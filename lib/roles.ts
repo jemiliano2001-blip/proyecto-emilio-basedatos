@@ -41,3 +41,21 @@ export function puedeVerPrecios(rol: RolUsuario | null): boolean {
     rol === 'proyectos'
   )
 }
+
+export function puedeCapturarRecepcion(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'personal' || rol === 'compras'
+}
+
+export function puedeRevisarRecepcion(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'compras'
+}
+
+export function puedeVerRecepciones(rol: RolUsuario | null): boolean {
+  return (
+    rol === 'acceso_total' ||
+    rol === 'personal' ||
+    rol === 'compras' ||
+    rol === 'operacion' ||
+    rol === 'proyectos'
+  )
+}

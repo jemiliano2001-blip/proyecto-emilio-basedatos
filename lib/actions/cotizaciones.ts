@@ -190,6 +190,7 @@ export async function aprobarCotizacionAction(
     cantidad: number
     precio_unitario: number
     subtotal: number
+    cotizacion_item_id: string
   }[] = []
 
   for (const row of rows) {
@@ -208,6 +209,7 @@ export async function aprobarCotizacionAction(
       cantidad,
       precio_unitario: precio,
       subtotal,
+      cotizacion_item_id: row.id,
     })
   }
 
@@ -242,6 +244,7 @@ export async function aprobarCotizacionAction(
       cantidad: item.cantidad,
       precio_unitario: item.precio_unitario,
       subtotal: item.subtotal,
+      cotizacion_item_id: item.cotizacion_item_id,
     }))
   )
 

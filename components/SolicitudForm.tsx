@@ -2,9 +2,12 @@
 
 import { useMemo, useState } from 'react'
 import { useFormState } from 'react-dom'
+import { useRouter } from 'next/navigation'
 import type { ActionResult } from '@/lib/actions/solicitudes'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
+import { putSolicitudPendiente } from '@/lib/offline/db'
+import { parseQuantity } from '@/lib/money'
 
 const initialState: ActionResult = { error: null }
 
@@ -48,8 +51,12 @@ export function SolicitudForm({
   materiales: MaterialOption[]
   defaultObraId?: string
 }) {
+  const router = useRouter()
   const [state, formAction] = useFormState(action, initialState)
   const [items, setItems] = useState<ItemRow[]>([nuevaFila()])
+  const [offlineMsg, setOfflineMsg] = useState<string | null>(null)
+  const [offlineError, setOfflineError] = useState<string | null>(null)
+  const [guardandoOffline, setGuardandoOffline] = useState(false)
 
   const itemsJson = useMemo(
     () =>
@@ -82,10 +89,84 @@ export function SolicitudForm({
     return materiales.filter((m) => !usados.has(m.id))
   }
 
+  async function guardarOffline(formData: FormData) {
+    setOfflineError(null)
+    setOfflineMsg(null)
+    setGuardandoOffline(true)
+
+    try {
+      const obra_id = String(formData.get('obra_id') ?? '')
+      const notaRaw = formData.get('nota')
+      const nota =
+        typeof notaRaw === 'string' && notaRaw.trim() !== '' ? notaRaw.trim() : null
+
+      if (!obra_id) {
+        setOfflineError('Selecciona una obra.')
+        return
+      }
+
+      const parsedItems: {
+        material_id: string
+        cantidad_solicitada: number
+        nota: string | null
+      }[] = []
+
+      for (const item of items) {
+        if (!item.material_id) {
+          setOfflineError('Selecciona material en todos los renglones.')
+          return
+        }
+        const cantidad = parseQuantity(item.cantidad)
+        if (cantidad === null || cantidad <= 0) {
+          setOfflineError('Revisa las cantidades: deben ser mayores a cero.')
+          return
+        }
+        parsedItems.push({
+          material_id: item.material_id,
+          cantidad_solicitada: cantidad,
+          nota: item.nota.trim() === '' ? null : item.nota.trim(),
+        })
+      }
+
+      const now = new Date().toISOString()
+      const id = crypto.randomUUID()
+      await putSolicitudPendiente({
+        id,
+        obra_id,
+        nota,
+        items: parsedItems,
+        status: 'guardado_local',
+        error: null,
+        created_at: now,
+        updated_at: now,
+      })
+
+      setOfflineMsg(
+        'Guardado en este teléfono. Se enviará cuando haya conexión.'
+      )
+      router.push('/solicitudes')
+    } catch {
+      setOfflineError('No se pudo guardar en este teléfono. Intenta de nuevo.')
+    } finally {
+      setGuardandoOffline(false)
+    }
+  }
+
+  function handleSubmit(formData: FormData) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      void guardarOffline(formData)
+      return
+    }
+    formAction(formData)
+  }
+
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={handleSubmit} className="space-y-4">
       <input type="hidden" name="items_json" value={itemsJson} />
-      <FormError message={state.error} />
+      <FormError message={state.error ?? offlineError} />
+      {offlineMsg && (
+        <p className="rounded-lg bg-teal-50 text-teal-800 text-sm px-3 py-2">{offlineMsg}</p>
+      )}
 
       <div>
         <label htmlFor="obra_id" className="block text-sm font-medium text-gray-700 mb-1">
@@ -195,7 +276,12 @@ export function SolicitudForm({
         />
       </div>
 
-      <SubmitButton>Enviar solicitud</SubmitButton>
+      <SubmitButton>
+        {guardandoOffline ? 'Guardando en el teléfono…' : 'Enviar solicitud'}
+      </SubmitButton>
+      <p className="text-xs text-gray-500 text-center">
+        Sin señal: se guarda en este teléfono y se envía al recuperar conexión.
+      </p>
     </form>
   )
 }

@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { AppNav } from '@/components/AppNav'
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeVerPrecios } from '@/lib/roles'
+import { puedeCapturarRecepcion, puedeVerPrecios, puedeVerRecepciones } from '@/lib/roles'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -27,11 +28,14 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body className="min-h-screen bg-gray-50 text-gray-900">
+        {showNav && <ServiceWorkerRegistration />}
         {children}
         {showNav && (
           <AppNav
             nombre={session?.perfil?.nombre ?? null}
             puedeVerPrecios={puedeVerPrecios(session?.rol ?? null)}
+            puedeVerRecepciones={puedeVerRecepciones(session?.rol ?? null)}
+            puedeCapturarRecepcion={puedeCapturarRecepcion(session?.rol ?? null)}
           />
         )}
       </body>

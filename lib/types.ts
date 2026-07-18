@@ -73,8 +73,66 @@ export interface SolicitudItem {
 }
 
 export type EstadoCotizacion = 'borrador' | 'enviada' | 'aprobada' | 'rechazada'
-export type EstadoOrdenCompra = 'emitida' | 'cancelada'
+export type EstadoOrdenCompra =
+  | 'emitida'
+  | 'cancelada'
+  | 'parcialmente_recibida'
+  | 'recibida'
 export type MonedaOc = 'MXN' | 'USD'
+
+export type EstadoRecepcion = 'pendiente_revision' | 'aprobada' | 'rechazada'
+export type EstadoRecepcionItem = 'completo' | 'parcial' | 'faltante' | 'danado'
+
+export interface RecepcionMaterial {
+  id: string
+  orden_id: string
+  receptor_id: string
+  estado: EstadoRecepcion
+  referencia_entrega: string | null
+  nota: string | null
+  recibido_en: string
+  revisado_por: string | null
+  revisado_en: string | null
+  nota_revision: string | null
+  creado_en: string
+}
+
+export interface RecepcionItem {
+  id: string
+  recepcion_id: string
+  orden_item_id: string
+  cantidad_recibida: number
+  cantidad_danada: number
+  estado: EstadoRecepcionItem
+  observacion: string | null
+}
+
+export interface OrdenChecklistResumen {
+  id: string
+  folio: string
+  obra_id: string
+  obra_nombre: string
+  proveedor_nombre: string
+  estado: EstadoOrdenCompra
+  creado_en: string
+}
+
+export interface OrdenItemChecklist {
+  orden_item_id: string
+  material_id: string
+  nombre_base: string
+  variante: string | null
+  unidad_medida: string
+  cantidad_pedida: number
+  cantidad_recibida_buena: number
+  cantidad_danada_acum: number
+  pendiente: number
+  folio: string
+  obra_id: string
+  obra_nombre: string
+  proveedor_nombre: string
+  orden_estado: EstadoOrdenCompra
+}
 
 export interface Proveedor {
   id: string
@@ -125,4 +183,5 @@ export interface OrdenCompraItem {
   cantidad: number
   precio_unitario: number
   subtotal: number
+  cotizacion_item_id: string | null
 }
