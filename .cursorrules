@@ -1,0 +1,72 @@
+# Reglas del proyecto — Sistema de Trazabilidad de Materiales y Obras
+
+## Contexto
+App para una empresa de construcción/instalación eléctrica. Maneja compras,
+facturas y presupuestos reales por obra. Los errores aquí cuestan dinero real,
+no solo tiempo de desarrollo. Trátalo con el mismo cuidado que una app bancaria
+chica: priorizamos correctitud e integridad de datos sobre velocidad de entrega.
+
+## Stack (no lo cambies sin que el usuario lo pida explícitamente)
+- Frontend: Next.js 14 (App Router), TypeScript estricto, Tailwind CSS
+- Backend/DB: Supabase (PostgreSQL) — SIEMPRE modelo relacional, nunca desnormalices
+  para "simplificar" a menos que se pida explícitamente
+- Tipo de app: PWA (installable, offline-first) — no app nativa, no App Store
+- Auth: Supabase Auth, login individual por persona (nunca usuarios compartidos)
+- Notificaciones: Supabase Realtime (en vivo mientras la app está abierta) +
+  Web Push vía Edge Function disparada por webhook de base de datos
+
+## SEGURIDAD — no negociable, revisar en cada PR
+1. **RLS (Row Level Security) debe estar activado en TODA tabla nueva**, sin
+   excepción, desde el mismo commit en que se crea la tabla. Nunca "lo agrego
+   después".
+2. Las políticas de RLS se validan contra una tabla real de roles/usuarios en
+   la base de datos (`usuarios.rol`), nunca contra JWT claims que el cliente
+   pueda manipular.
+3. La `service_role` key de Supabase NUNCA va en código de cliente/frontend.
+   Solo en Edge Functions o el servidor. Si ves esa key en un archivo bajo
+   `app/` o `components/`, es un bug de seguridad — detente y avisa.
+4. Cada INSERT/UPDATE/DELETE en tablas financieras o de auditoría
+   (`facturas_proveedor`, `asignaciones_material`, `traspasos_obra`) debe
+   quedar registrado por un trigger de auditoría con: quién, qué cambió,
+   cuándo, y el valor anterior. Nunca confíes en que el frontend registre esto.
+5. Antes de dar por cerrada cualquier tabla nueva, correr el checklist:
+   ¿tiene RLS activado? ¿tiene política para SELECT/INSERT/UPDATE/DELETE?
+   ¿las columnas sensibles (precios, ids de usuario) están protegidas?
+
+## Convenciones de nombres (ya definidas, no las inventes de nuevo)
+- Tablas y columnas en **español, snake_case**: `obras`, `catalogo_materiales`,
+  `factura_items`, `cantidad_asignada` — así están en el esquema SQL ya
+  aprobado, mantener consistencia.
+- Roles del sistema: `personal` (campo), `compras` (Talía), `proyectos`
+  (Manuel), `operacion` (Iveth), `acceso_total` (Emilio). Usar estos strings
+  exactos en la columna `usuarios.rol`.
+- Componentes de React en PascalCase, archivos de rutas en minúsculas
+  siguiendo la convención de Next.js App Router.
+
+## Orden de construcción (seguir este orden, no saltarse fases)
+1. Catálogo de materiales + Obras + `obra_material_contratado` (más simple)
+2. Solicitudes de campo (Personal)
+3. Cotización y Órdenes de Compra (Talía)
+4. Recepción / checklist de materiales
+5. Asignación de materiales a obra + saldo en vivo
+6. Traspasos entre obras (el más delicado — afecta presupuestos de 2 obras)
+7. Cierre de obra y reportes de conciliación
+
+No implementes Fase 6 o 7 antes de que 1-5 estén probadas y funcionando.
+
+## UI/UX
+- Diseño minimalista, sin decoración innecesaria — prioriza que sea fácil de
+  usar para personal que no es técnico y a veces está en obra con el celular.
+- Botones grandes, pocos pasos por pantalla, texto claro en vez de solo iconos.
+- Todo debe funcionar bien en celular primero (mobile-first), la vista de
+  escritorio es secundaria pero también debe ser usable.
+- Offline: cualquier pantalla que use Personal (solicitudes, checklist de
+  recepción) debe funcionar sin conexión y sincronizar después.
+
+## Qué NO hacer
+- No uses Firebase ni ninguna base de datos NoSQL para nada de este proyecto.
+- No generes datos de ejemplo con precios o nombres de materiales reales
+  inventados — usa placeholders claros tipo "Material de ejemplo".
+- No merges cambios de esquema (`supabase/migrations/`) sin que el usuario
+  los revise primero — son cambios que afectan datos financieros reales.
+- No agregues dependencias nuevas sin preguntar primero.
