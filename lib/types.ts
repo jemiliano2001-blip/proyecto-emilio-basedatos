@@ -1,4 +1,10 @@
-export type RolUsuario = 'personal' | 'compras' | 'proyectos' | 'operacion' | 'acceso_total'
+export type RolUsuario =
+  | 'personal'
+  | 'compras'
+  | 'proyectos'
+  | 'operacion'
+  | 'finanzas'
+  | 'acceso_total'
 
 export interface Usuario {
   id: string
@@ -10,12 +16,16 @@ export interface Usuario {
 export interface Obra {
   id: string
   nombre: string
+  cliente: string | null
   fraccionamiento: string | null
   paquete: string | null
   ubicacion: string | null
   estado: 'activa' | 'pausada' | 'cerrada'
+  presupuesto_mxn: number
   creado_en: string
 }
+
+export type CategoriaMaterialNombre = 'Obra Civil' | 'Electromecánico'
 
 export interface CatalogoMaterial {
   id: string
@@ -44,15 +54,35 @@ export interface SaldoMaterialObra {
   unidad_medida: string
   cantidad_contratada: number
   cantidad_usada: number
+  cantidad_comprometida?: number
   cantidad_disponible: number
 }
 
+export interface SaldoPresupuestoObra {
+  obra_id: string
+  presupuesto_mxn: number
+  comprometido_mxn: number
+  gastado_mxn: number
+  disponible_mxn: number
+}
+
 export type EstadoSolicitud =
-  | 'pendiente'
+  | 'recibida'
+  | 'en_proceso'
+  | 'finalizada'
   | 'cancelada'
+  | 'rechazada'
+  // Legacy (migrados; pueden aparecer en datos viejos sin remap)
+  | 'pendiente'
   | 'en_cotizacion'
   | 'aprobada'
-  | 'rechazada'
+
+export type TipoLineaSolicitud =
+  | 'material'
+  | 'flete'
+  | 'camiones'
+  | 'mantenimiento'
+  | 'otro'
 
 export interface SolicitudMaterial {
   id: string
@@ -67,8 +97,11 @@ export interface SolicitudMaterial {
 export interface SolicitudItem {
   id: string
   solicitud_id: string
-  material_id: string
-  cantidad_solicitada: number
+  tipo_linea: TipoLineaSolicitud
+  material_id: string | null
+  cantidad_solicitada: number | null
+  descripcion: string | null
+  monto_mxn: number | null
   nota: string | null
 }
 
@@ -166,8 +199,9 @@ export interface CotizacionItem {
 export interface OrdenCompra {
   id: string
   folio: string
-  cotizacion_id: string
-  proveedor_id: string
+  cotizacion_id: string | null
+  solicitud_id: string | null
+  proveedor_id: string | null
   obra_id: string
   estado: EstadoOrdenCompra
   total: number
@@ -179,9 +213,11 @@ export interface OrdenCompra {
 export interface OrdenCompraItem {
   id: string
   orden_id: string
-  material_id: string
+  material_id: string | null
   cantidad: number
   precio_unitario: number
   subtotal: number
   cotizacion_item_id: string | null
+  descripcion: string | null
+  tipo_linea: TipoLineaSolicitud
 }

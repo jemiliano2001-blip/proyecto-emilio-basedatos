@@ -8,6 +8,7 @@ import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
 import { putRecepcionPendiente } from '@/lib/offline/db'
 import { parseQuantity } from '@/lib/money'
+import { validateRecepcionInput } from '@/lib/validations/recepcion'
 import type { EstadoRecepcionItem, OrdenItemChecklist } from '@/lib/types'
 
 const initialState: ActionResult = { error: null }
@@ -92,33 +93,42 @@ export function RecepcionForm({
     setOfflineError(null)
     setOfflineMsg(null)
     try {
-      const parsedItems = JSON.parse(String(formData.get('items_json') ?? '[]')) as {
-        orden_item_id: string
-        cantidad_recibida: number
-        cantidad_danada: number
-        estado: string
-        observacion: string | null
-      }[]
+      let itemsRaw: unknown = []
+      const itemsJson = formData.get('items_json')
+      if (typeof itemsJson === 'string' && itemsJson.trim() !== '') {
+        try {
+          itemsRaw = JSON.parse(itemsJson)
+        } catch {
+          setOfflineError('No se pudieron leer los renglones del checklist.')
+          return
+        }
+      }
 
-      if (!Array.isArray(parsedItems) || parsedItems.length === 0) {
-        setOfflineError('Incluye al menos un renglón en el checklist.')
+      const referencia = formData.get('referencia_entrega')
+      const nota = formData.get('nota')
+      const parsed = validateRecepcionInput({
+        id: formData.get('id'),
+        orden_id: ordenId,
+        referencia_entrega: referencia,
+        nota,
+        recibido_en: formData.get('recibido_en'),
+        items: itemsRaw,
+      })
+
+      if (!parsed.ok) {
+        setOfflineError(parsed.error)
         return
       }
 
       const now = new Date().toISOString()
-      const referencia = formData.get('referencia_entrega')
-      const nota = formData.get('nota')
 
       await putRecepcionPendiente({
-        id: String(formData.get('id')),
-        orden_id: ordenId,
-        referencia_entrega:
-          typeof referencia === 'string' && referencia.trim() !== ''
-            ? referencia.trim()
-            : null,
-        nota: typeof nota === 'string' && nota.trim() !== '' ? nota.trim() : null,
-        recibido_en: String(formData.get('recibido_en') ?? now),
-        items: parsedItems,
+        id: parsed.data.id,
+        orden_id: parsed.data.orden_id,
+        referencia_entrega: parsed.data.referencia_entrega,
+        nota: parsed.data.nota,
+        recibido_en: parsed.data.recibido_en,
+        items: parsed.data.items,
         status: 'guardado_local',
         error: null,
         created_at: now,

@@ -1,9 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import { useFormState } from 'react-dom'
 import type { ActionResult } from '@/lib/actions/materiales'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
+import {
+  CATEGORIAS_MATERIAL,
+  subcategoriasDe,
+} from '@/lib/catalogo-categorias'
 import type { CatalogoMaterial } from '@/lib/types'
 
 const initialState: ActionResult = { error: null }
@@ -18,6 +23,10 @@ export function MaterialForm({
   submitLabel: string
 }) {
   const [state, formAction] = useFormState(action, initialState)
+  const [categoria, setCategoria] = useState(material?.categoria ?? '')
+  const [subcategoria, setSubcategoria] = useState(material?.subcategoria ?? '')
+
+  const subcats = subcategoriasDe(categoria)
 
   return (
     <form action={formAction} className="space-y-4">
@@ -64,23 +73,45 @@ export function MaterialForm({
         <label htmlFor="categoria" className="block text-sm font-medium text-gray-700 mb-1">
           Categoría
         </label>
-        <input
+        <select
           id="categoria"
           name="categoria"
-          defaultValue={material?.categoria ?? ''}
+          value={categoria}
+          onChange={(e) => {
+            setCategoria(e.target.value)
+            setSubcategoria('')
+          }}
           className="input-base"
-        />
+        >
+          <option value="">Sin categoría</option>
+          {CATEGORIAS_MATERIAL.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label htmlFor="subcategoria" className="block text-sm font-medium text-gray-700 mb-1">
           Subcategoría
         </label>
-        <input
+        <select
           id="subcategoria"
           name="subcategoria"
-          defaultValue={material?.subcategoria ?? ''}
+          value={subcategoria}
+          onChange={(e) => setSubcategoria(e.target.value)}
           className="input-base"
-        />
+          disabled={subcats.length === 0}
+        >
+          <option value="">
+            {subcats.length === 0 ? 'Elige categoría primero' : 'Sin subcategoría'}
+          </option>
+          {subcats.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label htmlFor="especificacion" className="block text-sm font-medium text-gray-700 mb-1">

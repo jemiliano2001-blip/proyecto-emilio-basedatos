@@ -32,7 +32,7 @@ export function AppNav({
     <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 z-20">
       <div className="max-w-2xl mx-auto flex items-stretch">
         <Link href="/" className={linkClass('/')}>
-          Obras
+          Proyectos
         </Link>
         <Link href="/materiales" className={linkClass('/materiales')}>
           Materiales

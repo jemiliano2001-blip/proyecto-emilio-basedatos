@@ -101,11 +101,17 @@ export async function syncRecepcionPayload(
   if (error) {
     const msg = rpcErrorMessage(error, 'No se pudo sincronizar la recepción.')
     const lower = msg.toLowerCase()
+    // Prefijo estable [CONFLICTO] desde RPC; fallbacks por mensaje/código PG.
     if (
+      lower.includes('[conflicto]') ||
       lower.includes('conflicto') ||
       lower.includes('ya no admite') ||
       lower.includes('no pertenece') ||
-      lower.includes('sobre-recepción')
+      lower.includes('sobre-recepci') ||
+      lower.includes('fuera de rango') ||
+      lower.includes('duplicate key') ||
+      lower.includes('unique constraint') ||
+      lower.includes('23505')
     ) {
       return { status: 'conflicto', error: msg }
     }

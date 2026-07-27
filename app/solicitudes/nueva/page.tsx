@@ -26,7 +26,7 @@ export default async function NuevaSolicitudPage({
 
   const { data: materiales } = await supabase
     .from('catalogo_materiales')
-    .select('id, nombre_base, variante, unidad_medida')
+    .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria')
     .eq('activo', true)
     .order('nombre_base')
 
@@ -36,23 +36,21 @@ export default async function NuevaSolicitudPage({
         <Link href="/solicitudes" className="text-sm text-[#1E7F7A] font-medium">
           ← Solicitudes
         </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">Nueva solicitud</h1>
+        <h1 className="text-2xl font-bold text-[#132A45] mt-2">
+          Solicitud para requisición de materiales
+        </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Elige la obra y agrega los materiales que necesitas
+          Elige el proyecto y agrega materiales, flete, camiones u otros gastos
         </p>
       </header>
 
-      {!obras?.length || !materiales?.length ? (
-        <p className="text-gray-500 text-center py-8">
-          {!obras?.length
-            ? 'No hay obras activas todavía.'
-            : 'El catálogo de materiales está vacío todavía.'}
-        </p>
+      {!obras?.length ? (
+        <p className="text-gray-500 text-center py-8">No hay proyectos activos todavía.</p>
       ) : (
         <SolicitudForm
           action={createSolicitudAction}
           obras={obras}
-          materiales={materiales}
+          materiales={materiales ?? []}
           defaultObraId={searchParams.obra}
         />
       )}

@@ -32,8 +32,11 @@ export interface SolicitudPendienteRecord {
   obra_id: string
   nota: string | null
   items: {
-    material_id: string
-    cantidad_solicitada: number
+    tipo_linea?: string
+    material_id: string | null
+    cantidad_solicitada: number | null
+    descripcion?: string | null
+    monto_mxn?: number | null
     nota: string | null
   }[]
   status: OfflineQueueStatus

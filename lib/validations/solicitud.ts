@@ -1,8 +1,20 @@
-import { parseQuantity } from '@/lib/money'
+import { parseMoney, parseQuantity } from '@/lib/money'
+import type { TipoLineaSolicitud } from '@/lib/types'
+
+export const TIPOS_LINEA_SOLICITUD: readonly TipoLineaSolicitud[] = [
+  'material',
+  'flete',
+  'camiones',
+  'mantenimiento',
+  'otro',
+] as const
 
 export interface SolicitudItemInput {
-  material_id: string
-  cantidad_solicitada: number
+  tipo_linea: TipoLineaSolicitud
+  material_id: string | null
+  cantidad_solicitada: number | null
+  descripcion: string | null
+  monto_mxn: number | null
   nota: string | null
 }
 
@@ -29,63 +41,117 @@ function trimOrNull(value: unknown): string | null {
 
 function validateItem(raw: unknown, index: number): ValidationResult<SolicitudItemInput> {
   if (typeof raw !== 'object' || raw === null) {
-    return { ok: false, error: `Rengl?n ${index + 1}: datos inv?lidos.` }
+    return { ok: false, error: `Renglón ${index + 1}: datos inválidos.` }
   }
 
   const body = raw as Record<string, unknown>
-  const material_id = typeof body.material_id === 'string' ? body.material_id.trim() : ''
+  const tipoRaw = typeof body.tipo_linea === 'string' ? body.tipo_linea : 'material'
+  if (!(TIPOS_LINEA_SOLICITUD as readonly string[]).includes(tipoRaw)) {
+    return { ok: false, error: `Renglón ${index + 1}: tipo de línea no válido.` }
+  }
+  const tipo_linea = tipoRaw as TipoLineaSolicitud
+  const nota = trimOrNull(body.nota)
 
-  if (!UUID_RE.test(material_id)) {
-    return { ok: false, error: `Rengl?n ${index + 1}: selecciona un material.` }
+  if (tipo_linea === 'material') {
+    const material_id = typeof body.material_id === 'string' ? body.material_id.trim() : ''
+    if (!UUID_RE.test(material_id)) {
+      return { ok: false, error: `Renglón ${index + 1}: selecciona un material.` }
+    }
+
+    const cantidadRaw =
+      typeof body.cantidad_solicitada === 'number'
+        ? String(body.cantidad_solicitada)
+        : typeof body.cantidad_solicitada === 'string'
+          ? body.cantidad_solicitada
+          : ''
+
+    const cantidad = parseQuantity(cantidadRaw)
+    if (cantidad === null) {
+      return { ok: false, error: `Renglón ${index + 1}: la cantidad debe ser un número válido.` }
+    }
+    if (cantidad <= 0) {
+      return { ok: false, error: `Renglón ${index + 1}: la cantidad debe ser mayor a cero.` }
+    }
+    if (cantidad > 9999999999.99) {
+      return { ok: false, error: `Renglón ${index + 1}: la cantidad es demasiado grande.` }
+    }
+
+    let monto_mxn: number | null = null
+    const montoRaw =
+      typeof body.monto_mxn === 'number'
+        ? String(body.monto_mxn)
+        : typeof body.monto_mxn === 'string'
+          ? body.monto_mxn
+          : ''
+    if (montoRaw.trim() !== '') {
+      const monto = parseMoney(montoRaw)
+      if (monto === null || monto < 0) {
+        return { ok: false, error: `Renglón ${index + 1}: monto MXN inválido.` }
+      }
+      monto_mxn = monto
+    }
+
+    return {
+      ok: true,
+      data: {
+        tipo_linea: 'material',
+        material_id,
+        cantidad_solicitada: cantidad,
+        descripcion: null,
+        monto_mxn,
+        nota,
+      },
+    }
   }
 
-  const cantidadRaw =
-    typeof body.cantidad_solicitada === 'number'
-      ? String(body.cantidad_solicitada)
-      : typeof body.cantidad_solicitada === 'string'
-        ? body.cantidad_solicitada
+  const descripcion = trimOrNull(body.descripcion)
+  if (!descripcion) {
+    return { ok: false, error: `Renglón ${index + 1}: indica una descripción.` }
+  }
+
+  const montoRaw =
+    typeof body.monto_mxn === 'number'
+      ? String(body.monto_mxn)
+      : typeof body.monto_mxn === 'string'
+        ? body.monto_mxn
         : ''
-
-  const cantidad = parseQuantity(cantidadRaw)
-  if (cantidad === null) {
-    return { ok: false, error: `Rengl?n ${index + 1}: la cantidad debe ser un n?mero v?lido.` }
-  }
-  if (cantidad <= 0) {
-    return { ok: false, error: `Rengl?n ${index + 1}: la cantidad debe ser mayor a cero.` }
-  }
-  if (cantidad > 9999999999.99) {
-    return { ok: false, error: `Rengl?n ${index + 1}: la cantidad es demasiado grande.` }
+  const monto = parseMoney(montoRaw)
+  if (monto === null || monto <= 0) {
+    return { ok: false, error: `Renglón ${index + 1}: el monto MXN debe ser mayor a cero.` }
   }
 
   return {
     ok: true,
     data: {
-      material_id,
-      cantidad_solicitada: cantidad,
-      nota: trimOrNull(body.nota),
+      tipo_linea,
+      material_id: null,
+      cantidad_solicitada: null,
+      descripcion,
+      monto_mxn: monto,
+      nota,
     },
   }
 }
 
 export function validateSolicitudInput(raw: unknown): ValidationResult<SolicitudInput> {
   if (typeof raw !== 'object' || raw === null) {
-    return { ok: false, error: 'Datos de solicitud inv?lidos.' }
+    return { ok: false, error: 'Datos de solicitud inválidos.' }
   }
 
   const body = raw as Record<string, unknown>
   const obra_id = typeof body.obra_id === 'string' ? body.obra_id.trim() : ''
 
   if (!UUID_RE.test(obra_id)) {
-    return { ok: false, error: 'Selecciona una obra.' }
+    return { ok: false, error: 'Selecciona un proyecto.' }
   }
 
   if (!Array.isArray(body.items) || body.items.length === 0) {
-    return { ok: false, error: 'Agrega al menos un material a la solicitud.' }
+    return { ok: false, error: 'Agrega al menos un renglón a la requisición.' }
   }
   if (body.items.length > MAX_ITEMS) {
     return {
       ok: false,
-      error: `No puedes agregar m?s de ${MAX_ITEMS} materiales en una sola solicitud.`,
+      error: `No puedes agregar más de ${MAX_ITEMS} renglones en una sola requisición.`,
     }
   }
 
@@ -97,13 +163,15 @@ export function validateSolicitudInput(raw: unknown): ValidationResult<Solicitud
     if (!parsedItem.ok) {
       return parsedItem
     }
-    if (vistos.has(parsedItem.data.material_id)) {
-      return {
-        ok: false,
-        error: `Rengl?n ${i + 1}: ese material ya est? en la solicitud, combina la cantidad en un solo rengl?n.`,
+    if (parsedItem.data.tipo_linea === 'material' && parsedItem.data.material_id) {
+      if (vistos.has(parsedItem.data.material_id)) {
+        return {
+          ok: false,
+          error: `Renglón ${i + 1}: ese material ya está en la requisición, combina la cantidad en un solo renglón.`,
+        }
       }
+      vistos.add(parsedItem.data.material_id)
     }
-    vistos.add(parsedItem.data.material_id)
     items.push(parsedItem.data)
   }
 
@@ -114,5 +182,20 @@ export function validateSolicitudInput(raw: unknown): ValidationResult<Solicitud
       nota: trimOrNull(body.nota),
       items,
     },
+  }
+}
+
+export function labelTipoLinea(tipo: TipoLineaSolicitud): string {
+  switch (tipo) {
+    case 'material':
+      return 'Material'
+    case 'flete':
+      return 'Flete'
+    case 'camiones':
+      return 'Camiones'
+    case 'mantenimiento':
+      return 'Mantenimiento'
+    case 'otro':
+      return 'Otro'
   }
 }

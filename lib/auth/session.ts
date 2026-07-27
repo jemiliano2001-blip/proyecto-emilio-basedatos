@@ -14,6 +14,7 @@ const ROLES: readonly RolUsuario[] = [
   'compras',
   'proyectos',
   'operacion',
+  'finanzas',
   'acceso_total',
 ]
 

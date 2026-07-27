@@ -38,8 +38,8 @@ chica: priorizamos correctitud e integridad de datos sobre velocidad de entrega.
   `factura_items`, `cantidad_asignada` — así están en el esquema SQL ya
   aprobado, mantener consistencia.
 - Roles del sistema: `personal` (campo), `compras` (Talía), `proyectos`
-  (Manuel), `operacion` (Iveth), `acceso_total` (Emilio). Usar estos strings
-  exactos en la columna `usuarios.rol`.
+  (Manuel), `operacion` (Iveth), `finanzas` (Blanquita — pagos), `acceso_total`
+  (Emilio). Usar estos strings exactos en la columna `usuarios.rol`.
 - Componentes de React en PascalCase, archivos de rutas en minúsculas
   siguiendo la convención de Next.js App Router.
 

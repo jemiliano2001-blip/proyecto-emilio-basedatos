@@ -7,6 +7,7 @@
 -- Manuel: manuel.prueba@example.com / TempManuel2026!  → proyectos
 -- Guero:  guero.prueba@example.com  / TempGuero2026!   → personal
 -- Talia:  talia.prueba@example.com  / TempTalia2026!   → compras
+-- Blanquita (crear a mano con rol finanzas tras migración 0006a)
 -- =====================================================================
 
 do $$
