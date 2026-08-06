@@ -49,7 +49,12 @@ export async function createCotizacionAction(
   if (!solicitud) {
     return { error: 'La solicitud no existe.' }
   }
-  if (solicitud.estado !== 'pendiente' && solicitud.estado !== 'en_cotizacion') {
+  if (
+    solicitud.estado !== 'pendiente' &&
+    solicitud.estado !== 'recibida' &&
+    solicitud.estado !== 'en_cotizacion' &&
+    solicitud.estado !== 'en_proceso'
+  ) {
     return { error: 'Esta solicitud ya no se puede cotizar.' }
   }
 
@@ -96,10 +101,10 @@ export async function createCotizacionAction(
     return { error: 'No se pudieron guardar los precios. Intenta de nuevo.' }
   }
 
-  if (solicitud.estado === 'pendiente') {
+  if (solicitud.estado === 'pendiente' || solicitud.estado === 'recibida') {
     const { error: errorEstado } = await supabase
       .from('solicitudes_material')
-      .update({ estado: 'en_cotizacion' })
+      .update({ estado: 'en_proceso' })
       .eq('id', solicitud.id)
 
     if (errorEstado) {
@@ -190,6 +195,7 @@ export async function aprobarCotizacionAction(
     cantidad: number
     precio_unitario: number
     subtotal: number
+    cotizacion_item_id: string
   }[] = []
 
   for (const row of rows) {
@@ -208,6 +214,7 @@ export async function aprobarCotizacionAction(
       cantidad,
       precio_unitario: precio,
       subtotal,
+      cotizacion_item_id: row.id,
     })
   }
 
@@ -242,6 +249,7 @@ export async function aprobarCotizacionAction(
       cantidad: item.cantidad,
       precio_unitario: item.precio_unitario,
       subtotal: item.subtotal,
+      cotizacion_item_id: item.cotizacion_item_id,
     }))
   )
 
@@ -264,7 +272,7 @@ export async function aprobarCotizacionAction(
 
   const { error: errorSolEstado } = await supabase
     .from('solicitudes_material')
-    .update({ estado: 'aprobada' })
+    .update({ estado: 'finalizada' })
     .eq('id', solicitud.id)
 
   if (errorSolEstado) {

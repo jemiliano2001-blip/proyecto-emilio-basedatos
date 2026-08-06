@@ -11,7 +11,7 @@ export default async function HomePage() {
 
   const { data: obras, error } = await supabase
     .from('obras')
-    .select('id, nombre, fraccionamiento, estado')
+    .select('id, nombre, fraccionamiento, cliente, estado')
     .eq('estado', 'activa')
     .order('nombre')
 
@@ -19,7 +19,7 @@ export default async function HomePage() {
     <main className="max-w-2xl mx-auto p-4 pb-28">
       <header className="mb-6 pt-4 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-[#132A45]">Obras activas</h1>
+          <h1 className="text-2xl font-bold text-[#132A45]">Proyectos activos</h1>
           <p className="text-gray-500 text-sm">
             {session?.perfil?.nombre
               ? `Hola, ${session.perfil.nombre}`
@@ -28,19 +28,19 @@ export default async function HomePage() {
         </div>
         {puedeCrear && (
           <Link href="/obras/nueva" className="btn-primary shrink-0 text-sm py-2 px-4">
-            Nueva obra
+            Nuevo proyecto
           </Link>
         )}
       </header>
 
       {error && (
         <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
-          No se pudieron cargar las obras. Revisa tu conexión.
+          No se pudieron cargar los proyectos. Revisa tu conexión.
         </div>
       )}
 
       <div className="space-y-3">
-        {(obras as Pick<Obra, 'id' | 'nombre' | 'fraccionamiento' | 'estado'>[] | null)?.map(
+        {(obras as Pick<Obra, 'id' | 'nombre' | 'fraccionamiento' | 'cliente' | 'estado'>[] | null)?.map(
           (obra) => (
             <Link
               key={obra.id}
@@ -49,8 +49,10 @@ export default async function HomePage() {
             >
               <div>
                 <p className="font-semibold">{obra.nombre}</p>
-                {obra.fraccionamiento && (
-                  <p className="text-sm text-gray-500">{obra.fraccionamiento}</p>
+                {(obra.cliente || obra.fraccionamiento) && (
+                  <p className="text-sm text-gray-500">
+                    {[obra.cliente, obra.fraccionamiento].filter(Boolean).join(' · ')}
+                  </p>
                 )}
               </div>
               <span className="text-[#1E7F7A]">→</span>
@@ -60,7 +62,7 @@ export default async function HomePage() {
 
         {obras?.length === 0 && (
           <p className="text-gray-500 text-center py-8">
-            No hay obras activas todavía.
+            No hay proyectos activos todavía.
           </p>
         )}
       </div>

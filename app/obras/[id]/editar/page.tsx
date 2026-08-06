@@ -20,7 +20,9 @@ export default async function EditarObraPage({
   const supabase = createClient()
   const { data: obra } = await supabase
     .from('obras')
-    .select('id, nombre, fraccionamiento, paquete, ubicacion, estado, creado_en')
+    .select(
+      'id, nombre, cliente, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn, creado_en'
+    )
     .eq('id', params.id)
     .maybeSingle()
 
@@ -32,9 +34,9 @@ export default async function EditarObraPage({
     <main className="max-w-2xl mx-auto p-4 pb-28">
       <header className="mb-6 pt-4">
         <Link href={`/obras/${params.id}`} className="text-sm text-[#1E7F7A] font-medium">
-          ← Volver a la obra
+          ← Volver al proyecto
         </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">Editar obra</h1>
+        <h1 className="text-2xl font-bold text-[#132A45] mt-2">Editar proyecto</h1>
       </header>
       <ObraForm
         action={updateAction}

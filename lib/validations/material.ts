@@ -1,8 +1,14 @@
+import {
+  CATEGORIAS_MATERIAL,
+  esParCategoriaValido,
+  type CategoriaMaterial,
+} from '@/lib/catalogo-categorias'
+
 export interface MaterialInput {
   nombre_base: string
   variante: string | null
   unidad_medida: string
-  categoria: string | null
+  categoria: CategoriaMaterial | null
   subcategoria: string | null
   especificacion: string | null
   activo: boolean
@@ -38,6 +44,24 @@ export function validateMaterialInput(raw: unknown): ValidationResult<MaterialIn
     return { ok: false, error: 'Indica una unidad de medida (ej. PZA, MTS, KG).' }
   }
 
+  const categoriaRaw = trimOrNull(body.categoria)
+  const subcategoria = trimOrNull(body.subcategoria)
+
+  let categoria: CategoriaMaterial | null = null
+  if (categoriaRaw !== null) {
+    if (!(CATEGORIAS_MATERIAL as readonly string[]).includes(categoriaRaw)) {
+      return { ok: false, error: 'Categoría no válida.' }
+    }
+    categoria = categoriaRaw as CategoriaMaterial
+  }
+
+  if (!esParCategoriaValido(categoria, subcategoria)) {
+    return {
+      ok: false,
+      error: 'Elige una subcategoría válida para la categoría seleccionada.',
+    }
+  }
+
   const activo =
     typeof body.activo === 'boolean'
       ? body.activo
@@ -51,8 +75,8 @@ export function validateMaterialInput(raw: unknown): ValidationResult<MaterialIn
       nombre_base,
       variante: trimOrNull(body.variante),
       unidad_medida,
-      categoria: trimOrNull(body.categoria),
-      subcategoria: trimOrNull(body.subcategoria),
+      categoria,
+      subcategoria,
       especificacion: trimOrNull(body.especificacion),
       activo,
     },

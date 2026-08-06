@@ -7,9 +7,12 @@ import { logoutAction } from '@/lib/actions/auth'
 export function AppNav({
   nombre,
   puedeVerPrecios,
+  puedeVerRecepciones,
 }: {
   nombre: string | null
   puedeVerPrecios: boolean
+  puedeVerRecepciones: boolean
+  puedeCapturarRecepcion?: boolean
 }) {
   const pathname = usePathname()
 
@@ -18,7 +21,7 @@ export function AppNav({
       href === '/'
         ? pathname === '/' || pathname.startsWith('/obras')
         : pathname === href || pathname.startsWith(`${href}/`)
-    return `flex-1 text-center py-3 text-sm font-semibold ${
+    return `flex-1 text-center py-3 text-xs sm:text-sm font-semibold ${
       active
         ? 'text-[#132A45] border-t-2 border-[#132A45]'
         : 'text-gray-500 border-t-2 border-transparent'
@@ -29,7 +32,7 @@ export function AppNav({
     <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 z-20">
       <div className="max-w-2xl mx-auto flex items-stretch">
         <Link href="/" className={linkClass('/')}>
-          Obras
+          Proyectos
         </Link>
         <Link href="/materiales" className={linkClass('/materiales')}>
           Materiales
@@ -37,6 +40,11 @@ export function AppNav({
         <Link href="/solicitudes" className={linkClass('/solicitudes')}>
           Solicitudes
         </Link>
+        {puedeVerRecepciones && (
+          <Link href="/recepciones" className={linkClass('/recepciones')}>
+            Recepción
+          </Link>
+        )}
         {puedeVerPrecios && (
           <Link href="/ordenes" className={linkClass('/ordenes')}>
             Órdenes
@@ -45,7 +53,7 @@ export function AppNav({
         <form action={logoutAction} className="flex-1">
           <button
             type="submit"
-            className="w-full py-3 text-sm font-semibold text-gray-500 border-t-2 border-transparent"
+            className="w-full py-3 text-xs sm:text-sm font-semibold text-gray-500 border-t-2 border-transparent"
             title={nombre ?? 'Cerrar sesión'}
           >
             Salir

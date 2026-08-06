@@ -8,10 +8,11 @@ Eres un arquitecto de base de datos senior especializado en PostgreSQL, con expe
 
 ## Contexto del negocio
 
-Empresa de construcción/instalación eléctrica. La app rastrea materiales y presupuestos por obra: qué se cotizó, qué se compró, qué se recibió, qué se asignó a cada obra y qué queda disponible. Roles del sistema (columna `usuarios.rol`, enum):
+Empresa de construcción/instalación eléctrica. La app rastrea materiales y presupuestos por **proyecto** (tabla `obras`): qué se pidió, qué se compró, qué se recibió, qué queda disponible (cantidad y dinero). Roles del sistema (columna `usuarios.rol`, enum):
 
-- `personal` — cuadrillas en campo, levantan solicitudes de material
-- `compras` — cotiza, aprueba órdenes de compra, revisa recepción
+- `personal` — cuadrillas en campo, levantan requisiciones
+- `compras` — aprueba requisiciones (Thalía); también cotiza/revisa recepción (flujo legacy)
+- `finanzas` — paga/aprueba requisiciones en proceso (Blanquita) y dispara emisión de OC
 - `proyectos` — define especificaciones técnicas de materiales
 - `operacion` — usa el sistema día a día, más que nadie
 - `acceso_total` — ve todo, no opera el día a día
@@ -20,38 +21,42 @@ Stack: Next.js 14 + Supabase (Postgres). RLS obligatorio en toda tabla desde su 
 
 ## Esquema actual (resumen — puedo pegarte el SQL completo si lo necesitas)
 
-- `usuarios(id, nombre, rol, activo)` — 1:1 con `auth.users`
-- `obras(id, nombre, fraccionamiento, paquete, ubicacion, estado, cerrado_en)` — **pendiente de confirmar**: ¿"obra" para efectos de presupuesto es el fraccionamiento o el paquete? Hoy fraccionamiento y paquete son columnas de texto libre en la misma fila, sin jerarquía real en tablas separadas.
-- `catalogo_materiales(id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, activo)` + `catalogo_materiales_alias(material_id, alias)` — un material puede tener nombre técnico + varios alias comerciales (problema real: el mismo material tiene distintos nombres según el proveedor)
-- `obra_material_contratado(obra_id, material_id, cantidad_contratada)` — el tope NO es por obra en general, es por combinación obra+material. Vista `v_saldo_material_obra` calcula disponible = contratado − usado (usado hoy es 0 a propósito, se activa cuando exista `asignaciones_material`)
-- `solicitudes_material(id, obra_id, solicitante_id, estado, nota)` + `solicitud_items(solicitud_id, material_id, cantidad_solicitada, nota)` — estado hoy solo `pendiente`/`cancelada`, a propósito minimal
-- `notificaciones(usuario_id, rol_destino, titulo, mensaje, tipo, referencia_id, leida)`
-- `auditoria(tabla, registro_id, usuario_id, accion, datos_antes, datos_despues)` — trigger genérico ya aplicado en tablas sensibles
+- `usuarios(id, nombre, rol, activo)` — 1:1 con `auth.users` (incluye rol `finanzas`)
+- `obras(id, nombre, cliente, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn, cerrado_en)` — UI dice “proyecto”; `paquete` sigue siendo texto libre **pendiente de confirmar definición de negocio con Emilio**
+- `catalogo_materiales(..., categoria, subcategoria, ...)` — categorías fijas: Obra Civil / Electromecánico + subcategorías validadas por CHECK
+- `obra_material_contratado(obra_id, material_id, cantidad_contratada)` + `v_saldo_material_obra` (contratado − comprometido − usado)
+- `obra_presupuesto_movimientos(obra_id, solicitud_id, tipo reserva|gasto|liberacion, monto_mxn)` + `v_saldo_presupuesto_obra`
+- `solicitudes_material` estados: `recibida` → `en_proceso` → `finalizada` (+ `rechazada`/`cancelada`); legacy remap desde pendiente/en_cotizacion/aprobada
+- `solicitud_items(tipo_linea material|flete|camiones|mantenimiento|otro, material_id nullable, descripcion, monto_mxn, ...)`
+- `solicitud_reservas_cantidad` — reserva al aprobar Compras; aplicada al pagar Finanzas
+- RPCs: `aprobar_solicitud_compras`, `aprobar_pago_solicitud`, `rechazar_solicitud`, `cancelar_solicitud`
+- `ordenes_compra` puede nacer desde `solicitud_id` (sin cotización); cotizaciones quedan legacy
+- `notificaciones`, `auditoria` — triggers en tablas sensibles / presupuesto
 
-## Roadmap de fases (ya construidas: 1 y 2; NO adelantes su diseño, solo prepáralo)
+## Roadmap de fases
 
-1. ✅ Catálogo + Obras + Topes
-2. ✅ Solicitudes de campo (Personal)
-3. Cotización y Órdenes de Compra (Talía) — nuevos estados de solicitud, tabla de órdenes de compra, relación con proveedores
-4. Recepción / checklist de materiales — qué llegó vs. qué se pidió, quién lo recibió
-5. Asignación de materiales a obra — activa el saldo real (`cantidad_usada` deja de ser 0)
-6. **Traspasos entre obras** — el más delicado: una operación afecta 2 presupuestos de obra distintos a la vez, tiene que ser atómica
+1. ✅ Catálogo + Proyectos + Topes (+ cliente / presupuesto MXN / categorías)
+2. ✅ Requisiciones de campo (tipos de línea, buscador)
+3. ✅ Cotización/OC (legacy) + puente req→OC vía Finanzas
+4. ✅ Recepción / checklist offline
+5. Asignación de materiales a obra (alinear con reservas/usados)
+6. **Traspasos entre obras** — atómico y auditable
 7. Cierre de obra y reporte de conciliación
 
 ## Lo que quiero que revises
 
-1. **Normalización y jerarquía de obras**: ¿la estructura fraccionamiento/paquete como columnas planas va a sostenerse cuando haya reportes por fraccionamiento completo? ¿Conviene una tabla `fraccionamientos` separada con `obras.fraccionamiento_id`? Dame el trade-off, no asumas que sí.
-2. **Diseño para Fase 6 (traspasos)** antes de que la construya: ¿qué forma de tabla necesito para que un traspaso entre 2 obras sea atómico y auditable, sin duplicar lógica de `asignaciones_material`? Adelántame el diseño (sin implementarlo).
-3. **RLS**: revisa las políticas que te puedo pegar — ¿hay algún hueco de seguridad, algún default-deny que se me haya pasado (como me pasó con `notificaciones`, que no tenía policy de insert y nadie se dio cuenta hasta que algo intentó escribir ahí)?
-4. **Índices y performance**: con crecimiento real (cientos de obras, miles de solicitudes/año), ¿qué índices faltan? ¿la vista `v_saldo_material_obra` va a escalar o conviene materializarla?
-5. **Integridad financiera**: ¿el modelo actual permite que una asignación exceda el tope contratado sin que la base de datos lo impida (constraint o trigger), o depende 100% de que el frontend valide?
-6. **Nombres técnicos vs. alias comerciales**: ¿el diseño actual de `catalogo_materiales_alias` es suficiente para que Personal encuentre un material por cualquier nombre que use, o falta algo (búsqueda difusa, sinónimos por proveedor)?
+1. **Normalización y jerarquía de obras/proyectos**: ¿fraccionamiento/paquete como columnas planas aguanta reportes, o conviene `fraccionamientos`? Trade-off, no asumas que sí.
+2. **Presupuesto dual (cantidad + MXN)**: ¿el modelo reserva→gasto/liberación evita sobregiro y doble conteo? ¿falta constraint/trigger adicional?
+3. **Diseño para Fase 6 (traspasos)** sin implementarlo: forma de tabla atómica y auditable.
+4. **RLS y RPCs**: ¿huecos en policies o en `security definer` (bypass accidental)?
+5. **Índices/performance**: `v_saldo_material_obra` y `v_saldo_presupuesto_obra` con cientos de obras.
+6. **Alias comerciales** en catálogo: ¿suficiente para búsqueda en campo?
 
 ## Formato de respuesta que quiero
 
 1. Diagnóstico honesto — qué está bien, qué es frágil
-2. Top 5 cambios priorizados, cada uno con el trade-off (qué gano, qué complico)
-3. Boceto en SQL de los cambios que recomiendes (no como migración final, como propuesta a discutir)
-4. Si te falta contexto (volumen de datos esperado, frecuencia de traspasos, etc.), pregúntame antes de asumir
+2. Top 5 cambios priorizados, cada uno con el trade-off
+3. Boceto en SQL de los cambios que recomiendes (propuesta a discutir)
+4. Si te falta contexto, pregúntame antes de asumir
 
 No cambies el stack (Postgres/Supabase, nunca NoSQL) ni las convenciones de nombres (tablas y columnas en español, snake_case).

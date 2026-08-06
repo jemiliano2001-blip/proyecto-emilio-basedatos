@@ -13,3 +13,15 @@ export function parseQuantity(raw: string): number | null {
   if (!Number.isFinite(value)) return null
   return roundQuantity(value)
 }
+
+/** Parsea montos MXN (numeric(14,2)). */
+export function parseMoney(raw: string): number | null {
+  return parseQuantity(raw)
+}
+
+export function formatMoneyMx(value: number): string {
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+  }).format(value)
+}
