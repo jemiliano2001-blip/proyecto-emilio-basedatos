@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { SolicitudForm } from '@/components/SolicitudForm'
 import { createSolicitudAction } from '@/lib/actions/solicitudes'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeCrearSolicitudes } from '@/lib/roles'
+import { puedeCrearSolicitudes, puedeCrearSolicitudMultiObra } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function NuevaSolicitudPage({
@@ -52,6 +52,7 @@ export default async function NuevaSolicitudPage({
           obras={obras}
           materiales={materiales ?? []}
           defaultObraId={searchParams.obra}
+          permiteMultiObra={puedeCrearSolicitudMultiObra(session.rol)}
         />
       )}
     </main>
