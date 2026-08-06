@@ -13,7 +13,11 @@ export function puedeGestionarTopes(rol: RolUsuario | null): boolean {
 }
 
 export function puedeCrearSolicitudes(rol: RolUsuario | null): boolean {
-  return rol === 'acceso_total' || rol === 'personal'
+  return rol === 'acceso_total' || rol === 'personal' || rol === 'compras'
+}
+
+export function puedeCrearSolicitudMultiObra(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'compras'
 }
 
 export function puedeVerTodasLasSolicitudes(rol: RolUsuario | null): boolean {
