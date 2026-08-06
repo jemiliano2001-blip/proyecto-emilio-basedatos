@@ -40,6 +40,7 @@ interface ItemRow {
   descripcion: string
   monto_mxn: string
   nota: string
+  obra_id: string
 }
 
 function nuevaFila(): ItemRow {
@@ -51,6 +52,7 @@ function nuevaFila(): ItemRow {
     descripcion: '',
     monto_mxn: '',
     nota: '',
+    obra_id: '',
   }
 }
 
@@ -59,15 +61,18 @@ export function SolicitudForm({
   obras,
   materiales,
   defaultObraId,
+  permiteMultiObra = false,
 }: {
   action: (prev: ActionResult, formData: FormData) => Promise<ActionResult>
   obras: ObraOption[]
   materiales: MaterialOption[]
   defaultObraId?: string
+  permiteMultiObra?: boolean
 }) {
   const router = useRouter()
   const [state, formAction] = useFormState(action, initialState)
   const [items, setItems] = useState<ItemRow[]>([nuevaFila()])
+  const [multiObra, setMultiObra] = useState(false)
   const [offlineMsg, setOfflineMsg] = useState<string | null>(null)
   const [offlineError, setOfflineError] = useState<string | null>(null)
   const [guardandoOffline, setGuardandoOffline] = useState(false)
@@ -82,9 +87,10 @@ export function SolicitudForm({
           descripcion: item.tipo_linea === 'material' ? null : item.descripcion,
           monto_mxn: item.monto_mxn.trim() === '' ? null : item.monto_mxn,
           nota: item.nota,
+          obra_id: multiObra && item.obra_id !== '' ? item.obra_id : null,
         }))
       ),
-    [items]
+    [items, multiObra]
   )
 
   function actualizarFila(key: string, cambios: Partial<ItemRow>) {
@@ -220,28 +226,43 @@ export function SolicitudForm({
         <p className="rounded-lg bg-teal-50 text-teal-800 text-sm px-3 py-2">{offlineMsg}</p>
       )}
 
-      <div>
-        <label htmlFor="obra_id" className="block text-sm font-medium text-gray-700 mb-1">
-          Proyecto
+      {permiteMultiObra && (
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={multiObra}
+            onChange={(e) => setMultiObra(e.target.checked)}
+          />
+          Requisición multi-obra (cada renglón elige su propia obra)
         </label>
-        <select
-          id="obra_id"
-          name="obra_id"
-          required
-          defaultValue={defaultObraId ?? ''}
-          className="input-base"
-        >
-          <option value="" disabled>
-            Selecciona un proyecto
-          </option>
-          {obras.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.nombre}
-              {o.fraccionamiento ? ` · ${o.fraccionamiento}` : ''}
+      )}
+
+      {multiObra ? (
+        <input type="hidden" name="obra_id" value={items[0]?.obra_id ?? ''} />
+      ) : (
+        <div>
+          <label htmlFor="obra_id" className="block text-sm font-medium text-gray-700 mb-1">
+            Proyecto
+          </label>
+          <select
+            id="obra_id"
+            name="obra_id"
+            required
+            defaultValue={defaultObraId ?? ''}
+            className="input-base"
+          >
+            <option value="" disabled>
+              Selecciona un proyecto
             </option>
-          ))}
-        </select>
-      </div>
+            {obras.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.nombre}
+                {o.fraccionamiento ? ` · ${o.fraccionamiento}` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <div className="flex items-center justify-between mb-2">
@@ -287,6 +308,24 @@ export function SolicitudForm({
                   </option>
                 ))}
               </select>
+
+              {multiObra && (
+                <select
+                  value={item.obra_id}
+                  onChange={(e) => actualizarFila(item.key, { obra_id: e.target.value })}
+                  className="input-base"
+                  required
+                >
+                  <option value="" disabled>
+                    Selecciona la obra de este renglón
+                  </option>
+                  {obras.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.nombre}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               {item.tipo_linea === 'material' ? (
                 <>
