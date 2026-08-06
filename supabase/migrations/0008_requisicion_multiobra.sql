@@ -283,7 +283,7 @@ begin
         case
             when array_length(v_ordenes, 1) > 1
             then 'Finanzas aprobó el pago. Se generaron ' || array_length(v_ordenes, 1) || ' órdenes de compra.'
-            else 'Finanzas aprobó el pago.'
+            else 'Finanzas aprobó el pago. Orden ' || v_folio || '.'
         end,
         'solicitud_finalizada',
         p_solicitud_id
