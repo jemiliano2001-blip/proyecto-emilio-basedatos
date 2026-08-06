@@ -3,17 +3,16 @@
 Sistema de trazabilidad de materiales y proyectos. Next.js 14 + Supabase (PostgreSQL).
 En UI se dice **proyecto**; la tabla sigue siendo `obras`.
 
-## Estado actual: Fase 4 + cambios Emilio (proyecto / presupuesto / requisiciones)
+## Estado actual: Fase 5 — requisición multi-obra (hecha)
 
 ### Fase 0 — Infraestructura (hecha)
 - Proyecto Supabase: `proyecto-emilio-basedatos` (ref `uplxxnpurpqlvhjrsufa`)
-- Migraciones en repo: `0001` … `0007` (aplicar `0006`/`0006a`/`0007` en remoto **después de revisarlas**)
+- Migraciones en repo y aplicadas en remoto: `0001` … `0008`
 - `.env.local` con URL + anon key (no subir a git)
 - Usuarios de prueba sembrados (ver abajo)
 
 Pendiente operativo (dashboard, no código):
-- [ ] Aplicar migraciones `0006`, `0006a`, `0007` en Supabase (revisar antes)
-- [ ] Crear usuario Blanquita con rol `finanzas`
+- [ ] Crear usuario Blanquita con rol `finanzas` (por ahora las aprobaciones de pago las hace `acceso_total`)
 - [ ] Activar backups automáticos (Settings → Database → Backups) — requiere plan Pro
 - [ ] Activar "Leaked password protection" en Auth
 - [ ] Reemplazar íconos PWA placeholder por logo real de la empresa
@@ -47,9 +46,16 @@ Pendiente operativo (dashboard, no código):
 - Saldo cantidad (comprometido/usado) + saldo monetario (`v_saldo_presupuesto_obra`)
 - Bandejas en `/solicitudes` por rol
 
+### Fase 5 — Requisición multi-obra (hecha)
+- Migración `0008`: `solicitud_items.obra_id` (renglón puede pertenecer a una obra distinta de la cabecera)
+- Compras (`compras`/`acceso_total`) puede levantar una sola requisición con renglones repartidos en varias obras
+- Aprobación todo-o-nada: si falta saldo (cantidad o presupuesto) en cualquier obra involucrada, no se reserva nada
+- Al pagar se emite **una orden de compra por cada obra distinta** de la requisición
+- Esto ya cubre lo que el roadmap original llamaba "asignación de materiales a obra (saldo real vs reservas)": el saldo en vivo por obra (`v_saldo_material_obra`: contratado/usado/comprometido/disponible) quedó resuelto aquí
+- Doc de diseño: [`docs/superpowers/specs/2026-08-05-fase5-requisicion-multiobra-design.md`](docs/superpowers/specs/2026-08-05-fase5-requisicion-multiobra-design.md)
+
 Lo que sigue (no te saltes fases — ver `.cursorrules`):
-5. Asignación de materiales a obra (refinar saldo real vs reservas)
-6. Traspasos entre obras
+6. Traspasos entre obras (el más delicado — afecta presupuestos de 2 obras)
 7. Cierre de obra y reportes de conciliación
 
 ## Cómo arrancar
@@ -76,6 +82,7 @@ Script: [`supabase/seed_usuarios_prueba.sql`](supabase/seed_usuarios_prueba.sql)
 Smoke E2E:
 - Fase 3: [`scripts/e2e-fase3.ps1`](scripts/e2e-fase3.ps1)
 - Fase 4: [`scripts/e2e-fase4.ps1`](scripts/e2e-fase4.ps1)
+- Fase 5: [`scripts/e2e-fase5.ps1`](scripts/e2e-fase5.ps1)
 
 ## Seguridad
 
