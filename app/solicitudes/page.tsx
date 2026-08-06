@@ -15,7 +15,7 @@ interface SolicitudRow {
   creado_en: string
   obra: { nombre: string; fraccionamiento: string | null } | null
   solicitante: { nombre: string } | null
-  items: { id: string }[]
+  items: { id: string; obra_id: string | null }[]
 }
 
 function badgeEstado(estado: EstadoSolicitud) {
@@ -55,6 +55,10 @@ function labelEstado(estado: EstadoSolicitud) {
   }
 }
 
+function esMultiObra(s: SolicitudRow): boolean {
+  return s.items.some((i) => i.obra_id !== null)
+}
+
 export default async function SolicitudesPage() {
   const session = await getSessionUsuario()
   const puedeCrear = puedeCrearSolicitudes(session?.rol ?? null)
@@ -66,7 +70,7 @@ export default async function SolicitudesPage() {
   const { data: solicitudes, error } = await supabase
     .from('solicitudes_material')
     .select(
-      'id, estado, creado_en, obra:obras(nombre, fraccionamiento), solicitante:usuarios(nombre), items:solicitud_items(id)'
+      'id, estado, creado_en, obra:obras(nombre, fraccionamiento), solicitante:usuarios(nombre), items:solicitud_items(id, obra_id)'
     )
     .order('creado_en', { ascending: false })
 
@@ -117,7 +121,7 @@ export default async function SolicitudesPage() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
-                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}
+                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · multi-obra' : ''}
                   {s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
                 </p>
               </Link>
@@ -144,7 +148,7 @@ export default async function SolicitudesPage() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
-                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}
+                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · multi-obra' : ''}
                   {s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
                 </p>
               </Link>
@@ -179,7 +183,7 @@ export default async function SolicitudesPage() {
             </div>
             <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
               <span>
-                {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}
+                {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · multi-obra' : ''}
                 {verTodas && s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
               </span>
               <span>{new Date(s.creado_en).toLocaleDateString('es-MX')}</span>
