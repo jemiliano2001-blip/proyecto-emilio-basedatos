@@ -145,13 +145,6 @@ select
           and r.material_id = omc.material_id
           and r.estado = 'aplicada'
     ), 0)::numeric as cantidad_usada,
-    coalesce((
-        select sum(r.cantidad)
-        from solicitud_reservas_cantidad r
-        where r.obra_id = omc.obra_id
-          and r.material_id = omc.material_id
-          and r.estado = 'activa'
-    ), 0)::numeric as cantidad_comprometida,
     (
         omc.cantidad_contratada
         - coalesce((
@@ -161,7 +154,14 @@ select
               and r.material_id = omc.material_id
               and r.estado in ('activa', 'aplicada')
         ), 0)
-    )::numeric as cantidad_disponible
+    )::numeric as cantidad_disponible,
+    coalesce((
+        select sum(r.cantidad)
+        from solicitud_reservas_cantidad r
+        where r.obra_id = omc.obra_id
+          and r.material_id = omc.material_id
+          and r.estado = 'activa'
+    ), 0)::numeric as cantidad_comprometida
 from obra_material_contratado omc
 join catalogo_materiales cm on cm.id = omc.material_id;
 
