@@ -16,6 +16,7 @@ export interface SolicitudItemInput {
   descripcion: string | null
   monto_mxn: number | null
   nota: string | null
+  obra_id: string | null
 }
 
 export interface SolicitudInput {
@@ -51,6 +52,11 @@ function validateItem(raw: unknown, index: number): ValidationResult<SolicitudIt
   }
   const tipo_linea = tipoRaw as TipoLineaSolicitud
   const nota = trimOrNull(body.nota)
+  const obraIdRaw = typeof body.obra_id === 'string' ? body.obra_id.trim() : ''
+  const obra_id = obraIdRaw === '' ? null : obraIdRaw
+  if (obra_id !== null && !UUID_RE.test(obra_id)) {
+    return { ok: false, error: `Renglón ${index + 1}: obra inválida.` }
+  }
 
   if (tipo_linea === 'material') {
     const material_id = typeof body.material_id === 'string' ? body.material_id.trim() : ''
@@ -100,6 +106,7 @@ function validateItem(raw: unknown, index: number): ValidationResult<SolicitudIt
         descripcion: null,
         monto_mxn,
         nota,
+        obra_id,
       },
     }
   }
@@ -129,6 +136,7 @@ function validateItem(raw: unknown, index: number): ValidationResult<SolicitudIt
       descripcion,
       monto_mxn: monto,
       nota,
+      obra_id,
     },
   }
 }
@@ -164,13 +172,15 @@ export function validateSolicitudInput(raw: unknown): ValidationResult<Solicitud
       return parsedItem
     }
     if (parsedItem.data.tipo_linea === 'material' && parsedItem.data.material_id) {
-      if (vistos.has(parsedItem.data.material_id)) {
+      const obraEfectiva = parsedItem.data.obra_id ?? obra_id
+      const clave = `${parsedItem.data.material_id}::${obraEfectiva}`
+      if (vistos.has(clave)) {
         return {
           ok: false,
-          error: `Renglón ${i + 1}: ese material ya está en la requisición, combina la cantidad en un solo renglón.`,
+          error: `Renglón ${i + 1}: ese material ya está en esa obra dentro de la requisición, combina la cantidad en un solo renglón.`,
         }
       }
-      vistos.add(parsedItem.data.material_id)
+      vistos.add(clave)
     }
     items.push(parsedItem.data)
   }

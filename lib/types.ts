@@ -103,6 +103,7 @@ export interface SolicitudItem {
   descripcion: string | null
   monto_mxn: number | null
   nota: string | null
+  obra_id: string | null
 }
 
 export type EstadoCotizacion = 'borrador' | 'enviada' | 'aprobada' | 'rechazada'
