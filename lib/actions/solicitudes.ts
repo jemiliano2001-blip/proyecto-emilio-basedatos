@@ -7,6 +7,7 @@ import {
   puedeAprobarCompras,
   puedeAprobarPago,
   puedeCrearSolicitudes,
+  puedeCrearSolicitudMultiObra,
 } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import { validateSolicitudInput, type SolicitudItemInput } from '@/lib/validations/solicitud'
@@ -42,6 +43,7 @@ async function insertSolicitudItems(
       descripcion: item.descripcion,
       monto_mxn: item.monto_mxn,
       nota: item.nota,
+      obra_id: item.obra_id,
     }))
   )
 }
@@ -73,6 +75,13 @@ export async function createSolicitudAction(
 
   if (!parsed.ok) {
     return { error: parsed.error }
+  }
+
+  if (
+    parsed.data.items.some((item) => item.obra_id !== null) &&
+    !puedeCrearSolicitudMultiObra(session.rol)
+  ) {
+    return { error: 'No tienes permiso para requisiciones multi-obra.' }
   }
 
   const supabase = createClient()
@@ -213,6 +222,13 @@ export async function syncSolicitudPayload(
   })
   if (!parsed.ok) {
     return { status: 'conflicto', error: parsed.error }
+  }
+
+  if (
+    parsed.data.items.some((item) => item.obra_id !== null) &&
+    !puedeCrearSolicitudMultiObra(session.rol)
+  ) {
+    return { status: 'conflicto', error: 'No tienes permiso para requisiciones multi-obra.' }
   }
 
   const supabase = createClient()
@@ -409,8 +425,9 @@ export async function aprobarPagoSolicitudAction(
   revalidatePath(`/solicitudes/${solicitudId}`)
   revalidatePath('/ordenes')
   revalidatePath('/')
-  if (typeof data === 'string') {
-    redirect(`/ordenes/${data}`)
+  const ordenes = Array.isArray(data) ? (data as string[]) : []
+  if (ordenes.length === 1) {
+    redirect(`/ordenes/${ordenes[0]}`)
   }
   return { error: null, ok: true }
 }
