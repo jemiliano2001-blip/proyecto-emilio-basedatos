@@ -100,9 +100,13 @@ export async function createSolicitudAction(
     return { error: 'Solo puedes solicitar para proyectos activos.' }
   }
 
-  const materialIds = parsed.data.items
-    .filter((item) => item.tipo_linea === 'material' && item.material_id)
-    .map((item) => item.material_id as string)
+  const materialIds = [
+    ...new Set(
+      parsed.data.items
+        .filter((item) => item.tipo_linea === 'material' && item.material_id)
+        .map((item) => item.material_id as string)
+    ),
+  ]
 
   if (materialIds.length > 0) {
     const { data: materiales } = await supabase
@@ -262,9 +266,13 @@ export async function syncSolicitudPayload(
     return { status: 'conflicto', error: 'Solo puedes solicitar para proyectos activos.' }
   }
 
-  const materialIds = parsed.data.items
-    .filter((item) => item.tipo_linea === 'material' && item.material_id)
-    .map((item) => item.material_id as string)
+  const materialIds = [
+    ...new Set(
+      parsed.data.items
+        .filter((item) => item.tipo_linea === 'material' && item.material_id)
+        .map((item) => item.material_id as string)
+    ),
+  ]
 
   if (materialIds.length > 0) {
     const { data: materiales } = await supabase
