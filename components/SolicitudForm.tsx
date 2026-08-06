@@ -105,10 +105,11 @@ export function SolicitudForm({
     setItems((prev) => (prev.length > 1 ? prev.filter((item) => item.key !== key) : prev))
   }
 
-  function materialesDisponiblesPara(key: string) {
+  function materialesDisponiblesPara(key: string, obraId: string) {
     const usados = new Set(
       items
         .filter((i) => i.key !== key && i.tipo_linea === 'material' && i.material_id)
+        .filter((i) => !multiObra || i.obra_id === obraId)
         .map((i) => i.material_id)
     )
     return materiales.filter((m) => !usados.has(m.id))
@@ -120,6 +121,11 @@ export function SolicitudForm({
     setGuardandoOffline(true)
 
     try {
+      if (multiObra) {
+        setOfflineError('Las requisiciones multi-obra necesitan conexión — no se pueden guardar sin internet.')
+        return
+      }
+
       const obra_id = String(formData.get('obra_id') ?? '')
       const notaRaw = formData.get('nota')
       const nota =
@@ -330,7 +336,7 @@ export function SolicitudForm({
               {item.tipo_linea === 'material' ? (
                 <>
                   <MaterialSearchCombobox
-                    materials={materialesDisponiblesPara(item.key)}
+                    materials={materialesDisponiblesPara(item.key, item.obra_id)}
                     value={item.material_id}
                     onChange={(material_id) => actualizarFila(item.key, { material_id })}
                   />
