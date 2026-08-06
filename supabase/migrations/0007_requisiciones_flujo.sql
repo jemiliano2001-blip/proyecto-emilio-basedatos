@@ -154,7 +154,7 @@ select
               and r.material_id = omc.material_id
               and r.estado in ('activa', 'aplicada')
         ), 0)
-    )::numeric as cantidad_disponible,
+    )::numeric(12,2) as cantidad_disponible,
     coalesce((
         select sum(r.cantidad)
         from solicitud_reservas_cantidad r
