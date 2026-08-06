@@ -32,12 +32,21 @@ interface SolicitudDetalle {
     descripcion: string | null
     monto_mxn: number | null
     nota: string | null
+    obra_id: string | null
+    item_obra: { nombre: string } | null
     material: {
       nombre_base: string
       variante: string | null
       unidad_medida: string
     } | null
   }[]
+}
+
+interface OrdenRelacionada {
+  id: string
+  folio: string
+  total: number
+  obra: { nombre: string } | null
 }
 
 function badgeEstado(estado: EstadoSolicitud) {
@@ -86,8 +95,9 @@ export default async function SolicitudDetallePage({
        obra:obras(id, nombre, fraccionamiento),
        solicitante:usuarios(nombre),
        items:solicitud_items(
-         id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn, nota,
-         material:catalogo_materiales(nombre_base, variante, unidad_medida)
+         id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn, nota, obra_id,
+         material:catalogo_materiales(nombre_base, variante, unidad_medida),
+         item_obra:obras!solicitud_items_obra_id_fkey(nombre)
        )`
     )
     .eq('id', params.id)
@@ -96,6 +106,16 @@ export default async function SolicitudDetallePage({
   if (!solicitud) notFound()
 
   const detalle = solicitud as unknown as SolicitudDetalle
+  const esMultiObra = detalle.items.some((i) => i.obra_id)
+
+  const { data: ordenesData } =
+    detalle.estado === 'finalizada'
+      ? await supabase
+          .from('ordenes_compra')
+          .select('id, folio, total, obra:obras(nombre)')
+          .eq('solicitud_id', params.id)
+      : { data: null }
+  const ordenesRelacionadas = (ordenesData as unknown as OrdenRelacionada[] | null) ?? []
   const esDueno = session?.perfil?.id === detalle.solicitante_id
   const estadoRecibida =
     detalle.estado === 'recibida' || detalle.estado === 'pendiente'
@@ -163,6 +183,11 @@ export default async function SolicitudDetallePage({
               <p className="text-xs font-semibold text-gray-400 uppercase mb-1">
                 {labelTipoLinea(tipo)}
               </p>
+              {esMultiObra && item.item_obra && (
+                <p className="text-xs font-semibold text-teal-700 mb-1">
+                  Obra: {item.item_obra.nombre}
+                </p>
+              )}
               {tipo === 'material' ? (
                 <div className="flex justify-between items-baseline">
                   <p className="font-medium">
@@ -195,6 +220,25 @@ export default async function SolicitudDetallePage({
           )
         })}
       </div>
+
+      {ordenesRelacionadas.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Órdenes de compra generadas
+          </h2>
+          <div className="space-y-2">
+            {ordenesRelacionadas.map((oc) => (
+              <Link key={oc.id} href={`/ordenes/${oc.id}`} className="card block">
+                <div className="flex justify-between">
+                  <span className="font-medium">{oc.folio}</span>
+                  <span className="text-sm text-gray-500">{oc.obra?.nombre}</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">{formatMoneyMx(Number(oc.total))}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-3">
         {puedeCompras && <AprobarComprasButton solicitudId={detalle.id} />}
