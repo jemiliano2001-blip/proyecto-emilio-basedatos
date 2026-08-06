@@ -12,10 +12,19 @@ create policy obra_presupuesto_movimientos_select on obra_presupuesto_movimiento
         )
     );
 
--- Remap de estados legacy → nuevo flujo
+-- Remap de estados legacy → nuevo flujo.
+-- Se desactiva el trigger de permisos mientras dura el remap: ese trigger
+-- exige un rol válido vía auth_rol(), que es null cuando la migración corre
+-- como postgres/superusuario desde el SQL Editor (sin sesión de usuario),
+-- así que sin este disable/enable el UPDATE queda bloqueado por el propio
+-- trigger de la tabla que está migrando.
+alter table solicitudes_material disable trigger trg_solicitudes_material_before_update;
+
 update solicitudes_material set estado = 'recibida' where estado = 'pendiente';
 update solicitudes_material set estado = 'en_proceso' where estado = 'en_cotizacion';
 update solicitudes_material set estado = 'finalizada' where estado = 'aprobada';
+
+alter table solicitudes_material enable trigger trg_solicitudes_material_before_update;
 
 alter table solicitudes_material
     alter column estado set default 'recibida';
