@@ -45,6 +45,9 @@ export function AppNav({
             Recepción
           </Link>
         )}
+        <Link href="/traspasos" className={linkClass('/traspasos')}>
+          Traspasos
+        </Link>
         {puedeVerPrecios && (
           <Link href="/ordenes" className={linkClass('/ordenes')}>
             Órdenes

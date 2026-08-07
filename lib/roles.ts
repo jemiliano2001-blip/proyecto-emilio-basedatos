@@ -75,3 +75,49 @@ export function puedeVerRecepciones(rol: RolUsuario | null): boolean {
     rol === 'proyectos'
   )
 }
+
+export function puedeSolicitarTraspaso(rol: RolUsuario | null): boolean {
+  return (
+    rol === 'acceso_total' ||
+    rol === 'personal' ||
+    rol === 'proyectos' ||
+    rol === 'operacion' ||
+    rol === 'compras'
+  )
+}
+
+/**
+ * Ojo: la RPC `cancelar_traspaso` acepta al solicitante (sea cual sea su rol)
+ * O a estos dos. Este predicado cubre solo la segunda mitad; el "soy el
+ * solicitante" se resuelve por separado con el id de sesión.
+ */
+export function puedeCancelarTraspaso(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'proyectos'
+}
+
+export function puedeAprobarTraspaso(rol: RolUsuario | null): boolean {
+  return (
+    rol === 'acceso_total' ||
+    rol === 'proyectos' ||
+    rol === 'operacion' ||
+    rol === 'compras'
+  )
+}
+
+export function puedeConfirmarTraspaso(rol: RolUsuario | null): boolean {
+  return (
+    rol === 'acceso_total' ||
+    rol === 'personal' ||
+    rol === 'proyectos' ||
+    rol === 'operacion' ||
+    rol === 'compras'
+  )
+}
+
+export function puedeCerrarObra(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'operacion'
+}
+
+export function puedeReabrirObra(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total'
+}

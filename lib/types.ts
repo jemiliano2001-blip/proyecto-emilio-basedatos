@@ -62,8 +62,13 @@ export interface SaldoPresupuestoObra {
   obra_id: string
   presupuesto_mxn: number
   comprometido_mxn: number
+  /** Incluye el neto de traspasos completados: gasto directo + cargo − crédito. */
   gastado_mxn: number
   disponible_mxn: number
+  /** Lo que esta obra recuperó al ceder material por traspaso (Fase 6). */
+  traspasos_credito_mxn?: number
+  /** Lo que esta obra absorbió al recibir material por traspaso (Fase 6). */
+  traspasos_cargo_mxn?: number
 }
 
 export type EstadoSolicitud =
@@ -222,3 +227,86 @@ export interface OrdenCompraItem {
   descripcion: string | null
   tipo_linea: TipoLineaSolicitud
 }
+
+export type EstadoTraspaso =
+  | 'solicitado'
+  | 'en_transito'
+  | 'completado'
+  | 'rechazado'
+  | 'cancelado'
+
+export interface TraspasoObra {
+  id: string
+  folio: string
+  obra_origen_id: string
+  obra_destino_id: string
+  solicitante_id: string
+  aprobador_id: string | null
+  receptor_id: string | null
+  estado: EstadoTraspaso
+  motivo: string | null
+  creado_en: string
+  aprobado_en: string | null
+  recibido_en: string | null
+  // Joins opcionales para UI
+  obra_origen_nombre?: string
+  obra_destino_nombre?: string
+  solicitante_nombre?: string
+}
+
+export interface TraspasoItem {
+  id: string
+  traspaso_id: string
+  material_id: string
+  cantidad: number
+  /** Congelado por `aprobar_traspaso`. Null mientras sigue en 'solicitado'. */
+  precio_unitario_mxn: number | null
+  creado_en: string
+  // Joins opcionales para UI
+  nombre_base?: string
+  variante?: string | null
+  unidad_medida?: string
+}
+
+/** Vista `v_conciliacion_obra_presupuesto` (Fase 7) — todo en MXN. */
+export interface ConciliacionPresupuestoObra {
+  obra_id: string
+  obra_nombre: string
+  cliente: string | null
+  fraccionamiento: string | null
+  paquete: string | null
+  estado: Obra['estado']
+  presupuesto_mxn: number
+  creado_en: string
+  cerrado_en: string | null
+  cierre_nota: string | null
+  reservado_requisiciones_mxn: number
+  gastado_ordenes_compra_mxn: number
+  fletes_camiones_mxn: number
+  servicios_otros_mxn: number
+  traspasos_credito_mxn: number
+  traspasos_cargo_mxn: number
+  gastado_total_ejecutado_mxn: number
+  variacion_saldo_mxn: number
+}
+
+/** Vista `v_conciliacion_obra_material` (Fase 7) — cantidades físicas. */
+export interface ConciliacionMaterialObra {
+  obra_id: string
+  material_id: string
+  nombre_base: string
+  variante: string | null
+  unidad_medida: string
+  categoria: string | null
+  subcategoria: string | null
+  cantidad_contratada: number
+  traspasos_entrada: number
+  traspasos_salida: number
+  cantidad_tope_efectiva: number
+  cantidad_usada: number
+  cantidad_comprometida: number
+  cantidad_disponible: number
+  cantidad_recibida_buena_sitio: number
+  porcentaje_ejecucion: number
+}
+
