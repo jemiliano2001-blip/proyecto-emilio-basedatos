@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeCrearSolicitudes, puedeGestionarObras, puedeGestionarTopes } from '@/lib/roles'
+import { puedeCerrarObra, puedeCrearSolicitudes, puedeGestionarObras, puedeGestionarTopes, puedeReabrirObra } from '@/lib/roles'
 import { formatMoneyMx } from '@/lib/money'
 import { createClient } from '@/lib/supabase/server'
 import type { SaldoMaterialObra, SaldoPresupuestoObra } from '@/lib/types'
 import { EditTopeInline } from '@/components/EditTopeInline'
+import { CierreObraAcciones } from '@/components/CierreObraAcciones'
 
 export default async function ObraDetallePage({
   params,
@@ -17,6 +18,8 @@ export default async function ObraDetallePage({
   const puedeEditarObra = puedeGestionarObras(session?.rol ?? null)
   const puedeTopes = puedeGestionarTopes(session?.rol ?? null)
   const puedeSolicitar = puedeCrearSolicitudes(session?.rol ?? null)
+  const puedeCerrar = puedeCerrarObra(session?.rol ?? null)
+  const puedeReabrir = puedeReabrirObra(session?.rol ?? null)
 
   const { data: obra } = await supabase
     .from('obras')
@@ -73,9 +76,25 @@ export default async function ObraDetallePage({
             </Link>
           )}
         </div>
+
+        <div className="flex flex-wrap items-center gap-2 mt-4">
+          <Link
+            href={`/obras/${params.id}/conciliacion`}
+            className="bg-[#132A45] hover:bg-[#1f3f66] text-white font-semibold text-xs py-2 px-3 rounded-lg shadow-sm transition inline-flex items-center gap-1.5"
+          >
+            📊 Reporte de Conciliación
+          </Link>
+
+          <CierreObraAcciones
+            obraId={obra.id}
+            estado={obra.estado}
+            puedeCerrar={puedeCerrar}
+            puedeReabrir={puedeReabrir}
+          />
+        </div>
       </header>
 
-      {puedeSolicitar && (
+      {puedeSolicitar && obra.estado === 'activa' && (
         <Link
           href={`/solicitudes/nueva?obra=${params.id}`}
           className="btn-primary w-full text-center block mb-6"
