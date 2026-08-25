@@ -25,6 +25,7 @@ export async function createMaterialAction(
     categoria: formData.get('categoria'),
     subcategoria: formData.get('subcategoria'),
     especificacion: formData.get('especificacion'),
+    precio_base: formData.get('precio_base'),
     activo: true,
   })
 
@@ -63,6 +64,7 @@ export async function updateMaterialAction(
     categoria: formData.get('categoria'),
     subcategoria: formData.get('subcategoria'),
     especificacion: formData.get('especificacion'),
+    precio_base: formData.get('precio_base'),
     activo: formData.get('activo') !== 'false',
   })
 

@@ -31,22 +31,22 @@ export default async function NuevoTraspasoPage() {
     .select('obra_id, material_id, cantidad_disponible')
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
-      <header className="mb-6 pt-4">
-        <Link href="/traspasos" className="text-sm text-[#1E7F7A] font-medium hover:underline">
+    <main className="page-shell">
+      <header className="mb-6 pt-2">
+        <Link href="/traspasos" className="text-sm font-medium text-accent hover:underline">
           ← Traspasos
         </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">
+        <h1 className="mt-2 text-2xl font-bold text-ink">
           Nuevo traspaso de materiales
         </h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Transfiere materiales disponibles de una obra origen a una obra destino
+        <p className="mt-1 text-sm text-gray-500">
+          Transfiere materiales disponibles de un proyecto origen a un proyecto destino
         </p>
       </header>
 
       {!obras || obras.length < 2 ? (
-        <div className="bg-yellow-50 text-yellow-800 p-4 rounded-xl border border-yellow-200 text-sm">
-          Se requieren al menos 2 obras activas registradas en el sistema para realizar un traspaso.
+        <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+          Se requieren al menos 2 proyectos activos para realizar un traspaso.
         </div>
       ) : (
         <TraspasoForm

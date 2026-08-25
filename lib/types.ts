@@ -35,6 +35,7 @@ export interface CatalogoMaterial {
   categoria: string | null
   subcategoria: string | null
   especificacion: string | null
+  precio_base?: number
   foto_url: string | null
   activo: boolean
 }
@@ -308,5 +309,68 @@ export interface ConciliacionMaterialObra {
   cantidad_disponible: number
   cantidad_recibida_buena_sitio: number
   porcentaje_ejecucion: number
+}
+
+export interface Notificacion {
+  id: string
+  usuario_id: string | null
+  rol_destino: RolUsuario | null
+  titulo: string
+  mensaje: string
+  tipo: string
+  referencia_id: string | null
+  leida: boolean
+  creado_en: string
+}
+
+export interface MaterialKit {
+  id: string
+  nombre: string
+  material_principal_id: string | null
+  configuracion: string | null
+  descripcion: string | null
+  activo: boolean
+  creado_en: string
+}
+
+export interface MaterialKitItem {
+  id: string
+  kit_id: string
+  material_id: string
+  cantidad: number
+  creado_en: string
+  // Joins opcionales
+  nombre_base?: string
+  variante?: string | null
+  unidad_medida?: string
+  precio_base?: number
+}
+
+export interface MaterialKitWithItems extends MaterialKit {
+  material_principal?: CatalogoMaterial | null
+  items: (MaterialKitItem & {
+    material?: CatalogoMaterial
+  })[]
+}
+
+export type TipoDocumentoObra =
+  | 'presupuesto'
+  | 'conciliacion'
+  | 'plano'
+  | 'minuta'
+  | 'general'
+  | 'otro'
+
+export interface ObraDocumento {
+  id: string
+  obra_id: string
+  nombre: string
+  tipo_documento: TipoDocumentoObra
+  archivo_path: string
+  archivo_url: string
+  tamano_bytes: number | null
+  subido_por: string | null
+  creado_en: string
+  subido_por_nombre?: string | null
 }
 

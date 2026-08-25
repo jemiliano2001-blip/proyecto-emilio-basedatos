@@ -69,7 +69,7 @@ export default async function MaterialesPage() {
   )
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
+    <main className="page-shell">
       <header className="mb-6 pt-4 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[#132A45]">Catálogo de materiales</h1>

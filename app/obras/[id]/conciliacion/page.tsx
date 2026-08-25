@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { formatMoneyMx } from '@/lib/money'
 import { puedeVerPrecios } from '@/lib/roles'
+import { esRelacionAusente } from '@/lib/schema-disponible'
 import { createClient } from '@/lib/supabase/server'
 import type {
   ConciliacionMaterialObra,
@@ -27,7 +28,27 @@ export default async function ConciliacionObraPage({
     .eq('obra_id', params.id)
     .maybeSingle()
 
-  if (errPres || !presupuestoData) {
+  if (errPres) {
+    if (esRelacionAusente(errPres)) {
+      return (
+        <main className="page-shell">
+          <header className="pt-2">
+            <Link href={`/obras/${params.id}`} className="text-sm font-medium text-accent hover:underline">
+              ← Volver al proyecto
+            </Link>
+            <h1 className="mt-2 text-2xl font-bold text-ink">Conciliación</h1>
+          </header>
+          <div className="card mt-4 border-amber-200 bg-amber-50 text-amber-900">
+            El reporte de conciliación todavía no está activo en la base. Cuando se
+            aplique la migración, esta pantalla va a funcionar.
+          </div>
+        </main>
+      )
+    }
+    notFound()
+  }
+
+  if (!presupuestoData) {
     notFound()
   }
 
@@ -50,7 +71,7 @@ export default async function ConciliacionObraPage({
   const esSuperavit = Number(pres.variacion_saldo_mxn) >= 0
 
   return (
-    <main className="max-w-4xl mx-auto p-4 pb-28 space-y-6">
+    <main className="page-shell-wide space-y-6">
       <header className="pt-4 flex flex-wrap items-start justify-between gap-3 print:hidden">
         <div>
           <Link href={`/obras/${params.id}`} className="text-sm text-[#1E7F7A] font-medium hover:underline">

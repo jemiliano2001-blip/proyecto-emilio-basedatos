@@ -29,7 +29,7 @@ export function CierreObraAcciones({
   }
 
   const handleReabrir = () => {
-    if (!confirm('¿Estás seguro de reabrir este proyecto?')) return
+    if (!confirm('¿Reabrir este proyecto?')) return
     setErrorMsg(null)
     startTransition(async () => {
       const res = await reabrirObraAction(obraId)
@@ -40,61 +40,68 @@ export function CierreObraAcciones({
   return (
     <div className="space-y-2">
       {errorMsg && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-xs">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
           {errorMsg}
         </div>
       )}
 
       {estado !== 'cerrada' && puedeCerrar && !mostrandoConfirmacion && (
         <button
+          type="button"
           onClick={() => setMostrandoConfirmacion(true)}
-          className="bg-gray-800 hover:bg-black text-white font-semibold text-xs py-2 px-3 rounded-lg transition"
+          className="btn-danger px-4 py-2 text-sm"
         >
-          🔒 Cerrar Proyecto
+          Cerrar proyecto
         </button>
       )}
 
       {estado === 'cerrada' && puedeReabrir && (
         <button
+          type="button"
           onClick={handleReabrir}
           disabled={isPending}
-          className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs py-2 px-3 rounded-lg transition disabled:opacity-50"
+          aria-busy={isPending}
+          className="btn-secondary px-4 py-2 text-sm"
         >
-          {isPending ? 'Reabriendo...' : '🔓 Reabrir Proyecto'}
+          {isPending ? 'Reabriendo…' : 'Reabrir proyecto'}
         </button>
       )}
 
       {mostrandoConfirmacion && (
-        <div className="bg-gray-900 text-white p-4 rounded-xl space-y-3 shadow-lg">
-          <h3 className="font-bold text-sm">¿Confirmar Cierre de Proyecto?</h3>
-          <p className="text-xs text-gray-300">
-            Al cerrar el proyecto no se podrán crear nuevas requisiciones ni traspasos.
+        <div className="card space-y-3 border-danger/30">
+          <h3 className="text-sm font-bold text-ink">¿Cerrar este proyecto?</h3>
+          <p className="text-sm text-gray-600">
+            Al cerrar no se podrán crear nuevas requisiciones ni traspasos.
           </p>
 
           <div>
-            <label className="block text-[11px] font-semibold text-gray-300 mb-1">
-              Nota o motivo de cierre (Opcional)
+            <label htmlFor="cierre-nota" className="mb-1 block text-sm font-semibold text-gray-700">
+              Nota o motivo de cierre (opcional)
             </label>
             <input
+              id="cierre-nota"
               type="text"
               value={nota}
               onChange={(e) => setNota(e.target.value)}
               placeholder="Ej. Entregado a cliente y conciliación final aprobada"
-              className="w-full text-xs border border-gray-700 bg-gray-800 text-white rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-amber-400"
+              className="input-base"
             />
           </div>
 
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-wrap gap-2 pt-1">
             <button
+              type="button"
               onClick={handleCerrar}
               disabled={isPending}
-              className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition disabled:opacity-50"
+              aria-busy={isPending}
+              className="btn-danger px-4 py-2 text-sm"
             >
-              {isPending ? 'Cerrando...' : 'Sí, Cerrar Proyecto'}
+              {isPending ? 'Cerrando…' : 'Sí, cerrar proyecto'}
             </button>
             <button
+              type="button"
               onClick={() => setMostrandoConfirmacion(false)}
-              className="bg-gray-700 text-gray-200 text-xs font-semibold py-2 px-3 rounded-lg hover:bg-gray-600 transition"
+              className="btn-secondary px-4 py-2 text-sm"
             >
               Cancelar
             </button>

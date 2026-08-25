@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeSolicitarTraspaso } from '@/lib/roles'
+import { esRelacionAusente } from '@/lib/schema-disponible'
 import { createClient } from '@/lib/supabase/server'
 import type { EstadoTraspaso } from '@/lib/types'
 
@@ -79,40 +80,50 @@ export default async function TraspasosPage() {
     .order('creado_en', { ascending: false })
 
   const lista = (traspasos as unknown as TraspasoRow[] | null) ?? []
+  const schemaAusente = error ? esRelacionAusente(error) : false
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
-      <header className="mb-6 pt-4 flex items-start justify-between gap-3">
+    <main className="page-shell">
+      <header className="mb-6 flex items-start justify-between gap-3 pt-2">
         <div>
-          <h1 className="text-2xl font-bold text-[#132A45]">Traspasos entre obras</h1>
-          <p className="text-gray-500 text-sm">
-            Movimiento y transferencia de excedentes de materiales
+          <h1 className="text-2xl font-bold text-ink">Traspasos entre proyectos</h1>
+          <p className="text-sm text-gray-500">
+            Mueve material de un proyecto a otro. El dinero sigue al material.
           </p>
         </div>
-        {puedeCrear && (
+        {puedeCrear && !schemaAusente && (
           <Link
             href="/traspasos/nuevo"
-            className="bg-[#132A45] hover:bg-[#1f3f66] text-white font-semibold shrink-0 text-sm py-2 px-4 rounded-lg shadow-sm transition"
+            className="btn-primary shrink-0 px-4 py-2 text-sm"
           >
-            + Nuevo Traspaso
+            Nuevo traspaso
           </Link>
         )}
       </header>
 
-      {error && (
-        <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm mb-4">
-          Error al cargar traspasos: {error.message}
+      {schemaAusente && (
+        <div className="card border-amber-200 bg-amber-50 text-amber-900">
+          Los traspasos todavía no están activos en la base. Cuando se aplique la
+          migración, este listado va a funcionar.
         </div>
       )}
 
-      {lista.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center shadow-sm">
-          <p className="text-gray-500 font-medium">No hay traspasos registrados</p>
-          <p className="text-gray-400 text-xs mt-1">
+      {error && !schemaAusente && (
+        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          No se pudieron cargar los traspasos. Revisa tu conexión.
+        </div>
+      )}
+
+      {!schemaAusente && lista.length === 0 && !error && (
+        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <p className="font-medium text-gray-500">No hay traspasos registrados</p>
+          <p className="mt-1 text-xs text-gray-400">
             Los traspasos entre proyectos aparecerán en este panel
           </p>
         </div>
-      ) : (
+      )}
+
+      {!schemaAusente && lista.length > 0 && (
         <div className="space-y-3">
           {lista.map((t) => {
             const fecha = new Date(t.creado_en).toLocaleDateString('es-MX', {

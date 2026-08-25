@@ -86,6 +86,16 @@ export function puedeSolicitarTraspaso(rol: RolUsuario | null): boolean {
   )
 }
 
+/** Quien puede entrar a /traspasos (solicitar, aprobar, confirmar o cancelar). */
+export function puedeVerTraspasos(rol: RolUsuario | null): boolean {
+  return (
+    puedeSolicitarTraspaso(rol) ||
+    puedeAprobarTraspaso(rol) ||
+    puedeConfirmarTraspaso(rol) ||
+    puedeCancelarTraspaso(rol)
+  )
+}
+
 /**
  * Ojo: la RPC `cancelar_traspaso` acepta al solicitante (sea cual sea su rol)
  * O a estos dos. Este predicado cubre solo la segunda mitad; el "soy el
@@ -121,3 +131,18 @@ export function puedeCerrarObra(rol: RolUsuario | null): boolean {
 export function puedeReabrirObra(rol: RolUsuario | null): boolean {
   return rol === 'acceso_total'
 }
+
+export function puedeGestionarDocumentos(rol: RolUsuario | null): boolean {
+  return (
+    rol === 'acceso_total' ||
+    rol === 'operacion' ||
+    rol === 'proyectos' ||
+    rol === 'compras' ||
+    rol === 'finanzas'
+  )
+}
+
+export function puedeEliminarDocumentos(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'operacion' || rol === 'proyectos'
+}
+

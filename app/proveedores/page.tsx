@@ -19,7 +19,7 @@ export default async function ProveedoresPage() {
     .order('nombre')
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
+    <main className="page-shell">
       <header className="mb-6 pt-4 flex items-start justify-between gap-3">
         <div>
           <Link href="/ordenes" className="text-sm text-[#1E7F7A] font-medium">

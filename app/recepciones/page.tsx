@@ -61,7 +61,7 @@ export default async function RecepcionesPage() {
   const otras = rows.filter((r) => r.estado !== 'pendiente_revision')
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
+    <main className="page-shell">
       <header className="mb-6 pt-4">
         <h1 className="text-2xl font-bold text-[#132A45]">Recepción</h1>
         <p className="text-gray-500 text-sm mt-1">

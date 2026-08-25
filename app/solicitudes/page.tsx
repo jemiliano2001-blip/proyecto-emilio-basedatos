@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
   puedeAprobarCompras,
@@ -81,10 +82,10 @@ export default async function SolicitudesPage() {
   const bandejaFinanzas = lista.filter((s) => s.estado === 'en_proceso')
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
-      <header className="mb-6 pt-4 flex items-start justify-between gap-3">
+    <main className="page-shell">
+      <header className="mb-6 flex items-start justify-between gap-3 pt-2">
         <div>
-          <h1 className="text-2xl font-bold text-[#132A45]">
+          <h1 className="text-2xl font-bold text-ink">
             {verTodas ? 'Control de solicitudes' : 'Mis solicitudes'}
           </h1>
           <p className="text-gray-500 text-sm">
@@ -100,8 +101,10 @@ export default async function SolicitudesPage() {
         )}
       </header>
 
+      <OfflineQueueBanner />
+
       {error && (
-        <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
+        <div className="card mb-4 border-red-300 bg-red-50 text-red-700">
           No se pudieron cargar las solicitudes. Revisa tu conexión.
         </div>
       )}
@@ -121,7 +124,7 @@ export default async function SolicitudesPage() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
-                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · multi-obra' : ''}
+                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · varios proyectos' : ''}
                   {s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
                 </p>
               </Link>
@@ -148,7 +151,7 @@ export default async function SolicitudesPage() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
-                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · multi-obra' : ''}
+                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · varios proyectos' : ''}
                   {s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
                 </p>
               </Link>
@@ -183,7 +186,7 @@ export default async function SolicitudesPage() {
             </div>
             <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
               <span>
-                {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · multi-obra' : ''}
+                {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · varios proyectos' : ''}
                 {verTodas && s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
               </span>
               <span>{new Date(s.creado_en).toLocaleDateString('es-MX')}</span>

@@ -125,6 +125,24 @@ export function MaterialForm({
           className="input-base"
         />
       </div>
+      <div>
+        <label htmlFor="precio_base" className="block text-sm font-medium text-gray-700 mb-1">
+          Precio base de referencia (MXN)
+        </label>
+        <input
+          id="precio_base"
+          name="precio_base"
+          type="number"
+          step="0.01"
+          min="0"
+          defaultValue={material?.precio_base !== undefined ? String(material.precio_base) : '0.00'}
+          className="input-base"
+          placeholder="0.00"
+        />
+        <p className="text-xs text-gray-400 mt-1">
+          Costo base unitario estimado utilizado para calcular el presupuesto en proyectos.
+        </p>
+      </div>
       {material && (
         <div>
           <label htmlFor="activo" className="block text-sm font-medium text-gray-700 mb-1">

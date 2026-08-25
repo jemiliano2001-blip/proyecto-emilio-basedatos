@@ -31,7 +31,7 @@ export default async function EditarObraPage({
   const updateAction = updateObraAction.bind(null, params.id)
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
+    <main className="page-shell">
       <header className="mb-6 pt-4">
         <Link href={`/obras/${params.id}`} className="text-sm text-[#1E7F7A] font-medium">
           ← Volver al proyecto

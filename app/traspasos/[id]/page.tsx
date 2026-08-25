@@ -125,7 +125,7 @@ export default async function TraspasoDetallePage({
     : null
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28 space-y-6">
+    <main className="page-shell space-y-6">
       <header className="pt-4">
         <Link href="/traspasos" className="text-sm text-[#1E7F7A] font-medium hover:underline">
           ← Volver a Traspasos
@@ -162,7 +162,7 @@ export default async function TraspasoDetallePage({
       <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm grid grid-cols-2 gap-4">
         <div className="border-r border-gray-100 pr-2">
           <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">
-            Obra Origen (Salida)
+            Proyecto origen (salida)
           </span>
           <p className="text-sm font-bold text-[#132A45] mt-1">
             {data.obra_origen?.nombre ?? 'N/A'}
@@ -174,7 +174,7 @@ export default async function TraspasoDetallePage({
 
         <div>
           <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">
-            Obra Destino (Entrada)
+            Proyecto destino (entrada)
           </span>
           <p className="text-sm font-bold text-[#132A45] mt-1">
             {data.obra_destino?.nombre ?? 'N/A'}
@@ -240,8 +240,8 @@ export default async function TraspasoDetallePage({
             </div>
             <p className="text-[11px] text-gray-500">
               Al completarse, este monto se le abona a{' '}
-              <strong>{data.obra_origen?.nombre ?? 'la obra origen'}</strong> y se le carga a{' '}
-              <strong>{data.obra_destino?.nombre ?? 'la obra destino'}</strong>.
+              <strong>{data.obra_origen?.nombre ?? 'el proyecto origen'}</strong> y se le carga a{' '}
+              <strong>{data.obra_destino?.nombre ?? 'el proyecto destino'}</strong>.
             </p>
             {haySinPrecio && (
               <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">

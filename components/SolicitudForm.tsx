@@ -30,6 +30,13 @@ interface MaterialOption {
   unidad_medida: string
   categoria?: string | null
   subcategoria?: string | null
+  precio_base?: number
+}
+
+interface SaldoItemOption {
+  obra_id: string
+  material_id: string
+  cantidad_disponible: number
 }
 
 interface ItemRow {
@@ -60,22 +67,52 @@ export function SolicitudForm({
   action,
   obras,
   materiales,
+  saldos = [],
   defaultObraId,
   permiteMultiObra = false,
 }: {
   action: (prev: ActionResult, formData: FormData) => Promise<ActionResult>
   obras: ObraOption[]
   materiales: MaterialOption[]
+  saldos?: SaldoItemOption[]
   defaultObraId?: string
   permiteMultiObra?: boolean
 }) {
   const router = useRouter()
   const [state, formAction] = useFormState(action, initialState)
+  const [selectedObraId, setSelectedObraId] = useState<string>(defaultObraId ?? (obras[0]?.id ?? ''))
   const [items, setItems] = useState<ItemRow[]>([nuevaFila()])
   const [multiObra, setMultiObra] = useState(false)
   const [offlineMsg, setOfflineMsg] = useState<string | null>(null)
   const [offlineError, setOfflineError] = useState<string | null>(null)
+  const [clientValidationError, setClientValidationError] = useState<string | null>(null)
   const [guardandoOffline, setGuardandoOffline] = useState(false)
+
+  // Mapas de ayuda
+  const materialMap = useMemo(() => {
+    return new Map(materiales.map((m) => [m.id, m]))
+  }, [materiales])
+
+  const saldoMap = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const s of saldos) {
+      map.set(`${s.obra_id}_${s.material_id}`, s.cantidad_disponible)
+    }
+    return map
+  }, [saldos])
+
+  function getSaldoDisponible(obraId: string, materialId: string): number | null {
+    if (!obraId || !materialId) return null
+    const key = `${obraId}_${materialId}`
+    if (saldoMap.has(key)) {
+      return saldoMap.get(key)!
+    }
+    // Si la obra tiene datos de saldos cargados y este material no está en la tabla, su asignación es 0
+    if (saldos.length > 0) {
+      return 0
+    }
+    return null
+  }
 
   const itemsJson = useMemo(
     () =>
@@ -94,6 +131,7 @@ export function SolicitudForm({
   )
 
   function actualizarFila(key: string, cambios: Partial<ItemRow>) {
+    setClientValidationError(null)
     setItems((prev) => prev.map((item) => (item.key === key ? { ...item, ...cambios } : item)))
   }
 
@@ -115,24 +153,61 @@ export function SolicitudForm({
     return materiales.filter((m) => !usados.has(m.id))
   }
 
+  function validarSaldos(): string | null {
+    for (const item of items) {
+      if (item.tipo_linea === 'material') {
+        if (!item.material_id) {
+          return 'Selecciona un material en todos los renglones.'
+        }
+        const effectiveObraId = multiObra ? item.obra_id : selectedObraId
+        if (!effectiveObraId) {
+          return 'Selecciona el proyecto para la requisición.'
+        }
+
+        const disp = getSaldoDisponible(effectiveObraId, item.material_id)
+        const mat = materialMap.get(item.material_id)
+        const matNombre = mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'el material'
+
+        if (disp !== null) {
+          if (disp <= 0) {
+            return `Saldo insuficiente: El material "${matNombre}" no tiene saldo disponible en este proyecto (Disponible: 0).`
+          }
+          const cantNum = parseQuantity(item.cantidad)
+          if (cantNum !== null && cantNum > disp) {
+            return `Cantidad excesiva: Para "${matNombre}", solicitas ${cantNum} pero solo hay ${disp} disponible.`
+          }
+        }
+      }
+    }
+    return null
+  }
+
   async function guardarOffline(formData: FormData) {
     setOfflineError(null)
     setOfflineMsg(null)
+    setClientValidationError(null)
     setGuardandoOffline(true)
 
     try {
       if (multiObra) {
-        setOfflineError('Las requisiciones multi-obra necesitan conexión — no se pueden guardar sin internet.')
+        setOfflineError('Las requisiciones de varios proyectos necesitan conexión — no se pueden guardar sin internet.')
         return
       }
 
-      const obra_id = String(formData.get('obra_id') ?? '')
+      const obra_id = String(formData.get('obra_id') ?? selectedObraId)
       const notaRaw = formData.get('nota')
       const nota =
         typeof notaRaw === 'string' && notaRaw.trim() !== '' ? notaRaw.trim() : null
 
       if (!obra_id) {
         setOfflineError('Selecciona un proyecto.')
+        return
+      }
+
+      // Validar saldos
+      const errorSaldo = validarSaldos()
+      if (errorSaldo) {
+        setOfflineError(errorSaldo)
         return
       }
 
@@ -217,6 +292,13 @@ export function SolicitudForm({
   }
 
   function handleSubmit(formData: FormData) {
+    setClientValidationError(null)
+    const saldoErr = validarSaldos()
+    if (saldoErr) {
+      setClientValidationError(saldoErr)
+      return
+    }
+
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       void guardarOffline(formData)
       return
@@ -227,7 +309,7 @@ export function SolicitudForm({
   return (
     <form action={handleSubmit} className="space-y-4">
       <input type="hidden" name="items_json" value={itemsJson} />
-      <FormError message={state.error ?? offlineError} />
+      <FormError message={state.error ?? offlineError ?? clientValidationError} />
       {offlineMsg && (
         <p className="rounded-lg bg-teal-50 text-teal-800 text-sm px-3 py-2">{offlineMsg}</p>
       )}
@@ -239,7 +321,7 @@ export function SolicitudForm({
             checked={multiObra}
             onChange={(e) => setMultiObra(e.target.checked)}
           />
-          Requisición multi-obra (cada renglón elige su propia obra)
+          Requisición a varios proyectos (cada renglón elige el suyo)
         </label>
       )}
 
@@ -248,13 +330,14 @@ export function SolicitudForm({
       ) : (
         <div>
           <label htmlFor="obra_id" className="block text-sm font-medium text-gray-700 mb-1">
-            Proyecto
+            Proyecto *
           </label>
           <select
             id="obra_id"
             name="obra_id"
             required
-            defaultValue={defaultObraId ?? ''}
+            value={selectedObraId}
+            onChange={(e) => setSelectedObraId(e.target.value)}
             className="input-base"
           >
             <option value="" disabled>
@@ -273,128 +356,193 @@ export function SolicitudForm({
       <div>
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-            Renglones
+            Renglones de la Requisición
           </h2>
         </div>
 
         <div className="space-y-3">
-          {items.map((item, index) => (
-            <div key={item.key} className="card space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-gray-400">
-                  Renglón {index + 1}
-                </span>
-                {items.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => quitarFila(item.key)}
-                    className="text-sm text-red-600 font-medium"
-                  >
-                    Quitar
-                  </button>
-                )}
-              </div>
+          {items.map((item, index) => {
+            const effectiveObraId = multiObra ? item.obra_id : selectedObraId
+            const disp = item.material_id ? getSaldoDisponible(effectiveObraId, item.material_id) : null
+            const cantNum = parseQuantity(item.cantidad) ?? 0
+            const esMaterial = item.tipo_linea === 'material'
+            const sinSaldo = esMaterial && item.material_id !== '' && disp !== null && disp <= 0
+            const saldoInsuficiente = esMaterial && item.material_id !== '' && disp !== null && disp > 0 && cantNum > disp
+            const mat = item.material_id ? materialMap.get(item.material_id) : null
 
-              <select
-                value={item.tipo_linea}
-                onChange={(e) =>
-                  actualizarFila(item.key, {
-                    tipo_linea: e.target.value as TipoLineaSolicitud,
-                    material_id: '',
-                    cantidad: '',
-                    descripcion: '',
-                    monto_mxn: '',
-                  })
-                }
-                className="input-base"
+            return (
+              <div
+                key={item.key}
+                className={`card space-y-3 ${
+                  sinSaldo || saldoInsuficiente ? 'border-red-300 bg-red-50/30' : ''
+                }`}
               >
-                {TIPOS_LINEA_SOLICITUD.map((t) => (
-                  <option key={t} value={t}>
-                    {labelTipoLinea(t)}
-                  </option>
-                ))}
-              </select>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-gray-400">
+                      Renglón {index + 1}
+                    </span>
+                    {esMaterial && disp !== null && (
+                      <span
+                        className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
+                          disp <= 0
+                            ? 'bg-red-100 text-red-700 font-bold'
+                            : 'bg-teal-50 text-teal-800'
+                        }`}
+                      >
+                        {disp <= 0
+                          ? '⛔ Saldo: 0 (Agotado)'
+                          : `Disponible: ${disp} ${mat?.unidad_medida ?? ''}`}
+                      </span>
+                    )}
+                  </div>
+                  {items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => quitarFila(item.key)}
+                      className="text-xs text-red-600 font-semibold hover:text-red-800"
+                    >
+                      ✕ Quitar
+                    </button>
+                  )}
+                </div>
 
-              {multiObra && (
                 <select
-                  value={item.obra_id}
-                  onChange={(e) => actualizarFila(item.key, { obra_id: e.target.value })}
+                  value={item.tipo_linea}
+                  onChange={(e) =>
+                    actualizarFila(item.key, {
+                      tipo_linea: e.target.value as TipoLineaSolicitud,
+                      material_id: '',
+                      cantidad: '',
+                      descripcion: '',
+                      monto_mxn: '',
+                    })
+                  }
                   className="input-base"
-                  required
                 >
-                  <option value="" disabled>
-                    Selecciona la obra de este renglón
-                  </option>
-                  {obras.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.nombre}
+                  {TIPOS_LINEA_SOLICITUD.map((t) => (
+                    <option key={t} value={t}>
+                      {labelTipoLinea(t)}
                     </option>
                   ))}
                 </select>
-              )}
 
-              {item.tipo_linea === 'material' ? (
-                <>
-                  <MaterialSearchCombobox
-                    materials={materialesDisponiblesPara(item.key, item.obra_id)}
-                    value={item.material_id}
-                    onChange={(material_id) => actualizarFila(item.key, { material_id })}
-                  />
-                  <input
-                    type="text"
-                    inputMode="decimal"
+                {multiObra && (
+                  <select
+                    value={item.obra_id}
+                    onChange={(e) => actualizarFila(item.key, { obra_id: e.target.value })}
+                    className="input-base"
                     required
-                    placeholder="Cantidad"
-                    value={item.cantidad}
-                    onChange={(e) => actualizarFila(item.key, { cantidad: e.target.value })}
-                    className="input-base"
-                  />
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="Monto MXN (opcional)"
-                    value={item.monto_mxn}
-                    onChange={(e) => actualizarFila(item.key, { monto_mxn: e.target.value })}
-                    className="input-base"
-                  />
-                </>
-              ) : (
-                <>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Descripción"
-                    value={item.descripcion}
-                    onChange={(e) => actualizarFila(item.key, { descripcion: e.target.value })}
-                    className="input-base"
-                  />
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    required
-                    placeholder="Monto MXN"
-                    value={item.monto_mxn}
-                    onChange={(e) => actualizarFila(item.key, { monto_mxn: e.target.value })}
-                    className="input-base"
-                  />
-                </>
-              )}
+                  >
+                    <option value="" disabled>
+                      Selecciona el proyecto de este renglón
+                    </option>
+                    {obras.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.nombre}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
-              <input
-                type="text"
-                placeholder="Nota"
-                value={item.nota}
-                onChange={(e) => actualizarFila(item.key, { nota: e.target.value })}
-                className="input-base"
-              />
-            </div>
-          ))}
+                {item.tipo_linea === 'material' ? (
+                  <>
+                    <div>
+                      <MaterialSearchCombobox
+                        materials={materialesDisponiblesPara(item.key, item.obra_id)}
+                        value={item.material_id}
+                        onChange={(material_id) =>
+                          actualizarFila(item.key, { material_id })
+                        }
+                      />
+                      {sinSaldo && (
+                        <p className="text-xs font-semibold text-red-600 mt-1">
+                          ⚠️ Este material no tiene presupuesto asignado o se encuentra agotado en el proyecto. No podrás enviar esta requisición.
+                        </p>
+                      )}
+                      {saldoInsuficiente && (
+                        <p className="text-xs font-semibold text-red-600 mt-1">
+                          ⚠️ La cantidad solicitada ({cantNum}) supera el saldo disponible ({disp}). Ajusta la cantidad.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                          Cantidad *
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          required
+                          placeholder="Cantidad solicitada"
+                          value={item.cantidad}
+                          onChange={(e) =>
+                            actualizarFila(item.key, { cantidad: e.target.value })
+                          }
+                          className="input-base"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                          Monto MXN estimado (opcional)
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="0.00"
+                          value={item.monto_mxn}
+                          onChange={(e) =>
+                            actualizarFila(item.key, { monto_mxn: e.target.value })
+                          }
+                          className="input-base"
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Descripción del gasto (flete, flete camión, mantenimiento, etc.)"
+                      value={item.descripcion}
+                      onChange={(e) =>
+                        actualizarFila(item.key, { descripcion: e.target.value })
+                      }
+                      className="input-base"
+                    />
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      required
+                      placeholder="Monto estimado MXN *"
+                      value={item.monto_mxn}
+                      onChange={(e) =>
+                        actualizarFila(item.key, { monto_mxn: e.target.value })
+                      }
+                      className="input-base"
+                    />
+                  </>
+                )}
+
+                <input
+                  type="text"
+                  placeholder="Nota del renglón (opcional)"
+                  value={item.nota}
+                  onChange={(e) => actualizarFila(item.key, { nota: e.target.value })}
+                  className="input-base text-sm"
+                />
+              </div>
+            )
+          })}
         </div>
 
         <button
           type="button"
           onClick={agregarFila}
-          className="mt-3 w-full rounded-lg border border-dashed border-gray-300 py-3 text-sm font-semibold text-[#1E7F7A]"
+          className="mt-3 w-full rounded-lg border border-dashed border-gray-300 py-3 text-sm font-semibold text-[#1E7F7A] hover:bg-teal-50/50"
         >
           + Agregar otro renglón
         </button>

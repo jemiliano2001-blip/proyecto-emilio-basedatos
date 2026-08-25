@@ -111,7 +111,7 @@ export async function createSolicitudAction(
   if (materialIds.length > 0) {
     const { data: materiales } = await supabase
       .from('catalogo_materiales')
-      .select('id, activo')
+      .select('id, nombre_base, variante, activo')
       .in('id', materialIds)
 
     if (!materiales || materiales.length !== materialIds.length) {
@@ -119,6 +119,46 @@ export async function createSolicitudAction(
     }
     if (materiales.some((m) => !m.activo)) {
       return { error: 'Uno o más materiales están inactivos. Quítalos de la requisición.' }
+    }
+
+    // Validación estricta de saldo disponible en campo
+    const matMap = new Map(materiales.map((m) => [m.id, m]))
+    const { data: saldos } = await supabase
+      .from('v_saldo_material_obra')
+      .select('obra_id, material_id, cantidad_disponible')
+      .in('material_id', materialIds)
+
+    const saldoLookup = new Map(
+      (saldos ?? []).map((s) => [`${s.obra_id}_${s.material_id}`, Number(s.cantidad_disponible ?? 0)])
+    )
+
+    for (const item of parsed.data.items) {
+      if (item.tipo_linea === 'material' && item.material_id) {
+        const itemObraId = item.obra_id ?? parsed.data.obra_id
+        const key = `${itemObraId}_${item.material_id}`
+        const mat = matMap.get(item.material_id)
+        const matNombre = mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'Material'
+
+        if (!saldoLookup.has(key)) {
+          return {
+            error: `El material "${matNombre}" no tiene presupuesto asignado en este proyecto.`,
+          }
+        }
+
+        const disponible = saldoLookup.get(key)!
+        if (disponible <= 0) {
+          return {
+            error: `Saldo insuficiente: El material "${matNombre}" no tiene saldo disponible en este proyecto (Disponible: 0).`,
+          }
+        }
+
+        const cantSol = item.cantidad_solicitada ?? 0
+        if (cantSol > disponible) {
+          return {
+            error: `Saldo insuficiente: Para "${matNombre}" solicitas ${cantSol}, pero solo hay ${disponible} disponible.`,
+          }
+        }
+      }
     }
   }
 
@@ -277,7 +317,7 @@ export async function syncSolicitudPayload(
   if (materialIds.length > 0) {
     const { data: materiales } = await supabase
       .from('catalogo_materiales')
-      .select('id, activo')
+      .select('id, nombre_base, variante, activo')
       .in('id', materialIds)
 
     if (!materiales || materiales.length !== materialIds.length) {
@@ -285,6 +325,49 @@ export async function syncSolicitudPayload(
     }
     if (materiales.some((m) => !m.activo)) {
       return { status: 'conflicto', error: 'Uno o más materiales están inactivos.' }
+    }
+
+    // Validación estricta de saldo disponible
+    const matMap = new Map(materiales.map((m) => [m.id, m]))
+    const { data: saldos } = await supabase
+      .from('v_saldo_material_obra')
+      .select('obra_id, material_id, cantidad_disponible')
+      .in('material_id', materialIds)
+
+    const saldoLookup = new Map(
+      (saldos ?? []).map((s) => [`${s.obra_id}_${s.material_id}`, Number(s.cantidad_disponible ?? 0)])
+    )
+
+    for (const item of parsed.data.items) {
+      if (item.tipo_linea === 'material' && item.material_id) {
+        const itemObraId = item.obra_id ?? parsed.data.obra_id
+        const key = `${itemObraId}_${item.material_id}`
+        const mat = matMap.get(item.material_id)
+        const matNombre = mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'Material'
+
+        if (!saldoLookup.has(key)) {
+          return {
+            status: 'conflicto',
+            error: `El material "${matNombre}" no tiene presupuesto asignado en este proyecto.`,
+          }
+        }
+
+        const disponible = saldoLookup.get(key)!
+        if (disponible <= 0) {
+          return {
+            status: 'conflicto',
+            error: `Saldo insuficiente: El material "${matNombre}" no tiene saldo disponible en este proyecto (Disponible: 0).`,
+          }
+        }
+
+        const cantSol = item.cantidad_solicitada ?? 0
+        if (cantSol > disponible) {
+          return {
+            status: 'conflicto',
+            error: `Saldo insuficiente: Para "${matNombre}" solicitas ${cantSol}, pero solo hay ${disponible} disponible.`,
+          }
+        }
+      }
     }
   }
 

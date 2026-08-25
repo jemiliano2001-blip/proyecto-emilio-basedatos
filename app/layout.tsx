@@ -1,13 +1,20 @@
 import type { Metadata, Viewport } from 'next'
 import { AppNav } from '@/components/AppNav'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
+import { TopBar } from '@/components/TopBar'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeCapturarRecepcion, puedeVerPrecios, puedeVerRecepciones } from '@/lib/roles'
+import {
+  puedeGestionarProveedores,
+  puedeVerPrecios,
+  puedeVerRecepciones,
+  puedeVerTraspasos,
+} from '@/lib/roles'
+import { traspasosSchemaDisponible } from '@/lib/schema-disponible'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Proyecto Emilio - Base de Datos',
-  description: 'Control de materiales y obras',
+  description: 'Control de materiales y proyectos',
   manifest: '/manifest.json',
 }
 
@@ -15,6 +22,7 @@ export const viewport: Viewport = {
   themeColor: '#132A45',
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default async function RootLayout({
@@ -24,18 +32,23 @@ export default async function RootLayout({
 }) {
   const session = await getSessionUsuario()
   const showNav = Boolean(session)
+  const rol = session?.rol ?? null
+  const traspasosDisponibles = showNav ? await traspasosSchemaDisponible() : false
 
   return (
     <html lang="es">
-      <body className="min-h-screen bg-gray-50 text-gray-900">
+      <body className="min-h-dvh bg-paper text-gray-900">
         {showNav && <ServiceWorkerRegistration />}
+        {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} />}
         {children}
         {showNav && (
           <AppNav
-            nombre={session?.perfil?.nombre ?? null}
-            puedeVerPrecios={puedeVerPrecios(session?.rol ?? null)}
-            puedeVerRecepciones={puedeVerRecepciones(session?.rol ?? null)}
-            puedeCapturarRecepcion={puedeCapturarRecepcion(session?.rol ?? null)}
+            rol={rol}
+            puedeVerPrecios={puedeVerPrecios(rol)}
+            puedeVerRecepciones={puedeVerRecepciones(rol)}
+            puedeVerTraspasos={puedeVerTraspasos(rol)}
+            puedeGestionarProveedores={puedeGestionarProveedores(rol)}
+            traspasosDisponibles={traspasosDisponibles}
           />
         )}
       </body>

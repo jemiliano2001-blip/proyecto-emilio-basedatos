@@ -135,7 +135,7 @@ export default async function SolicitudDetallePage({
       detalle.estado === 'aprobada')
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
+    <main className="page-shell">
       <header className="mb-6 pt-4">
         <Link href="/solicitudes" className="text-sm text-[#1E7F7A] font-medium">
           ← Solicitudes
@@ -185,7 +185,7 @@ export default async function SolicitudDetallePage({
               </p>
               {esMultiObra && item.item_obra && (
                 <p className="text-xs font-semibold text-teal-700 mb-1">
-                  Obra: {item.item_obra.nombre}
+                  Proyecto: {item.item_obra.nombre}
                 </p>
               )}
               {tipo === 'material' ? (

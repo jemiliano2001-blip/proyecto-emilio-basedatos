@@ -29,7 +29,7 @@ export default async function EditarProveedorPage({
   const updateAction = updateProveedorAction.bind(null, params.id)
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
+    <main className="page-shell">
       <header className="mb-6 pt-4">
         <Link href="/proveedores" className="text-sm text-[#1E7F7A] font-medium">
           ← Proveedores

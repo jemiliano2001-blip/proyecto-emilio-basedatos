@@ -1,12 +1,29 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeCerrarObra, puedeCrearSolicitudes, puedeGestionarObras, puedeGestionarTopes, puedeReabrirObra } from '@/lib/roles'
-import { formatMoneyMx } from '@/lib/money'
-import { createClient } from '@/lib/supabase/server'
-import type { SaldoMaterialObra, SaldoPresupuestoObra } from '@/lib/types'
-import { EditTopeInline } from '@/components/EditTopeInline'
 import { CierreObraAcciones } from '@/components/CierreObraAcciones'
+import { EditTopeInline } from '@/components/EditTopeInline'
+import { ObraDocumentos } from '@/components/ObraDocumentos'
+import { getSessionUsuario } from '@/lib/auth/session'
+import { formatMoneyMx } from '@/lib/money'
+import {
+  puedeCerrarObra,
+  puedeCrearSolicitudes,
+  puedeEliminarDocumentos,
+  puedeGestionarDocumentos,
+  puedeGestionarObras,
+  puedeGestionarTopes,
+  puedeReabrirObra,
+  puedeVerPrecios,
+} from '@/lib/roles'
+import { conciliacionSchemaDisponible } from '@/lib/schema-disponible'
+import { createClient } from '@/lib/supabase/server'
+import type { ObraDocumento, SaldoMaterialObra, SaldoPresupuestoObra } from '@/lib/types'
+
+function labelEstatus(estado: string): string {
+  if (estado === 'pausada') return 'Pausado'
+  if (estado === 'cerrada') return 'Cerrado'
+  return 'Activo'
+}
 
 export default async function ObraDetallePage({
   params,
@@ -15,15 +32,20 @@ export default async function ObraDetallePage({
 }) {
   const session = await getSessionUsuario()
   const supabase = createClient()
-  const puedeEditarObra = puedeGestionarObras(session?.rol ?? null)
-  const puedeTopes = puedeGestionarTopes(session?.rol ?? null)
-  const puedeSolicitar = puedeCrearSolicitudes(session?.rol ?? null)
-  const puedeCerrar = puedeCerrarObra(session?.rol ?? null)
-  const puedeReabrir = puedeReabrirObra(session?.rol ?? null)
+  const rol = session?.rol ?? null
+  const puedeEditarObra = puedeGestionarObras(rol)
+  const puedeTopes = puedeGestionarTopes(rol)
+  const puedeSolicitar = puedeCrearSolicitudes(rol)
+  const puedeCerrar = puedeCerrarObra(rol)
+  const puedeReabrir = puedeReabrirObra(rol)
+  const verPrecios = puedeVerPrecios(rol)
+  const verConciliacion = verPrecios && (await conciliacionSchemaDisponible())
+  const puedeGestionarDocs = puedeGestionarDocumentos(rol)
+  const puedeEliminarDocs = puedeEliminarDocumentos(rol)
 
   const { data: obra } = await supabase
     .from('obras')
-    .select('id, nombre, cliente, fraccionamiento, paquete, estado, presupuesto_mxn')
+    .select('id, nombre, cliente, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn')
     .eq('id', params.id)
     .maybeSingle()
 
@@ -35,169 +57,242 @@ export default async function ObraDetallePage({
     .eq('obra_id', params.id)
     .order('nombre_base')
 
-  const { data: saldoMx } = await supabase
-    .from('v_saldo_presupuesto_obra')
-    .select('*')
-    .eq('obra_id', params.id)
-    .maybeSingle()
+  const { data: saldoMx } = verPrecios
+    ? await supabase
+        .from('v_saldo_presupuesto_obra')
+        .select('*')
+        .eq('obra_id', params.id)
+        .maybeSingle()
+    : { data: null }
 
   const { data: topes } = await supabase
     .from('obra_material_contratado')
     .select('id, material_id, cantidad_contratada')
     .eq('obra_id', params.id)
 
+  // Documentos adjuntos PDF
+  const { data: documentosRaw } = await supabase
+    .from('obra_documentos')
+    .select(`
+      id,
+      obra_id,
+      nombre,
+      tipo_documento,
+      archivo_path,
+      archivo_url,
+      tamano_bytes,
+      subido_por,
+      creado_en,
+      usuarios:subido_por (nombre)
+    `)
+    .eq('obra_id', params.id)
+    .order('creado_en', { ascending: false })
+
+  const documentos: ObraDocumento[] = (documentosRaw ?? []).map((d: any) => ({
+    id: d.id,
+    obra_id: d.obra_id,
+    nombre: d.nombre,
+    tipo_documento: d.tipo_documento,
+    archivo_path: d.archivo_path,
+    archivo_url: d.archivo_url,
+    tamano_bytes: d.tamano_bytes,
+    subido_por: d.subido_por,
+    creado_en: d.creado_en,
+    subido_por_nombre: d.usuarios?.nombre ?? null,
+  }))
+
   const topePorMaterial = new Map((topes ?? []).map((t) => [t.material_id, t]))
   const presupuesto = saldoMx as SaldoPresupuestoObra | null
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
-      <header className="mb-6 pt-4">
-        <Link href="/" className="text-sm text-[#1E7F7A] font-medium">
+    <main className="page-shell space-y-6">
+      <header className="pt-2">
+        <Link href="/" className="text-sm font-medium text-accent hover:underline">
           ← Proyectos
         </Link>
-        <div className="flex items-start justify-between gap-3 mt-2">
+        <div className="mt-2 flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-[#132A45]">{obra.nombre}</h1>
-            {obra.cliente && <p className="text-gray-600 text-sm">Cliente: {obra.cliente}</p>}
+            <h1 className="text-2xl font-bold text-ink">{obra.nombre}</h1>
+            {obra.cliente && <p className="text-sm text-gray-600">Cliente: {obra.cliente}</p>}
             {obra.fraccionamiento && (
-              <p className="text-gray-500 text-sm">
-                {obra.fraccionamiento}
+              <p className="text-sm text-gray-500">
+                Fracc: {obra.fraccionamiento}
                 {obra.paquete ? ` · ${obra.paquete}` : ''}
               </p>
             )}
-            <p className="text-xs text-gray-400 mt-1 capitalize">Estatus: {obra.estado}</p>
+            {obra.ubicacion && (
+              <p className="text-xs text-gray-500 mt-0.5">Ubicación: {obra.ubicacion}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-400">Estatus: {labelEstatus(obra.estado)}</p>
           </div>
           {puedeEditarObra && (
-            <Link
-              href={`/obras/${params.id}/editar`}
-              className="btn-primary shrink-0 text-sm py-2 px-4"
-            >
+            <Link href={`/obras/${params.id}/editar`} className="btn-primary shrink-0 px-4 py-2 text-sm">
               Editar
             </Link>
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mt-4">
-          <Link
-            href={`/obras/${params.id}/conciliacion`}
-            className="bg-[#132A45] hover:bg-[#1f3f66] text-white font-semibold text-xs py-2 px-3 rounded-lg shadow-sm transition inline-flex items-center gap-1.5"
-          >
-            📊 Reporte de Conciliación
-          </Link>
-
-          <CierreObraAcciones
-            obraId={obra.id}
-            estado={obra.estado}
-            puedeCerrar={puedeCerrar}
-            puedeReabrir={puedeReabrir}
-          />
-        </div>
+        {(verConciliacion || puedeCerrar || puedeReabrir) && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {verConciliacion && (
+              <Link href={`/obras/${params.id}/conciliacion`} className="btn-secondary px-4 py-2 text-sm">
+                Conciliación
+              </Link>
+            )}
+            <CierreObraAcciones
+              obraId={obra.id}
+              estado={obra.estado}
+              puedeCerrar={puedeCerrar}
+              puedeReabrir={puedeReabrir}
+            />
+          </div>
+        )}
       </header>
 
       {puedeSolicitar && obra.estado === 'activa' && (
         <Link
           href={`/solicitudes/nueva?obra=${params.id}`}
-          className="btn-primary w-full text-center block mb-6"
+          className="btn-primary block w-full text-center"
         >
-          Solicitar material
+          + Solicitar material
         </Link>
       )}
 
-      <div className="card mb-6">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          Presupuesto (MXN)
-        </h2>
-        <div className="flex flex-wrap gap-4 text-sm">
-          <span className="text-gray-500">
-            Total:{' '}
-            <b className="text-gray-900">
-              {formatMoneyMx(Number(presupuesto?.presupuesto_mxn ?? obra.presupuesto_mxn ?? 0))}
-            </b>
-          </span>
-          <span className="text-gray-500">
-            Comprometido:{' '}
-            <b className="text-gray-900">
-              {formatMoneyMx(Number(presupuesto?.comprometido_mxn ?? 0))}
-            </b>
-          </span>
-          <span className="text-gray-500">
-            Gastado:{' '}
-            <b className="text-gray-900">
-              {formatMoneyMx(Number(presupuesto?.gastado_mxn ?? 0))}
-            </b>
-          </span>
-          <span className="text-gray-500">
-            Disponible:{' '}
-            <b className="text-[#1E7F7A]">
-              {formatMoneyMx(Number(presupuesto?.disponible_mxn ?? obra.presupuesto_mxn ?? 0))}
-            </b>
-          </span>
+      {/* PRESUPUESTO FINANCIERO (Solo roles con acceso a dinero) */}
+      {verPrecios && (
+        <div className="card">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Presupuesto (MXN)
+          </h2>
+          <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+            <div>
+              <p className="text-gray-500">Total</p>
+              <p className="tabular-nums font-semibold text-gray-900">
+                {formatMoneyMx(Number(presupuesto?.presupuesto_mxn ?? obra.presupuesto_mxn ?? 0))}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Comprometido</p>
+              <p className="tabular-nums font-semibold text-gray-900">
+                {formatMoneyMx(Number(presupuesto?.comprometido_mxn ?? 0))}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Gastado</p>
+              <p className="tabular-nums font-semibold text-gray-900">
+                {formatMoneyMx(Number(presupuesto?.gastado_mxn ?? 0))}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-500">Disponible</p>
+              <p className="tabular-nums font-semibold text-accent">
+                {formatMoneyMx(Number(presupuesto?.disponible_mxn ?? obra.presupuesto_mxn ?? 0))}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECCIÓN 1: SALDO Y ESTATUS DE MATERIALES */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            Saldo y Estatus de Materiales
+          </h2>
+          {puedeTopes && (
+            <Link href={`/obras/${params.id}/tope`} className="min-h-[40px] inline-flex items-center text-sm font-semibold text-accent">
+              + Asignar material
+            </Link>
+          )}
+        </div>
+
+        <p className="text-xs text-gray-400">
+          Control de partidas: Asignado, Entregado / En proceso y Saldo Disponible para requisiciones.
+        </p>
+
+        <div className="space-y-2">
+          {(saldos as SaldoMaterialObra[] | null)?.map((s) => {
+            const tope = topePorMaterial.get(s.material_id)
+            const asignado = Number(s.cantidad_contratada ?? 0)
+            const usado = Number(s.cantidad_usada ?? 0)
+            const comprometido = Number(s.cantidad_comprometida ?? 0)
+            const entregadoOComprado = usado + comprometido
+            const disponible = Number(s.cantidad_disponible ?? 0)
+            const sinSaldo = disponible <= 0
+
+            return (
+              <div
+                key={s.material_id}
+                className={`card ${sinSaldo ? 'border-red-200 bg-red-50/20' : ''}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium text-ink">
+                      {s.nombre_base}
+                      {s.variante && <span className="text-gray-500"> · {s.variante}</span>}
+                    </p>
+                    <span className="text-xs text-gray-500">{s.unidad_medida}</span>
+                  </div>
+
+                  {sinSaldo && (
+                    <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-700">
+                      Sin saldo disponible
+                    </span>
+                  )}
+                </div>
+
+                <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
+                  <div>
+                    <p className="text-gray-500 text-xs">Asignado</p>
+                    <p className="tabular-nums font-semibold text-gray-900">{asignado}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs">Entregado / Proceso</p>
+                    <p className="tabular-nums font-semibold text-gray-900">{entregadoOComprado}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-xs">Disponible</p>
+                    <p
+                      className={`tabular-nums font-bold ${
+                        sinSaldo ? 'text-red-600' : 'text-accent'
+                      }`}
+                    >
+                      {disponible}
+                    </p>
+                  </div>
+                </div>
+
+                {puedeTopes && tope && (
+                  <div className="mt-2 pt-2 border-t border-gray-100">
+                    <EditTopeInline
+                      topeId={tope.id}
+                      obraId={params.id}
+                      materialId={s.material_id}
+                      cantidadActual={Number(tope.cantidad_contratada)}
+                    />
+                  </div>
+                )}
+              </div>
+            )
+          })}
+
+          {saldos?.length === 0 && (
+            <p className="card py-8 text-center text-gray-500">
+              Todavía no hay materiales asignados para este proyecto.
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-          Saldo de materiales
-        </h2>
-        {puedeTopes && (
-          <Link
-            href={`/obras/${params.id}/tope`}
-            className="text-sm font-semibold text-[#1E7F7A]"
-          >
-            + Agregar
-          </Link>
-        )}
-      </div>
-
-      <p className="text-xs text-gray-400 mb-3">
-        Saldo = presupuesto de cantidad. Disponible resta comprometido y usado.
-      </p>
-
-      <div className="space-y-2">
-        {(saldos as SaldoMaterialObra[] | null)?.map((s) => {
-          const tope = topePorMaterial.get(s.material_id)
-          return (
-            <div key={s.material_id} className="card">
-              <div className="flex justify-between items-baseline">
-                <p className="font-medium">
-                  {s.nombre_base}
-                  {s.variante && <span className="text-gray-500"> · {s.variante}</span>}
-                </p>
-                <span className="text-sm text-gray-500">{s.unidad_medida}</span>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-4 text-sm">
-                <span className="text-gray-500">
-                  Contratado: <b className="text-gray-900">{s.cantidad_contratada}</b>
-                </span>
-                {s.cantidad_comprometida !== undefined && Number(s.cantidad_comprometida) > 0 && (
-                  <span className="text-gray-500">
-                    Comprometido:{' '}
-                    <b className="text-gray-900">{s.cantidad_comprometida}</b>
-                  </span>
-                )}
-                <span className="text-gray-500">
-                  Disponible:{' '}
-                  <b className="text-[#1E7F7A]">{s.cantidad_disponible}</b>
-                </span>
-              </div>
-              {puedeTopes && tope && (
-                <EditTopeInline
-                  topeId={tope.id}
-                  obraId={params.id}
-                  materialId={s.material_id}
-                  cantidadActual={Number(tope.cantidad_contratada)}
-                />
-              )}
-            </div>
-          )
-        })}
-
-        {saldos?.length === 0 && (
-          <p className="text-gray-500 text-center py-8">
-            Todavía no hay materiales contratados para este proyecto.
-          </p>
-        )}
-      </div>
+      {/* SECCIÓN 2: INFORMACIÓN ADICIONAL Y DOCUMENTACIÓN PDF */}
+      <section className="pt-2 border-t border-gray-200">
+        <ObraDocumentos
+          obraId={params.id}
+          documentos={documentos}
+          puedeGestionar={puedeGestionarDocs}
+          puedeEliminar={puedeEliminarDocs}
+        />
+      </section>
     </main>
   )
 }

@@ -178,7 +178,7 @@ export function TraspasoForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Obra Origen (Sale el material) *
+              Proyecto origen (sale el material) *
             </label>
             <select
               name="obra_origen_id"
@@ -200,7 +200,7 @@ export function TraspasoForm({
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Obra Destino (Entra el material) *
+              Proyecto destino (entra el material) *
             </label>
             <select
               name="obra_destino_id"

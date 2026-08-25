@@ -36,10 +36,31 @@ export async function createObraAction(
   const supabase = createClient()
   const { topes, ...obraData } = parsed.data
 
+  let finalPresupuesto = obraData.presupuesto_mxn
+
+  // Si se enviaron topes de materiales, verificar precios base en catálogo para garantizar cálculo
+  if (topes.length > 0 && finalPresupuesto === 0) {
+    const matIds = topes.map((t) => t.material_id)
+    const { data: mats } = await supabase
+      .from('catalogo_materiales')
+      .select('id, precio_base')
+      .in('id', matIds)
+
+    if (mats) {
+      const priceMap = new Map(mats.map((m) => [m.id, Number(m.precio_base ?? 0)]))
+      finalPresupuesto = topes.reduce((acc, t) => {
+        const p = priceMap.get(t.material_id) ?? 0
+        return acc + t.cantidad_contratada * p
+      }, 0)
+      finalPresupuesto = Math.round(finalPresupuesto * 100) / 100
+    }
+  }
+
   const { data, error } = await supabase
     .from('obras')
     .insert({
       ...obraData,
+      presupuesto_mxn: finalPresupuesto,
       cerrado_en: obraData.estado === 'cerrada' ? new Date().toISOString() : null,
     })
     .select('id')

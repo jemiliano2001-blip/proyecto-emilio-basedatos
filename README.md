@@ -7,12 +7,12 @@ En UI se dice **proyecto**; la tabla sigue siendo `obras`.
 
 ### Fase 0 — Infraestructura (hecha)
 - Proyecto Supabase: `proyecto-emilio-basedatos` (ref `uplxxnpurpqlvhjrsufa`)
-- Migraciones en repo: `0001` … `0010` (`0009` y `0010` listas para aplicar en remoto tras revisión)
+- Migraciones en repo: `0001` … `0011` (aplicadas en remoto, incluida `0011` de notificaciones Realtime)
 - `.env.local` con URL + anon key (no subir a git)
 - Usuarios de prueba sembrados (ver abajo)
 
 Pendiente operativo (dashboard, no código):
-- [ ] Aplicar migraciones `0009_traspasos_obra.sql` y `0010_cierre_conciliacion_obra.sql` en el Dashboard de Supabase
+- [x] Aplicar migraciones `0009_traspasos_obra.sql`, `0010_cierre_conciliacion_obra.sql` y `0011_notificaciones_realtime.sql` (0009 → 0010 → 0011)
 - [ ] Crear usuario Blanquita con rol `finanzas` (por ahora las aprobaciones de pago las hace `acceso_total`)
 - [ ] Activar backups automáticos (Settings → Database → Backups) — requiere plan Pro
 - [ ] Activar "Leaked password protection" en Auth
@@ -54,7 +54,7 @@ Pendiente operativo (dashboard, no código):
 - Al pagar se emite **una orden de compra por cada obra distinta** de la requisición
 - Doc de diseño: [`docs/superpowers/specs/2026-08-05-fase5-requisicion-multiobra-design.md`](docs/superpowers/specs/2026-08-05-fase5-requisicion-multiobra-design.md)
 
-### Fase 6 — Traspasos entre obras (código listo, migración SIN aplicar)
+### Fase 6 — Traspasos entre obras (aplicada)
 - Migración `0009`: Tablas `traspasos_obra` y `traspaso_items`, secuencia de folios (`TR-00001`), actualización de vista `v_saldo_material_obra` para entradas/salidas de traspasos.
 - RPCs transaccionales: `crear_solicitud_traspaso`, `aprobar_traspaso`, `confirmar_recepcion_traspaso`, `rechazar_traspaso`, `cancelar_traspaso`.
 - Guardias de integridad: `fn_traspasos_obra_before_update` (máquina de estados + saldo) y `fn_traspaso_items_guard` (renglones inmutables una vez aprobado). Sin ellos, un PATCH directo a PostgREST movía material entre obras sin aprobación.
@@ -70,17 +70,16 @@ Pendiente operativo (dashboard, no código):
 - Aprobar un traspaso **falla si la obra destino no tiene presupuesto disponible** para
   absorber el costo, igual que una requisición.
 
-### Fase 7 — Cierre de obra y reportes de conciliación (código listo, migración SIN aplicar)
+### Fase 7 — Cierre de obra y reportes de conciliación (aplicada)
 - Migración `0010`: columna `obras.cierre_nota`, RPCs `cerrar_obra` y `reabrir_obra` con validación de pendientes (requisiciones, traspasos, órdenes de compra abiertas y recepciones sin revisar).
 - Vistas de conciliación: `v_conciliacion_obra_presupuesto` ($ MXN y variaciones, restringida a roles que ven precios) y `v_conciliacion_obra_material` (cantidades físicas, traspasos, recepciones en sitio y remanentes).
 - UI en `/obras/[id]/conciliacion` (dashboard de conciliación ejecutiva y operativa) y acciones de cierre/reapertura en la vista del proyecto.
 - Script de prueba: [`scripts/e2e-fase7.ps1`](scripts/e2e-fase7.ps1)
 
-> **Nota de revisión (2026-08-06):** `0009` y `0010` se revisaron y corrigieron antes de
-> aplicarse. El bug que impedía aplicar `0009` era un `create or replace view` sobre
-> `v_saldo_material_obra` que cambiaba el orden de columnas (mismo tropiezo del commit
-> `b8491e0`); ahora lleva `drop view` explícito. Ninguna de las dos se ha corrido en el
-> Supabase remoto todavía.
+> **Nota de revisión (2026-08-06 / aplicada 2026-08-14):** `0009`, `0010` y `0011`
+> están aplicadas en el remoto `uplxxnpurpqlvhjrsufa`. El bug histórico de `0009` era un
+> `create or replace view` sobre `v_saldo_material_obra` que cambiaba el orden de
+> columnas; la migración lleva `drop view` explícito.
 
 
 ## Cómo arrancar

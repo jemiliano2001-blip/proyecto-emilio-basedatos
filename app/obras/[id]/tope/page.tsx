@@ -40,7 +40,7 @@ export default async function NuevoTopePage({
   const disponibles = (materiales ?? []).filter((m) => !usados.has(m.id))
 
   return (
-    <main className="max-w-2xl mx-auto p-4 pb-28">
+    <main className="page-shell">
       <header className="mb-6 pt-4">
         <Link href={`/obras/${params.id}`} className="text-sm text-[#1E7F7A] font-medium">
           ← Volver a {obra.nombre}
@@ -49,14 +49,14 @@ export default async function NuevoTopePage({
           Agregar material contratado
         </h1>
         <p className="text-gray-500 text-sm mt-1">
-          Define el tope contratado para esta obra
+          Define el tope contratado para este proyecto
         </p>
       </header>
 
       {disponibles.length === 0 ? (
         <p className="text-gray-500 text-center py-8">
           No hay materiales disponibles para agregar. Crea materiales en el catálogo
-          o ya están todos asignados a esta obra.
+          o ya están todos asignados a este proyecto.
         </p>
       ) : (
         <TopeForm
