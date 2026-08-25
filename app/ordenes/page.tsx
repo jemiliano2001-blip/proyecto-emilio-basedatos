@@ -49,26 +49,45 @@ export default async function OrdenesPage() {
 
       <div className="space-y-3">
         {(ordenes as unknown as OrdenRow[] | null)?.map((o) => (
-          <Link key={o.id} href={`/ordenes/${o.id}`} className="card block">
+          <Link key={o.id} href={`/ordenes/${o.id}`} className="card-interactive block">
             <div className="flex justify-between items-start gap-2">
               <div>
-                <p className="font-semibold">{o.folio}</p>
-                <p className="text-sm text-gray-500">{o.obra?.nombre}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-ink">{o.folio}</p>
+                  <span
+                    className={
+                      o.estado === 'emitida'
+                        ? 'badge-navy'
+                        : o.estado === 'completada' || o.estado === 'recibida'
+                        ? 'badge-teal'
+                        : o.estado === 'parcialmente_recibida'
+                        ? 'badge-amber'
+                        : 'badge-gray'
+                    }
+                  >
+                    {o.estado.replaceAll('_', ' ')}
+                  </span>
+                </div>
+                <p className="text-sm font-medium text-gray-700 mt-0.5">{o.obra?.nombre}</p>
                 <p className="text-xs text-gray-400">{o.proveedor?.nombre}</p>
               </div>
               <div className="text-right shrink-0">
-                <p className="font-semibold">
-                  {Number(o.total).toFixed(2)} {o.moneda}
+                <p className="font-bold tabular-nums text-ink">
+                  ${Number(o.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })} <span className="text-xs font-medium text-gray-500">{o.moneda}</span>
                 </p>
-                <span className="text-xs capitalize text-gray-500">{o.estado}</span>
+                <p className="text-[11px] text-gray-400 mt-1">
+                  {new Date(o.creado_en).toLocaleDateString('es-MX')}
+                </p>
               </div>
             </div>
           </Link>
         ))}
         {ordenes?.length === 0 && (
-          <p className="text-gray-500 text-center py-8">
-            Todavía no hay órdenes. Cotiza una solicitud pendiente para emitir la primera.
-          </p>
+          <div className="card text-center py-12 border-dashed border-gray-300">
+            <p className="text-gray-500 font-medium">
+              Todavía no hay órdenes de compra emitidas.
+            </p>
+          </div>
         )}
       </div>
     </main>

@@ -33,7 +33,8 @@ html {
 body {
   background-color: var(--color-paper);
   color: #111827;
-  font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -46,12 +47,11 @@ body {
   }
 }
 
-/* Botones grandes y fáciles de tocar — la mayoría de los usuarios va a
-   estar en el celular, muchas veces en obra. Mobile-first en todo. */
+/* Botones grandes y táctiles (≥44px) — Mobile-first utilitarian */
 @layer components {
   .btn-primary {
     @apply inline-flex items-center justify-center min-h-[44px] bg-ink text-white
-           rounded-lg px-5 py-3 text-base font-semibold cursor-pointer
+           rounded-lg px-5 py-3 text-base font-semibold cursor-pointer shadow-sm
            hover:bg-ink/90 active:scale-[0.98]
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
            focus-visible:ring-offset-2
@@ -59,25 +59,27 @@ body {
            [&[aria-busy=true]]:opacity-70;
     transition: opacity var(--dur-short) var(--ease-out),
       transform var(--dur-short) var(--ease-out),
-      background-color var(--dur-short) var(--ease-out);
+      background-color var(--dur-short) var(--ease-out),
+      box-shadow var(--dur-short) var(--ease-out);
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center min-h-[44px] bg-white text-ink
            rounded-lg px-5 py-3 text-base font-semibold cursor-pointer
-           border border-gray-300
-           hover:bg-gray-50 active:scale-[0.98]
+           border border-gray-300 shadow-sm
+           hover:bg-gray-50 hover:border-gray-400 active:scale-[0.98]
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent
            focus-visible:ring-offset-2
            disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed;
     transition: opacity var(--dur-short) var(--ease-out),
       transform var(--dur-short) var(--ease-out),
-      background-color var(--dur-short) var(--ease-out);
+      background-color var(--dur-short) var(--ease-out),
+      border-color var(--dur-short) var(--ease-out);
   }
 
   .btn-danger {
     @apply inline-flex items-center justify-center min-h-[44px] bg-danger text-white
-           rounded-lg px-5 py-3 text-base font-semibold cursor-pointer
+           rounded-lg px-5 py-3 text-base font-semibold cursor-pointer shadow-sm
            hover:bg-red-700 active:scale-[0.98]
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger
            focus-visible:ring-offset-2
@@ -89,11 +91,92 @@ body {
 
   .card {
     @apply bg-white rounded-xl shadow-sm border border-gray-200 p-4;
+    transition: border-color var(--dur-short) var(--ease-out),
+      box-shadow var(--dur-short) var(--ease-out);
+  }
+
+  .card-interactive {
+    @apply card hover:border-gray-300 hover:shadow-md active:scale-[0.99] cursor-pointer;
+  }
+
+  .card-flat {
+    @apply bg-white rounded-xl border border-gray-200 p-4;
+  }
+
+  .stat-tile {
+    @apply bg-slate-900 text-white rounded-xl p-4 shadow-sm;
+  }
+
+  .glass-header {
+    @apply sticky top-0 z-30 border-b border-gray-200/80 bg-white/95 backdrop-blur-md;
   }
 
   .input-base {
-    @apply w-full min-h-[44px] rounded-lg border border-gray-300 px-4 py-3 text-base
-           focus:outline-none focus:ring-2 focus:ring-accent;
+    @apply w-full min-h-[44px] rounded-lg border border-gray-300 bg-white px-4 py-3 text-base text-gray-900
+           placeholder:text-gray-400
+           transition-colors
+           focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20;
+  }
+
+  /* Badges semánticos para estatus */
+  .badge-teal {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  .badge-amber {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+
+  .badge-red {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+
+  .badge-gray {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+  }
+
+  .badge-navy {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: #1e293b;
+    color: #5eead4;
+    border: 1px solid #334155;
   }
 
   .page-shell {
@@ -108,5 +191,24 @@ body {
 
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .page-shell,
+  .page-shell-wide {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  header, nav, footer, button, .print-hide {
+    display: none !important;
+  }
+  .card {
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
   }
 }

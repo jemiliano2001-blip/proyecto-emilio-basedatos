@@ -88,7 +88,21 @@ export default async function ObraDetallePage({
     .eq('obra_id', params.id)
     .order('creado_en', { ascending: false })
 
-  const documentos: ObraDocumento[] = (documentosRaw ?? []).map((d: any) => ({
+  interface DocumentoDbRow {
+    id: string
+    obra_id: string
+    nombre: string
+    tipo_documento: import('@/lib/types').TipoDocumentoObra
+    archivo_path: string
+    archivo_url: string
+    tamano_bytes: number | null
+    subido_por: string | null
+    creado_en: string
+    usuarios?: { nombre: string | null } | null
+  }
+
+  const rawDocs = (documentosRaw ?? []) as unknown as DocumentoDbRow[]
+  const documentos: ObraDocumento[] = rawDocs.map((d) => ({
     id: d.id,
     obra_id: d.obra_id,
     nombre: d.nombre,
@@ -112,8 +126,21 @@ export default async function ObraDetallePage({
         </Link>
         <div className="mt-2 flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-ink">{obra.nombre}</h1>
-            {obra.cliente && <p className="text-sm text-gray-600">Cliente: {obra.cliente}</p>}
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-bold text-ink">{obra.nombre}</h1>
+              <span
+                className={
+                  obra.estado === 'activa'
+                    ? 'badge-teal'
+                    : obra.estado === 'pausada'
+                    ? 'badge-amber'
+                    : 'badge-gray'
+                }
+              >
+                {labelEstatus(obra.estado)}
+              </span>
+            </div>
+            {obra.cliente && <p className="text-sm font-medium text-gray-700 mt-1">Cliente: {obra.cliente}</p>}
             {obra.fraccionamiento && (
               <p className="text-sm text-gray-500">
                 Fracc: {obra.fraccionamiento}
@@ -123,10 +150,9 @@ export default async function ObraDetallePage({
             {obra.ubicacion && (
               <p className="text-xs text-gray-500 mt-0.5">Ubicación: {obra.ubicacion}</p>
             )}
-            <p className="mt-1 text-xs text-gray-400">Estatus: {labelEstatus(obra.estado)}</p>
           </div>
           {puedeEditarObra && (
-            <Link href={`/obras/${params.id}/editar`} className="btn-primary shrink-0 px-4 py-2 text-sm">
+            <Link href={`/obras/${params.id}/editar`} className="btn-secondary shrink-0 px-4 py-2 text-sm">
               Editar
             </Link>
           )}

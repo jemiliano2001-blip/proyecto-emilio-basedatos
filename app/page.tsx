@@ -88,26 +88,45 @@ export default async function HomePage({
             <Link
               key={obra.id}
               href={`/obras/${obra.id}`}
-              className="card flex min-h-[44px] items-center justify-between"
+              className="card-interactive flex min-h-[48px] items-center justify-between gap-3"
             >
-              <div className="min-w-0">
-                <p className="font-semibold text-ink">{obra.nombre}</p>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-ink truncate">{obra.nombre}</p>
+                  <span
+                    className={
+                      obra.estado === 'activa'
+                        ? 'badge-teal'
+                        : obra.estado === 'pausada'
+                        ? 'badge-amber'
+                        : 'badge-gray'
+                    }
+                  >
+                    {labelEstatus(obra.estado)}
+                  </span>
+                </div>
                 {(obra.cliente || obra.fraccionamiento) && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 truncate mt-0.5">
                     {[obra.cliente, obra.fraccionamiento].filter(Boolean).join(' · ')}
                   </p>
                 )}
-                <p className="mt-1 text-xs text-gray-400">{labelEstatus(obra.estado)}</p>
               </div>
-              <IconChevron className="h-5 w-5 shrink-0 text-accent" />
+              <IconChevron className="h-5 w-5 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
             </Link>
           )
         )}
 
         {obras?.length === 0 && (
-          <p className="py-8 text-center text-gray-500">
-            No hay proyectos {estatus === 'activa' ? 'activos' : estatus === 'pausada' ? 'pausados' : 'cerrados'} todavía.
-          </p>
+          <div className="card text-center py-12 px-4 border-dashed border-gray-300">
+            <p className="text-gray-500 font-medium">
+              No hay proyectos {estatus === 'activa' ? 'activos' : estatus === 'pausada' ? 'pausados' : 'cerrados'} registrados.
+            </p>
+            {puedeCrear && estatus === 'activa' && (
+              <Link href="/obras/nueva" className="btn-primary mt-4 inline-flex">
+                + Crear primer proyecto
+              </Link>
+            )}
+          </div>
         )}
       </div>
     </main>

@@ -9,7 +9,7 @@ export function TopBar({ nombre }: { nombre: string | null }) {
   const titulo = tituloDeRuta(pathname)
 
   return (
-    <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur-sm">
+    <header className="glass-header">
       <div
         className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4"
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}

@@ -56,8 +56,35 @@ export default async function NuevaObraPage() {
     .eq('activo', true)
     .order('nombre')
 
+  interface KitItemDbRow {
+    id: string
+    kit_id: string
+    material_id: string
+    cantidad: number
+    creado_en: string
+    catalogo_materiales?: {
+      id: string
+      nombre_base: string
+      variante: string | null
+      unidad_medida: string
+      precio_base: number | null
+    } | null
+  }
+
+  interface KitDbRow {
+    id: string
+    nombre: string
+    material_principal_id: string | null
+    configuracion: string | null
+    descripcion: string | null
+    activo: boolean
+    creado_en: string
+    material_kit_items?: KitItemDbRow[] | null
+  }
+
   // Mapear los kits
-  const kits: MaterialKitWithItems[] = (kitsRaw ?? []).map((k: any) => ({
+  const rawList = (kitsRaw ?? []) as unknown as KitDbRow[]
+  const kits: MaterialKitWithItems[] = rawList.map((k) => ({
     id: k.id,
     nombre: k.nombre,
     material_principal_id: k.material_principal_id,
@@ -65,7 +92,7 @@ export default async function NuevaObraPage() {
     descripcion: k.descripcion,
     activo: k.activo,
     creado_en: k.creado_en,
-    items: (k.material_kit_items ?? []).map((ki: any) => ({
+    items: (k.material_kit_items ?? []).map((ki) => ({
       id: ki.id,
       kit_id: ki.kit_id,
       material_id: ki.material_id,

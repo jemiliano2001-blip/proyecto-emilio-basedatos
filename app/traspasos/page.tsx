@@ -24,15 +24,15 @@ interface TraspasoRow {
 function badgeEstado(estado: EstadoTraspaso) {
   switch (estado) {
     case 'completado':
-      return 'bg-green-100 text-green-700'
+      return 'badge-teal'
     case 'en_transito':
-      return 'bg-blue-100 text-blue-700'
+      return 'badge-navy'
     case 'solicitado':
-      return 'bg-amber-100 text-amber-700'
+      return 'badge-amber'
     case 'rechazado':
     case 'cancelado':
     default:
-      return 'bg-gray-100 text-gray-500'
+      return 'badge-gray'
   }
 }
 

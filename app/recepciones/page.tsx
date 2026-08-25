@@ -89,8 +89,8 @@ export default async function RecepcionesPage() {
                   className="card block hover:bg-gray-50"
                 >
                   <div className="flex justify-between gap-2 items-baseline">
-                    <p className="font-semibold text-[#132A45]">{orden.folio}</p>
-                    <span className="text-xs text-gray-400 capitalize">
+                    <p className="font-semibold text-ink">{orden.folio}</p>
+                    <span className="badge-amber">
                       {orden.estado.replaceAll('_', ' ')}
                     </span>
                   </div>
@@ -116,14 +116,17 @@ export default async function RecepcionesPage() {
                 <Link
                   key={r.id}
                   href={`/recepciones/${r.id}/revisar`}
-                  className="card block hover:bg-gray-50 border-l-4 border-l-amber-400"
+                  className="card-interactive block border-l-4 border-l-amber-500"
                 >
-                  <p className="font-semibold">{r.orden_folio}</p>
-                  <p className="text-sm text-gray-600">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-ink">{r.orden_folio}</p>
+                    <span className="badge-amber">Por revisar</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
                     {r.receptor_nombre} ·{' '}
                     {new Date(r.recibido_en).toLocaleString('es-MX')}
                   </p>
-                  <p className="text-xs text-amber-700 mt-1">Revisar checklist →</p>
+                  <p className="text-xs text-accent font-medium mt-1">Revisar checklist →</p>
                 </Link>
               ))}
             </div>
@@ -143,11 +146,21 @@ export default async function RecepcionesPage() {
               <Link
                 key={r.id}
                 href={`/recepciones/${r.id}`}
-                className="card block hover:bg-gray-50"
+                className="card-interactive block"
               >
-                <div className="flex justify-between gap-2">
-                  <p className="font-semibold">{r.orden_folio}</p>
-                  <span className="text-xs text-gray-500">{etiquetaEstado(r.estado)}</span>
+                <div className="flex justify-between items-center gap-2">
+                  <p className="font-semibold text-ink">{r.orden_folio}</p>
+                  <span
+                    className={
+                      r.estado === 'aprobada'
+                        ? 'badge-teal'
+                        : r.estado === 'pendiente_revision'
+                        ? 'badge-amber'
+                        : 'badge-red'
+                    }
+                  >
+                    {etiquetaEstado(r.estado)}
+                  </span>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
                   {new Date(r.recibido_en).toLocaleString('es-MX')}

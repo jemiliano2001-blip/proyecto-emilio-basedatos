@@ -1,16 +1,19 @@
 import Link from 'next/link'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { CATEGORIAS_MATERIAL } from '@/lib/catalogo-categorias'
-import { puedeGestionarCatalogo } from '@/lib/roles'
+import { puedeGestionarCatalogo, puedeVerPrecios } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import type { CatalogoMaterial } from '@/lib/types'
+import { formatMoneyMx } from '@/lib/money'
 
 function MaterialCard({
   m,
   puedeEditar,
+  verPrecios,
 }: {
   m: CatalogoMaterial
   puedeEditar: boolean
+  verPrecios: boolean
 }) {
   const body = (
     <>
@@ -26,17 +29,24 @@ function MaterialCard({
           <span className="text-gray-300 text-xs">Sin foto</span>
         )}
       </div>
-      <p className="font-medium text-sm">{m.nombre_base}</p>
-      {m.variante && <p className="text-xs text-gray-500">{m.variante}</p>}
+      <p className="font-bold text-sm text-ink line-clamp-2">{m.nombre_base}</p>
+      {m.variante && <p className="text-xs text-gray-500 truncate">{m.variante}</p>}
       {m.subcategoria && (
         <p className="text-xs text-gray-400 mt-0.5">{m.subcategoria}</p>
       )}
-      <p className="text-xs text-gray-400 mt-1">{m.unidad_medida}</p>
+      <div className="mt-2 flex items-center justify-between pt-1 border-t border-gray-100">
+        <span className="text-xs text-gray-400 font-medium">{m.unidad_medida}</span>
+        {verPrecios && m.precio_base !== undefined && m.precio_base > 0 && (
+          <span className="text-xs font-semibold tabular-nums text-accent">
+            {formatMoneyMx(m.precio_base)}
+          </span>
+        )}
+      </div>
     </>
   )
 
   return puedeEditar ? (
-    <Link href={`/materiales/${m.id}`} className="card block">
+    <Link href={`/materiales/${m.id}`} className="card-interactive block">
       {body}
     </Link>
   ) : (
@@ -47,12 +57,13 @@ function MaterialCard({
 export default async function MaterialesPage() {
   const session = await getSessionUsuario()
   const puedeEditar = puedeGestionarCatalogo(session?.rol ?? null)
+  const verPrecios = puedeVerPrecios(session?.rol ?? null)
   const supabase = createClient()
 
   const { data: materiales, error } = await supabase
     .from('catalogo_materiales')
     .select(
-      'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, activo'
+      'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, precio_base, activo'
     )
     .eq('activo', true)
     .order('nombre_base')
@@ -82,7 +93,7 @@ export default async function MaterialesPage() {
             href="/materiales/nuevo"
             className="btn-primary shrink-0 text-sm py-2 px-4"
           >
-            Nuevo
+            + Nuevo
           </Link>
         )}
       </header>
@@ -113,7 +124,7 @@ export default async function MaterialesPage() {
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {items.map((m) => (
-                      <MaterialCard key={m.id} m={m} puedeEditar={puedeEditar} />
+                      <MaterialCard key={m.id} m={m} puedeEditar={puedeEditar} verPrecios={verPrecios} />
                     ))}
                   </div>
                 </div>
@@ -127,7 +138,7 @@ export default async function MaterialesPage() {
             <h2 className="text-lg font-bold text-[#132A45] mb-3">Sin categoría</h2>
             <div className="grid grid-cols-2 gap-3">
               {sinCategoria.map((m) => (
-                <MaterialCard key={m.id} m={m} puedeEditar={puedeEditar} />
+                <MaterialCard key={m.id} m={m} puedeEditar={puedeEditar} verPrecios={verPrecios} />
               ))}
             </div>
           </section>
@@ -135,9 +146,11 @@ export default async function MaterialesPage() {
       </div>
 
       {lista.length === 0 && (
-        <p className="text-gray-500 text-center py-8">
-          El catálogo está vacío — se llena con la lista de Manuel.
-        </p>
+        <div className="card text-center py-12 border-dashed border-gray-300">
+          <p className="text-gray-500 font-medium">
+            El catálogo está vacío.
+          </p>
+        </div>
       )}
     </main>
   )

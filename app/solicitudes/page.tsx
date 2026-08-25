@@ -23,17 +23,17 @@ function badgeEstado(estado: EstadoSolicitud) {
   switch (estado) {
     case 'cancelada':
     case 'rechazada':
-      return 'bg-gray-100 text-gray-500'
+      return 'badge-red'
     case 'finalizada':
     case 'aprobada':
-      return 'bg-green-100 text-green-700'
+      return 'badge-teal'
     case 'en_proceso':
     case 'en_cotizacion':
-      return 'bg-blue-100 text-blue-700'
+      return 'badge-navy'
     case 'recibida':
     case 'pendiente':
     default:
-      return 'bg-amber-100 text-amber-700'
+      return 'badge-amber'
   }
 }
 
@@ -116,10 +116,10 @@ export default async function SolicitudesPage() {
           </h2>
           <div className="space-y-2">
             {bandejaCompras.map((s) => (
-              <Link key={s.id} href={`/solicitudes/${s.id}`} className="card block">
-                <div className="flex justify-between gap-2">
-                  <p className="font-semibold">{s.obra?.nombre ?? 'Proyecto'}</p>
-                  <span className={`text-xs font-semibold rounded-full px-2 py-1 ${badgeEstado(s.estado)}`}>
+              <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
+                <div className="flex justify-between items-center gap-2">
+                  <p className="font-semibold text-ink truncate">{s.obra?.nombre ?? 'Proyecto'}</p>
+                  <span className={badgeEstado(s.estado)}>
                     {labelEstado(s.estado)}
                   </span>
                 </div>
@@ -143,10 +143,10 @@ export default async function SolicitudesPage() {
           </h2>
           <div className="space-y-2">
             {bandejaFinanzas.map((s) => (
-              <Link key={s.id} href={`/solicitudes/${s.id}`} className="card block">
-                <div className="flex justify-between gap-2">
-                  <p className="font-semibold">{s.obra?.nombre ?? 'Proyecto'}</p>
-                  <span className={`text-xs font-semibold rounded-full px-2 py-1 ${badgeEstado(s.estado)}`}>
+              <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
+                <div className="flex justify-between items-center gap-2">
+                  <p className="font-semibold text-ink truncate">{s.obra?.nombre ?? 'Proyecto'}</p>
+                  <span className={badgeEstado(s.estado)}>
                     {labelEstado(s.estado)}
                   </span>
                 </div>
@@ -168,19 +168,15 @@ export default async function SolicitudesPage() {
       </h2>
       <div className="space-y-3">
         {lista.map((s) => (
-          <Link key={s.id} href={`/solicitudes/${s.id}`} className="card block">
+          <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="font-semibold">{s.obra?.nombre ?? 'Proyecto'}</p>
+                <p className="font-semibold text-ink">{s.obra?.nombre ?? 'Proyecto'}</p>
                 {s.obra?.fraccionamiento && (
                   <p className="text-xs text-gray-500">{s.obra.fraccionamiento}</p>
                 )}
               </div>
-              <span
-                className={`text-xs font-semibold rounded-full px-2 py-1 capitalize shrink-0 ${badgeEstado(
-                  s.estado
-                )}`}
-              >
+              <span className={badgeEstado(s.estado)}>
                 {labelEstado(s.estado)}
               </span>
             </div>
