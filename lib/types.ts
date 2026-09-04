@@ -381,3 +381,22 @@ export interface ObraDocumento {
   subido_por_nombre?: string | null
 }
 
+export type TipoArchivoFactura = 'pdf' | 'imagen' | 'xml' | 'otro'
+
+export interface OrdenCompraFactura {
+  id: string
+  orden_id: string
+  obra_id: string
+  folio_factura: string | null
+  monto_factura: number | null
+  archivo_path: string
+  archivo_url: string
+  archivo_nombre: string
+  tamano_bytes: number | null
+  tipo_archivo: TipoArchivoFactura
+  subido_por: string | null
+  creado_en: string
+  subido_por_nombre?: string | null
+}
+
+

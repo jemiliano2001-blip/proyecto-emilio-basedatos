@@ -150,3 +150,12 @@ export function puedeEliminarDocumentos(rol: RolUsuario | null): boolean {
   return rol === 'acceso_total' || rol === 'operacion' || rol === 'proyectos'
 }
 
+export function puedeGestionarFacturasOC(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'compras' || rol === 'finanzas'
+}
+
+export function puedeAsignarProveedorOC(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'compras' || rol === 'finanzas'
+}
+
+

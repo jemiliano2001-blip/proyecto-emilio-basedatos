@@ -1,16 +1,27 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { OrdenCompraFacturasSection } from '@/components/OrdenCompraFacturasSection'
+import { OrdenCompraProveedorModal } from '@/components/OrdenCompraProveedorModal'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeCapturarRecepcion, puedeVerPrecios } from '@/lib/roles'
+import {
+  puedeAsignarProveedorOC,
+  puedeCapturarRecepcion,
+  puedeGestionarFacturasOC,
+  puedeVerPrecios,
+} from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
+import type { OrdenCompraFactura } from '@/lib/types'
 
 interface OrdenDetalle {
   id: string
   folio: string
+  folio_fisico?: string | null
   total: number
   moneda: string
   estado: string
   creado_en: string
+  obra_id: string
+  proveedor_id: string | null
   obra: { nombre: string; fraccionamiento: string | null } | null
   proveedor: { nombre: string; contacto: string | null; telefono: string | null } | null
   items: {
@@ -47,7 +58,7 @@ export default async function OrdenDetallePage({
   const { data: orden } = await supabase
     .from('ordenes_compra')
     .select(
-      `id, folio, total, moneda, estado, creado_en,
+      `id, folio, folio_fisico, total, moneda, estado, creado_en, obra_id, proveedor_id,
        obra:obras(nombre, fraccionamiento),
        proveedor:proveedores(nombre, contacto, telefono),
        items:orden_compra_items(
@@ -92,13 +103,79 @@ export default async function OrdenDetallePage({
     puedeCapturarRecepcion(session.rol) &&
     (detalle.estado === 'emitida' || detalle.estado === 'parcialmente_recibida')
 
+  const puedeAsignar = puedeAsignarProveedorOC(session.rol)
+  const puedeGestionarFacturas = puedeGestionarFacturasOC(session.rol)
+
+  // Cargar lista de proveedores si el usuario puede asignar
+  let proveedores: { id: string; nombre: string }[] = []
+  if (puedeAsignar) {
+    const { data: provs } = await supabase
+      .from('proveedores')
+      .select('id, nombre')
+      .order('nombre')
+    proveedores = (provs ?? []) as { id: string; nombre: string }[]
+  }
+
+  // Cargar facturas adjuntas a la orden de compra
+  const { data: facturasData } = await supabase
+    .from('orden_compra_facturas')
+    .select(
+      `id, orden_id, obra_id, folio_factura, monto_factura,
+       archivo_path, archivo_url, archivo_nombre, tamano_bytes,
+       tipo_archivo, subido_por, creado_en,
+       subidor:usuarios!orden_compra_facturas_subido_por_fkey(nombre)`
+    )
+    .eq('orden_id', params.id)
+    .order('creado_en', { ascending: false })
+
+  type FacturaRow = {
+    id: string
+    orden_id: string
+    obra_id: string
+    folio_factura: string | null
+    monto_factura: number | null
+    archivo_path: string
+    archivo_url: string
+    archivo_nombre: string
+    tamano_bytes: number | null
+    tipo_archivo: 'pdf' | 'imagen' | 'xml' | 'otro'
+    subido_por: string | null
+    creado_en: string
+    subidor: { nombre: string } | null
+  }
+
+  const facturas: OrdenCompraFactura[] = (
+    (facturasData ?? []) as unknown as FacturaRow[]
+  ).map((f) => ({
+    id: f.id,
+    orden_id: f.orden_id,
+    obra_id: f.obra_id,
+    folio_factura: f.folio_factura,
+    monto_factura: f.monto_factura,
+    archivo_path: f.archivo_path,
+    archivo_url: f.archivo_url,
+    archivo_nombre: f.archivo_nombre,
+    tamano_bytes: f.tamano_bytes,
+    tipo_archivo: f.tipo_archivo,
+    subido_por: f.subido_por,
+    creado_en: f.creado_en,
+    subido_por_nombre: f.subidor?.nombre,
+  }))
+
   return (
     <main className="page-shell">
       <header className="mb-6 pt-4">
         <Link href="/ordenes" className="text-sm text-[#1E7F7A] font-medium">
           ← Órdenes
         </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">{detalle.folio}</h1>
+        <div className="flex items-center gap-2 mt-2">
+          <h1 className="text-2xl font-bold text-[#132A45]">{detalle.folio}</h1>
+          {detalle.folio_fisico && (
+            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200">
+              Talonario: {detalle.folio_fisico}
+            </span>
+          )}
+        </div>
         <p className="text-gray-500 text-sm">{detalle.obra?.nombre}</p>
         {detalle.obra?.fraccionamiento && (
           <p className="text-xs text-gray-400">{detalle.obra.fraccionamiento}</p>
@@ -108,25 +185,54 @@ export default async function OrdenDetallePage({
         </p>
       </header>
 
-      {puedeRecibir && (
+      {/* Acciones principales: Imprimir Formato y Registrar Recepción */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-6">
         <Link
-          href={`/ordenes/${detalle.id}/recibir`}
-          className="block w-full text-center mb-4 rounded-xl bg-[#1E7F7A] text-white font-semibold py-3"
+          href={`/ordenes/${detalle.id}/formato`}
+          className="flex-1 text-center rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold py-3 text-sm flex items-center justify-center gap-2 shadow-xs transition-colors"
         >
-          Registrar recepción
+          📄 Ver e Imprimir Formato OC (PDF)
         </Link>
-      )}
+
+        {puedeRecibir && (
+          <Link
+            href={`/ordenes/${detalle.id}/recibir`}
+            className="flex-1 text-center rounded-xl bg-[#1E7F7A] hover:bg-[#186662] text-white font-semibold py-3 text-sm flex items-center justify-center gap-2 shadow-xs transition-colors"
+          >
+            📦 Registrar recepción
+          </Link>
+        )}
+      </div>
 
       <div className="card mb-4">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
-          Proveedor
+        <div className="flex justify-between items-start mb-1">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+            Proveedor
+          </p>
+          {puedeAsignar && (
+            <OrdenCompraProveedorModal
+              ordenId={detalle.id}
+              proveedorActualId={detalle.proveedor_id}
+              folioFisicoActual={detalle.folio_fisico}
+              proveedores={proveedores}
+            />
+          )}
+        </div>
+        <p className="font-semibold text-ink">
+          {detalle.proveedor?.nombre || (
+            <span className="text-gray-400 italic font-normal">Sin proveedor asignado</span>
+          )}
         </p>
-        <p className="font-medium">{detalle.proveedor?.nombre}</p>
         {detalle.proveedor?.contacto && (
           <p className="text-sm text-gray-500">{detalle.proveedor.contacto}</p>
         )}
         {detalle.proveedor?.telefono && (
           <p className="text-sm text-gray-500">{detalle.proveedor.telefono}</p>
+        )}
+        {detalle.folio_fisico && (
+          <p className="text-xs text-amber-800 bg-amber-50 px-2 py-0.5 rounded inline-block mt-2 border border-amber-200">
+            No. Folio físico: <strong>{detalle.folio_fisico}</strong>
+          </p>
         )}
       </div>
 
@@ -171,6 +277,16 @@ export default async function OrdenDetallePage({
           {Number(detalle.total).toFixed(2)} {detalle.moneda}
         </span>
       </div>
+
+      {/* Sección de Facturas del Proveedor (PDF e Imágenes) */}
+      <OrdenCompraFacturasSection
+        ordenId={detalle.id}
+        obraId={detalle.obra_id}
+        totalOrden={Number(detalle.total)}
+        moneda={detalle.moneda}
+        facturas={facturas}
+        puedeGestionar={puedeGestionarFacturas}
+      />
 
       <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
         Historial de recepciones
