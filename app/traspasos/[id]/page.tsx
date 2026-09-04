@@ -143,7 +143,7 @@ export default async function TraspasoDetallePage({
               data.estado
             )} uppercase tracking-wider`}
           >
-            {data.estado.replace('_', ' ')}
+            {String(data.estado ?? '').replace(/_/g, ' ')}
           </span>
         </div>
       </header>

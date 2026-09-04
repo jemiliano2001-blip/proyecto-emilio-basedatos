@@ -57,7 +57,7 @@ function labelEstado(estado: EstadoSolicitud) {
 }
 
 function esMultiObra(s: SolicitudRow): boolean {
-  return s.items.some((i) => i.obra_id !== null)
+  return (s.items ?? []).some((i) => i.obra_id !== null)
 }
 
 export default async function SolicitudesPage() {

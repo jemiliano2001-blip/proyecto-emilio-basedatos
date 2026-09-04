@@ -95,7 +95,7 @@ export default async function RecepcionDetallePage({
         Renglones
       </h2>
       <div className="space-y-2 mb-4">
-        {detalle.items.map((item) => (
+        {(detalle.items ?? []).map((item) => (
           <div key={item.id} className="card">
             <p className="font-medium text-sm">
               {item.orden_item?.material?.nombre_base}

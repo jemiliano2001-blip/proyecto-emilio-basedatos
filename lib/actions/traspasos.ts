@@ -62,7 +62,12 @@ export async function crearTraspasoAction(
   }
 
   for (const item of items) {
-    if (!item.material_id || typeof item.cantidad !== 'number' || item.cantidad <= 0) {
+    if (
+      !item.material_id ||
+      typeof item.cantidad !== 'number' ||
+      !Number.isFinite(item.cantidad) ||
+      item.cantidad <= 0
+    ) {
       return { error: 'Verifique los materiales y cantidades ingresadas.' }
     }
   }

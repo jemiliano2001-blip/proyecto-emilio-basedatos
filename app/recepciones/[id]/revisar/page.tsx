@@ -72,7 +72,7 @@ export default async function RevisarRecepcionPage({
       </header>
 
       <div className="space-y-2 mb-6">
-        {detalle.items.map((item) => (
+        {(detalle.items ?? []).map((item) => (
           <div key={item.id} className="card">
             <p className="font-medium text-sm">
               {item.orden_item?.material?.nombre_base}

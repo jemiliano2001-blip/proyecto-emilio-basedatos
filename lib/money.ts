@@ -20,6 +20,9 @@ export function parseMoney(raw: string): number | null {
 }
 
 export function formatMoneyMx(value: number): string {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return '$0.00'
+  }
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: 'MXN',

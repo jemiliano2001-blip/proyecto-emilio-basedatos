@@ -134,7 +134,7 @@ export default async function OrdenDetallePage({
         Renglones
       </h2>
       <div className="space-y-2 mb-4">
-        {detalle.items.map((item) => {
+        {(detalle.items ?? []).map((item) => {
           const saldo = saldoMap.get(item.id)
           return (
             <div key={item.id} className="card">
@@ -188,7 +188,7 @@ export default async function OrdenDetallePage({
               <div className="flex justify-between gap-2">
                 <p className="text-sm font-medium">{r.receptor?.nombre ?? 'Receptor'}</p>
                 <span className="text-xs text-gray-500 capitalize">
-                  {r.estado.replaceAll('_', ' ')}
+                  {(r.estado ?? '').replaceAll('_', ' ')}
                 </span>
               </div>
               <p className="text-xs text-gray-400 mt-1">

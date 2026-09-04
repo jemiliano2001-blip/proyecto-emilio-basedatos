@@ -3,6 +3,7 @@ import {
   esParCategoriaValido,
   type CategoriaMaterial,
 } from '@/lib/catalogo-categorias'
+import { parseMoney } from '@/lib/money'
 
 export interface MaterialInput {
   nombre_base: string
@@ -65,11 +66,14 @@ export function validateMaterialInput(raw: unknown): ValidationResult<MaterialIn
 
   let precio_base = 0
   if (body.precio_base !== undefined && body.precio_base !== null) {
-    const pNum = typeof body.precio_base === 'number' ? body.precio_base : parseFloat(String(body.precio_base))
-    if (!Number.isFinite(pNum) || pNum < 0) {
+    const pNum =
+      typeof body.precio_base === 'number'
+        ? (Number.isFinite(body.precio_base) ? Math.round(body.precio_base * 100) / 100 : null)
+        : parseMoney(String(body.precio_base))
+    if (pNum === null || pNum < 0) {
       return { ok: false, error: 'El precio base debe ser un número mayor o igual a 0.' }
     }
-    precio_base = Math.round(pNum * 100) / 100
+    precio_base = pNum
   }
 
   const activo =

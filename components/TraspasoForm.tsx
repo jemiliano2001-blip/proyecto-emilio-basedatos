@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useFormState, useFormStatus } from 'react-dom'
 import type { ActionResult } from '@/lib/actions/traspasos'
+import { parseQuantity } from '@/lib/money'
 
 function BotonEnviarTraspaso({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus()
@@ -111,8 +112,8 @@ export function TraspasoForm({
       return
     }
 
-    const cant = parseFloat(cantidadSel)
-    if (isNaN(cant) || cant <= 0) {
+    const cant = parseQuantity(cantidadSel)
+    if (cant === null || cant <= 0) {
       setErrorLocal('Ingresa una cantidad mayor a cero.')
       return
     }
@@ -184,8 +185,17 @@ export function TraspasoForm({
               name="obra_origen_id"
               value={obraOrigenId}
               onChange={(e) => {
-                setObraOrigenId(e.target.value)
+                const nuevaOrigen = e.target.value
+                setObraOrigenId(nuevaOrigen)
                 setItems([]) // Reiniciar lista si cambia la obra origen
+                setMaterialIdSel('')
+                setCantidadSel('')
+                setMaterialBusqueda('')
+                setErrorLocal(null)
+                if (obraDestinoId === nuevaOrigen) {
+                  const otra = obras.find((o) => o.id !== nuevaOrigen)
+                  if (otra) setObraDestinoId(otra.id)
+                }
               }}
               className="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-[#132A45] focus:outline-none"
               required

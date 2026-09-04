@@ -106,7 +106,7 @@ export default async function SolicitudDetallePage({
   if (!solicitud) notFound()
 
   const detalle = solicitud as unknown as SolicitudDetalle
-  const esMultiObra = detalle.items.some((i) => i.obra_id)
+  const esMultiObra = (detalle.items ?? []).some((i) => i.obra_id)
 
   const { data: ordenesData } =
     detalle.estado === 'finalizada'
@@ -176,7 +176,7 @@ export default async function SolicitudDetallePage({
         Renglones
       </h2>
       <div className="space-y-2 mb-6">
-        {detalle.items.map((item) => {
+        {(detalle.items ?? []).map((item) => {
           const tipo = item.tipo_linea ?? 'material'
           return (
             <div key={item.id} className="card">

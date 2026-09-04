@@ -51,13 +51,13 @@ export function OfflineQueueBanner() {
       <ul className="space-y-1 text-xs text-amber-900 mb-3">
         {recepciones.map((r) => (
           <li key={r.id}>
-            Recepción {r.id.slice(0, 8)}… — {labelStatus(r.status)}
+            Recepción {(r.id ?? '').slice(0, 8)}… — {labelStatus(r.status)}
             {r.error ? ` (${r.error})` : ''}
           </li>
         ))}
         {solicitudes.map((s) => (
           <li key={s.id}>
-            Solicitud {s.id.slice(0, 8)}… — {labelStatus(s.status)}
+            Solicitud {(s.id ?? '').slice(0, 8)}… — {labelStatus(s.status)}
             {s.error ? ` (${s.error})` : ''}
           </li>
         ))}
