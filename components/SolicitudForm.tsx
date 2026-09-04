@@ -150,7 +150,17 @@ export function SolicitudForm({
         .filter((i) => !multiObra || i.obra_id === obraId)
         .map((i) => i.material_id)
     )
-    return materiales.filter((m) => !usados.has(m.id))
+    const effectiveObraId = multiObra ? obraId : selectedObraId
+    return materiales
+      .filter((m) => !usados.has(m.id))
+      .map((m) => {
+        const disp = getSaldoDisponible(effectiveObraId, m.id)
+        return {
+          ...m,
+          disponible: disp,
+          disabled: disp !== null && disp <= 0,
+        }
+      })
   }
 
   function validarSaldos(): string | null {

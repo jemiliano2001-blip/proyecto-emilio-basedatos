@@ -1,6 +1,6 @@
 {
-  "name": "Proyecto Emilio - Base de Datos",
-  "short_name": "P. Emilio",
+  "name": "ObraTrack — Control de Proyectos y Materiales",
+  "short_name": "ObraTrack",
   "description": "Control de materiales y obras",
   "start_url": "/",
   "display": "standalone",

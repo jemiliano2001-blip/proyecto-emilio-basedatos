@@ -97,6 +97,11 @@ export function MoreSheet({
             Materiales
           </Link>
 
+          <Link href="/kits" className={itemClass} onClick={onClose}>
+            <span className="text-base" aria-hidden="true">⚡</span>
+            Kits y Ensambles
+          </Link>
+
           {mostrarRecepcionEnMas && puedeVerRecepciones && (
             <Link href="/recepciones" className={itemClass} onClick={onClose}>
               <IconRecepcion className="h-5 w-5 shrink-0" />

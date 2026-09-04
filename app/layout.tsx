@@ -13,8 +13,8 @@ import { traspasosSchemaDisponible } from '@/lib/schema-disponible'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Proyecto Emilio - Base de Datos',
-  description: 'Control de materiales y proyectos',
+  title: 'ObraTrack — Control de Proyectos y Materiales',
+  description: 'Sistema de control, presupuestos y trazabilidad de materiales y proyectos de obra',
   manifest: '/manifest.json',
 }
 

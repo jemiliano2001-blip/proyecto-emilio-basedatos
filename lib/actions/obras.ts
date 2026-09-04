@@ -21,6 +21,7 @@ export async function createObraAction(
   const parsed = validateObraInput({
     nombre: formData.get('nombre'),
     cliente: formData.get('cliente'),
+    ciudad: formData.get('ciudad'),
     fraccionamiento: formData.get('fraccionamiento'),
     paquete: formData.get('paquete'),
     ubicacion: formData.get('ubicacion'),
@@ -106,6 +107,7 @@ export async function updateObraAction(
   const parsed = validateObraInput({
     nombre: formData.get('nombre'),
     cliente: formData.get('cliente'),
+    ciudad: formData.get('ciudad'),
     fraccionamiento: formData.get('fraccionamiento'),
     paquete: formData.get('paquete'),
     ubicacion: formData.get('ubicacion'),

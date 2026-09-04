@@ -31,6 +31,7 @@ export function ObraForm({
     Obra,
     | 'nombre'
     | 'cliente'
+    | 'ciudad'
     | 'fraccionamiento'
     | 'paquete'
     | 'ubicacion'
@@ -55,6 +56,19 @@ export function ObraForm({
   const materialMap = useMemo(() => {
     return new Map(materiales.map((m) => [m.id, m]))
   }, [materiales])
+
+  // Kits indexados por material_principal_id para sugerencias automáticas
+  const kitsPorMaterialPrincipal = useMemo(() => {
+    const map = new Map<string, MaterialKitWithItems[]>()
+    for (const k of kits) {
+      if (k.material_principal_id) {
+        const arr = map.get(k.material_principal_id) ?? []
+        arr.push(k)
+        map.set(k.material_principal_id, arr)
+      }
+    }
+    return map
+  }, [kits])
 
   // Cálculo en vivo del subtotal por partida y del presupuesto total estimado
   const { itemsConCalculo, totalPresupuestoCalculado } = useMemo(() => {
@@ -112,13 +126,11 @@ export function ObraForm({
   }
 
   // Cargar conjunto de materiales secundarios de un kit
-  function aplicarKit() {
-    if (!selectedKitId) return
-    const kit = kits.find((k) => k.id === selectedKitId)
+  function aplicarKitConcreto(kitId: string, cantidadBase: number) {
+    const kit = kits.find((k) => k.id === kitId)
     if (!kit || !kit.items || kit.items.length === 0) return
 
-    const factor = parseQuantity(kitMultiplicador) ?? 1
-    if (factor <= 0) return
+    const factor = cantidadBase > 0 ? cantidadBase : 1
 
     setPartidas((prev) => {
       const nuevas = [...prev]
@@ -146,7 +158,12 @@ export function ObraForm({
       }
       return nuevas
     })
+  }
 
+  function aplicarKit() {
+    if (!selectedKitId) return
+    const factor = parseQuantity(kitMultiplicador) ?? 1
+    aplicarKitConcreto(selectedKitId, factor)
     setSelectedKitId('')
     setKitMultiplicador('1')
     setMostrarModalKit(false)
@@ -208,8 +225,23 @@ export function ObraForm({
           </div>
 
           <div>
+            <label htmlFor="ciudad" className="block text-sm font-medium text-gray-700 mb-1">
+              Ciudad / Municipio
+            </label>
+            <input
+              id="ciudad"
+              name="ciudad"
+              defaultValue={obra?.ciudad ?? ''}
+              className="input-base"
+              placeholder="ej. Matamoros, Reynosa, Querétaro"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
             <label htmlFor="fraccionamiento" className="block text-sm font-medium text-gray-700 mb-1">
-              Fraccionamiento
+              Fraccionamiento / Colonia
             </label>
             <input
               id="fraccionamiento"
@@ -219,38 +251,35 @@ export function ObraForm({
               placeholder="ej. Residencial Los Olivos"
             />
           </div>
+
+          <div>
+            <label htmlFor="estado" className="block text-sm font-medium text-gray-700 mb-1">
+              Estatus
+            </label>
+            <select
+              id="estado"
+              name="estado"
+              defaultValue={obra?.estado ?? 'activa'}
+              className="input-base"
+            >
+              <option value="activa">Activa</option>
+              <option value="pausada">Pausada</option>
+              <option value="cerrada">Cerrada</option>
+            </select>
+          </div>
         </div>
 
         <div>
           <label htmlFor="ubicacion" className="block text-sm font-medium text-gray-700 mb-1">
-            Ubicación (Ciudad / Municipio / Dirección)
+            Ubicación detallada (Dirección o referencias)
           </label>
           <input
             id="ubicacion"
             name="ubicacion"
             defaultValue={obra?.ubicacion ?? ''}
             className="input-base"
-            placeholder="ej. Querétaro, Qro. / Av. Universidad #120"
+            placeholder="ej. Av. Universidad #120 / Carretera a Reynosa Km 5"
           />
-          <p className="text-xs text-gray-400 mt-1">
-            Especifica el municipio o ciudad para logística de compras y fletes.
-          </p>
-        </div>
-
-        <div>
-          <label htmlFor="estado" className="block text-sm font-medium text-gray-700 mb-1">
-            Estatus
-          </label>
-          <select
-            id="estado"
-            name="estado"
-            defaultValue={obra?.estado ?? 'activa'}
-            className="input-base"
-          >
-            <option value="activa">Activa</option>
-            <option value="pausada">Pausada</option>
-            <option value="cerrada">Cerrada</option>
-          </select>
         </div>
       </div>
 
@@ -490,6 +519,31 @@ export function ObraForm({
                     </span>
                   </div>
                 </div>
+
+                {/* SUGERENCIA RÁPIDA DE ACCESORIOS / KITS (ej. Transformadores) */}
+                {(() => {
+                  const kitsRelacionados = item.material_id
+                    ? kitsPorMaterialPrincipal.get(item.material_id) ?? []
+                    : []
+                  if (kitsRelacionados.length === 0) return null
+                  return (
+                    <div className="mt-2 pt-2 border-t border-teal-100 flex flex-wrap items-center gap-2 text-xs bg-teal-50/60 p-2 rounded">
+                      <span className="text-teal-900 font-medium">
+                        ⚡ Equipo con ensamble ({kitsRelacionados[0].nombre}):
+                      </span>
+                      {kitsRelacionados.map((k) => (
+                        <button
+                          key={k.id}
+                          type="button"
+                          onClick={() => aplicarKitConcreto(k.id, item.cantNum || 1)}
+                          className="px-2 py-1 rounded bg-white border border-teal-300 text-teal-800 font-semibold hover:bg-teal-100 shadow-sm"
+                        >
+                          + {k.configuracion || k.nombre}
+                        </button>
+                      ))}
+                    </div>
+                  )
+                })()}
               </div>
             ))}
 

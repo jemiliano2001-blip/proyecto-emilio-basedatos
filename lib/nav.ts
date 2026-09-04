@@ -4,10 +4,11 @@ export function tituloDeRuta(pathname: string): string {
   if (pathname.startsWith('/recepciones') || pathname.includes('/recibir')) return 'Recepción'
   if (pathname.startsWith('/traspasos')) return 'Traspasos'
   if (pathname.startsWith('/ordenes')) return 'Órdenes'
+  if (pathname.startsWith('/kits')) return 'Kits y Ensambles'
   if (pathname.startsWith('/materiales')) return 'Materiales'
   if (pathname.startsWith('/proveedores')) return 'Proveedores'
   if (pathname.startsWith('/obras') || pathname === '/') return 'Proyectos'
-  return 'Proyecto Emilio'
+  return 'ObraTrack'
 }
 
 export function hrefNotificacion(tipo: string, referenciaId: string | null): string | null {

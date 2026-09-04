@@ -45,7 +45,7 @@ export default async function ObraDetallePage({
 
   const { data: obra } = await supabase
     .from('obras')
-    .select('id, nombre, cliente, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn')
+    .select('id, nombre, cliente, ciudad, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn')
     .eq('id', params.id)
     .maybeSingle()
 
@@ -141,10 +141,9 @@ export default async function ObraDetallePage({
               </span>
             </div>
             {obra.cliente && <p className="text-sm font-medium text-gray-700 mt-1">Cliente: {obra.cliente}</p>}
-            {obra.fraccionamiento && (
+            {(obra.ciudad || obra.fraccionamiento) && (
               <p className="text-sm text-gray-500">
-                Fracc: {obra.fraccionamiento}
-                {obra.paquete ? ` · ${obra.paquete}` : ''}
+                {[obra.ciudad, obra.fraccionamiento].filter(Boolean).join(' · ')}
               </p>
             )}
             {obra.ubicacion && (
@@ -158,21 +157,28 @@ export default async function ObraDetallePage({
           )}
         </div>
 
-        {(verConciliacion || puedeCerrar || puedeReabrir) && (
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            {verConciliacion && (
-              <Link href={`/obras/${params.id}/conciliacion`} className="btn-secondary px-4 py-2 text-sm">
-                Conciliación
-              </Link>
-            )}
-            <CierreObraAcciones
-              obraId={obra.id}
-              estado={obra.estado}
-              puedeCerrar={puedeCerrar}
-              puedeReabrir={puedeReabrir}
-            />
-          </div>
-        )}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {verConciliacion && (
+            <Link href={`/obras/${params.id}/conciliacion`} className="btn-secondary px-4 py-2 text-sm">
+              Conciliación
+            </Link>
+          )}
+          <a
+            href="#documentos"
+            className="btn-secondary px-3 py-2 text-sm inline-flex items-center gap-1.5 text-teal-800 border-teal-300 hover:bg-teal-50"
+          >
+            <span>📁 Documentos / PDFs</span>
+            <span className="rounded-full bg-teal-100 text-teal-900 text-xs px-1.5 py-0.2 font-bold">
+              {documentos.length}
+            </span>
+          </a>
+          <CierreObraAcciones
+            obraId={obra.id}
+            estado={obra.estado}
+            puedeCerrar={puedeCerrar}
+            puedeReabrir={puedeReabrir}
+          />
+        </div>
       </header>
 
       {puedeSolicitar && obra.estado === 'activa' && (
@@ -219,30 +225,44 @@ export default async function ObraDetallePage({
         </div>
       )}
 
-      {/* SECCIÓN 1: SALDO Y ESTATUS DE MATERIALES */}
+      {/* SECCIÓN DOCUMENTACIÓN ADICIONAL Y ARCHIVOS PDF */}
+      <section id="documentos" className="card border-slate-200">
+        <ObraDocumentos
+          obraId={params.id}
+          documentos={documentos}
+          puedeGestionar={puedeGestionarDocs}
+          puedeEliminar={puedeEliminarDocs}
+        />
+      </section>
+
+      {/* SECCIÓN SALDO Y ESTATUS DE MATERIALES */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Saldo y Estatus de Materiales
-          </h2>
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+              Saldo y Estatus de Materiales
+            </h2>
+            <p className="text-xs text-gray-400">
+              Flujo: Asignado → En proceso de compra → Comprado → Entregado en obra.
+            </p>
+          </div>
           {puedeTopes && (
-            <Link href={`/obras/${params.id}/tope`} className="min-h-[40px] inline-flex items-center text-sm font-semibold text-accent">
-              + Asignar material
+            <Link
+              href={`/obras/${params.id}/asignar-materiales`}
+              className="btn-primary shrink-0 text-xs px-3 py-2 min-h-[38px] bg-accent text-white"
+            >
+              + Asignar materiales
             </Link>
           )}
         </div>
 
-        <p className="text-xs text-gray-400">
-          Control de partidas: Asignado, Entregado / En proceso y Saldo Disponible para requisiciones.
-        </p>
-
         <div className="space-y-2">
           {(saldos as SaldoMaterialObra[] | null)?.map((s) => {
             const tope = topePorMaterial.get(s.material_id)
-            const asignado = Number(s.cantidad_contratada ?? 0)
-            const usado = Number(s.cantidad_usada ?? 0)
-            const comprometido = Number(s.cantidad_comprometida ?? 0)
-            const entregadoOComprado = usado + comprometido
+            const asignado = Number(s.cantidad_asignada ?? s.cantidad_contratada ?? 0)
+            const enProceso = Number(s.cantidad_en_proceso ?? s.cantidad_comprometida ?? 0)
+            const comprado = Number(s.cantidad_comprada ?? 0)
+            const entregado = Number(s.cantidad_entregada ?? s.cantidad_usada ?? 0)
             const disponible = Number(s.cantidad_disponible ?? 0)
             const sinSaldo = disponible <= 0
 
@@ -267,22 +287,26 @@ export default async function ObraDetallePage({
                   )}
                 </div>
 
-                <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
-                  <div>
-                    <p className="text-gray-500 text-xs">Asignado</p>
-                    <p className="tabular-nums font-semibold text-gray-900">{asignado}</p>
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                  <div className="bg-slate-50 p-2 rounded">
+                    <p className="text-gray-500 font-medium">Asignado</p>
+                    <p className="tabular-nums font-semibold text-gray-900 text-sm mt-0.5">{asignado}</p>
                   </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">Entregado / Proceso</p>
-                    <p className="tabular-nums font-semibold text-gray-900">{entregadoOComprado}</p>
+                  <div className="bg-slate-50 p-2 rounded">
+                    <p className="text-gray-500 font-medium">En proceso</p>
+                    <p className="tabular-nums font-semibold text-gray-900 text-sm mt-0.5">{enProceso}</p>
                   </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">Disponible</p>
-                    <p
-                      className={`tabular-nums font-bold ${
-                        sinSaldo ? 'text-red-600' : 'text-accent'
-                      }`}
-                    >
+                  <div className="bg-slate-50 p-2 rounded">
+                    <p className="text-gray-500 font-medium">Comprado</p>
+                    <p className="tabular-nums font-semibold text-gray-900 text-sm mt-0.5">{comprado}</p>
+                  </div>
+                  <div className="bg-slate-50 p-2 rounded">
+                    <p className="text-gray-500 font-medium">Entregado</p>
+                    <p className="tabular-nums font-semibold text-gray-900 text-sm mt-0.5">{entregado}</p>
+                  </div>
+                  <div className={`p-2 rounded col-span-2 sm:col-span-1 ${sinSaldo ? 'bg-red-100/70' : 'bg-teal-50'}`}>
+                    <p className={`font-semibold ${sinSaldo ? 'text-red-700' : 'text-teal-800'}`}>Disponible</p>
+                    <p className={`tabular-nums font-bold text-sm mt-0.5 ${sinSaldo ? 'text-red-600' : 'text-teal-700'}`}>
                       {disponible}
                     </p>
                   </div>
@@ -309,16 +333,6 @@ export default async function ObraDetallePage({
           )}
         </div>
       </div>
-
-      {/* SECCIÓN 2: INFORMACIÓN ADICIONAL Y DOCUMENTACIÓN PDF */}
-      <section className="pt-2 border-t border-gray-200">
-        <ObraDocumentos
-          obraId={params.id}
-          documentos={documentos}
-          puedeGestionar={puedeGestionarDocs}
-          puedeEliminar={puedeEliminarDocs}
-        />
-      </section>
     </main>
   )
 }

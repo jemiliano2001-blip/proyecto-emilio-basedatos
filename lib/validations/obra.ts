@@ -10,6 +10,7 @@ export interface TopeCreacionInput {
 export interface ObraInput {
   nombre: string
   cliente: string | null
+  ciudad: string | null
   fraccionamiento: string | null
   paquete: string | null
   ubicacion: string | null
@@ -126,6 +127,7 @@ export function validateObraInput(raw: unknown): ValidationResult<ObraInput> {
     data: {
       nombre,
       cliente: trimOrNull(body.cliente),
+      ciudad: trimOrNull(body.ciudad),
       fraccionamiento: trimOrNull(body.fraccionamiento),
       paquete: trimOrNull(body.paquete),
       ubicacion: trimOrNull(body.ubicacion),

@@ -17,6 +17,7 @@ export interface Obra {
   id: string
   nombre: string
   cliente: string | null
+  ciudad?: string | null
   fraccionamiento: string | null
   paquete: string | null
   ubicacion: string | null
@@ -53,10 +54,16 @@ export interface SaldoMaterialObra {
   nombre_base: string
   variante: string | null
   unidad_medida: string
+  // Nuevas columnas del flujo acordado
+  cantidad_asignada?: number
+  cantidad_en_proceso?: number
+  cantidad_comprada?: number
+  cantidad_entregada?: number
+  cantidad_disponible: number
+  // Campos de compatibilidad
   cantidad_contratada: number
   cantidad_usada: number
   cantidad_comprometida?: number
-  cantidad_disponible: number
 }
 
 export interface SaldoPresupuestoObra {

@@ -8,6 +8,10 @@ export function puedeGestionarCatalogo(rol: RolUsuario | null): boolean {
   return rol === 'acceso_total' || rol === 'proyectos'
 }
 
+export function puedeGestionarKits(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'proyectos' || rol === 'operacion'
+}
+
 export function puedeGestionarTopes(rol: RolUsuario | null): boolean {
   return rol === 'acceso_total' || rol === 'operacion' || rol === 'proyectos'
 }

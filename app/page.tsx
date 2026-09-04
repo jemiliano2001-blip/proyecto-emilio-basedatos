@@ -31,7 +31,7 @@ export default async function HomePage({
 
   const { data: obras, error } = await supabase
     .from('obras')
-    .select('id, nombre, fraccionamiento, cliente, estado')
+    .select('id, nombre, ciudad, fraccionamiento, cliente, estado')
     .eq('estado', estatus)
     .order('nombre')
 
@@ -83,7 +83,7 @@ export default async function HomePage({
       )}
 
       <div className="space-y-3">
-        {(obras as Pick<Obra, 'id' | 'nombre' | 'fraccionamiento' | 'cliente' | 'estado'>[] | null)?.map(
+        {(obras as Pick<Obra, 'id' | 'nombre' | 'ciudad' | 'fraccionamiento' | 'cliente' | 'estado'>[] | null)?.map(
           (obra) => (
             <Link
               key={obra.id}
@@ -105,9 +105,9 @@ export default async function HomePage({
                     {labelEstatus(obra.estado)}
                   </span>
                 </div>
-                {(obra.cliente || obra.fraccionamiento) && (
+                {(obra.cliente || obra.ciudad || obra.fraccionamiento) && (
                   <p className="text-sm text-gray-500 truncate mt-0.5">
-                    {[obra.cliente, obra.fraccionamiento].filter(Boolean).join(' · ')}
+                    {[obra.cliente, obra.ciudad, obra.fraccionamiento].filter(Boolean).join(' · ')}
                   </p>
                 )}
               </div>

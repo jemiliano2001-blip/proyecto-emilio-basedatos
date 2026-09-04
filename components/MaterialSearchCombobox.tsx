@@ -9,10 +9,15 @@ export interface MaterialComboboxOption {
   unidad_medida: string
   categoria?: string | null
   subcategoria?: string | null
+  disponible?: number | null
+  disabled?: boolean
 }
 
 function labelMaterial(m: MaterialComboboxOption): string {
-  return `${m.nombre_base}${m.variante ? ` · ${m.variante}` : ''} (${m.unidad_medida})`
+  const agotado = m.disponible !== undefined && m.disponible !== null && m.disponible <= 0
+  return `${m.nombre_base}${m.variante ? ` · ${m.variante}` : ''} (${m.unidad_medida})${
+    agotado ? ' [Agotado — 0 disp.]' : ''
+  }`
 }
 
 export function MaterialSearchCombobox({
@@ -103,28 +108,47 @@ export function MaterialSearchCombobox({
           {filtered.length === 0 ? (
             <li className="px-3 py-2 text-sm text-gray-500">Sin coincidencias</li>
           ) : (
-            filtered.map((m) => (
-              <li key={m.id} role="option" aria-selected={m.id === value}>
-                <button
-                  type="button"
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                    m.id === value ? 'bg-teal-50 text-[#132A45]' : 'text-gray-800'
-                  }`}
-                  onClick={() => {
-                    onChange(m.id)
-                    setQuery(labelMaterial(m))
-                    setOpen(false)
-                  }}
-                >
-                  <span className="font-medium">{m.nombre_base}</span>
-                  {m.variante && <span className="text-gray-500"> · {m.variante}</span>}
-                  <span className="text-gray-400"> ({m.unidad_medida})</span>
-                  {m.subcategoria && (
-                    <span className="block text-xs text-gray-400">{m.subcategoria}</span>
-                  )}
-                </button>
-              </li>
-            ))
+            filtered.map((m) => {
+              const estaAgotado =
+                m.disabled ||
+                (m.disponible !== undefined && m.disponible !== null && m.disponible <= 0)
+
+              return (
+                <li key={m.id} role="option" aria-selected={m.id === value}>
+                  <button
+                    type="button"
+                    disabled={estaAgotado}
+                    className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between ${
+                      estaAgotado
+                        ? 'opacity-50 cursor-not-allowed bg-gray-50 text-gray-400'
+                        : m.id === value
+                        ? 'bg-teal-50 text-[#132A45] hover:bg-teal-100/60'
+                        : 'text-gray-800 hover:bg-gray-50'
+                    }`}
+                    onClick={() => {
+                      if (estaAgotado) return
+                      onChange(m.id)
+                      setQuery(labelMaterial(m))
+                      setOpen(false)
+                    }}
+                  >
+                    <div>
+                      <span className="font-medium">{m.nombre_base}</span>
+                      {m.variante && <span className="text-gray-500"> · {m.variante}</span>}
+                      <span className="text-gray-400"> ({m.unidad_medida})</span>
+                      {m.subcategoria && (
+                        <span className="block text-xs text-gray-400">{m.subcategoria}</span>
+                      )}
+                    </div>
+                    {estaAgotado && (
+                      <span className="shrink-0 text-[11px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">
+                        Agotado (0 disp.)
+                      </span>
+                    )}
+                  </button>
+                </li>
+              )
+            })
           )}
         </ul>
       )}

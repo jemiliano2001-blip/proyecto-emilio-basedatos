@@ -21,7 +21,7 @@ export default async function EditarObraPage({
   const { data: obra } = await supabase
     .from('obras')
     .select(
-      'id, nombre, cliente, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn, creado_en'
+      'id, nombre, cliente, ciudad, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn, creado_en'
     )
     .eq('id', params.id)
     .maybeSingle()
