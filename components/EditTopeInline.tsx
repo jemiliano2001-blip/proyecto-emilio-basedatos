@@ -28,7 +28,7 @@ export function EditTopeInline({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-3 text-sm font-semibold text-[#1E7F7A]"
+        className="mt-3 text-sm font-semibold text-accent hover:underline"
       >
         Editar cantidad
       </button>
@@ -36,13 +36,13 @@ export function EditTopeInline({
   }
 
   return (
-    <form action={formAction} className="mt-3 space-y-3 border-t border-gray-100 pt-3">
+    <form action={formAction} className="mt-3 space-y-3 border-t border-rule pt-3">
       <input type="hidden" name="material_id" value={materialId} />
       <FormError message={state.error} />
       {state.ok && (
         <p className="text-sm text-green-700">Cantidad actualizada.</p>
       )}
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-ink">
         Nueva cantidad contratada
         <input
           name="cantidad_contratada"
@@ -57,7 +57,7 @@ export function EditTopeInline({
         <SubmitButton className="btn-primary flex-1">Guardar</SubmitButton>
         <button
           type="button"
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 font-semibold"
+          className="btn-secondary flex-1"
           onClick={() => setOpen(false)}
         >
           Cancelar

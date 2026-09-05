@@ -3,6 +3,8 @@
 import React, { useState, useTransition, useRef } from 'react'
 import type { OrdenCompraFactura } from '@/lib/types'
 import { eliminarFacturaOrdenAction, subirFacturaOrdenAction } from '@/lib/actions/ordenes'
+import { IconClip, IconOjo, IconBasura } from '@/components/icons'
+import { CopyButton } from '@/components/CopyButton'
 
 interface Props {
   ordenId: string
@@ -98,7 +100,7 @@ export function OrdenCompraFacturasSection({
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
             Facturas del proveedor
           </h2>
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
             {facturas.length}
           </span>
         </div>
@@ -107,9 +109,10 @@ export function OrdenCompraFacturasSection({
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="text-xs font-bold text-[#1E7F7A] bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 border border-teal-200"
+            className="btn-secondary text-xs px-3 py-1.5 inline-flex items-center gap-1.5"
           >
-            📎 Adjuntar factura (PDF)
+            <IconClip className="h-3.5 w-3.5" />
+            <span>Adjuntar factura (PDF)</span>
           </button>
         )}
       </div>
@@ -123,9 +126,9 @@ export function OrdenCompraFacturasSection({
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="mt-2 text-xs font-semibold text-[#1E7F7A] hover:underline"
+              className="mt-2 text-xs font-semibold text-accent hover:underline"
             >
-              + Subir comprobante fiscal en PDF o imagen
+              Subir comprobante fiscal en PDF o imagen
             </button>
           )}
         </div>
@@ -134,7 +137,7 @@ export function OrdenCompraFacturasSection({
           {facturas.map((f) => (
             <div
               key={f.id}
-              className="card flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 transition-colors"
+              className="card flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-gray-300 transition-colors"
             >
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold text-xs shrink-0 border border-red-100">
@@ -143,12 +146,13 @@ export function OrdenCompraFacturasSection({
 
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-sm text-[#132A45] break-all">
+                    <p className="font-semibold text-sm text-ink break-all">
                       {f.archivo_nombre}
                     </p>
                     {f.folio_factura && (
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                        Folio: {f.folio_factura}
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                        <span>Folio: {f.folio_factura}</span>
+                        <CopyButton text={f.folio_factura} label="Copiar folio factura" className="py-0 px-1 text-[10px]" />
                       </span>
                     )}
                   </div>
@@ -160,7 +164,7 @@ export function OrdenCompraFacturasSection({
                     {f.monto_factura !== null && f.monto_factura !== undefined && (
                       <>
                         <span>·</span>
-                        <span className="font-semibold text-slate-700">
+                        <span className="font-semibold text-gray-700">
                           ${Number(f.monto_factura).toLocaleString('es-MX', { minimumFractionDigits: 2 })} {moneda}
                         </span>
                       </>
@@ -180,9 +184,10 @@ export function OrdenCompraFacturasSection({
                   href={f.archivo_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors flex items-center gap-1"
+                  className="btn-secondary text-xs px-3 py-1.5 inline-flex items-center gap-1.5"
                 >
-                  👁️ Ver documento
+                  <IconOjo className="h-3.5 w-3.5" />
+                  <span>Ver documento</span>
                 </a>
 
                 {puedeGestionar && (
@@ -190,10 +195,10 @@ export function OrdenCompraFacturasSection({
                     type="button"
                     onClick={() => handleEliminar(f.id)}
                     disabled={deletingId === f.id}
-                    className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                    className="p-2 text-gray-400 hover:text-danger rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
                     title="Eliminar factura"
                   >
-                    🗑️
+                    <IconBasura className="h-4 w-4" />
                   </button>
                 )}
               </div>
@@ -206,7 +211,7 @@ export function OrdenCompraFacturasSection({
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-gray-100">
-            <h3 className="text-lg font-bold text-[#132A45] mb-1">
+            <h3 className="text-lg font-bold text-ink mb-1">
               Adjuntar factura del proveedor
             </h3>
             <p className="text-xs text-gray-500 mb-4">
@@ -214,7 +219,7 @@ export function OrdenCompraFacturasSection({
             </p>
 
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-xs border border-red-200">
+              <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-xs border border-red-200" role="alert">
                 {error}
               </div>
             )}
@@ -229,11 +234,11 @@ export function OrdenCompraFacturasSection({
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   accept=".pdf,application/pdf,image/jpeg,image/png,image/webp,text/xml,application/xml"
-                  className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-teal-50 file:text-[#1E7F7A] hover:file:bg-teal-100 border border-gray-300 rounded-xl p-1 cursor-pointer"
+                  className="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-ink file:text-white hover:file:bg-ink/90 border border-gray-300 rounded-lg p-1 cursor-pointer"
                 />
                 {archivo && (
-                  <p className="text-[11px] text-emerald-600 mt-1 font-medium">
-                    ✓ Archivo seleccionado: {archivo.name} ({formatBytes(archivo.size)})
+                  <p className="text-[11px] text-accent mt-1 font-medium">
+                    Archivo seleccionado: {archivo.name} ({formatBytes(archivo.size)})
                   </p>
                 )}
               </div>
@@ -247,7 +252,7 @@ export function OrdenCompraFacturasSection({
                   placeholder="Ej. F-14329 o UUID del SAT"
                   value={folioFactura}
                   onChange={(e) => setFolioFactura(e.target.value)}
-                  className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E7F7A]"
+                  className="input-base text-sm"
                 />
               </div>
 
@@ -261,7 +266,7 @@ export function OrdenCompraFacturasSection({
                   placeholder="Ej. 1496.88"
                   value={montoFactura}
                   onChange={(e) => setMontoFactura(e.target.value)}
-                  className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E7F7A]"
+                  className="input-base text-sm"
                 />
                 <p className="text-[11px] text-gray-400 mt-1">
                   Total de la orden: ${Number(totalOrden).toLocaleString('es-MX', { minimumFractionDigits: 2 })} {moneda}
@@ -273,16 +278,17 @@ export function OrdenCompraFacturasSection({
                   type="button"
                   onClick={() => setModalOpen(false)}
                   disabled={isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100"
+                  className="btn-secondary text-xs px-4 py-2"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isPending || !archivo}
-                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#1E7F7A] hover:bg-[#16605d] transition-colors disabled:opacity-50"
+                  aria-busy={isPending}
+                  className="btn-primary text-xs px-4 py-2"
                 >
-                  {isPending ? 'Subiendo factura...' : 'Subir factura'}
+                  {isPending ? 'Subiendo factura…' : 'Subir factura'}
                 </button>
               </div>
             </form>

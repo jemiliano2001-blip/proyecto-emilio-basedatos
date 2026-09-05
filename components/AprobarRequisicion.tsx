@@ -50,7 +50,7 @@ export function RechazarSolicitudForm({ solicitudId }: { solicitudId: string }) 
       />
       <button
         type="submit"
-        className="w-full rounded-lg border border-red-300 bg-red-50 py-3 text-sm font-semibold text-red-700"
+        className="btn-danger w-full text-sm"
       >
         Rechazar
       </button>

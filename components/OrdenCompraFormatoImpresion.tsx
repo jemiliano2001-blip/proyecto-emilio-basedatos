@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { IconFlechaAtras, IconImprimir, IconCheck } from '@/components/icons'
 
 interface ItemImpresion {
   id: string
@@ -97,22 +98,23 @@ export function OrdenCompraFormatoImpresion({ orden }: OrdenFormatoProps) {
   const folioMostrado = orden.folio_fisico || orden.folio
 
   return (
-    <div className="min-h-screen bg-slate-100 py-6 px-4 print:p-0 print:bg-white">
+    <div className="min-h-screen bg-paper py-6 px-4 print:p-0 print:bg-white">
       {/* Barra de Controles superior (Oculta al imprimir) */}
-      <div className="max-w-4xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200 print:hidden">
+      <div className="card max-w-4xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-3 p-4 shadow-xs border border-rule print:hidden">
         <div className="flex items-center gap-2">
           <Link
             href={`/ordenes/${orden.id}`}
-            className="text-sm font-semibold text-[#1E7F7A] hover:underline flex items-center gap-1"
+            className="text-sm font-semibold text-accent hover:underline inline-flex items-center gap-1"
           >
-            ← Volver a la orden
+            <IconFlechaAtras className="w-4 h-4" />
+            <span>Volver a la orden</span>
           </Link>
-          <span className="text-gray-300">|</span>
-          <span className="text-xs font-bold px-2.5 py-1 rounded bg-[#132A45] text-white">
+          <span className="text-muted">|</span>
+          <span className="text-xs font-bold px-2.5 py-1 rounded bg-ink text-white">
             {orden.folio}
           </span>
           {orden.folio_fisico && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+            <span className="badge-amber">
               No. Físico: {orden.folio_fisico}
             </span>
           )}
@@ -120,14 +122,14 @@ export function OrdenCompraFormatoImpresion({ orden }: OrdenFormatoProps) {
 
         <div className="flex items-center flex-wrap gap-2">
           {/* Toggle Papel */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-lg text-xs font-medium border border-slate-200">
+          <div className="flex items-center bg-gray-100 p-1 rounded-xl text-xs font-medium border border-rule">
             <button
               type="button"
               onClick={() => setEstiloPapel('amarillo')}
-              className={`px-2.5 py-1 rounded ${
+              className={`px-2.5 py-1 rounded-lg ${
                 estiloPapel === 'amarillo'
                   ? 'bg-amber-100 text-amber-900 font-bold shadow-xs'
-                  : 'text-gray-600 hover:text-black'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               Papel Amarillo
@@ -135,10 +137,10 @@ export function OrdenCompraFormatoImpresion({ orden }: OrdenFormatoProps) {
             <button
               type="button"
               onClick={() => setEstiloPapel('blanco')}
-              className={`px-2.5 py-1 rounded ${
+              className={`px-2.5 py-1 rounded-lg ${
                 estiloPapel === 'blanco'
-                  ? 'bg-white text-slate-900 font-bold shadow-xs'
-                  : 'text-gray-600 hover:text-black'
+                  ? 'bg-white text-ink font-bold shadow-xs'
+                  : 'text-muted hover:text-ink'
               }`}
             >
               Blanco / Impresión
@@ -149,18 +151,26 @@ export function OrdenCompraFormatoImpresion({ orden }: OrdenFormatoProps) {
           <button
             type="button"
             onClick={handleCopiarWhatsApp}
-            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
           >
-            {copiado ? '✓ ¡Copiado!' : '💬 Copiar para WhatsApp'}
+            {copiado ? (
+              <>
+                <IconCheck className="w-3.5 h-3.5" />
+                <span>¡Copiado!</span>
+              </>
+            ) : (
+              <span>Copiar para WhatsApp</span>
+            )}
           </button>
 
           {/* Botón Imprimir / PDF */}
           <button
             type="button"
             onClick={handlePrint}
-            className="px-4 py-1.5 rounded-lg bg-[#1E7F7A] hover:bg-[#186662] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+            className="btn-primary text-xs inline-flex items-center gap-1.5"
           >
-            🖨️ Imprimir / Guardar PDF
+            <IconImprimir className="w-3.5 h-3.5" />
+            <span>Imprimir / Guardar PDF</span>
           </button>
         </div>
       </div>

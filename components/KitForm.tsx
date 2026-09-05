@@ -5,6 +5,7 @@ import { useFormState } from 'react-dom'
 import type { ActionResult } from '@/lib/actions/kits'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
+import { IconPlus, IconBasura } from '@/components/icons'
 import { parseQuantity } from '@/lib/money'
 import type { CatalogoMaterial } from '@/lib/types'
 
@@ -130,7 +131,7 @@ export function KitForm({
         </div>
       </div>
 
-      <div className="card space-y-4 border-teal-200">
+      <div className="card space-y-4">
         <div className="flex items-center justify-between border-b border-gray-100 pb-3">
           <div>
             <h2 className="text-sm font-bold text-ink uppercase tracking-wide">
@@ -143,14 +144,15 @@ export function KitForm({
           <button
             type="button"
             onClick={agregarFila}
-            className="btn-primary text-xs px-3 py-1.5 bg-accent text-white"
+            className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
           >
-            + Componente
+            <IconPlus className="w-3.5 h-3.5" />
+            <span>Componente</span>
           </button>
         </div>
 
         <div className="space-y-3">
-          {items.map((it, idx) => (
+          {items.map((it) => (
             <div
               key={it.key}
               className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200"
@@ -187,9 +189,10 @@ export function KitForm({
                 <button
                   type="button"
                   onClick={() => quitarFila(it.key)}
-                  className="text-xs text-red-600 font-semibold hover:text-red-800 px-2 py-1"
+                  aria-label="Quitar componente"
+                  className="btn-ghost text-red-600 hover:text-red-800 p-2 self-center"
                 >
-                  ✕
+                  <IconBasura className="w-4 h-4" />
                 </button>
               )}
             </div>

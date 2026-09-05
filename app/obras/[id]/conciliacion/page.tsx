@@ -1,5 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { IconPaquete } from '@/components/icons'
+import { ExportarConciliacionButton } from '@/components/ExportarConciliacionButton'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { formatMoneyMx } from '@/lib/money'
 import { puedeVerPrecios } from '@/lib/roles'
@@ -32,12 +36,11 @@ export default async function ConciliacionObraPage({
     if (esRelacionAusente(errPres)) {
       return (
         <main className="page-shell">
-          <header className="pt-2">
-            <Link href={`/obras/${params.id}`} className="text-sm font-medium text-accent hover:underline">
-              ← Volver al proyecto
-            </Link>
-            <h1 className="mt-2 text-2xl font-bold text-ink">Conciliación</h1>
-          </header>
+          <PageHeader
+            title="Conciliación"
+            backHref={`/obras/${params.id}`}
+            backLabel="Volver al proyecto"
+          />
           <div className="card mt-4 border-amber-200 bg-amber-50 text-amber-900">
             El reporte de conciliación todavía no está activo en la base. Cuando se
             aplique la migración, esta pantalla va a funcionar.
@@ -72,44 +75,39 @@ export default async function ConciliacionObraPage({
 
   return (
     <main className="page-shell-wide space-y-6">
-      <header className="pt-4 flex flex-wrap items-start justify-between gap-3 print:hidden">
-        <div>
-          <Link href={`/obras/${params.id}`} className="text-sm text-[#1E7F7A] font-medium hover:underline">
-            ← Volver al Proyecto
-          </Link>
-          <h1 className="text-2xl font-bold text-[#132A45] mt-1">
-            Reporte de Conciliación de Proyecto
-          </h1>
-          <p className="text-gray-500 text-xs">
-            {pres.obra_nombre} {pres.cliente ? `· Cliente: ${pres.cliente}` : ''}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span
-            className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
-              pres.estado === 'cerrada'
-                ? 'bg-gray-800 text-white'
-                : 'bg-green-100 text-green-800 border border-green-200'
-            }`}
-          >
+      <PageHeader
+        className="print:hidden"
+        title="Reporte de Conciliación de Proyecto"
+        description={`${pres.obra_nombre}${pres.cliente ? ` · Cliente: ${pres.cliente}` : ''}`}
+        backHref={`/obras/${params.id}`}
+        backLabel="Volver al proyecto"
+        badge={
+          <Badge variant={pres.estado === 'cerrada' ? 'gray' : 'teal'}>
             Estatus: {pres.estado}
-          </span>
-        </div>
-      </header>
+          </Badge>
+        }
+        actions={
+          <div className="flex items-center gap-2">
+            <ExportarConciliacionButton
+              presupuesto={pres}
+              materiales={mats}
+            />
+          </div>
+        }
+      />
 
       {/* Encabezado Imprimible */}
       <div className="hidden print:block border-b border-gray-300 pb-4 mb-4">
-        <h1 className="text-xl font-bold text-[#132A45]">REPORTE DE CONCILIACIÓN Y CIERRE DE PROYECTO</h1>
+        <h1 className="text-xl font-bold text-ink">REPORTE DE CONCILIACIÓN Y CIERRE DE PROYECTO</h1>
         <p className="text-sm font-semibold">{pres.obra_nombre}</p>
         {pres.cliente && <p className="text-xs">Cliente: {pres.cliente}</p>}
         <p className="text-xs text-gray-500">Fecha de reporte: {new Date().toLocaleDateString('es-MX')}</p>
       </div>
 
       {/* Tarjeta Resumen Financiero ($ MXN) */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b pb-3">
-          <h2 className="font-bold text-[#132A45] text-base">
+      <div className="card p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-rule pb-3">
+          <h2 className="font-bold text-ink text-base">
             Conciliación Financiera ($ MXN)
           </h2>
           {fechaCierre && (
@@ -200,10 +198,10 @@ export default async function ConciliacionObraPage({
       </div>
 
       {/* Conciliación Física de Materiales */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b pb-3">
+      <div className="card p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-rule pb-3">
           <div>
-            <h2 className="font-bold text-[#132A45] text-base">
+            <h2 className="font-bold text-ink text-base">
               Conciliación Física de Materiales
             </h2>
             <p className="text-xs text-gray-500">
@@ -278,7 +276,7 @@ export default async function ConciliacionObraPage({
 
                       <td className="py-2.5 px-2 text-right font-bold">
                         {remanente > 0 ? (
-                          <span className="text-[#1E7F7A]">{remanente}</span>
+                          <span className="text-accent">{remanente}</span>
                         ) : (
                           <span className="text-gray-400">0</span>
                         )}
@@ -309,7 +307,8 @@ export default async function ConciliacionObraPage({
       {/* Resumen de Sobrantes de Material Disponibles para Traspaso */}
       <div className="bg-amber-50 rounded-xl border border-amber-200 p-4 space-y-2 text-xs text-amber-900">
         <h3 className="font-bold text-sm flex items-center gap-2">
-          <span>📦 Materiales Sobrantes Disponibles</span>
+          <IconPaquete className="w-4 h-4 text-amber-800" />
+          <span>Materiales Sobrantes Disponibles</span>
         </h3>
         <p>
           Los siguientes materiales cuentan con disponible en vivo. Al cerrar o finalizar la obra, estos remanentes pueden ser traspasados a otro proyecto mediante la función de <strong>Traspasos</strong>:

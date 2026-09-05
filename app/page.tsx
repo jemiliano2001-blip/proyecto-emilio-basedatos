@@ -1,5 +1,9 @@
 import Link from 'next/link'
-import { IconChevron } from '@/components/icons'
+import { IconChevron, IconPlus, IconDocumento } from '@/components/icons'
+import { PageHeader } from '@/components/PageHeader'
+import { FilterTabs } from '@/components/FilterTabs'
+import { Badge } from '@/components/Badge'
+import { EmptyState } from '@/components/EmptyState'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeGestionarObras } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -35,46 +39,39 @@ export default async function HomePage({
     .eq('estado', estatus)
     .order('nombre')
 
-  const tabClass = (activo: boolean) =>
-    `min-h-[44px] flex-1 rounded-lg px-3 py-2 text-center text-sm font-semibold ${
-      activo ? 'bg-ink text-white' : 'bg-white text-ink border border-gray-200'
-    }`
+  const tabs = [
+    { key: 'activa', label: 'Activos', href: '/?estatus=activa', active: estatus === 'activa' },
+    { key: 'pausada', label: 'Pausados', href: '/?estatus=pausada', active: estatus === 'pausada' },
+    { key: 'cerrada', label: 'Cerrados', href: '/?estatus=cerrada', active: estatus === 'cerrada' },
+  ]
 
   return (
     <main className="page-shell">
-      <header className="mb-4 flex items-start justify-between gap-3 pt-2">
-        <div>
-          <h1 className="text-2xl font-bold text-ink">
-            {estatus === 'activa'
-              ? 'Proyectos activos'
-              : estatus === 'pausada'
-                ? 'Proyectos pausados'
-                : 'Proyectos cerrados'}
-          </h1>
-          <p className="text-sm text-gray-500">
-            {session?.perfil?.nombre
-              ? `Hola, ${session.perfil.nombre}`
-              : 'Materiales y proyectos'}
-          </p>
-        </div>
-        {puedeCrear && (
-          <Link href="/obras/nueva" className="btn-primary shrink-0 px-4 py-2 text-sm">
-            Nuevo proyecto
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        title={
+          estatus === 'activa'
+            ? 'Proyectos activos'
+            : estatus === 'pausada'
+              ? 'Proyectos pausados'
+              : 'Proyectos cerrados'
+        }
+        subtitle={
+          session?.perfil?.nombre
+            ? `Hola, ${session.perfil.nombre}`
+            : 'Materiales y proyectos'
+        }
+        action={
+          puedeCrear
+            ? {
+                label: 'Nuevo proyecto',
+                href: '/obras/nueva',
+                icon: <IconPlus className="w-4 h-4" />,
+              }
+            : undefined
+        }
+      />
 
-      <div className="mb-4 flex gap-2" role="tablist" aria-label="Estatus de proyectos">
-        <Link href="/?estatus=activa" className={tabClass(estatus === 'activa')} scroll={false}>
-          Activos
-        </Link>
-        <Link href="/?estatus=pausada" className={tabClass(estatus === 'pausada')} scroll={false}>
-          Pausados
-        </Link>
-        <Link href="/?estatus=cerrada" className={tabClass(estatus === 'cerrada')} scroll={false}>
-          Cerrados
-        </Link>
-      </div>
+      <FilterTabs tabs={tabs} className="mb-4" />
 
       {error && (
         <div className="card mb-4 border-red-300 bg-red-50 text-red-700">
@@ -93,17 +90,17 @@ export default async function HomePage({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="font-bold text-ink truncate">{obra.nombre}</p>
-                  <span
-                    className={
+                  <Badge
+                    variant={
                       obra.estado === 'activa'
-                        ? 'badge-teal'
+                        ? 'teal'
                         : obra.estado === 'pausada'
-                        ? 'badge-amber'
-                        : 'badge-gray'
+                          ? 'amber'
+                          : 'gray'
                     }
                   >
                     {labelEstatus(obra.estado)}
-                  </span>
+                  </Badge>
                 </div>
                 {(obra.cliente || obra.ciudad || obra.fraccionamiento) && (
                   <p className="text-sm text-gray-500 truncate mt-0.5">
@@ -117,16 +114,20 @@ export default async function HomePage({
         )}
 
         {obras?.length === 0 && (
-          <div className="card text-center py-12 px-4 border-dashed border-gray-300">
-            <p className="text-gray-500 font-medium">
-              No hay proyectos {estatus === 'activa' ? 'activos' : estatus === 'pausada' ? 'pausados' : 'cerrados'} registrados.
-            </p>
-            {puedeCrear && estatus === 'activa' && (
-              <Link href="/obras/nueva" className="btn-primary mt-4 inline-flex">
-                + Crear primer proyecto
-              </Link>
-            )}
-          </div>
+          <EmptyState
+            icon={<IconDocumento className="w-8 h-8" />}
+            title={`No hay proyectos ${estatus === 'activa' ? 'activos' : estatus === 'pausada' ? 'pausados' : 'cerrados'}`}
+            description={
+              puedeCrear && estatus === 'activa'
+                ? 'Comienza registrando tu primer proyecto para gestionar su presupuesto y materiales.'
+                : undefined
+            }
+            action={
+              puedeCrear && estatus === 'activa'
+                ? { label: 'Nuevo proyecto', href: '/obras/nueva' }
+                : undefined
+            }
+          />
         )}
       </div>
     </main>

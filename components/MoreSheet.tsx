@@ -8,6 +8,7 @@ import {
   IconMateriales,
   IconOrdenes,
   IconProveedores,
+  IconRayo,
   IconRecepcion,
   IconSalir,
   IconTraspasos,
@@ -98,7 +99,7 @@ export function MoreSheet({
           </Link>
 
           <Link href="/kits" className={itemClass} onClick={onClose}>
-            <span className="text-base" aria-hidden="true">⚡</span>
+            <IconRayo className="h-5 w-5 shrink-0 text-amber-500" />
             Kits y Ensambles
           </Link>
 

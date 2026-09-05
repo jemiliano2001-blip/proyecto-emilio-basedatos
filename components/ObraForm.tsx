@@ -5,6 +5,7 @@ import { useFormState } from 'react-dom'
 import type { ActionResult } from '@/lib/actions/obras'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
+import { IconPlus, IconBasura, IconRayo } from '@/components/icons'
 import { formatMoneyMx, parseQuantity } from '@/lib/money'
 import type { CatalogoMaterial, MaterialKitWithItems, Obra } from '@/lib/types'
 
@@ -301,18 +302,20 @@ export function ObraForm({
                 <button
                   type="button"
                   onClick={() => setMostrarModalKit(true)}
-                  className="btn-secondary text-xs px-3 py-2 min-h-[38px] text-teal-800 border-teal-300 hover:bg-teal-50"
+                  className="btn-secondary text-xs px-3 py-2 min-h-[38px] text-teal-800 border-teal-300 hover:bg-teal-50 flex items-center gap-1.5"
                 >
-                  ⚡ Cargar Kit / Ensamble
+                  <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Cargar Kit / Ensamble</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={agregarMaterialIndividual}
-                className="btn-primary text-xs px-3 py-2 min-h-[38px] bg-accent text-white"
+                className="btn-primary text-xs px-3 py-2 min-h-[38px] flex items-center gap-1.5"
                 disabled={materiales.length === 0}
               >
-                + Material individual
+                <IconPlus className="w-3.5 h-3.5" />
+                <span>Material individual</span>
               </button>
             </div>
           </div>
@@ -342,9 +345,9 @@ export function ObraForm({
                 <button
                   type="button"
                   onClick={() => setMostrarModalKit(false)}
-                  className="text-xs text-gray-500 hover:text-gray-800 font-bold"
+                  className="text-xs text-gray-500 hover:text-gray-800 font-semibold"
                 >
-                  ✕ Cerrar
+                  Cerrar
                 </button>
               </div>
               <p className="text-xs text-teal-700">
@@ -454,9 +457,10 @@ export function ObraForm({
                   <button
                     type="button"
                     onClick={() => quitarPartida(item.key)}
-                    className="text-xs text-red-600 font-semibold hover:text-red-800 py-1"
+                    className="text-xs text-red-600 font-semibold hover:text-red-800 py-1 inline-flex items-center gap-1"
                   >
-                    ✕ Quitar
+                    <IconBasura className="w-3.5 h-3.5" />
+                    <span>Quitar</span>
                   </button>
                 </div>
 
@@ -528,8 +532,9 @@ export function ObraForm({
                   if (kitsRelacionados.length === 0) return null
                   return (
                     <div className="mt-2 pt-2 border-t border-teal-100 flex flex-wrap items-center gap-2 text-xs bg-teal-50/60 p-2 rounded">
-                      <span className="text-teal-900 font-medium">
-                        ⚡ Equipo con ensamble ({kitsRelacionados[0].nombre}):
+                      <span className="text-teal-900 font-medium inline-flex items-center gap-1">
+                        <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Equipo con ensamble ({kitsRelacionados[0].nombre}):</span>
                       </span>
                       {kitsRelacionados.map((k) => (
                         <button
@@ -560,17 +565,19 @@ export function ObraForm({
                     <button
                       type="button"
                       onClick={() => setMostrarModalKit(true)}
-                      className="btn-secondary text-xs px-3 py-1.5"
+                      className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1"
                     >
-                      ⚡ Usar Kit
+                      <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Usar Kit</span>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={agregarMaterialIndividual}
-                    className="btn-primary text-xs px-3 py-1.5 bg-accent"
+                    className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1"
                   >
-                    + Agregar material
+                    <IconPlus className="w-3.5 h-3.5" />
+                    <span>Agregar material</span>
                   </button>
                 </div>
               </div>

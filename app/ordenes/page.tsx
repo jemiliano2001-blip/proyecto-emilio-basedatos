@@ -1,5 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { EmptyState } from '@/components/EmptyState'
+import { IconDocumento } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeVerPrecios } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -33,15 +37,14 @@ export default async function OrdenesPage() {
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-[#132A45]">Órdenes de compra</h1>
-          <p className="text-gray-500 text-sm">Emitidas desde cotizaciones o requisiciones pagadas</p>
-        </div>
-        <Link href="/proveedores" className="text-sm font-semibold text-[#1E7F7A] shrink-0 pt-1">
-          Proveedores
-        </Link>
-      </header>
+      <PageHeader
+        title="Órdenes de compra"
+        description="Emitidas desde cotizaciones o requisiciones pagadas"
+        action={{
+          label: 'Proveedores',
+          href: '/proveedores',
+        }}
+      />
 
       {error && (
         <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
@@ -52,6 +55,15 @@ export default async function OrdenesPage() {
       <div className="space-y-3">
         {(ordenes as unknown as OrdenRow[] | null)?.map((o) => {
           const numFacturas = o.facturas?.length ?? 0
+          const badgeVariantType =
+            o.estado === 'emitida'
+              ? 'navy'
+              : o.estado === 'completada' || o.estado === 'recibida'
+              ? 'teal'
+              : o.estado === 'parcialmente_recibida'
+              ? 'amber'
+              : 'gray'
+
           return (
             <Link key={o.id} href={`/ordenes/${o.id}`} className="card-interactive block">
               <div className="flex justify-between items-start gap-2">
@@ -63,27 +75,17 @@ export default async function OrdenesPage() {
                         Talonario: {o.folio_fisico}
                       </span>
                     )}
-                    <span
-                      className={
-                        o.estado === 'emitida'
-                          ? 'badge-navy'
-                          : o.estado === 'completada' || o.estado === 'recibida'
-                          ? 'badge-teal'
-                          : o.estado === 'parcialmente_recibida'
-                          ? 'badge-amber'
-                          : 'badge-gray'
-                      }
-                    >
+                    <Badge variant={badgeVariantType}>
                       {o.estado.replaceAll('_', ' ')}
-                    </span>
+                    </Badge>
                     {numFacturas > 0 ? (
-                      <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        ✓ Factura ({numFacturas})
-                      </span>
+                      <Badge variant="teal">
+                        Factura ({numFacturas})
+                      </Badge>
                     ) : (
-                      <span className="text-[11px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
+                      <Badge variant="gray">
                         Sin factura
-                      </span>
+                      </Badge>
                     )}
                   </div>
                   <p className="text-sm font-medium text-gray-700 mt-1">{o.obra?.nombre}</p>
@@ -105,11 +107,11 @@ export default async function OrdenesPage() {
           )
         })}
         {ordenes?.length === 0 && (
-          <div className="card text-center py-12 border-dashed border-gray-300">
-            <p className="text-gray-500 font-medium">
-              Todavía no hay órdenes de compra emitidas.
-            </p>
-          </div>
+          <EmptyState
+            icon={IconDocumento}
+            title="Sin órdenes de compra"
+            description="Todavía no hay órdenes de compra emitidas en el sistema."
+          />
         )}
       </div>
     </main>

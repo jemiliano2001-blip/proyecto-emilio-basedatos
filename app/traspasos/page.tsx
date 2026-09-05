@@ -1,4 +1,8 @@
 import Link from 'next/link'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { EmptyState } from '@/components/EmptyState'
+import { IconPlus, IconPaquete } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeSolicitarTraspaso } from '@/lib/roles'
 import { esRelacionAusente } from '@/lib/schema-disponible'
@@ -21,18 +25,18 @@ interface TraspasoRow {
   }[]
 }
 
-function badgeEstado(estado: EstadoTraspaso) {
+function badgeVariant(estado: EstadoTraspaso): 'teal' | 'navy' | 'amber' | 'gray' {
   switch (estado) {
     case 'completado':
-      return 'badge-teal'
+      return 'teal'
     case 'en_transito':
-      return 'badge-navy'
+      return 'navy'
     case 'solicitado':
-      return 'badge-amber'
+      return 'amber'
     case 'rechazado':
     case 'cancelado':
     default:
-      return 'badge-gray'
+      return 'gray'
   }
 }
 
@@ -84,25 +88,22 @@ export default async function TraspasosPage() {
 
   return (
     <main className="page-shell">
-      <header className="mb-6 flex items-start justify-between gap-3 pt-2">
-        <div>
-          <h1 className="text-2xl font-bold text-ink">Traspasos entre proyectos</h1>
-          <p className="text-sm text-gray-500">
-            Mueve material de un proyecto a otro. El dinero sigue al material.
-          </p>
-        </div>
-        {puedeCrear && !schemaAusente && (
-          <Link
-            href="/traspasos/nuevo"
-            className="btn-primary shrink-0 px-4 py-2 text-sm"
-          >
-            Nuevo traspaso
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        title="Traspasos entre proyectos"
+        description="Mueve material de un proyecto a otro. El dinero sigue al material."
+        action={
+          puedeCrear && !schemaAusente
+            ? {
+                label: 'Nuevo traspaso',
+                href: '/traspasos/nuevo',
+                icon: IconPlus,
+              }
+            : undefined
+        }
+      />
 
       {schemaAusente && (
-        <div className="card border-amber-200 bg-amber-50 text-amber-900">
+        <div className="card border-amber-200 bg-amber-50 text-amber-900 mb-4">
           Los traspasos todavía no están activos en la base. Cuando se aplique la
           migración, este listado va a funcionar.
         </div>
@@ -115,12 +116,20 @@ export default async function TraspasosPage() {
       )}
 
       {!schemaAusente && lista.length === 0 && !error && (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
-          <p className="font-medium text-gray-500">No hay traspasos registrados</p>
-          <p className="mt-1 text-xs text-gray-400">
-            Los traspasos entre proyectos aparecerán en este panel
-          </p>
-        </div>
+        <EmptyState
+          icon={IconPaquete}
+          title="No hay traspasos registrados"
+          description="Los traspasos entre proyectos aparecerán en este panel."
+          action={
+            puedeCrear
+              ? {
+                  label: 'Nuevo traspaso',
+                  href: '/traspasos/nuevo',
+                  icon: IconPlus,
+                }
+              : undefined
+          }
+        />
       )}
 
       {!schemaAusente && lista.length > 0 && (
@@ -138,19 +147,15 @@ export default async function TraspasosPage() {
               <Link
                 key={t.id}
                 href={`/traspasos/${t.id}`}
-                className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-gray-300 hover:shadow-md transition"
+                className="card-interactive block"
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#132A45] text-sm">{t.folio}</span>
-                      <span
-                        className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badgeEstado(
-                          t.estado
-                        )}`}
-                      >
+                      <span className="font-bold text-ink text-sm">{t.folio}</span>
+                      <Badge variant={badgeVariant(t.estado)}>
                         {labelEstado(t.estado)}
-                      </span>
+                      </Badge>
                     </div>
                     <p className="text-xs text-gray-400 mt-0.5">{fecha}</p>
                   </div>
@@ -180,7 +185,7 @@ export default async function TraspasosPage() {
 
                 <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
                   <span>Solicita: {t.solicitante?.nombre ?? 'Anónimo'}</span>
-                  <span className="text-[#132A45] font-semibold hover:underline">
+                  <span className="text-accent font-semibold hover:underline">
                     Ver detalle →
                   </span>
                 </div>

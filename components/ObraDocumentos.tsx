@@ -14,6 +14,8 @@ import {
   labelTipoDocumento,
 } from '@/lib/validations/documento'
 import type { ObraDocumento } from '@/lib/types'
+import { EmptyState } from '@/components/EmptyState'
+import { IconPlus, IconDocumento } from '@/components/icons'
 
 const initialState: DocumentoActionResult = { error: null }
 
@@ -84,9 +86,16 @@ export function ObraDocumentos({
           <button
             type="button"
             onClick={() => setMostrandoSubida((prev) => !prev)}
-            className="text-sm font-semibold text-accent hover:underline py-1 px-2"
+            className="text-xs font-semibold text-accent hover:underline py-1 px-2 inline-flex items-center gap-1"
           >
-            {mostrandoSubida ? '✕ Cerrar subida' : '+ Adjuntar PDF'}
+            {mostrandoSubida ? (
+              <span>Cerrar subida</span>
+            ) : (
+              <>
+                <IconPlus className="w-3.5 h-3.5" />
+                <span>Adjuntar PDF</span>
+              </>
+            )}
           </button>
         )}
       </div>
@@ -228,14 +237,15 @@ export function ObraDocumentos({
         ))}
 
         {documentos.length === 0 && (
-          <div className="card text-center py-6 text-gray-500 space-y-1">
-            <p className="text-sm font-medium">No hay documentos adjuntos en este proyecto.</p>
-            <p className="text-xs text-gray-400">
-              {puedeGestionar
+          <EmptyState
+            icon={<IconDocumento className="w-7 h-7" />}
+            title="Sin documentos adjuntos"
+            description={
+              puedeGestionar
                 ? 'Puedes adjuntar presupuestos formales, planos o minutas en PDF usando el botón de arriba.'
-                : 'La oficina aún no ha cargado archivos PDF para este proyecto.'}
-            </p>
-          </div>
+                : 'La oficina aún no ha cargado archivos PDF para este proyecto.'
+            }
+          />
         )}
       </div>
     </div>

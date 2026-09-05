@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
 import {
   AprobarComprasButton,
   AprobarPagoButton,
@@ -49,19 +51,19 @@ interface OrdenRelacionada {
   obra: { nombre: string } | null
 }
 
-function badgeEstado(estado: EstadoSolicitud) {
+function badgeVariant(estado: EstadoSolicitud): 'red' | 'teal' | 'navy' | 'amber' {
   switch (estado) {
     case 'cancelada':
     case 'rechazada':
-      return 'bg-gray-100 text-gray-500'
+      return 'red'
     case 'finalizada':
     case 'aprobada':
-      return 'bg-green-100 text-green-700'
+      return 'teal'
     case 'en_proceso':
     case 'en_cotizacion':
-      return 'bg-blue-100 text-blue-700'
+      return 'navy'
     default:
-      return 'bg-amber-100 text-amber-700'
+      return 'amber'
   }
 }
 
@@ -136,32 +138,27 @@ export default async function SolicitudDetallePage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href="/solicitudes" className="text-sm text-[#1E7F7A] font-medium">
-          ← Solicitudes
-        </Link>
-        <div className="flex items-start justify-between gap-3 mt-2">
+      <PageHeader
+        title={detalle.obra?.nombre ?? 'Proyecto'}
+        description={
           <div>
-            <h1 className="text-2xl font-bold text-[#132A45]">
-              {detalle.obra?.nombre ?? 'Proyecto'}
-            </h1>
             {detalle.obra?.fraccionamiento && (
               <p className="text-gray-500 text-sm">{detalle.obra.fraccionamiento}</p>
             )}
+            <p className="text-xs text-muted mt-1">
+              {detalle.solicitante?.nombre ? `${detalle.solicitante.nombre} · ` : ''}
+              {new Date(detalle.creado_en).toLocaleString('es-MX')}
+            </p>
           </div>
-          <span
-            className={`text-xs font-semibold rounded-full px-2 py-1 capitalize shrink-0 ${badgeEstado(
-              detalle.estado
-            )}`}
-          >
+        }
+        backHref="/solicitudes"
+        backLabel="Solicitudes"
+        badge={
+          <Badge variant={badgeVariant(detalle.estado)}>
             {labelEstado(detalle.estado)}
-          </span>
-        </div>
-        <p className="text-xs text-gray-400 mt-2">
-          {detalle.solicitante?.nombre ? `${detalle.solicitante.nombre} · ` : ''}
-          {new Date(detalle.creado_en).toLocaleString('es-MX')}
-        </p>
-      </header>
+          </Badge>
+        }
+      />
 
       {detalle.nota && (
         <div className="card mb-4">
@@ -247,7 +244,7 @@ export default async function SolicitudDetallePage({
         {mostrarCotizarLegacy && (
           <Link
             href={`/solicitudes/${detalle.id}/cotizar`}
-            className="w-full text-center block rounded-lg border border-gray-300 py-3 text-sm font-semibold text-gray-600"
+            className="btn-secondary w-full text-center block text-sm"
           >
             Cotizar (flujo anterior)
           </Link>

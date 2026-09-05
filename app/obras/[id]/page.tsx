@@ -1,5 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { EmptyState } from '@/components/EmptyState'
+import { IconPlus, IconDocumento, IconPaquete } from '@/components/icons'
 import { CierreObraAcciones } from '@/components/CierreObraAcciones'
 import { EditTopeInline } from '@/components/EditTopeInline'
 import { ObraDocumentos } from '@/components/ObraDocumentos'
@@ -120,27 +124,26 @@ export default async function ObraDetallePage({
 
   return (
     <main className="page-shell space-y-6">
-      <header className="pt-2">
-        <Link href="/" className="text-sm font-medium text-accent hover:underline">
-          ← Proyectos
-        </Link>
-        <div className="mt-2 flex items-start justify-between gap-3">
+      <PageHeader
+        title={obra.nombre}
+        backHref="/"
+        backLabel="Proyectos"
+        badge={
+          <Badge
+            variant={
+              obra.estado === 'activa'
+                ? 'teal'
+                : obra.estado === 'pausada'
+                ? 'amber'
+                : 'gray'
+            }
+          >
+            {labelEstatus(obra.estado)}
+          </Badge>
+        }
+        description={
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold text-ink">{obra.nombre}</h1>
-              <span
-                className={
-                  obra.estado === 'activa'
-                    ? 'badge-teal'
-                    : obra.estado === 'pausada'
-                    ? 'badge-amber'
-                    : 'badge-gray'
-                }
-              >
-                {labelEstatus(obra.estado)}
-              </span>
-            </div>
-            {obra.cliente && <p className="text-sm font-medium text-gray-700 mt-1">Cliente: {obra.cliente}</p>}
+            {obra.cliente && <p className="text-sm font-medium text-gray-700">Cliente: {obra.cliente}</p>}
             {(obra.ciudad || obra.fraccionamiento) && (
               <p className="text-sm text-gray-500">
                 {[obra.ciudad, obra.fraccionamiento].filter(Boolean).join(' · ')}
@@ -150,43 +153,47 @@ export default async function ObraDetallePage({
               <p className="text-xs text-gray-500 mt-0.5">Ubicación: {obra.ubicacion}</p>
             )}
           </div>
-          {puedeEditarObra && (
-            <Link href={`/obras/${params.id}/editar`} className="btn-secondary shrink-0 px-4 py-2 text-sm">
+        }
+        actions={
+          puedeEditarObra ? (
+            <Link href={`/obras/${params.id}/editar`} className="btn-secondary px-4 py-2 text-sm">
               Editar
             </Link>
-          )}
-        </div>
+          ) : undefined
+        }
+      />
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {verConciliacion && (
-            <Link href={`/obras/${params.id}/conciliacion`} className="btn-secondary px-4 py-2 text-sm">
-              Conciliación
-            </Link>
-          )}
-          <a
-            href="#documentos"
-            className="btn-secondary px-3 py-2 text-sm inline-flex items-center gap-1.5 text-teal-800 border-teal-300 hover:bg-teal-50"
-          >
-            <span>📁 Documentos / PDFs</span>
-            <span className="rounded-full bg-teal-100 text-teal-900 text-xs px-1.5 py-0.2 font-bold">
-              {documentos.length}
-            </span>
-          </a>
-          <CierreObraAcciones
-            obraId={obra.id}
-            estado={obra.estado}
-            puedeCerrar={puedeCerrar}
-            puedeReabrir={puedeReabrir}
-          />
-        </div>
-      </header>
+      <div className="flex flex-wrap items-center gap-2 -mt-2">
+        {verConciliacion && (
+          <Link href={`/obras/${params.id}/conciliacion`} className="btn-secondary px-4 py-2 text-sm">
+            Conciliación
+          </Link>
+        )}
+        <a
+          href="#documentos"
+          className="btn-secondary px-3 py-2 text-sm inline-flex items-center gap-1.5 text-accent"
+        >
+          <IconDocumento className="w-4 h-4" />
+          <span>Documentos / PDFs</span>
+          <span className="badge-teal">
+            {documentos.length}
+          </span>
+        </a>
+        <CierreObraAcciones
+          obraId={obra.id}
+          estado={obra.estado}
+          puedeCerrar={puedeCerrar}
+          puedeReabrir={puedeReabrir}
+        />
+      </div>
 
       {puedeSolicitar && obra.estado === 'activa' && (
         <Link
           href={`/solicitudes/nueva?obra=${params.id}`}
-          className="btn-primary block w-full text-center"
+          className="btn-primary flex items-center justify-center gap-2 w-full text-center"
         >
-          + Solicitar material
+          <IconPlus className="w-4 h-4" />
+          <span>Solicitar material</span>
         </Link>
       )}
 
@@ -249,9 +256,10 @@ export default async function ObraDetallePage({
           {puedeTopes && (
             <Link
               href={`/obras/${params.id}/asignar-materiales`}
-              className="btn-primary shrink-0 text-xs px-3 py-2 min-h-[38px] bg-accent text-white"
+              className="btn-primary shrink-0 text-xs px-3 py-2 min-h-[38px] inline-flex items-center gap-1.5"
             >
-              + Asignar materiales
+              <IconPlus className="w-3.5 h-3.5" />
+              <span>Asignar materiales</span>
             </Link>
           )}
         </div>
@@ -281,9 +289,9 @@ export default async function ObraDetallePage({
                   </div>
 
                   {sinSaldo && (
-                    <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-red-100 text-red-700">
-                      Sin saldo disponible
-                    </span>
+                    <Badge variant="red">
+                      Sin saldo
+                    </Badge>
                   )}
                 </div>
 
@@ -327,9 +335,19 @@ export default async function ObraDetallePage({
           })}
 
           {saldos?.length === 0 && (
-            <p className="card py-8 text-center text-gray-500">
-              Todavía no hay materiales asignados para este proyecto.
-            </p>
+            <EmptyState
+              icon={IconPaquete}
+              title="Sin materiales asignados"
+              description="Todavía no hay materiales asignados en el presupuesto de este proyecto."
+              action={
+                puedeTopes
+                  ? {
+                      label: 'Asignar materiales',
+                      href: `/obras/${params.id}/asignar-materiales`,
+                    }
+                  : undefined
+              }
+            />
           )}
         </div>
       </div>

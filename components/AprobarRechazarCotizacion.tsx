@@ -25,7 +25,7 @@ export function AprobarRechazarCotizacion({ cotizacionId }: { cotizacionId: stri
         <SubmitButton>Aprobar y emitir OC</SubmitButton>
       </form>
       <form action={rechazarAction}>
-        <SubmitButton className="w-full rounded-lg border border-red-300 text-red-700 px-5 py-3 text-base font-semibold bg-white">
+        <SubmitButton className="btn-danger w-full">
           Rechazar solicitud
         </SubmitButton>
       </form>

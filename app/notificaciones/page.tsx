@@ -1,4 +1,7 @@
-import Link from 'next/link'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { EmptyState } from '@/components/EmptyState'
+import { IconDocumento } from '@/components/icons'
 import {
   abrirNotificacionAction,
   marcarNotificacionLeidaFormAction,
@@ -32,12 +35,10 @@ export default async function NotificacionesPage() {
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-2">
-        <h1 className="text-2xl font-bold text-ink">Avisos</h1>
-        <p className="text-sm text-gray-500">
-          Lo que te espera: requisiciones, recepciones y traspasos.
-        </p>
-      </header>
+      <PageHeader
+        title="Avisos"
+        description="Lo que te espera: requisiciones, recepciones y traspasos."
+      />
 
       {error && (
         <div className="card mb-4 border-red-300 bg-red-50 text-red-700">
@@ -60,9 +61,9 @@ export default async function NotificacionesPage() {
                   <p className="mt-2 text-xs text-gray-400">{fechaAviso(n.creado_en)}</p>
                 </div>
                 {!n.leida && (
-                  <span className="mt-1 shrink-0 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                  <Badge variant="teal">
                     Nuevo
-                  </span>
+                  </Badge>
                 )}
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -86,7 +87,11 @@ export default async function NotificacionesPage() {
         })}
 
         {items.length === 0 && !error && (
-          <p className="py-8 text-center text-gray-500">No hay avisos todavía.</p>
+          <EmptyState
+            icon={IconDocumento}
+            title="No hay avisos todavía"
+            description="Cuando haya requisiciones, recepciones o traspasos que requieran tu atención, aparecerán aquí."
+          />
         )}
       </div>
     </main>

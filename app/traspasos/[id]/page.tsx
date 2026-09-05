@@ -1,5 +1,6 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
 import { TraspasoAcciones } from '@/components/TraspasoAcciones'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { formatMoneyMx } from '@/lib/money'
@@ -34,18 +35,18 @@ interface TraspasoDetalle {
   }[]
 }
 
-function badgeEstado(estado: EstadoTraspaso) {
+function badgeVariant(estado: EstadoTraspaso): 'teal' | 'navy' | 'amber' | 'gray' {
   switch (estado) {
     case 'completado':
-      return 'bg-green-100 text-green-800 border-green-200'
+      return 'teal'
     case 'en_transito':
-      return 'bg-blue-100 text-blue-800 border-blue-200'
+      return 'navy'
     case 'solicitado':
-      return 'bg-amber-100 text-amber-800 border-amber-200'
+      return 'amber'
     case 'rechazado':
     case 'cancelado':
     default:
-      return 'bg-gray-100 text-gray-700 border-gray-200'
+      return 'gray'
   }
 }
 
@@ -126,27 +127,17 @@ export default async function TraspasoDetallePage({
 
   return (
     <main className="page-shell space-y-6">
-      <header className="pt-4">
-        <Link href="/traspasos" className="text-sm text-[#1E7F7A] font-medium hover:underline">
-          ← Volver a Traspasos
-        </Link>
-
-        <div className="flex items-center justify-between mt-2 gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-[#132A45] flex items-center gap-2">
-              Traspaso {data.folio}
-            </h1>
-            <p className="text-xs text-gray-500 mt-0.5">Solicitado el {fechaCreacion}</p>
-          </div>
-          <span
-            className={`text-xs font-bold px-3 py-1 rounded-full border ${badgeEstado(
-              data.estado
-            )} uppercase tracking-wider`}
-          >
+      <PageHeader
+        title={`Traspaso ${data.folio}`}
+        backHref="/traspasos"
+        backLabel="Volver a Traspasos"
+        description={`Solicitado el ${fechaCreacion}`}
+        badge={
+          <Badge variant={badgeVariant(data.estado)}>
             {String(data.estado ?? '').replace(/_/g, ' ')}
-          </span>
-        </div>
-      </header>
+          </Badge>
+        }
+      />
 
       {/* Botones de acción dinámica */}
       <TraspasoAcciones
@@ -159,12 +150,12 @@ export default async function TraspasoDetallePage({
       />
 
       {/* Tarjeta de Origen y Destino */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm grid grid-cols-2 gap-4">
+      <div className="card grid grid-cols-2 gap-4">
         <div className="border-r border-gray-100 pr-2">
           <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">
             Proyecto origen (salida)
           </span>
-          <p className="text-sm font-bold text-[#132A45] mt-1">
+          <p className="text-sm font-bold text-ink mt-1">
             {data.obra_origen?.nombre ?? 'N/A'}
           </p>
           {data.obra_origen?.fraccionamiento && (
@@ -176,7 +167,7 @@ export default async function TraspasoDetallePage({
           <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">
             Proyecto destino (entrada)
           </span>
-          <p className="text-sm font-bold text-[#132A45] mt-1">
+          <p className="text-sm font-bold text-ink mt-1">
             {data.obra_destino?.nombre ?? 'N/A'}
           </p>
           {data.obra_destino?.fraccionamiento && (
@@ -194,8 +185,8 @@ export default async function TraspasoDetallePage({
       )}
 
       {/* Lista de Materiales */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm space-y-3">
-        <h2 className="font-bold text-[#132A45] text-sm border-b pb-2">
+      <div className="card space-y-3">
+        <h2 className="font-bold text-ink text-sm border-b pb-2">
           Materiales a Traspasar
         </h2>
 
@@ -210,7 +201,7 @@ export default async function TraspasoDetallePage({
                 <p className="text-gray-400 text-[11px]">Unidad: {item.material?.unidad_medida}</p>
               </div>
               <div className="text-right">
-                <span className="text-base font-bold text-[#132A45]">
+                <span className="text-base font-bold text-ink">
                   {item.cantidad}
                 </span>{' '}
                 <span className="text-gray-500 text-xs">{item.material?.unidad_medida}</span>
@@ -236,7 +227,7 @@ export default async function TraspasoDetallePage({
                   </span>
                 )}
               </span>
-              <span className="font-bold text-[#132A45]">{formatMoneyMx(montoTotal)}</span>
+              <span className="font-bold text-ink">{formatMoneyMx(montoTotal)}</span>
             </div>
             <p className="text-[11px] text-gray-500">
               Al completarse, este monto se le abona a{' '}
@@ -254,8 +245,8 @@ export default async function TraspasoDetallePage({
       </div>
 
       {/* Historial / Trazabilidad */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm space-y-2 text-xs">
-        <h2 className="font-bold text-[#132A45] text-sm border-b pb-2 mb-3">
+      <div className="card space-y-2 text-xs">
+        <h2 className="font-bold text-ink text-sm border-b pb-2 mb-3">
           Historial de Trazabilidad
         </h2>
 
@@ -269,7 +260,7 @@ export default async function TraspasoDetallePage({
 
         {fechaAprobacion && (
           <div className="flex items-start gap-3 text-gray-600 pt-2 border-t border-gray-50">
-            <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-navy mt-1.5 shrink-0" />
             <div>
               <p className="font-semibold text-gray-800">Aprobado (En tránsito)</p>
               <p className="text-gray-500">
@@ -281,7 +272,7 @@ export default async function TraspasoDetallePage({
 
         {fechaRecepcion && (
           <div className="flex items-start gap-3 text-gray-600 pt-2 border-t border-gray-50">
-            <div className="w-2 h-2 rounded-full bg-green-500 mt-1.5 shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-teal-600 mt-1.5 shrink-0" />
             <div>
               <p className="font-semibold text-gray-800">Completado (Recibido)</p>
               <p className="text-gray-500">

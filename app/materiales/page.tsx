@@ -1,4 +1,7 @@
 import Link from 'next/link'
+import { PageHeader } from '@/components/PageHeader'
+import { EmptyState } from '@/components/EmptyState'
+import { IconPlus, IconPaquete } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { CATEGORIAS_MATERIAL } from '@/lib/catalogo-categorias'
 import { puedeGestionarCatalogo, puedeVerPrecios } from '@/lib/roles'
@@ -81,22 +84,19 @@ export default async function MaterialesPage() {
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-[#132A45]">Catálogo de materiales</h1>
-          <p className="text-gray-500 text-sm">
-            Agrupados por Obra Civil y Electromecánico
-          </p>
-        </div>
-        {puedeEditar && (
-          <Link
-            href="/materiales/nuevo"
-            className="btn-primary shrink-0 text-sm py-2 px-4"
-          >
-            + Nuevo
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        title="Catálogo de materiales"
+        description="Agrupados por Obra Civil y Electromecánico"
+        action={
+          puedeEditar
+            ? {
+                label: 'Nuevo material',
+                href: '/materiales/nuevo',
+                icon: IconPlus,
+              }
+            : undefined
+        }
+      />
 
       {error && (
         <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
@@ -116,7 +116,7 @@ export default async function MaterialesPage() {
 
           return (
             <section key={grupo.categoria}>
-              <h2 className="text-lg font-bold text-[#132A45] mb-3">{grupo.categoria}</h2>
+              <h2 className="text-lg font-bold text-ink mb-3">{grupo.categoria}</h2>
               {[...porSub.entries()].map(([sub, items]) => (
                 <div key={sub} className="mb-4">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
@@ -135,7 +135,7 @@ export default async function MaterialesPage() {
 
         {sinCategoria.length > 0 && (
           <section>
-            <h2 className="text-lg font-bold text-[#132A45] mb-3">Sin categoría</h2>
+            <h2 className="text-lg font-bold text-ink mb-3">Sin categoría</h2>
             <div className="grid grid-cols-2 gap-3">
               {sinCategoria.map((m) => (
                 <MaterialCard key={m.id} m={m} puedeEditar={puedeEditar} verPrecios={verPrecios} />
@@ -146,11 +146,20 @@ export default async function MaterialesPage() {
       </div>
 
       {lista.length === 0 && (
-        <div className="card text-center py-12 border-dashed border-gray-300">
-          <p className="text-gray-500 font-medium">
-            El catálogo está vacío.
-          </p>
-        </div>
+        <EmptyState
+          icon={IconPaquete}
+          title="El catálogo está vacío"
+          description="Aún no se han dado de alta materiales en el catálogo."
+          action={
+            puedeEditar
+              ? {
+                  label: 'Nuevo material',
+                  href: '/materiales/nuevo',
+                  icon: IconPlus,
+                }
+              : undefined
+          }
+        />
       )}
     </main>
   )

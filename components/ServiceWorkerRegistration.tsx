@@ -55,7 +55,7 @@ export function ServiceWorkerRegistration() {
   if (!mensaje) return null
 
   return (
-    <div className="fixed top-0 inset-x-0 z-30 bg-[#1E7F7A] text-white text-sm px-4 py-2 text-center">
+    <div className="fixed top-0 inset-x-0 z-30 bg-accent text-white text-sm px-4 py-2 text-center shadow-md">
       <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
         <p>{mensaje}</p>
         <button

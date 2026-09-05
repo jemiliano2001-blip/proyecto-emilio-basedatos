@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { TraspasoForm } from '@/components/TraspasoForm'
 import { crearTraspasoAction } from '@/lib/actions/traspasos'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -32,17 +32,12 @@ export default async function NuevoTraspasoPage() {
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-2">
-        <Link href="/traspasos" className="text-sm font-medium text-accent hover:underline">
-          ← Traspasos
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold text-ink">
-          Nuevo traspaso de materiales
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Transfiere materiales disponibles de un proyecto origen a un proyecto destino
-        </p>
-      </header>
+      <PageHeader
+        title="Nuevo traspaso de materiales"
+        description="Transfiere materiales disponibles de un proyecto origen a un proyecto destino"
+        backHref="/traspasos"
+        backLabel="Traspasos"
+      />
 
       {!obras || obras.length < 2 ? (
         <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">

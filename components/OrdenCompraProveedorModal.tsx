@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from 'react'
 import { asignarProveedorOrdenAction } from '@/lib/actions/ordenes'
+import { IconEditar } from '@/components/icons'
 
 interface ProveedorOption {
   id: string
@@ -50,36 +51,37 @@ export function OrdenCompraProveedorModal({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="text-xs font-semibold text-[#1E7F7A] hover:underline flex items-center gap-1"
+        className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1"
       >
-        ✏️ {proveedorActualId ? 'Cambiar proveedor / folio' : 'Asignar proveedor'}
+        <IconEditar className="w-3.5 h-3.5" />
+        <span>{proveedorActualId ? 'Cambiar proveedor / folio' : 'Asignar proveedor'}</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-gray-100">
-            <h3 className="text-lg font-bold text-[#132A45] mb-1">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-xs">
+          <div className="card w-full max-w-md shadow-xl border border-rule">
+            <h3 className="text-lg font-bold text-ink mb-1">
               Proveedor y Folio Físico
             </h3>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-muted mb-4">
               Asigna el proveedor que surtirá esta orden y opcionalmente el número de folio de la hoja membretada.
             </p>
 
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-xs border border-red-200">
+              <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleGuardar} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-ink mb-1">
                   Proveedor
                 </label>
                 <select
                   value={proveedorId}
                   onChange={(e) => setProveedorId(e.target.value)}
-                  className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#1E7F7A]"
+                  className="input-base"
                 >
                   <option value="">-- Sin proveedor seleccionado --</option>
                   {proveedores.map((p) => (
@@ -91,7 +93,7 @@ export function OrdenCompraProveedorModal({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-ink mb-1">
                   Folio físico / No. de talonario (Opcional)
                 </label>
                 <input
@@ -99,9 +101,9 @@ export function OrdenCompraProveedorModal({
                   placeholder="Ej. 14329"
                   value={folioFisico}
                   onChange={(e) => setFolioFisico(e.target.value)}
-                  className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1E7F7A]"
+                  className="input-base"
                 />
-                <p className="text-[11px] text-gray-400 mt-1">
+                <p className="text-[11px] text-muted mt-1">
                   Si dejas este campo vacío, en el formato se mostrará el folio automático del sistema.
                 </p>
               </div>
@@ -111,14 +113,14 @@ export function OrdenCompraProveedorModal({
                   type="button"
                   onClick={() => setIsOpen(false)}
                   disabled={isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100"
+                  className="btn-secondary text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#1E7F7A] hover:bg-[#16605d] transition-colors disabled:opacity-50"
+                  className="btn-primary text-xs"
                 >
                   {isPending ? 'Guardando...' : 'Guardar'}
                 </button>

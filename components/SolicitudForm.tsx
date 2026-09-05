@@ -14,6 +14,7 @@ import {
   labelTipoLinea,
 } from '@/lib/validations/solicitud'
 import type { TipoLineaSolicitud } from '@/lib/types'
+import { IconPlus, IconAlerta } from '@/components/icons'
 
 const initialState: ActionResult = { error: null }
 
@@ -394,14 +395,10 @@ export function SolicitudForm({
                     </span>
                     {esMaterial && disp !== null && (
                       <span
-                        className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
-                          disp <= 0
-                            ? 'bg-red-100 text-red-700 font-bold'
-                            : 'bg-teal-50 text-teal-800'
-                        }`}
+                        className={disp <= 0 ? 'badge-red' : 'badge-teal'}
                       >
                         {disp <= 0
-                          ? '⛔ Saldo: 0 (Agotado)'
+                          ? 'Saldo: 0 (Agotado)'
                           : `Disponible: ${disp} ${mat?.unidad_medida ?? ''}`}
                       </span>
                     )}
@@ -412,7 +409,7 @@ export function SolicitudForm({
                       onClick={() => quitarFila(item.key)}
                       className="text-xs text-red-600 font-semibold hover:text-red-800"
                     >
-                      ✕ Quitar
+                      Quitar
                     </button>
                   )}
                 </div>
@@ -466,13 +463,15 @@ export function SolicitudForm({
                         }
                       />
                       {sinSaldo && (
-                        <p className="text-xs font-semibold text-red-600 mt-1">
-                          ⚠️ Este material no tiene presupuesto asignado o se encuentra agotado en el proyecto. No podrás enviar esta requisición.
+                        <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5">
+                          <IconAlerta className="w-3.5 h-3.5 shrink-0" />
+                          <span>Este material no tiene presupuesto asignado o se encuentra agotado en el proyecto. No podrás enviar esta requisición.</span>
                         </p>
                       )}
                       {saldoInsuficiente && (
-                        <p className="text-xs font-semibold text-red-600 mt-1">
-                          ⚠️ La cantidad solicitada ({cantNum}) supera el saldo disponible ({disp}). Ajusta la cantidad.
+                        <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5">
+                          <IconAlerta className="w-3.5 h-3.5 shrink-0" />
+                          <span>La cantidad solicitada ({cantNum}) supera el saldo disponible ({disp}). Ajusta la cantidad.</span>
                         </p>
                       )}
                     </div>
@@ -552,9 +551,10 @@ export function SolicitudForm({
         <button
           type="button"
           onClick={agregarFila}
-          className="mt-3 w-full rounded-lg border border-dashed border-gray-300 py-3 text-sm font-semibold text-[#1E7F7A] hover:bg-teal-50/50"
+          className="mt-3 w-full rounded-xl border border-dashed border-rule py-3 text-sm font-semibold text-accent hover:bg-teal-50/50 inline-flex items-center justify-center gap-1.5 transition-colors"
         >
-          + Agregar otro renglón
+          <IconPlus className="w-4 h-4" />
+          <span>Agregar otro renglón</span>
         </button>
       </div>
 

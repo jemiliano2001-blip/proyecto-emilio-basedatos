@@ -1,9 +1,12 @@
 import Link from 'next/link'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { EmptyState } from '@/components/EmptyState'
+import { IconPlus, IconPaquete } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeGestionarKits, puedeVerPrecios } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import { formatMoneyMx } from '@/lib/money'
-import type { CatalogoMaterial, MaterialKitWithItems } from '@/lib/types'
 
 export default async function KitsPage() {
   const session = await getSessionUsuario()
@@ -74,19 +77,19 @@ export default async function KitsPage() {
 
   return (
     <main className="page-shell space-y-6">
-      <header className="mb-4 pt-2 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-ink">Kits y Ensambles</h1>
-          <p className="text-gray-500 text-sm">
-            Plantillas para agrupar equipos principales con sus accesorios y componentes menores.
-          </p>
-        </div>
-        {puedeGestionar && (
-          <Link href="/kits/nuevo" className="btn-primary shrink-0 text-sm py-2 px-4">
-            + Nuevo Kit
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        title="Kits y Ensambles"
+        description="Plantillas para agrupar equipos principales con sus accesorios y componentes menores."
+        action={
+          puedeGestionar
+            ? {
+                label: 'Nuevo kit',
+                href: '/kits/nuevo',
+                icon: IconPlus,
+              }
+            : undefined
+        }
+      />
 
       <div className="space-y-4">
         {kits.map((kit) => (
@@ -96,9 +99,9 @@ export default async function KitsPage() {
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold text-ink">{kit.nombre}</h2>
                   {kit.configuracion && (
-                    <span className="badge-teal text-xs">
+                    <Badge variant="teal">
                       {kit.configuracion}
-                    </span>
+                    </Badge>
                   )}
                 </div>
                 {kit.material_principal && (
@@ -152,17 +155,20 @@ export default async function KitsPage() {
         ))}
 
         {kits.length === 0 && (
-          <div className="card text-center py-12 px-4 border-dashed border-gray-300">
-            <p className="text-gray-500 font-medium">No hay kits registrados aún.</p>
-            <p className="text-xs text-gray-400 mt-1">
-              Crea el primer ensamble de transformador u otro equipo con sus accesorios para cargar a obras con un solo clic.
-            </p>
-            {puedeGestionar && (
-              <Link href="/kits/nuevo" className="btn-primary mt-4 inline-flex">
-                + Crear primer kit
-              </Link>
-            )}
-          </div>
+          <EmptyState
+            icon={IconPaquete}
+            title="No hay kits registrados aún"
+            description="Crea el primer ensamble de transformador u otro equipo con sus accesorios para cargar a obras con un solo clic."
+            action={
+              puedeGestionar
+                ? {
+                    label: 'Nuevo kit',
+                    href: '/kits/nuevo',
+                    icon: IconPlus,
+                  }
+                : undefined
+            }
+          />
         )}
       </div>
     </main>

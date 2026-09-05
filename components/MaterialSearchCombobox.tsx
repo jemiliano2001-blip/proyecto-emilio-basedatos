@@ -122,7 +122,7 @@ export function MaterialSearchCombobox({
                       estaAgotado
                         ? 'opacity-50 cursor-not-allowed bg-gray-50 text-gray-400'
                         : m.id === value
-                        ? 'bg-teal-50 text-[#132A45] hover:bg-teal-100/60'
+                        ? 'bg-teal-50 text-ink font-semibold hover:bg-teal-100/60'
                         : 'text-gray-800 hover:bg-gray-50'
                     }`}
                     onClick={() => {

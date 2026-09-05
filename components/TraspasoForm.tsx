@@ -11,9 +11,10 @@ function BotonEnviarTraspaso({ disabled }: { disabled: boolean }) {
     <button
       type="submit"
       disabled={pending || disabled}
-      className="w-full bg-[#132A45] hover:bg-[#1f3f66] disabled:opacity-50 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition text-base"
+      aria-busy={pending}
+      className="btn-primary w-full"
     >
-      {pending ? 'Solicitando Traspaso...' : 'Solicitar Traspaso'}
+      {pending ? 'Solicitando traspaso…' : 'Solicitar traspaso'}
     </button>
   )
 }
@@ -171,8 +172,8 @@ export function TraspasoForm({
       )}
 
       {/* Obra Origen y Destino */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
-        <h2 className="font-semibold text-gray-800 text-sm border-b pb-2">
+      <div className="card space-y-4">
+        <h2 className="font-semibold text-ink text-sm border-b border-gray-100 pb-2">
           Selección de Proyectos
         </h2>
 
@@ -197,7 +198,7 @@ export function TraspasoForm({
                   if (otra) setObraDestinoId(otra.id)
                 }
               }}
-              className="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-[#132A45] focus:outline-none"
+              className="input-base text-sm"
               required
             >
               {obras.map((o) => (
@@ -216,7 +217,7 @@ export function TraspasoForm({
               name="obra_destino_id"
               value={obraDestinoId}
               onChange={(e) => setObraDestinoId(e.target.value)}
-              className="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-[#132A45] focus:outline-none"
+              className="input-base text-sm"
               required
             >
               {obras
@@ -232,7 +233,7 @@ export function TraspasoForm({
 
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">
-            Motivo / Observaciones del Traspaso
+            Motivo / Observaciones del traspaso
           </label>
           <input
             type="text"
@@ -240,34 +241,34 @@ export function TraspasoForm({
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
             placeholder="Ej. Transferencia por requerimiento urgente de obra civil"
-            className="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-[#132A45] focus:outline-none"
+            className="input-base text-sm"
           />
         </div>
       </div>
 
       {/* Agregar Materiales */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
-        <h2 className="font-semibold text-gray-800 text-sm border-b pb-2">
+      <div className="card space-y-4">
+        <h2 className="font-semibold text-ink text-sm border-b border-gray-100 pb-2">
           Agregar Materiales al Traspaso
         </h2>
 
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Buscar Material
+              Buscar material
             </label>
             <input
               type="text"
               value={materialBusqueda}
               onChange={(e) => setMaterialBusqueda(e.target.value)}
               placeholder="Escribe para buscar material..."
-              className="w-full text-sm border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#132A45] focus:outline-none mb-2"
+              className="input-base text-sm mb-2"
             />
 
             <select
               value={materialIdSel}
               onChange={(e) => setMaterialIdSel(e.target.value)}
-              className="w-full text-sm border border-gray-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-[#132A45] focus:outline-none"
+              className="input-base text-sm"
             >
               <option value="">-- Selecciona un material --</option>
               {materialesFiltrados.map((m) => {
@@ -282,7 +283,7 @@ export function TraspasoForm({
           </div>
 
           {materialActual && (
-            <div className="bg-blue-50 p-3 rounded-lg flex items-center justify-between text-xs text-blue-800 border border-blue-100">
+            <div className="bg-teal-50 p-3 rounded-lg flex items-center justify-between text-xs text-teal-800 border border-teal-100">
               <span>
                 Material seleccionado: <strong>{materialActual.nombre_base} {materialActual.variante || ''}</strong>
               </span>
@@ -305,23 +306,23 @@ export function TraspasoForm({
                 value={cantidadSel}
                 onChange={(e) => setCantidadSel(e.target.value)}
                 placeholder={`Máx ${disponibleActual}`}
-                className="w-full text-sm border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-[#132A45] focus:outline-none"
+                className="input-base text-sm"
               />
             </div>
             <button
               type="button"
               onClick={handleAgregarItem}
-              className="bg-gray-800 hover:bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition shrink-0"
+              className="btn-primary text-xs px-4 py-3 shrink-0"
             >
-              + Agregar
+              Agregar
             </button>
           </div>
         </div>
       </div>
 
       {/* Lista de Items Agregados */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3">
-        <h2 className="font-semibold text-gray-800 text-sm border-b pb-2 flex items-center justify-between">
+      <div className="card space-y-3">
+        <h2 className="font-semibold text-ink text-sm border-b border-gray-100 pb-2 flex items-center justify-between">
           <span>Materiales en el traspaso</span>
           <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-normal">
             {items.length} {items.length === 1 ? 'item' : 'items'}
@@ -337,17 +338,17 @@ export function TraspasoForm({
             {items.map((item) => (
               <div key={item.material_id} className="py-2.5 flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">
+                  <p className="text-sm font-semibold text-ink">
                     {item.nombre_base} {item.variante ? `(${item.variante})` : ''}
                   </p>
                   <p className="text-xs text-gray-500">
-                    Cantidad: <strong className="text-[#132A45]">{item.cantidad} {item.unidad_medida}</strong> (de {item.disponible} disponibles)
+                    Cantidad: <strong className="text-ink font-bold">{item.cantidad} {item.unidad_medida}</strong> (de {item.disponible} disponibles)
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleEliminarItem(item.material_id)}
-                  className="text-xs text-red-600 hover:text-red-800 hover:bg-red-50 p-1.5 rounded transition"
+                  className="text-xs text-danger hover:underline p-1.5"
                 >
                   Quitar
                 </button>

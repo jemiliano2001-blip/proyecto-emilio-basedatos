@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { ProveedorForm } from '@/components/ProveedorForm'
 import { updateProveedorAction } from '@/lib/actions/proveedores'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -30,12 +30,12 @@ export default async function EditarProveedorPage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href="/proveedores" className="text-sm text-[#1E7F7A] font-medium">
-          ← Proveedores
-        </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">Editar proveedor</h1>
-      </header>
+      <PageHeader
+        title="Editar proveedor"
+        subtitle={proveedor.nombre}
+        backHref="/proveedores"
+        backLabel="Proveedores"
+      />
       <ProveedorForm
         action={updateAction}
         proveedor={proveedor as Proveedor}

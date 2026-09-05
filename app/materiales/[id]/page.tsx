@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { MaterialForm } from '@/components/MaterialForm'
 import { updateMaterialAction } from '@/lib/actions/materiales'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -32,12 +32,12 @@ export default async function EditarMaterialPage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href="/materiales" className="text-sm text-[#1E7F7A] font-medium">
-          ← Volver al catálogo
-        </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">Editar material</h1>
-      </header>
+      <PageHeader
+        title="Editar material"
+        subtitle={material.nombre_base}
+        backHref="/materiales"
+        backLabel="Volver al catálogo"
+      />
       <MaterialForm
         action={updateAction}
         material={material as CatalogoMaterial}

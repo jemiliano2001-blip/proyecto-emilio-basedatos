@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { ObraForm } from '@/components/ObraForm'
 import { updateObraAction } from '@/lib/actions/obras'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -32,12 +32,12 @@ export default async function EditarObraPage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href={`/obras/${params.id}`} className="text-sm text-[#1E7F7A] font-medium">
-          ← Volver al proyecto
-        </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">Editar proyecto</h1>
-      </header>
+      <PageHeader
+        title="Editar proyecto"
+        description={obra.nombre}
+        backHref={`/obras/${params.id}`}
+        backLabel="Volver al proyecto"
+      />
       <ObraForm
         action={updateAction}
         obra={obra as Obra}

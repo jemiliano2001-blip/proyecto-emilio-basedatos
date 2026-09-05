@@ -1,5 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { EmptyState } from '@/components/EmptyState'
+import { IconPaquete } from '@/components/icons'
 import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
@@ -62,12 +66,10 @@ export default async function RecepcionesPage() {
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <h1 className="text-2xl font-bold text-[#132A45]">Recepción</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Checklist de materiales recibidos vs lo pedido en la OC.
-        </p>
-      </header>
+      <PageHeader
+        title="Recepción"
+        description="Checklist de materiales recibidos vs lo pedido en la OC."
+      />
 
       <OfflineQueueBanner />
 
@@ -77,7 +79,7 @@ export default async function RecepcionesPage() {
             Órdenes por recibir
           </h2>
           {ordenesChecklist.length === 0 ? (
-            <div className="card text-sm text-gray-600">
+            <div className="card text-sm text-gray-500 py-4 text-center">
               No hay órdenes pendientes de recepción.
             </div>
           ) : (
@@ -90,9 +92,9 @@ export default async function RecepcionesPage() {
                 >
                   <div className="flex justify-between gap-2 items-baseline">
                     <p className="font-semibold text-ink">{orden.folio}</p>
-                    <span className="badge-amber">
+                    <Badge variant="amber">
                       {orden.estado.replaceAll('_', ' ')}
-                    </span>
+                    </Badge>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">{orden.obra_nombre}</p>
                   <p className="text-xs text-gray-400">{orden.proveedor_nombre}</p>
@@ -109,7 +111,7 @@ export default async function RecepcionesPage() {
             Pendientes de revisión ({pendientes.length})
           </h2>
           {pendientes.length === 0 ? (
-            <div className="card text-sm text-gray-600">Nada por revisar.</div>
+            <div className="card text-sm text-gray-500 py-4 text-center">Nada por revisar.</div>
           ) : (
             <div className="space-y-2">
               {pendientes.map((r) => (
@@ -120,13 +122,13 @@ export default async function RecepcionesPage() {
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-ink">{r.orden_folio}</p>
-                    <span className="badge-amber">Por revisar</span>
+                    <Badge variant="amber">Por revisar</Badge>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
                     {r.receptor_nombre} ·{' '}
                     {new Date(r.recibido_en).toLocaleString('es-MX')}
                   </p>
-                  <p className="text-xs text-accent font-medium mt-1">Revisar checklist →</p>
+                  <p className="text-xs text-accent font-medium mt-1">Revisar checklist</p>
                 </Link>
               ))}
             </div>
@@ -139,7 +141,11 @@ export default async function RecepcionesPage() {
           Historial
         </h2>
         {(puedeRevisar ? otras : rows).length === 0 ? (
-          <div className="card text-sm text-gray-600">Aún no hay recepciones.</div>
+          <EmptyState
+            icon={IconPaquete}
+            title="Sin recepciones registradas"
+            description="Aún no hay recepciones de material en el historial."
+          />
         ) : (
           <div className="space-y-2">
             {(puedeRevisar ? otras : rows).map((r) => (
@@ -150,17 +156,17 @@ export default async function RecepcionesPage() {
               >
                 <div className="flex justify-between items-center gap-2">
                   <p className="font-semibold text-ink">{r.orden_folio}</p>
-                  <span
-                    className={
+                  <Badge
+                    variant={
                       r.estado === 'aprobada'
-                        ? 'badge-teal'
+                        ? 'teal'
                         : r.estado === 'pendiente_revision'
-                        ? 'badge-amber'
-                        : 'badge-red'
+                        ? 'amber'
+                        : 'red'
                     }
                   >
                     {etiquetaEstado(r.estado)}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
                   {new Date(r.recibido_en).toLocaleString('es-MX')}

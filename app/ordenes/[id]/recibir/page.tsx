@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { RecepcionForm } from '@/components/RecepcionForm'
 import { crearRecepcionAction } from '@/lib/actions/recepciones'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -35,19 +35,22 @@ export default async function RecibirOrdenPage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href="/recepciones" className="text-sm text-[#1E7F7A] font-medium">
-          ← Recepción
-        </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">
-          Checklist · {cabecera.folio}
-        </h1>
-        <p className="text-gray-500 text-sm">{cabecera.obra_nombre}</p>
-        <p className="text-xs text-gray-400">{cabecera.proveedor_nombre}</p>
-        <p className="text-xs text-gray-400 mt-1 capitalize">
-          Estado OC: {String(cabecera.orden_estado).replaceAll('_', ' ')}
-        </p>
-      </header>
+      <PageHeader
+        title={`Checklist · ${cabecera.folio}`}
+        description={
+          <div>
+            <p className="text-sm font-medium text-gray-700">{cabecera.obra_nombre}</p>
+            {cabecera.proveedor_nombre && (
+              <p className="text-xs text-gray-500">{cabecera.proveedor_nombre}</p>
+            )}
+            <p className="text-xs text-muted mt-0.5 capitalize">
+              Estado OC: {String(cabecera.orden_estado).replaceAll('_', ' ')}
+            </p>
+          </div>
+        }
+        backHref="/recepciones"
+        backLabel="Recepción"
+      />
 
       <RecepcionForm action={crearRecepcionAction} ordenId={params.id} items={items} />
     </main>

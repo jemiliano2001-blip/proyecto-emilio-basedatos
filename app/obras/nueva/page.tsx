@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { ObraForm } from '@/components/ObraForm'
 import { createObraAction } from '@/lib/actions/obras'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -107,15 +107,12 @@ export default async function NuevaObraPage() {
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href="/" className="text-sm text-accent font-medium hover:underline">
-          ← Volver a proyectos
-        </Link>
-        <h1 className="text-2xl font-bold text-ink mt-2">Nuevo proyecto</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Registra la información general y define el presupuesto de materiales asignados para el proyecto.
-        </p>
-      </header>
+      <PageHeader
+        title="Nuevo proyecto"
+        description="Registra la información general y define el presupuesto de materiales asignados para el proyecto."
+        backHref="/"
+        backLabel="Volver a proyectos"
+      />
 
       <ObraForm
         action={createObraAction}

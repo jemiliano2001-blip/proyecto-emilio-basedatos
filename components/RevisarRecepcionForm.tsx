@@ -44,7 +44,7 @@ export function RevisarRecepcionForm({ recepcionId }: { recepcionId: string }) {
         </label>
         <button
           type="submit"
-          className="w-full rounded-xl bg-red-600 text-white font-semibold py-3 text-base"
+          className="btn-danger w-full"
         >
           Rechazar recepción
         </button>

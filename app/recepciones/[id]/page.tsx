@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeRevisarRecepcion, puedeVerRecepciones } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -62,19 +64,27 @@ export default async function RecepcionDetallePage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href="/recepciones" className="text-sm text-[#1E7F7A] font-medium">
-          ← Recepción
-        </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">
-          {detalle.orden?.folio ?? 'Recepción'}
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">{etiquetaEstado(detalle.estado)}</p>
-        <p className="text-xs text-gray-400">
-          Capturado por {detalle.receptor?.nombre ?? '—'} ·{' '}
-          {new Date(detalle.recibido_en).toLocaleString('es-MX')}
-        </p>
-      </header>
+      <PageHeader
+        title={detalle.orden?.folio ?? 'Recepción'}
+        backHref="/recepciones"
+        backLabel="Recepción"
+        badge={
+          <Badge
+            variant={
+              detalle.estado === 'aprobada'
+                ? 'teal'
+                : detalle.estado === 'pendiente_revision'
+                ? 'amber'
+                : 'red'
+            }
+          >
+            {etiquetaEstado(detalle.estado)}
+          </Badge>
+        }
+        description={`Capturado por ${detalle.receptor?.nombre ?? '—'} · ${new Date(
+          detalle.recibido_en
+        ).toLocaleString('es-MX')}`}
+      />
 
       {(detalle.referencia_entrega || detalle.nota) && (
         <div className="card mb-4 space-y-1">
@@ -128,23 +138,25 @@ export default async function RecepcionDetallePage({
         </div>
       )}
 
-      {puedeRevisar && (
-        <Link
-          href={`/recepciones/${detalle.id}/revisar`}
-          className="block w-full text-center rounded-xl bg-[#132A45] text-white font-semibold py-3"
-        >
-          Revisar checklist
-        </Link>
-      )}
+      <div className="space-y-3 pt-2">
+        {puedeRevisar && (
+          <Link
+            href={`/recepciones/${detalle.id}/revisar`}
+            className="btn-primary w-full text-center block"
+          >
+            Revisar checklist
+          </Link>
+        )}
 
-      {detalle.orden?.id && (
-        <Link
-          href={`/ordenes/${detalle.orden.id}/recibir`}
-          className="block w-full text-center mt-3 rounded-xl border border-gray-300 font-semibold py-3 text-sm"
-        >
-          Registrar otra recepción de esta OC
-        </Link>
-      )}
+        {detalle.orden?.id && (
+          <Link
+            href={`/ordenes/${detalle.orden.id}/recibir`}
+            className="btn-secondary w-full text-center block"
+          >
+            Registrar otra recepción de esta OC
+          </Link>
+        )}
+      </div>
     </main>
   )
 }

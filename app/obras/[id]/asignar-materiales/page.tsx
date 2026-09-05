@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { AsignarMaterialesObraForm } from '@/components/AsignarMaterialesObraForm'
 import { asignarMaterialesMasivosAction } from '@/lib/actions/topes'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -118,20 +118,12 @@ export default async function AsignarMaterialesPage({
 
   return (
     <main className="page-shell space-y-6">
-      <header className="pt-2">
-        <Link
-          href={`/obras/${params.id}`}
-          className="text-sm font-medium text-accent hover:underline"
-        >
-          ← Volver a {obra.nombre}
-        </Link>
-        <h1 className="text-2xl font-bold text-ink mt-2">
-          Asignar Materiales y Kits
-        </h1>
-        <p className="text-sm text-gray-500">
-          Incorpora materiales individuales o configuraciones de kits de transformadores.
-        </p>
-      </header>
+      <PageHeader
+        title="Asignar Materiales y Kits"
+        description="Incorpora materiales individuales o configuraciones de kits de transformadores."
+        backHref={`/obras/${params.id}`}
+        backLabel={`Volver a ${obra.nombre}`}
+      />
 
       <AsignarMaterialesObraForm
         action={action}

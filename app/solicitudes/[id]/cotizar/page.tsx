@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { CotizarForm } from '@/components/CotizarForm'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeCotizar } from '@/lib/roles'
@@ -69,22 +69,16 @@ export default async function CotizarSolicitudPage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link
-          href={`/solicitudes/${params.id}`}
-          className="text-sm text-[#1E7F7A] font-medium"
-        >
-          ← Volver a la solicitud
-        </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">Cotizar solicitud</h1>
-        <p className="text-gray-500 text-sm">
-          {(obra as { nombre?: string } | null)?.nombre ?? 'Proyecto'} · estado{' '}
-          <span className="capitalize">{solicitud.estado}</span>
-        </p>
-        <Link href="/proveedores" className="text-sm font-semibold text-[#1E7F7A] inline-block mt-2">
-          Gestionar proveedores
-        </Link>
-      </header>
+      <PageHeader
+        title="Cotizar solicitud"
+        description={`${(obra as { nombre?: string } | null)?.nombre ?? 'Proyecto'} · Estatus: ${solicitud.estado}`}
+        backHref={`/solicitudes/${params.id}`}
+        backLabel="Volver a la solicitud"
+        action={{
+          label: 'Gestionar proveedores',
+          href: '/proveedores',
+        }}
+      />
 
       <CotizarForm
         solicitudId={params.id}

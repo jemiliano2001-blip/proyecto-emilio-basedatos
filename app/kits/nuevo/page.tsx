@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { KitForm } from '@/components/KitForm'
 import { createKitAction } from '@/lib/actions/kits'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -24,15 +24,12 @@ export default async function NuevoKitPage() {
 
   return (
     <main className="page-shell space-y-6">
-      <header className="mb-4 pt-2">
-        <Link href="/kits" className="text-sm font-medium text-accent hover:underline">
-          ← Volver a Kits
-        </Link>
-        <h1 className="text-2xl font-bold text-ink mt-2">Nueva Plantilla de Kit</h1>
-        <p className="text-sm text-gray-500">
-          Define un equipo principal con su configuración y el conjunto de accesorios menores asociados.
-        </p>
-      </header>
+      <PageHeader
+        title="Nueva Plantilla de Kit"
+        description="Define un equipo principal con su configuración y el conjunto de accesorios menores asociados."
+        backHref="/kits"
+        backLabel="Volver a Kits"
+      />
 
       <KitForm action={createKitAction} materiales={materiales} submitLabel="Guardar Kit / Ensamble" />
     </main>

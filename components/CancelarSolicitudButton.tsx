@@ -34,12 +34,12 @@ export function CancelarSolicitudButton({ solicitudId }: { solicitudId: string }
       <FormError message={state.error} />
       <p className="text-sm text-gray-700">¿Seguro que quieres cancelar esta solicitud?</p>
       <div className="flex gap-2">
-        <SubmitButton className="flex-1 rounded-lg bg-red-600 text-white px-4 py-3 font-semibold active:opacity-80 disabled:opacity-40 transition">
+        <SubmitButton className="btn-danger flex-1">
           Sí, cancelar
         </SubmitButton>
         <button
           type="button"
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 font-semibold"
+          className="btn-secondary flex-1"
           onClick={() => setConfirmando(false)}
         >
           Volver

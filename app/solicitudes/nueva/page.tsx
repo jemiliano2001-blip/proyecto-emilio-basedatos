@@ -1,5 +1,6 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { EmptyState } from '@/components/EmptyState'
 import { SolicitudForm } from '@/components/SolicitudForm'
 import { createSolicitudAction } from '@/lib/actions/solicitudes'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -43,20 +44,19 @@ export default async function NuevaSolicitudPage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href="/solicitudes" className="text-sm text-[#1E7F7A] font-medium hover:underline">
-          ← Solicitudes
-        </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">
-          Solicitud para requisición de materiales
-        </h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Elige el proyecto y agrega materiales, flete, camiones u otros gastos. Las partidas de materiales validan disponibilidad presupuestal.
-        </p>
-      </header>
+      <PageHeader
+        title="Solicitud para requisición de materiales"
+        description="Elige el proyecto y agrega materiales, flete, camiones u otros gastos. Las partidas de materiales validan disponibilidad presupuestal."
+        backHref="/solicitudes"
+        backLabel="Solicitudes"
+      />
 
       {!obras?.length ? (
-        <p className="text-gray-500 text-center py-8">No hay proyectos activos todavía.</p>
+        <EmptyState
+          title="No hay proyectos activos"
+          description="Debes tener al menos un proyecto activo para poder solicitar materiales."
+          action={{ label: 'Crear proyecto', href: '/obras/nueva' }}
+        />
       ) : (
         <SolicitudForm
           action={createSolicitudAction}

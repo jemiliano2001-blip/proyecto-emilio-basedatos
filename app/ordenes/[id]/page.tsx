@@ -1,5 +1,9 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { CopyButton } from '@/components/CopyButton'
+import { IconImprimir, IconPaquete } from '@/components/icons'
 import { OrdenCompraFacturasSection } from '@/components/OrdenCompraFacturasSection'
 import { OrdenCompraProveedorModal } from '@/components/OrdenCompraProveedorModal'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -164,42 +168,65 @@ export default async function OrdenDetallePage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link href="/ordenes" className="text-sm text-[#1E7F7A] font-medium">
-          ← Órdenes
-        </Link>
-        <div className="flex items-center gap-2 mt-2">
-          <h1 className="text-2xl font-bold text-[#132A45]">{detalle.folio}</h1>
-          {detalle.folio_fisico && (
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200">
-              Talonario: {detalle.folio_fisico}
-            </span>
-          )}
-        </div>
-        <p className="text-gray-500 text-sm">{detalle.obra?.nombre}</p>
-        {detalle.obra?.fraccionamiento && (
-          <p className="text-xs text-gray-400">{detalle.obra.fraccionamiento}</p>
-        )}
-        <p className="text-xs text-gray-400 mt-1 capitalize">
-          Estado: {detalle.estado.replaceAll('_', ' ')}
-        </p>
-      </header>
+      <PageHeader
+        title={
+          <span className="inline-flex items-center gap-2">
+            <span>{detalle.folio}</span>
+            <CopyButton text={detalle.folio} label="Copiar folio" />
+          </span>
+        }
+        badge={
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {detalle.folio_fisico && (
+              <span className="badge-amber inline-flex items-center gap-1">
+                <span>Talonario: {detalle.folio_fisico}</span>
+                <CopyButton text={detalle.folio_fisico} label="Copiar talonario" className="py-0.5 px-1.5 text-xs" />
+              </span>
+            )}
+            <Badge
+              variant={
+                detalle.estado === 'emitida'
+                  ? 'navy'
+                  : detalle.estado === 'completada' || detalle.estado === 'recibida'
+                  ? 'teal'
+                  : detalle.estado === 'parcialmente_recibida'
+                  ? 'amber'
+                  : 'gray'
+              }
+            >
+              {detalle.estado.replaceAll('_', ' ')}
+            </Badge>
+          </div>
+        }
+        description={
+          <div>
+            <p className="text-sm font-medium text-gray-700">{detalle.obra?.nombre}</p>
+            {detalle.obra?.fraccionamiento && (
+              <p className="text-xs text-gray-400">{detalle.obra.fraccionamiento}</p>
+            )}
+          </div>
+        }
+        backHref="/ordenes"
+        backLabel="Órdenes"
+      />
 
       {/* Acciones principales: Imprimir Formato y Registrar Recepción */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-6">
+      <div className="flex flex-col sm:flex-row gap-2 mb-6 -mt-2">
         <Link
           href={`/ordenes/${detalle.id}/formato`}
           className="flex-1 text-center rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold py-3 text-sm flex items-center justify-center gap-2 shadow-xs transition-colors"
         >
-          📄 Ver e Imprimir Formato OC (PDF)
+          <IconImprimir className="w-4 h-4" />
+          <span>Ver e Imprimir Formato OC (PDF)</span>
         </Link>
 
         {puedeRecibir && (
           <Link
             href={`/ordenes/${detalle.id}/recibir`}
-            className="flex-1 text-center rounded-xl bg-[#1E7F7A] hover:bg-[#186662] text-white font-semibold py-3 text-sm flex items-center justify-center gap-2 shadow-xs transition-colors"
+            className="btn-primary flex-1 py-3 text-sm flex items-center justify-center gap-2"
           >
-            📦 Registrar recepción
+            <IconPaquete className="w-4 h-4" />
+            <span>Registrar recepción</span>
           </Link>
         )}
       </div>
@@ -260,7 +287,7 @@ export default async function OrdenDetallePage({
                 {Number(item.precio_unitario).toFixed(2)} {detalle.moneda}
               </p>
               {saldo && (
-                <p className="text-xs text-[#1E7F7A] mt-2">
+                <p className="text-xs text-accent mt-2">
                   Recibido bueno {Number(saldo.cantidad_recibida_buena)} · Dañado{' '}
                   {Number(saldo.cantidad_danada_acum)} · Pendiente{' '}
                   {Number(saldo.pendiente)}
@@ -273,7 +300,7 @@ export default async function OrdenDetallePage({
 
       <div className="card flex justify-between items-center mb-6">
         <span className="font-semibold">Total</span>
-        <span className="text-lg font-bold text-[#132A45]">
+        <span className="text-lg font-bold text-ink">
           {Number(detalle.total).toFixed(2)} {detalle.moneda}
         </span>
       </div>

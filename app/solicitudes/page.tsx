@@ -1,4 +1,8 @@
 import Link from 'next/link'
+import { PageHeader } from '@/components/PageHeader'
+import { Badge } from '@/components/Badge'
+import { EmptyState } from '@/components/EmptyState'
+import { IconPlus, IconDocumento } from '@/components/icons'
 import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
@@ -19,21 +23,21 @@ interface SolicitudRow {
   items: { id: string; obra_id: string | null }[]
 }
 
-function badgeEstado(estado: EstadoSolicitud) {
+function badgeVariant(estado: EstadoSolicitud): 'red' | 'teal' | 'navy' | 'amber' {
   switch (estado) {
     case 'cancelada':
     case 'rechazada':
-      return 'badge-red'
+      return 'red'
     case 'finalizada':
     case 'aprobada':
-      return 'badge-teal'
+      return 'teal'
     case 'en_proceso':
     case 'en_cotizacion':
-      return 'badge-navy'
+      return 'navy'
     case 'recibida':
     case 'pendiente':
     default:
-      return 'badge-amber'
+      return 'amber'
   }
 }
 
@@ -83,23 +87,23 @@ export default async function SolicitudesPage() {
 
   return (
     <main className="page-shell">
-      <header className="mb-6 flex items-start justify-between gap-3 pt-2">
-        <div>
-          <h1 className="text-2xl font-bold text-ink">
-            {verTodas ? 'Control de solicitudes' : 'Mis solicitudes'}
-          </h1>
-          <p className="text-gray-500 text-sm">
-            {verTodas
-              ? 'Requisiciones por estatus · Compras → Finanzas'
-              : 'Lo que has solicitado para tus proyectos'}
-          </p>
-        </div>
-        {puedeCrear && (
-          <Link href="/solicitudes/nueva" className="btn-primary shrink-0 text-sm py-2 px-4">
-            Nueva
-          </Link>
-        )}
-      </header>
+      <PageHeader
+        title={verTodas ? 'Control de solicitudes' : 'Mis solicitudes'}
+        subtitle={
+          verTodas
+            ? 'Requisiciones por estatus · Compras → Finanzas'
+            : 'Lo que has solicitado para tus proyectos'
+        }
+        action={
+          puedeCrear
+            ? {
+                label: 'Nueva',
+                href: '/solicitudes/nueva',
+                icon: <IconPlus className="w-4 h-4" />,
+              }
+            : undefined
+        }
+      />
 
       <OfflineQueueBanner />
 
@@ -119,9 +123,9 @@ export default async function SolicitudesPage() {
               <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
                 <div className="flex justify-between items-center gap-2">
                   <p className="font-semibold text-ink truncate">{s.obra?.nombre ?? 'Proyecto'}</p>
-                  <span className={badgeEstado(s.estado)}>
+                  <Badge variant={badgeVariant(s.estado)}>
                     {labelEstado(s.estado)}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
                   {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · varios proyectos' : ''}
@@ -146,9 +150,9 @@ export default async function SolicitudesPage() {
               <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
                 <div className="flex justify-between items-center gap-2">
                   <p className="font-semibold text-ink truncate">{s.obra?.nombre ?? 'Proyecto'}</p>
-                  <span className={badgeEstado(s.estado)}>
+                  <Badge variant={badgeVariant(s.estado)}>
                     {labelEstado(s.estado)}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
                   {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · varios proyectos' : ''}
@@ -176,9 +180,9 @@ export default async function SolicitudesPage() {
                   <p className="text-xs text-gray-500">{s.obra.fraccionamiento}</p>
                 )}
               </div>
-              <span className={badgeEstado(s.estado)}>
+              <Badge variant={badgeVariant(s.estado)}>
                 {labelEstado(s.estado)}
-              </span>
+              </Badge>
             </div>
             <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
               <span>
@@ -191,11 +195,23 @@ export default async function SolicitudesPage() {
         ))}
 
         {lista.length === 0 && (
-          <p className="text-gray-500 text-center py-8">
-            {verTodas
-              ? 'Todavía no hay requisiciones.'
-              : 'Todavía no has levantado ninguna requisición.'}
-          </p>
+          <EmptyState
+            icon={IconDocumento}
+            title={verTodas ? 'Sin solicitudes registradas' : 'Sin solicitudes'}
+            description={
+              verTodas
+                ? 'Todavía no hay requisiciones registradas en el sistema.'
+                : 'Todavía no has levantado ninguna requisición.'
+            }
+            action={
+              puedeCrear
+                ? {
+                    label: 'Nueva requisición',
+                    href: '/solicitudes/nueva',
+                  }
+                : undefined
+            }
+          />
         )}
       </div>
     </main>

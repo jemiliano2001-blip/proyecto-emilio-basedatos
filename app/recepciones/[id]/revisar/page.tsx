@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { PageHeader } from '@/components/PageHeader'
 import { RevisarRecepcionForm } from '@/components/RevisarRecepcionForm'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeRevisarRecepcion } from '@/lib/roles'
@@ -56,20 +57,15 @@ export default async function RevisarRecepcionPage({
 
   return (
     <main className="page-shell">
-      <header className="mb-6 pt-4">
-        <Link
-          href={`/recepciones/${detalle.id}`}
-          className="text-sm text-[#1E7F7A] font-medium"
-        >
-          ← Detalle
-        </Link>
-        <h1 className="text-2xl font-bold text-[#132A45] mt-2">Revisar recepción</h1>
-        <p className="text-sm text-gray-500">{detalle.orden?.folio}</p>
-        <p className="text-xs text-gray-400">
-          {detalle.receptor?.nombre} ·{' '}
-          {new Date(detalle.recibido_en).toLocaleString('es-MX')}
-        </p>
-      </header>
+      <PageHeader
+        title="Revisar recepción"
+        backHref={`/recepciones/${detalle.id}`}
+        backLabel="Detalle"
+        subtitle={detalle.orden?.folio}
+        description={`${detalle.receptor?.nombre ?? '—'} · ${new Date(
+          detalle.recibido_en
+        ).toLocaleString('es-MX')}`}
+      />
 
       <div className="space-y-2 mb-6">
         {(detalle.items ?? []).map((item) => (

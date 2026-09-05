@@ -7,6 +7,7 @@ import {
   confirmarRecepcionTraspasoAction,
   rechazarTraspasoAction,
 } from '@/lib/actions/traspasos'
+import { IconCheck, IconPaquete } from '@/components/icons'
 
 export function TraspasoAcciones({
   traspasoId,
@@ -70,7 +71,7 @@ export function TraspasoAcciones({
   return (
     <div className="space-y-3">
       {errorMsg && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm" role="alert">
           {errorMsg}
         </div>
       )}
@@ -81,9 +82,11 @@ export function TraspasoAcciones({
             <button
               onClick={handleAprobar}
               disabled={isPending}
-              className="bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-sm disabled:opacity-50"
+              aria-busy={isPending}
+              className="btn-primary text-sm px-4 py-2.5 inline-flex items-center gap-1.5"
             >
-              {isPending ? 'Aprobando...' : '✓ Aprobar Traspaso (En tránsito)'}
+              <IconCheck className="h-4 w-4" />
+              <span>{isPending ? 'Aprobando…' : 'Aprobar traspaso'}</span>
             </button>
           )}
 
@@ -91,20 +94,17 @@ export function TraspasoAcciones({
             <button
               onClick={() => setMostrandoRechazo(true)}
               disabled={isPending}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg transition text-sm disabled:opacity-50"
+              className="btn-danger text-sm px-4 py-2.5"
             >
-              ✕ Rechazar
+              Rechazar
             </button>
           )}
 
-          {/* `cancelar_traspaso` acepta al solicitante o a proyectos/acceso_total.
-              Antes esto usaba puedeAprobar, así que a compras y operación les
-              aparecía el botón y les tronaba la RPC. */}
           {(esSolicitante || puedeCancelar) && (
             <button
               onClick={handleCancelar}
               disabled={isPending}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition text-sm disabled:opacity-50"
+              className="btn-secondary text-sm px-4 py-2.5"
             >
               Cancelar
             </button>
@@ -118,9 +118,11 @@ export function TraspasoAcciones({
             <button
               onClick={handleConfirmarRecepcion}
               disabled={isPending}
-              className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 px-4 rounded-lg shadow-md transition text-sm disabled:opacity-50"
+              aria-busy={isPending}
+              className="btn-primary text-sm px-4 py-2.5 inline-flex items-center gap-1.5"
             >
-              {isPending ? 'Confirmando...' : '📦 Confirmar Recepción (Completar)'}
+              <IconPaquete className="h-4 w-4" />
+              <span>{isPending ? 'Confirmando…' : 'Confirmar recepción (completar)'}</span>
             </button>
           )}
 
@@ -128,16 +130,16 @@ export function TraspasoAcciones({
             <button
               onClick={() => setMostrandoRechazo(true)}
               disabled={isPending}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg transition text-sm disabled:opacity-50"
+              className="btn-danger text-sm px-4 py-2.5"
             >
-              ✕ Rechazar Traspaso
+              Rechazar traspaso
             </button>
           )}
         </div>
       )}
 
       {mostrandoRechazo && (
-        <div className="bg-red-50 border border-red-200 p-4 rounded-xl space-y-3">
+        <div className="card border-red-200 bg-red-50/50 p-4 space-y-3">
           <label className="block text-xs font-semibold text-red-800">
             Motivo del rechazo
           </label>
@@ -146,19 +148,19 @@ export function TraspasoAcciones({
             value={motivoRechazo}
             onChange={(e) => setMotivoRechazo(e.target.value)}
             placeholder="Especifica la razón por la que se rechaza"
-            className="w-full text-sm border border-red-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500 focus:outline-none"
+            className="input-base text-sm"
           />
           <div className="flex gap-2">
             <button
               onClick={handleRechazar}
               disabled={isPending}
-              className="bg-red-700 text-white text-xs font-bold py-2 px-3 rounded-lg"
+              className="btn-danger text-xs px-3 py-2"
             >
-              {isPending ? 'Rechazando...' : 'Confirmar Rechazo'}
+              {isPending ? 'Rechazando…' : 'Confirmar rechazo'}
             </button>
             <button
               onClick={() => setMostrandoRechazo(false)}
-              className="bg-gray-200 text-gray-700 text-xs font-semibold py-2 px-3 rounded-lg"
+              className="btn-secondary text-xs px-3 py-2"
             >
               Cancelar
             </button>
