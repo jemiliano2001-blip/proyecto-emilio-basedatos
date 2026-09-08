@@ -5,7 +5,7 @@ import { updateMaterialAction } from '@/lib/actions/materiales'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeGestionarCatalogo } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
-import type { CatalogoMaterial } from '@/lib/types'
+import type { CatalogoMaterial, MaterialCategoria } from '@/lib/types'
 
 export default async function EditarMaterialPage({
   params,
@@ -21,13 +21,31 @@ export default async function EditarMaterialPage({
   const { data: material } = await supabase
     .from('catalogo_materiales')
     .select(
-      'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, activo'
+      'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, precio_base, activo'
     )
     .eq('id', params.id)
     .maybeSingle()
 
   if (!material) notFound()
 
+  const { data: categoriasRaw } = await supabase
+    .from('material_categorias')
+    .select(`
+      id,
+      nombre,
+      orden,
+      creado_en,
+      material_subcategorias (
+        id,
+        categoria_id,
+        nombre,
+        orden,
+        creado_en
+      )
+    `)
+    .order('orden', { ascending: true })
+
+  const categorias = (categoriasRaw as MaterialCategoria[] | null) ?? []
   const updateAction = updateMaterialAction.bind(null, params.id)
 
   return (
@@ -42,6 +60,7 @@ export default async function EditarMaterialPage({
         action={updateAction}
         material={material as CatalogoMaterial}
         submitLabel="Guardar cambios"
+        categorias={categorias}
       />
     </main>
   )

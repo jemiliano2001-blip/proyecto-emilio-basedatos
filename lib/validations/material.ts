@@ -1,18 +1,14 @@
-import {
-  CATEGORIAS_MATERIAL,
-  esParCategoriaValido,
-  type CategoriaMaterial,
-} from '@/lib/catalogo-categorias'
 import { parseMoney } from '@/lib/money'
 
 export interface MaterialInput {
   nombre_base: string
   variante: string | null
   unidad_medida: string
-  categoria: CategoriaMaterial | null
+  categoria: string | null
   subcategoria: string | null
   especificacion: string | null
   precio_base: number
+  foto_url?: string | null
   activo: boolean
 }
 
@@ -46,22 +42,12 @@ export function validateMaterialInput(raw: unknown): ValidationResult<MaterialIn
     return { ok: false, error: 'Indica una unidad de medida (ej. PZA, MTS, KG).' }
   }
 
-  const categoriaRaw = trimOrNull(body.categoria)
-  const subcategoria = trimOrNull(body.subcategoria)
+  const categoria = trimOrNull(body.categoria)
+  let subcategoria = trimOrNull(body.subcategoria)
 
-  let categoria: CategoriaMaterial | null = null
-  if (categoriaRaw !== null) {
-    if (!(CATEGORIAS_MATERIAL as readonly string[]).includes(categoriaRaw)) {
-      return { ok: false, error: 'Categoría no válida.' }
-    }
-    categoria = categoriaRaw as CategoriaMaterial
-  }
-
-  if (!esParCategoriaValido(categoria, subcategoria)) {
-    return {
-      ok: false,
-      error: 'Elige una subcategoría válida para la categoría seleccionada.',
-    }
+  // Si no hay categoría, la subcategoría no puede existir aislada
+  if (!categoria) {
+    subcategoria = null
   }
 
   let precio_base = 0
@@ -83,6 +69,8 @@ export function validateMaterialInput(raw: unknown): ValidationResult<MaterialIn
         ? false
         : true
 
+  const foto_url = trimOrNull(body.foto_url)
+
   return {
     ok: true,
     data: {
@@ -93,6 +81,7 @@ export function validateMaterialInput(raw: unknown): ValidationResult<MaterialIn
       subcategoria,
       especificacion: trimOrNull(body.especificacion),
       precio_base,
+      foto_url,
       activo,
     },
   }

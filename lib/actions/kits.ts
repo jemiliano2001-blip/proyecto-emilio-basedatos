@@ -66,6 +66,72 @@ export async function createKitAction(
   redirect('/kits')
 }
 
+export async function updateKitAction(
+  kitId: string,
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const session = await getSessionUsuario()
+  if (!session || !puedeGestionarKits(session.rol)) {
+    return { error: 'No tienes permiso para gestionar kits de materiales.' }
+  }
+
+  const parsed = validateMaterialKitInput({
+    nombre: formData.get('nombre'),
+    material_principal_id: formData.get('material_principal_id'),
+    configuracion: formData.get('configuracion'),
+    descripcion: formData.get('descripcion'),
+    items_json: formData.get('items_json'),
+    activo: formData.get('activo') !== 'false',
+  })
+
+  if (!parsed.ok) {
+    return { error: parsed.error }
+  }
+
+  const { items, ...kitData } = parsed.data
+  const supabase = createClient()
+
+  const { error: errKit } = await supabase
+    .from('material_kits')
+    .update(kitData)
+    .eq('id', kitId)
+
+  if (errKit) {
+    return { error: 'No se pudo actualizar el kit. Intenta de nuevo.' }
+  }
+
+  // Reemplazar componentes del kit
+  const { error: errDel } = await supabase
+    .from('material_kit_items')
+    .delete()
+    .eq('kit_id', kitId)
+
+  if (errDel) {
+    return { error: 'No se pudieron actualizar los componentes del kit.' }
+  }
+
+  if (items.length > 0) {
+    const { error: errItems } = await supabase
+      .from('material_kit_items')
+      .insert(
+        items.map((it) => ({
+          kit_id: kitId,
+          material_id: it.material_id,
+          cantidad: it.cantidad,
+        }))
+      )
+
+    if (errItems) {
+      return { error: 'No se pudieron guardar los nuevos componentes del kit.' }
+    }
+  }
+
+  revalidatePath('/kits')
+  revalidatePath('/obras/nueva')
+  redirect('/kits')
+}
+
 export async function deleteKitAction(kitId: string): Promise<ActionResult> {
   const session = await getSessionUsuario()
   if (!session || !puedeGestionarKits(session.rol)) {

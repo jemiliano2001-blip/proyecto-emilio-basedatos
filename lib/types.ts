@@ -41,6 +41,22 @@ export interface CatalogoMaterial {
   activo: boolean
 }
 
+export interface MaterialSubcategoria {
+  id: string
+  categoria_id: string
+  nombre: string
+  orden: number
+  creado_en: string
+}
+
+export interface MaterialCategoria {
+  id: string
+  nombre: string
+  orden: number
+  creado_en: string
+  material_subcategorias?: MaterialSubcategoria[]
+}
+
 export interface ObraMaterialContratado {
   id: string
   obra_id: string
@@ -64,6 +80,10 @@ export interface SaldoMaterialObra {
   cantidad_contratada: number
   cantidad_usada: number
   cantidad_comprometida?: number
+  // Rubro y foto
+  categoria?: string | null
+  subcategoria?: string | null
+  foto_url?: string | null
 }
 
 export interface SaldoPresupuestoObra {
