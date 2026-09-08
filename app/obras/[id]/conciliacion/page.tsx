@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
@@ -17,19 +16,18 @@ import type {
 export default async function ConciliacionObraPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   // Este reporte expone presupuesto, gastado y desviación del proyecto. `personal`
   // no ve precios en ninguna otra pantalla (puedeVerPrecios); aquí tampoco.
   if (!session || !puedeVerPrecios(session.rol)) notFound()
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: presupuestoData, error: errPres } = await supabase
-    .from('v_conciliacion_obra_presupuesto')
-    .select('*')
-    .eq('obra_id', params.id)
+    .rpc('conciliacion_presupuesto_proyecto', { p_obra_id: resolvedparams.id })
     .maybeSingle()
 
   if (errPres) {
@@ -38,7 +36,7 @@ export default async function ConciliacionObraPage({
         <main className="page-shell">
           <PageHeader
             title="Conciliación"
-            backHref={`/obras/${params.id}`}
+            backHref={`/obras/${resolvedparams.id}`}
             backLabel="Volver al proyecto"
           />
           <div className="card mt-4 border-amber-200 bg-amber-50 text-amber-900">
@@ -58,7 +56,7 @@ export default async function ConciliacionObraPage({
   const { data: materialesData } = await supabase
     .from('v_conciliacion_obra_material')
     .select('*')
-    .eq('obra_id', params.id)
+    .eq('obra_id', resolvedparams.id)
     .order('nombre_base')
 
   const pres = presupuestoData as ConciliacionPresupuestoObra
@@ -79,7 +77,7 @@ export default async function ConciliacionObraPage({
         className="print:hidden"
         title="Reporte de Conciliación de Proyecto"
         description={`${pres.obra_nombre}${pres.cliente ? ` · Cliente: ${pres.cliente}` : ''}`}
-        backHref={`/obras/${params.id}`}
+        backHref={`/obras/${resolvedparams.id}`}
         backLabel="Volver al proyecto"
         badge={
           <Badge variant={pres.estado === 'cerrada' ? 'gray' : 'teal'}>

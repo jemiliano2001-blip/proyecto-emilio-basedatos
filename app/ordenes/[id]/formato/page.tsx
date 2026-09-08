@@ -5,16 +5,17 @@ import { puedeVerPrecios } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function OrdenFormatoPage({ params }: PageProps) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeVerPrecios(session.rol)) {
     redirect('/')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: orden, error } = await supabase
     .from('ordenes_compra')
@@ -31,7 +32,7 @@ export default async function OrdenFormatoPage({ params }: PageProps) {
          material:catalogo_materiales(nombre_base, variante, unidad_medida)
        )`
     )
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (error || !orden) {

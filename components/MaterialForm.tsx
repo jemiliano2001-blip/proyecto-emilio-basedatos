@@ -181,7 +181,7 @@ export function MaterialForm({
 
         {fotoPreview ? (
           <div className="mt-2 flex items-center gap-3 p-2 bg-teal-50/50 rounded-lg border border-teal-200">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* Imagen de catálogo servida por Storage */}
             <img
               src={fotoPreview}
               alt="Vista previa"
@@ -194,7 +194,7 @@ export function MaterialForm({
           </div>
         ) : material?.foto_url ? (
           <div className="mt-2 flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* Imagen de catálogo servida por Storage */}
             <img
               src={material.foto_url}
               alt={material.nombre_base}

@@ -72,7 +72,7 @@ export async function crearTraspasoAction(
     }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data, error } = await supabase.rpc('crear_solicitud_traspaso', {
     p_obra_origen_id: obra_origen_id,
     p_obra_destino_id: obra_destino_id,
@@ -102,7 +102,7 @@ export async function aprobarTraspasoAction(
     return { error: 'No tienes permiso para aprobar traspasos.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('aprobar_traspaso', {
     p_traspaso_id: traspasoId,
   })
@@ -124,7 +124,7 @@ export async function confirmarRecepcionTraspasoAction(
     return { error: 'No tienes permiso para confirmar la recepción del traspaso.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('confirmar_recepcion_traspaso', {
     p_traspaso_id: traspasoId,
   })
@@ -147,7 +147,7 @@ export async function rechazarTraspasoAction(
     return { error: 'No tienes permiso para rechazar traspasos.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('rechazar_traspaso', {
     p_traspaso_id: traspasoId,
     p_motivo: motivo,
@@ -170,7 +170,7 @@ export async function cancelarTraspasoAction(
     return { error: 'No autenticado.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('cancelar_traspaso', {
     p_traspaso_id: traspasoId,
   })

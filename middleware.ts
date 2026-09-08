@@ -5,6 +5,10 @@ export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
+  const path = request.nextUrl.pathname
+  // Las APIs de sincronización devuelven 401 JSON desde su propio control de sesión.
+  // Los archivos del shell nunca necesitan una sesión para instalarse.
+  if (path === '/sw.js' || path === '/offline.html' || path.startsWith('/api/')) return supabaseResponse
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -34,7 +38,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const path = request.nextUrl.pathname
   const isLogin = path === '/login'
 
   if (!user && !isLogin) {

@@ -10,14 +10,15 @@ import { createClient } from '@/lib/supabase/server'
 export default async function NuevaSolicitudPage({
   searchParams,
 }: {
-  searchParams: { obra?: string }
+  searchParams: Promise<{ obra?: string }>
 }) {
+  const resolvedsearchParams = await searchParams
   const session = await getSessionUsuario()
   if (!session || !puedeCrearSolicitudes(session.rol)) {
     redirect('/solicitudes')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: obras } = await supabase
     .from('obras')
@@ -63,7 +64,7 @@ export default async function NuevaSolicitudPage({
           obras={obras}
           materiales={materiales ?? []}
           saldos={saldos}
-          defaultObraId={searchParams.obra}
+          defaultObraId={resolvedsearchParams.obra}
           permiteMultiObra={puedeCrearSolicitudMultiObra(session.rol)}
         />
       )}

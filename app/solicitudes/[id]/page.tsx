@@ -85,10 +85,11 @@ function labelEstado(estado: EstadoSolicitud) {
 export default async function SolicitudDetallePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: solicitud } = await supabase
     .from('solicitudes_material')
@@ -102,7 +103,7 @@ export default async function SolicitudDetallePage({
          item_obra:obras!solicitud_items_obra_id_fkey(nombre)
        )`
     )
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!solicitud) notFound()
@@ -115,7 +116,7 @@ export default async function SolicitudDetallePage({
       ? await supabase
           .from('ordenes_compra')
           .select('id, folio, total, obra:obras(nombre)')
-          .eq('solicitud_id', params.id)
+          .eq('solicitud_id', resolvedparams.id)
       : { data: null }
   const ordenesRelacionadas = (ordenesData as unknown as OrdenRelacionada[] | null) ?? []
   const esDueno = session?.perfil?.id === detalle.solicitante_id

@@ -10,14 +10,15 @@ import type { CatalogoMaterial } from '@/lib/types'
 export default async function EditarKitPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeGestionarKits(session.rol)) {
     redirect('/kits')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // Consulta del kit y sus componentes
   const { data: kit } = await supabase
@@ -35,7 +36,7 @@ export default async function EditarKitPage({
         cantidad
       )
     `)
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!kit) notFound()

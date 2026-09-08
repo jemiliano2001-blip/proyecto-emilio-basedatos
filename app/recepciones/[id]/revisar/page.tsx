@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { RevisarRecepcionForm } from '@/components/RevisarRecepcionForm'
@@ -35,16 +34,17 @@ interface DetalleRecepcion {
 export default async function RevisarRecepcionPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeRevisarRecepcion(session.rol)) {
     redirect('/recepciones')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data, error } = await supabase.rpc('detalle_recepcion', {
-    p_recepcion_id: params.id,
+    p_recepcion_id: resolvedparams.id,
   })
 
   if (error || !data) notFound()

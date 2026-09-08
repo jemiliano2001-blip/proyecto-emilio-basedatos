@@ -38,7 +38,7 @@ export async function createCotizacionAction(
 
   if (!parsed.ok) return { error: parsed.error }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: solicitud } = await supabase
     .from('solicitudes_material')
@@ -130,7 +130,7 @@ export async function aprobarCotizacionAction(
     return { error: 'No tienes permiso para aprobar cotizaciones.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: cotizacion } = await supabase
     .from('cotizaciones')
@@ -303,7 +303,7 @@ export async function rechazarCotizacionAction(
     return { error: 'No tienes permiso para rechazar cotizaciones.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: cotizacion } = await supabase
     .from('cotizaciones')

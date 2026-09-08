@@ -1,5 +1,6 @@
 'use server'
 
+import { matchesOfflineOwner } from '@/lib/offline/owner'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -47,7 +48,7 @@ export async function crearRecepcionAction(
 
   if (!parsed.ok) return { error: parsed.error }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data, error } = await supabase.rpc('crear_recepcion', {
     p_id: parsed.data.id,
     p_orden_id: parsed.data.orden_id,
@@ -79,6 +80,9 @@ export async function syncRecepcionPayload(
   | { status: 'reintentar'; error: string }
 > {
   const session = await getSessionUsuario()
+  if (!matchesOfflineOwner(raw, session?.authUserId)) {
+    return { status: 'no_autenticado' }
+  }
   if (!session || !session.perfil || !puedeCapturarRecepcion(session.rol)) {
     return { status: 'no_autenticado' }
   }
@@ -88,7 +92,7 @@ export async function syncRecepcionPayload(
     return { status: 'conflicto', error: parsed.error }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data, error } = await supabase.rpc('crear_recepcion', {
     p_id: parsed.data.id,
     p_orden_id: parsed.data.orden_id,
@@ -143,7 +147,7 @@ export async function revisarRecepcionAction(
     return { error: 'Al rechazar debes indicar una nota.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: recepcion } = await supabase
     .from('recepciones_material')
     .select('id, orden_id, estado')

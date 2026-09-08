@@ -1,3 +1,6 @@
+import { ListFilters, ListPagination } from '@/components/ListFilters'
+import { listFilters, type ListParams } from '@/lib/list-filters'
+const STATUSES = ["recibida","en_proceso","finalizada","pendiente","en_cotizacion","aprobada","rechazada","cancelada"] as const
 import Link from 'next/link'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
@@ -64,26 +67,32 @@ function esMultiObra(s: SolicitudRow): boolean {
   return (s.items ?? []).some((i) => i.obra_id !== null)
 }
 
-export default async function SolicitudesPage() {
+export default async function SolicitudesPage({ searchParams }: { searchParams: Promise<ListParams> }) {
+  const params = await searchParams
+  const filters = listFilters(params, STATUSES)
   const session = await getSessionUsuario()
   const puedeCrear = puedeCrearSolicitudes(session?.rol ?? null)
   const verTodas = puedeVerTodasLasSolicitudes(session?.rol ?? null)
   const esCompras = puedeAprobarCompras(session?.rol ?? null)
   const esFinanzas = puedeAprobarPago(session?.rol ?? null)
-  const supabase = createClient()
+  const supabase = await createClient()
 
-  const { data: solicitudes, error } = await supabase
+  let query = supabase
     .from('solicitudes_material')
     .select(
-      'id, estado, creado_en, obra:obras(nombre, fraccionamiento), solicitante:usuarios(nombre), items:solicitud_items(id, obra_id)'
+      'id, estado, creado_en, obra:obras!inner(nombre, fraccionamiento), solicitante:usuarios(nombre), items:solicitud_items(id, obra_id)', { count: 'exact' }
     )
     .order('creado_en', { ascending: false })
+    .order('id', { ascending: false })
+  if (filters.estatus === 'recibida') query = query.in('estado', ['recibida', 'pendiente'])
+  else if (filters.estatus) query = query.eq('estado', filters.estatus)
+  if (filters.desde) query = query.gte('creado_en', filters.desde + 'T00:00:00Z')
+  if (filters.hasta) query = query.lt('creado_en', new Date(Date.parse(filters.hasta) + 86400000).toISOString())
+  if (filters.q) query = query.ilike('obra.nombre', '%' + filters.q + '%')
+  
+  const { data: solicitudes, error, count } = await query.range(filters.from, filters.to)
 
   const lista = (solicitudes as unknown as SolicitudRow[] | null) ?? []
-  const bandejaCompras = lista.filter(
-    (s) => s.estado === 'recibida' || s.estado === 'pendiente'
-  )
-  const bandejaFinanzas = lista.filter((s) => s.estado === 'en_proceso')
 
   return (
     <main className="page-shell">
@@ -107,69 +116,17 @@ export default async function SolicitudesPage() {
 
       <OfflineQueueBanner />
 
+      <ListFilters path="/solicitudes" params={params} statuses={STATUSES} searchLabel="Proyecto principal" />
       {error && (
         <div className="card mb-4 border-red-300 bg-red-50 text-red-700">
           No se pudieron cargar las solicitudes. Revisa tu conexión.
         </div>
       )}
 
-      {esCompras && (
-        <section className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-            Bandeja Compras (recibidas)
-          </h2>
-          <div className="space-y-2">
-            {bandejaCompras.map((s) => (
-              <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
-                <div className="flex justify-between items-center gap-2">
-                  <p className="font-semibold text-ink truncate">{s.obra?.nombre ?? 'Proyecto'}</p>
-                  <Badge variant={badgeVariant(s.estado)}>
-                    {labelEstado(s.estado)}
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · varios proyectos' : ''}
-                  {s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
-                </p>
-              </Link>
-            ))}
-            {bandejaCompras.length === 0 && (
-              <p className="text-sm text-gray-400 py-2">No hay requisiciones pendientes de Compras.</p>
-            )}
-          </div>
-        </section>
-      )}
-
-      {esFinanzas && (
-        <section className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-            Bandeja Finanzas (en proceso)
-          </h2>
-          <div className="space-y-2">
-            {bandejaFinanzas.map((s) => (
-              <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
-                <div className="flex justify-between items-center gap-2">
-                  <p className="font-semibold text-ink truncate">{s.obra?.nombre ?? 'Proyecto'}</p>
-                  <Badge variant={badgeVariant(s.estado)}>
-                    {labelEstado(s.estado)}
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  {s.items.length} renglón{s.items.length === 1 ? '' : 'es'}{esMultiObra(s) ? ' · varios proyectos' : ''}
-                  {s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
-                </p>
-              </Link>
-            ))}
-            {bandejaFinanzas.length === 0 && (
-              <p className="text-sm text-gray-400 py-2">No hay requisiciones pendientes de pago.</p>
-            )}
-          </div>
-        </section>
-      )}
-
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-        Todas
-      </h2>
+      <div className="flex flex-wrap gap-4 mb-4">
+        {esCompras && <Link href="/solicitudes?estatus=recibida" className="btn-secondary">Pendientes de Compras</Link>}
+        {esFinanzas && <Link href="/solicitudes?estatus=en_proceso" className="btn-secondary">Pendientes de Finanzas</Link>}
+      </div>
       <div className="space-y-3">
         {lista.map((s) => (
           <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
@@ -194,10 +151,10 @@ export default async function SolicitudesPage() {
           </Link>
         ))}
 
-        {lista.length === 0 && (
+        {!error && lista.length === 0 && (
           <EmptyState
             icon={IconDocumento}
-            title={verTodas ? 'Sin solicitudes registradas' : 'Sin solicitudes'}
+            title="Sin resultados"
             description={
               verTodas
                 ? 'Todavía no hay requisiciones registradas en el sistema.'
@@ -214,6 +171,7 @@ export default async function SolicitudesPage() {
           />
         )}
       </div>
+      {!error && <ListPagination path="/solicitudes" params={params} page={filters.page} total={count ?? 0} />}
     </main>
   )
 }

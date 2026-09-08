@@ -19,7 +19,7 @@ function fechaAviso(iso: string): string {
 
 export default async function NotificacionesPage() {
   const session = await getSessionUsuario()
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data, error } = session?.perfil
     ? await supabase

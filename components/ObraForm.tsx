@@ -263,9 +263,9 @@ export function ObraForm({
               defaultValue={obra?.estado ?? 'activa'}
               className="input-base"
             >
-              <option value="activa">Activa</option>
-              <option value="pausada">Pausada</option>
-              <option value="cerrada">Cerrada</option>
+              <option value="activa">Activo</option>
+              <option value="pausada">Pausado</option>
+              
             </select>
           </div>
         </div>

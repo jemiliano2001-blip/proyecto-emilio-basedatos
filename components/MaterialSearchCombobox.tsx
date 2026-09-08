@@ -37,6 +37,8 @@ export function MaterialSearchCombobox({
   const rootRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [activeIndex, setActiveIndex] = useState(-1)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const selected = materials.find((m) => m.id === value) ?? null
 
@@ -82,6 +84,26 @@ export function MaterialSearchCombobox({
   return (
     <div ref={rootRef} className="relative">
       <input
+        ref={inputRef}
+        aria-label={placeholder}
+        aria-activedescendant={open && activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") { setOpen(false); setQuery(selected ? labelMaterial(selected) : ""); return }
+          if (event.key === "Tab") { setOpen(false); return }
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault(); setOpen(true)
+            const enabled = filtered.map((m, i) => ({m, i})).filter(({m}) => !m.disabled && !(m.disponible != null && m.disponible <= 0)).map(({i}) => i)
+            const position = enabled.indexOf(activeIndex)
+            const next = event.key === "ArrowDown" ? (position + 1) % enabled.length : (position <= 0 ? enabled.length - 1 : position - 1)
+            const index = enabled[next] ?? -1
+            setActiveIndex(index)
+            document.getElementById(`${listId}-${index}`)?.scrollIntoView({block: "nearest"})
+          }
+          if (event.key === "Enter" && open) {
+            event.preventDefault(); const item = filtered[activeIndex]
+            if (item && !item.disabled && !(item.disponible != null && item.disponible <= 0)) { onChange(item.id); setQuery(labelMaterial(item)); setOpen(false) }
+          }
+        }}
         type="text"
         role="combobox"
         aria-expanded={open}
@@ -91,6 +113,7 @@ export function MaterialSearchCombobox({
         placeholder={placeholder}
         value={query}
         onChange={(e) => {
+          setActiveIndex(-1)
           setQuery(e.target.value)
           setOpen(true)
           if (value) onChange('')
@@ -108,17 +131,19 @@ export function MaterialSearchCombobox({
           {filtered.length === 0 ? (
             <li className="px-3 py-2 text-sm text-gray-500">Sin coincidencias</li>
           ) : (
-            filtered.map((m) => {
+            filtered.map((m, index) => {
               const estaAgotado =
                 m.disabled ||
                 (m.disponible !== undefined && m.disponible !== null && m.disponible <= 0)
 
               return (
-                <li key={m.id} role="option" aria-selected={m.id === value}>
+                <li id={`${listId}-${index}`} key={m.id} role="option" aria-selected={m.id === value} aria-disabled={Boolean(estaAgotado)} className={index === activeIndex ? "ring-2 ring-inset ring-accent" : ""}>
                   <button
                     type="button"
                     disabled={estaAgotado}
-                    className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between ${
+                    tabIndex={-1}
+                    onMouseDown={(e) => e.preventDefault()}
+                    className={`min-h-[44px] w-full text-left px-3 py-2 text-base flex items-center justify-between ${
                       estaAgotado
                         ? 'opacity-50 cursor-not-allowed bg-gray-50 text-gray-400'
                         : m.id === value

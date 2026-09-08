@@ -9,6 +9,7 @@ export type OfflineQueueStatus =
   | 'necesita_revision'
 
 export interface RecepcionPendienteRecord {
+  usuario_id: string
   id: string
   orden_id: string
   referencia_entrega: string | null
@@ -28,6 +29,7 @@ export interface RecepcionPendienteRecord {
 }
 
 export interface SolicitudPendienteRecord {
+  usuario_id: string
   id: string
   obra_id: string
   nota: string | null
@@ -111,14 +113,14 @@ export async function putRecepcionPendiente(
   })
 }
 
-export async function listRecepcionesPendientes(): Promise<RecepcionPendienteRecord[]> {
+export async function listRecepcionesPendientes(userId: string): Promise<RecepcionPendienteRecord[]> {
   const db = await openDb()
   return new Promise((resolve, reject) => {
     const tx = db.transaction('recepciones_pendientes', 'readonly')
     const store = tx.objectStore('recepciones_pendientes')
     const request = store.getAll()
     request.onsuccess = () => {
-      resolve((request.result as RecepcionPendienteRecord[]) ?? [])
+      resolve(((request.result as RecepcionPendienteRecord[]) ?? []).filter(r => r.usuario_id === userId))
       db.close()
     }
     request.onerror = () => {
@@ -176,14 +178,14 @@ export async function putSolicitudPendiente(
   })
 }
 
-export async function listSolicitudesPendientes(): Promise<SolicitudPendienteRecord[]> {
+export async function listSolicitudesPendientes(userId: string): Promise<SolicitudPendienteRecord[]> {
   const db = await openDb()
   return new Promise((resolve, reject) => {
     const tx = db.transaction('solicitudes_pendientes', 'readonly')
     const store = tx.objectStore('solicitudes_pendientes')
     const request = store.getAll()
     request.onsuccess = () => {
-      resolve((request.result as SolicitudPendienteRecord[]) ?? [])
+      resolve(((request.result as SolicitudPendienteRecord[]) ?? []).filter(r => r.usuario_id === userId))
       db.close()
     }
     request.onerror = () => {

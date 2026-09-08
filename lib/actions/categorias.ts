@@ -23,7 +23,7 @@ export async function crearCategoriaAction(
     return { error: 'El nombre de la categoría no puede estar vacío.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.from('material_categorias').insert({ nombre })
 
   if (error) {
@@ -54,7 +54,7 @@ export async function actualizarCategoriaAction(
     return { error: 'El nombre de la categoría no puede estar vacío.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // Obtener nombre actual para sincronizar materiales
   const { data: catActual } = await supabase
@@ -95,7 +95,7 @@ export async function eliminarCategoriaAction(
     return { error: 'No tienes permiso para eliminar categorías.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: cat } = await supabase
     .from('material_categorias')
@@ -146,7 +146,7 @@ export async function crearSubcategoriaAction(
     return { error: 'El nombre de la subcategoría no puede estar vacío.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase
     .from('material_subcategorias')
     .insert({ categoria_id: categoriaId, nombre })
@@ -179,7 +179,7 @@ export async function actualizarSubcategoriaAction(
     return { error: 'El nombre de la subcategoría no puede estar vacío.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: subActual } = await supabase
     .from('material_subcategorias')
@@ -222,7 +222,7 @@ export async function eliminarSubcategoriaAction(
     return { error: 'No tienes permiso para eliminar subcategorías.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: subActual } = await supabase
     .from('material_subcategorias')

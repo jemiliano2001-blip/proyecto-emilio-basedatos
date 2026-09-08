@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation'
 
-export default function NuevoTopePage({
+export default async function NuevoTopePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  redirect(`/obras/${params.id}/asignar-materiales`)
+  const resolvedparams = await params
+  redirect(`/obras/${resolvedparams.id}/asignar-materiales`)
 }

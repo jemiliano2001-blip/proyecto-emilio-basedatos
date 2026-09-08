@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useFormState } from 'react-dom'
+import { useOfflineUser } from '@/components/OfflineUserProvider'
 import { useRouter } from 'next/navigation'
 import type { ActionResult } from '@/lib/actions/recepciones'
 import { FormError } from '@/components/FormError'
@@ -43,6 +44,7 @@ export function RecepcionForm({
   items: OrdenItemChecklist[]
 }) {
   const router = useRouter()
+  const userId = useOfflineUser()
   const [state, formAction] = useFormState(action, initialState)
   const [offlineError, setOfflineError] = useState<string | null>(null)
   const [offlineMsg, setOfflineMsg] = useState<string | null>(null)
@@ -90,6 +92,7 @@ export function RecepcionForm({
   }
 
   async function guardarOffline(formData: FormData) {
+    if (!userId) { setOfflineError("Inicia sesión para guardar en este teléfono."); return }
     setOfflineError(null)
     setOfflineMsg(null)
     try {
@@ -123,6 +126,7 @@ export function RecepcionForm({
       const now = new Date().toISOString()
 
       await putRecepcionPendiente({
+        usuario_id: userId,
         id: parsed.data.id,
         orden_id: parsed.data.orden_id,
         referencia_entrega: parsed.data.referencia_entrega,

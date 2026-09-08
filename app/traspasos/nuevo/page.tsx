@@ -12,7 +12,7 @@ export default async function NuevoTraspasoPage() {
     redirect('/traspasos')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: obras } = await supabase
     .from('obras')

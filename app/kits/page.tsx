@@ -12,7 +12,7 @@ export default async function KitsPage() {
   const session = await getSessionUsuario()
   const puedeGestionar = puedeGestionarKits(session?.rol ?? null)
   const verPrecios = puedeVerPrecios(session?.rol ?? null)
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: kitsRaw } = await supabase
     .from('material_kits')

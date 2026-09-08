@@ -51,14 +51,15 @@ interface RecepcionHist {
 export default async function OrdenDetallePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeVerPrecios(session.rol)) {
     redirect('/')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: orden } = await supabase
     .from('ordenes_compra')
     .select(
@@ -70,7 +71,7 @@ export default async function OrdenDetallePage({
          material:catalogo_materiales(nombre_base, variante, unidad_medida)
        )`
     )
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!orden) notFound()
@@ -78,7 +79,7 @@ export default async function OrdenDetallePage({
   const detalle = orden as unknown as OrdenDetalle
 
   const { data: checklistRows } = await supabase.rpc('detalle_orden_checklist', {
-    p_orden_id: params.id,
+    p_orden_id: resolvedparams.id,
   })
 
   type ChecklistRow = {
@@ -99,7 +100,7 @@ export default async function OrdenDetallePage({
       `id, estado, recibido_en,
        receptor:usuarios!recepciones_material_receptor_id_fkey(nombre)`
     )
-    .eq('orden_id', params.id)
+    .eq('orden_id', resolvedparams.id)
     .order('creado_en', { ascending: false })
 
   const recepciones = (historial ?? []) as unknown as RecepcionHist[]
@@ -129,7 +130,7 @@ export default async function OrdenDetallePage({
        tipo_archivo, subido_por, creado_en,
        subidor:usuarios!orden_compra_facturas_subido_por_fkey(nombre)`
     )
-    .eq('orden_id', params.id)
+    .eq('orden_id', resolvedparams.id)
     .order('creado_en', { ascending: false })
 
   type FacturaRow = {

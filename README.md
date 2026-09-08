@@ -5,6 +5,15 @@ En UI se dice **proyecto**; la tabla sigue siendo `obras`.
 
 ## Estado actual: Fase 7 — Cierre de obra y reportes de conciliación (hecha)
 
+### Mantenimiento y hardening (2026-09-08)
+- Next.js actualizado a `15.5.25`; `npm audit` sin vulnerabilidades.
+- TypeScript estricto, ESLint y 13 pruebas aisladas en `tests/`.
+- El cierre requiere las RPC formales; la edición normal ya no puede falsificarlo.
+- Capturas offline aisladas por usuario, con corrección y descarte de conflictos.
+- El Service Worker no almacena HTML privado y solicitudes/órdenes tienen filtros y paginación.
+
+La migración `supabase/migrations/0016_integridad_proyectos_precios.sql` queda pendiente de revisión manual y aplicación controlada en Supabase antes del despliegue del frontend de este lote.
+
 ### Fase 0 — Infraestructura (hecha)
 - Proyecto Supabase: `proyecto-emilio-basedatos` (ref `uplxxnpurpqlvhjrsufa`)
 - Migraciones en repo: `0001` … `0011` (aplicadas en remoto, incluida `0011` de notificaciones Realtime)
@@ -13,10 +22,10 @@ En UI se dice **proyecto**; la tabla sigue siendo `obras`.
 
 Pendiente operativo (dashboard, no código):
 - [x] Aplicar migraciones `0009_traspasos_obra.sql`, `0010_cierre_conciliacion_obra.sql` y `0011_notificaciones_realtime.sql` (0009 → 0010 → 0011)
-- [ ] Crear usuario Blanquita con rol `finanzas` (por ahora las aprobaciones de pago las hace `acceso_total`)
+- [ ] Crear usuario Blanquita con rol `finanzas` (falta su correo; por ahora paga `acceso_total`)
 - [ ] Activar backups automáticos (Settings → Database → Backups) — requiere plan Pro
 - [ ] Activar "Leaked password protection" en Auth
-- [ ] Reemplazar íconos PWA placeholder por logo real de la empresa
+- [ ] Reemplazar íconos PWA placeholder por logo real de la empresa (falta recibir el archivo oficial)
 
 ### Fase 1 — Catálogo + Proyectos + Topes
 - Login individual (`/login`) + middleware de sesión

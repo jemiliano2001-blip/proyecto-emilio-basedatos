@@ -1,12 +1,13 @@
 import { LoginForm } from '@/components/LoginForm'
 import { sanitizeNextPath } from '@/lib/auth/safe-next'
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string }
+  searchParams: Promise<{ next?: string }>
 }) {
-  const next = sanitizeNextPath(searchParams.next)
+  const resolvedsearchParams = await searchParams
+  const next = sanitizeNextPath(resolvedsearchParams.next)
 
   return (
     <main className="max-w-md mx-auto p-4 min-h-screen flex flex-col justify-center">

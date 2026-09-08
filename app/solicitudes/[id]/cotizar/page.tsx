@@ -8,14 +8,15 @@ import { createClient } from '@/lib/supabase/server'
 export default async function CotizarSolicitudPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeCotizar(session.rol)) {
-    redirect(`/solicitudes/${params.id}`)
+    redirect(`/solicitudes/${resolvedparams.id}`)
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: solicitud } = await supabase
     .from('solicitudes_material')
@@ -27,7 +28,7 @@ export default async function CotizarSolicitudPage({
          material:catalogo_materiales(nombre_base, variante, unidad_medida)
        )`
     )
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!solicitud) notFound()
@@ -46,7 +47,7 @@ export default async function CotizarSolicitudPage({
          id, solicitud_item_id, proveedor_id, precio_unitario, cantidad, moneda
        )`
     )
-    .eq('solicitud_id', params.id)
+    .eq('solicitud_id', resolvedparams.id)
     .order('creado_en', { ascending: false })
     .limit(1)
 
@@ -72,7 +73,7 @@ export default async function CotizarSolicitudPage({
       <PageHeader
         title="Cotizar solicitud"
         description={`${(obra as { nombre?: string } | null)?.nombre ?? 'Proyecto'} · Estatus: ${solicitud.estado}`}
-        backHref={`/solicitudes/${params.id}`}
+        backHref={`/solicitudes/${resolvedparams.id}`}
         backLabel="Volver a la solicitud"
         action={{
           label: 'Gestionar proveedores',
@@ -81,7 +82,7 @@ export default async function CotizarSolicitudPage({
       />
 
       <CotizarForm
-        solicitudId={params.id}
+        solicitudId={resolvedparams.id}
         items={
           (solicitud.items ?? []) as unknown as {
             id: string

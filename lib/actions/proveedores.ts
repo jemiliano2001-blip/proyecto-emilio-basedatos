@@ -27,7 +27,7 @@ export async function createProveedorAction(
 
   if (!parsed.ok) return { error: parsed.error }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.from('proveedores').insert(parsed.data)
 
   if (error) {
@@ -60,7 +60,7 @@ export async function updateProveedorAction(
 
   if (!parsed.ok) return { error: parsed.error }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase
     .from('proveedores')
     .update(parsed.data)

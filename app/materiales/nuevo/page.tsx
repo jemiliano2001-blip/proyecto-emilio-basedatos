@@ -10,14 +10,15 @@ import type { MaterialCategoria } from '@/lib/types'
 export default async function NuevoMaterialPage({
   searchParams,
 }: {
-  searchParams?: { categoria?: string; subcategoria?: string }
+  searchParams?: Promise<{ categoria?: string; subcategoria?: string }>
 }) {
+  const resolvedSearchParams = await searchParams
   const session = await getSessionUsuario()
   if (!session || !puedeGestionarCatalogo(session.rol)) {
     redirect('/materiales')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: categoriasRaw } = await supabase
     .from('material_categorias')
     .select(`
@@ -48,8 +49,8 @@ export default async function NuevoMaterialPage({
         action={createMaterialAction}
         submitLabel="Crear material"
         categorias={categorias}
-        initialCategoria={searchParams?.categoria}
-        initialSubcategoria={searchParams?.subcategoria}
+        initialCategoria={resolvedSearchParams?.categoria}
+        initialSubcategoria={resolvedSearchParams?.subcategoria}
       />
     </main>
   )

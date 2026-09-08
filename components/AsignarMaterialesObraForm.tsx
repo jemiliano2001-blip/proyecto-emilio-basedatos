@@ -20,7 +20,7 @@ interface PartidaAsignacion {
 
 export function AsignarMaterialesObraForm({
   action,
-  obraId,
+  obraId: _obraId,
   obraNombre,
   materiales = [],
   kits = [],

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useFormState } from 'react-dom'
+import { useOfflineUser } from '@/components/OfflineUserProvider'
 import { useRouter } from 'next/navigation'
 import type { ActionResult } from '@/lib/actions/solicitudes'
 import { FormError } from '@/components/FormError'
@@ -80,6 +81,7 @@ export function SolicitudForm({
   permiteMultiObra?: boolean
 }) {
   const router = useRouter()
+  const userId = useOfflineUser()
   const [state, formAction] = useFormState(action, initialState)
   const [selectedObraId, setSelectedObraId] = useState<string>(defaultObraId ?? (obras[0]?.id ?? ''))
   const [items, setItems] = useState<ItemRow[]>([nuevaFila()])
@@ -194,6 +196,7 @@ export function SolicitudForm({
   }
 
   async function guardarOffline(formData: FormData) {
+    if (!userId) { setOfflineError("Inicia sesión para guardar en este teléfono."); return }
     setOfflineError(null)
     setOfflineMsg(null)
     setClientValidationError(null)
@@ -283,6 +286,7 @@ export function SolicitudForm({
       const now = new Date().toISOString()
       const id = crypto.randomUUID()
       await putSolicitudPendiente({
+        usuario_id: userId,
         id,
         obra_id,
         nota,

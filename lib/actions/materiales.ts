@@ -10,7 +10,7 @@ import { validateMaterialInput } from '@/lib/validations/material'
 export type ActionResult = { error: string | null; ok?: boolean }
 
 async function uploadMaterialFoto(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   file: File | null
 ): Promise<{ url?: string; error?: string }> {
   if (!file || file.size === 0) return {}
@@ -58,7 +58,7 @@ export async function createMaterialAction(
     return { error: 'No tienes permiso para crear materiales.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const fotoFile = formData.get('foto') as File | null
   let foto_url: string | null = null
@@ -110,7 +110,7 @@ export async function updateMaterialAction(
     return { error: 'No tienes permiso para editar materiales.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const fotoFile = formData.get('foto') as File | null
   const fotoExistenteRaw = formData.get('foto_url_existente')

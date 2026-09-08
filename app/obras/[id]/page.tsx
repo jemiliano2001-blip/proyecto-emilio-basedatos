@@ -32,10 +32,11 @@ function labelEstatus(estado: string): string {
 export default async function ObraDetallePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
-  const supabase = createClient()
+  const supabase = await createClient()
   const rol = session?.rol ?? null
   const puedeEditarObra = puedeGestionarObras(rol)
   const puedeTopes = puedeGestionarTopes(rol)
@@ -50,7 +51,7 @@ export default async function ObraDetallePage({
   const { data: obra } = await supabase
     .from('obras')
     .select('id, nombre, cliente, ciudad, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn')
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!obra) notFound()
@@ -58,21 +59,19 @@ export default async function ObraDetallePage({
   const { data: saldos } = await supabase
     .from('v_saldo_material_obra')
     .select('*')
-    .eq('obra_id', params.id)
+    .eq('obra_id', resolvedparams.id)
     .order('nombre_base')
 
   const { data: saldoMx } = verPrecios
     ? await supabase
-        .from('v_saldo_presupuesto_obra')
-        .select('*')
-        .eq('obra_id', params.id)
+        .rpc('saldo_presupuesto_proyecto', { p_obra_id: resolvedparams.id })
         .maybeSingle()
     : { data: null }
 
   const { data: topes } = await supabase
     .from('obra_material_contratado')
     .select('id, material_id, cantidad_contratada')
-    .eq('obra_id', params.id)
+    .eq('obra_id', resolvedparams.id)
 
   // Documentos adjuntos PDF
   const { data: documentosRaw } = await supabase
@@ -89,7 +88,7 @@ export default async function ObraDetallePage({
       creado_en,
       usuarios:subido_por (nombre)
     `)
-    .eq('obra_id', params.id)
+    .eq('obra_id', resolvedparams.id)
     .order('creado_en', { ascending: false })
 
   interface DocumentoDbRow {
@@ -156,7 +155,7 @@ export default async function ObraDetallePage({
         }
         actions={
           puedeEditarObra ? (
-            <Link href={`/obras/${params.id}/editar`} className="btn-secondary px-4 py-2 text-sm">
+            <Link href={`/obras/${resolvedparams.id}/editar`} className="btn-secondary px-4 py-2 text-sm">
               Editar
             </Link>
           ) : undefined
@@ -165,7 +164,7 @@ export default async function ObraDetallePage({
 
       <div className="flex flex-wrap items-center gap-2 -mt-2">
         {verConciliacion && (
-          <Link href={`/obras/${params.id}/conciliacion`} className="btn-secondary px-4 py-2 text-sm">
+          <Link href={`/obras/${resolvedparams.id}/conciliacion`} className="btn-secondary px-4 py-2 text-sm">
             Conciliación
           </Link>
         )}
@@ -189,7 +188,7 @@ export default async function ObraDetallePage({
 
       {puedeSolicitar && obra.estado === 'activa' && (
         <Link
-          href={`/solicitudes/nueva?obra=${params.id}`}
+          href={`/solicitudes/nueva?obra=${resolvedparams.id}`}
           className="btn-primary flex items-center justify-center gap-2 w-full text-center"
         >
           <IconPlus className="w-4 h-4" />
@@ -235,7 +234,7 @@ export default async function ObraDetallePage({
       {/* SECCIÓN DOCUMENTACIÓN ADICIONAL Y ARCHIVOS PDF */}
       <section id="documentos" className="card border-slate-200">
         <ObraDocumentos
-          obraId={params.id}
+          obraId={resolvedparams.id}
           documentos={documentos}
           puedeGestionar={puedeGestionarDocs}
           puedeEliminar={puedeEliminarDocs}
@@ -255,7 +254,7 @@ export default async function ObraDetallePage({
           </div>
           {puedeTopes && (
             <Link
-              href={`/obras/${params.id}/asignar-materiales`}
+              href={`/obras/${resolvedparams.id}/asignar-materiales`}
               className="btn-primary shrink-0 text-xs px-3 py-2 min-h-[38px] inline-flex items-center gap-1.5"
             >
               <IconPlus className="w-3.5 h-3.5" />
@@ -278,7 +277,7 @@ export default async function ObraDetallePage({
                     puedeTopes
                       ? {
                           label: 'Asignar materiales',
-                          href: `/obras/${params.id}/asignar-materiales`,
+                          href: `/obras/${resolvedparams.id}/asignar-materiales`,
                         }
                       : undefined
                   }
@@ -325,7 +324,7 @@ export default async function ObraDetallePage({
                           {/* Miniatura de foto o placeholder legible */}
                           <div className="w-14 h-14 rounded-lg bg-gray-100 border border-gray-200 shrink-0 flex items-center justify-center overflow-hidden">
                             {s.foto_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
+                              // Imagen de catálogo servida por Storage
                               <img
                                 src={s.foto_url}
                                 alt={s.nombre_base}
@@ -394,7 +393,7 @@ export default async function ObraDetallePage({
                           <div className="mt-2 pt-2 border-t border-gray-100">
                             <EditTopeInline
                               topeId={tope.id}
-                              obraId={params.id}
+                              obraId={resolvedparams.id}
                               materialId={s.material_id}
                               cantidadActual={Number(tope.cantidad_contratada)}
                             />

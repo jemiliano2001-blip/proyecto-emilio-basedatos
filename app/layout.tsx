@@ -12,6 +12,7 @@ import {
 import { traspasosSchemaDisponible } from '@/lib/schema-disponible'
 import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator'
 import { CommandPalette } from '@/components/CommandPalette'
+import { OfflineUserProvider } from '@/components/OfflineUserProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -40,6 +41,7 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body className="min-h-dvh bg-paper text-gray-900">
+        <OfflineUserProvider key={session?.authUserId ?? 'anon'} userId={session?.authUserId ?? null}>
         <NetworkStatusIndicator />
         {showNav && <ServiceWorkerRegistration />}
         {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} />}
@@ -55,6 +57,7 @@ export default async function RootLayout({
             traspasosDisponibles={traspasosDisponibles}
           />
         )}
+      </OfflineUserProvider>
       </body>
     </html>
   )

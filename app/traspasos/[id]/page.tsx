@@ -53,10 +53,11 @@ function badgeVariant(estado: EstadoTraspaso): 'teal' | 'navy' | 'amber' | 'gray
 export default async function TraspasoDetallePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: traspaso, error } = await supabase
     .from('traspasos_obra')
@@ -78,12 +79,12 @@ export default async function TraspasoDetallePage({
       items:traspaso_items(
         id,
         cantidad,
-        precio_unitario_mxn,
+
         material:catalogo_materiales(nombre_base, variante, unidad_medida)
       )
     `
     )
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .single()
 
   if (error || !traspaso) {
@@ -97,6 +98,13 @@ export default async function TraspasoDetallePage({
   const puedeConfirmar = puedeConfirmarTraspaso(session?.rol ?? null)
   const puedeCancelar = puedeCancelarTraspaso(session?.rol ?? null)
   const verPrecios = puedeVerPrecios(session?.rol ?? null)
+
+  if (verPrecios) {
+    const { data: precios, error: preciosError } = await supabase.rpc('precios_traspaso', { p_traspaso_id: resolvedparams.id })
+    if (preciosError) throw new Error('No se pudieron cargar los precios del traspaso.')
+    const porId = new Map((precios as { id: string; precio_unitario_mxn: number | null }[]).map(p => [p.id, p.precio_unitario_mxn]))
+    data.items = data.items.map(item => ({ ...item, precio_unitario_mxn: porId.get(item.id) ?? null }))
+  }
 
   // Valuación congelada al aprobar. Mientras el traspaso está 'solicitado'
   // todavía no hay precios y el total es 0.

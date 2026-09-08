@@ -9,12 +9,13 @@ import { CatalogoMaterialesView } from '@/components/CatalogoMaterialesView'
 export default async function MaterialesPage({
   searchParams,
 }: {
-  searchParams?: { categoria?: string }
+  searchParams?: Promise<{ categoria?: string }>
 }) {
+  const resolvedSearchParams = await searchParams
   const session = await getSessionUsuario()
   const puedeEditar = puedeGestionarCatalogo(session?.rol ?? null)
   const verPrecios = puedeVerPrecios(session?.rol ?? null)
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // 1. Consulta de materiales activos
   const { data: materiales, error: errMateriales } = await supabase
@@ -73,7 +74,7 @@ export default async function MaterialesPage({
         categorias={categorias}
         puedeEditar={puedeEditar}
         verPrecios={verPrecios}
-        initialCategoria={searchParams?.categoria}
+        initialCategoria={resolvedSearchParams?.categoria}
       />
     </main>
   )

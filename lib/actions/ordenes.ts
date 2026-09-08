@@ -21,7 +21,7 @@ export async function asignarProveedorOrdenAction(
     return { error: 'No tienes permiso para modificar la orden de compra.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const updates: { proveedor_id?: string | null; folio_fisico?: string | null } = {}
   if (proveedorId !== undefined) {
@@ -86,7 +86,7 @@ export async function subirFacturaOrdenAction(
     return { error: 'El archivo supera el tamaño máximo permitido de 30 MB.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { orden_id, obra_id, folio_factura, monto_factura } = parsed.data
   const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
   const storagePath = `ordenes/${orden_id}/facturas/${crypto.randomUUID()}-${sanitizedFileName}`
@@ -149,7 +149,7 @@ export async function eliminarFacturaOrdenAction(
     return { error: 'No tienes permiso para eliminar facturas.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: factura, error: fetchError } = await supabase
     .from('orden_compra_facturas')

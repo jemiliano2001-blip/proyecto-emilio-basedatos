@@ -16,7 +16,7 @@ export default async function ProveedoresPage() {
   }
 
   const puedeGestionar = puedeGestionarProveedores(session.rol)
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: proveedores, error } = await supabase
     .from('proveedores')
     .select('id, nombre, contacto, telefono, activo, creado_en')

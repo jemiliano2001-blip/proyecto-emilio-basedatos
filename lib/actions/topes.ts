@@ -28,7 +28,7 @@ export async function createTopeAction(
     return { error: parsed.error }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.from('obra_material_contratado').insert(parsed.data)
 
   if (error) {
@@ -63,7 +63,7 @@ export async function updateTopeAction(
     return { error: parsed.error }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase
     .from('obra_material_contratado')
     .update({ cantidad_contratada: parsed.data.cantidad_contratada })
@@ -111,7 +111,7 @@ export async function asignarMaterialesMasivosAction(
     return { error: 'Agrega al menos un material con cantidad mayor a 0.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // 1. Obtener precios base de los materiales para cálculo de presupuesto adicional
   const matIds = partidas.map((p) => p.material_id)

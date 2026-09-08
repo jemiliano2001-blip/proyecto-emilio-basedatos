@@ -26,7 +26,7 @@ export async function cerrarObraAction(
     return { error: 'No tienes permiso para cerrar proyectos.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('cerrar_obra', {
     p_obra_id: obraId,
     p_nota: nota || null,
@@ -48,7 +48,7 @@ export async function reabrirObraAction(obraId: string): Promise<ActionResult> {
     return { error: 'No tienes permiso para reabrir proyectos.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('reabrir_obra', {
     p_obra_id: obraId,
   })

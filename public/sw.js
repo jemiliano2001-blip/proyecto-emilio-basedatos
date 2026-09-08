@@ -2,8 +2,8 @@
  * Cachea el shell PWA y páginas estáticas. No cachea respuestas privadas
  * de la API ni HTML autenticado de forma agresiva.
  */
-const CACHE_NAME = 'proyecto-emilio-shell-v1'
-const SHELL_URLS = ['/', '/manifest.json', '/login']
+const CACHE_NAME = 'proyecto-emilio-shell-v2'
+const SHELL_URLS = ['/offline.html', '/manifest.json', '/icon-192.png']
 
 self.addEventListener('install', (event) => {
   const e = /** @type {ExtendableEvent} */ (event)
@@ -18,7 +18,7 @@ self.addEventListener('activate', (event) => {
   const e = /** @type {ExtendableEvent} */ (event)
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k.startsWith('proyecto-emilio-') && k !== CACHE_NAME).map((k) => caches.delete(k)))
     ).then(() => /** @type {ServiceWorkerGlobalScope} */ (self).clients.claim())
   )
 })
@@ -32,18 +32,10 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return
   if (url.pathname.startsWith('/api/')) return
 
-  // Navegación: network-first, fallback a cache del shell
+  // Nunca persistir HTML privado: incluye datos financieros y estado de sesión.
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy))
-          return res
-        })
-        .catch(() =>
-          caches.match(req).then((cached) => cached || caches.match('/login'))
-        )
+      fetch(req).catch(async () => (await caches.match('/offline.html')) || Response.error())
     )
     return
   }
@@ -62,6 +54,7 @@ self.addEventListener('fetch', (event) => {
       caches.match(req).then((cached) => {
         if (cached) return cached
         return fetch(req).then((res) => {
+          if (!res.ok || res.redirected || res.headers.get('content-type')?.includes('text/html')) return res
           const copy = res.clone()
           caches.open(CACHE_NAME).then((cache) => cache.put(req, copy))
           return res

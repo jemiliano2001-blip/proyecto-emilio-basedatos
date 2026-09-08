@@ -1,5 +1,6 @@
 'use server'
 
+import { matchesOfflineOwner } from '@/lib/offline/owner'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getSessionUsuario } from '@/lib/auth/session'
@@ -30,7 +31,7 @@ function mapRpcError(error: { message?: string } | null, fallback: string): stri
 }
 
 async function insertSolicitudItems(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   solicitudId: string,
   items: SolicitudItemInput[]
 ) {
@@ -84,7 +85,7 @@ export async function createSolicitudAction(
     return { error: 'No tienes permiso para requisiciones multi-obra.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const solicitanteId = session.perfil.id
 
   const { data: obra } = await supabase
@@ -242,6 +243,9 @@ export async function syncSolicitudPayload(
   | { status: 'reintentar'; error: string }
 > {
   const session = await getSessionUsuario()
+  if (!matchesOfflineOwner(raw, session?.authUserId)) {
+    return { status: 'no_autenticado' }
+  }
   if (!session || !session.perfil || !puedeCrearSolicitudes(session.rol)) {
     return { status: 'no_autenticado' }
   }
@@ -275,7 +279,7 @@ export async function syncSolicitudPayload(
     return { status: 'conflicto', error: 'No tienes permiso para requisiciones multi-obra.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: existente } = await supabase
     .from('solicitudes_material')
@@ -426,7 +430,7 @@ export async function cancelSolicitudAction(
     return { error: 'No autenticado.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('cancelar_solicitud', {
     p_solicitud_id: solicitudId,
   })
@@ -478,7 +482,7 @@ export async function aprobarSolicitudComprasAction(
     return { error: 'No tienes permiso para aprobar como Compras.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('aprobar_solicitud_compras', {
     p_solicitud_id: solicitudId,
   })
@@ -503,7 +507,7 @@ export async function aprobarPagoSolicitudAction(
     return { error: 'No tienes permiso para aprobar el pago.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data, error } = await supabase.rpc('aprobar_pago_solicitud', {
     p_solicitud_id: solicitudId,
   })
@@ -540,7 +544,7 @@ export async function rechazarSolicitudAction(
   const motivo =
     typeof motivoRaw === 'string' && motivoRaw.trim() !== '' ? motivoRaw.trim() : null
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.rpc('rechazar_solicitud', {
     p_solicitud_id: solicitudId,
     p_motivo: motivo,

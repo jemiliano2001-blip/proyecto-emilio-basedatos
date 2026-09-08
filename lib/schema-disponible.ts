@@ -13,14 +13,14 @@ export function esRelacionAusente(error: { message?: string; code?: string }): b
 }
 
 export async function traspasosSchemaDisponible(): Promise<boolean> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.from('traspasos_obra').select('id').limit(1)
   if (!error) return true
   return !esRelacionAusente(error)
 }
 
 export async function conciliacionSchemaDisponible(): Promise<boolean> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase
     .from('v_conciliacion_obra_presupuesto')
     .select('obra_id')

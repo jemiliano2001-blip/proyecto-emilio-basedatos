@@ -24,7 +24,7 @@ function asRol(value: unknown): RolUsuario | null {
 }
 
 export const getSessionUsuario = cache(async (): Promise<SessionUsuario | null> => {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

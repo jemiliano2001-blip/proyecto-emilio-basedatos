@@ -10,20 +10,21 @@ import type { CatalogoMaterial, MaterialCategoria } from '@/lib/types'
 export default async function EditarMaterialPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeGestionarCatalogo(session.rol)) {
     redirect('/materiales')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: material } = await supabase
     .from('catalogo_materiales')
     .select(
       'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, precio_base, activo'
     )
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!material) notFound()
@@ -46,7 +47,7 @@ export default async function EditarMaterialPage({
     .order('orden', { ascending: true })
 
   const categorias = (categoriasRaw as MaterialCategoria[] | null) ?? []
-  const updateAction = updateMaterialAction.bind(null, params.id)
+  const updateAction = updateMaterialAction.bind(null, resolvedparams.id)
 
   return (
     <main className="page-shell">

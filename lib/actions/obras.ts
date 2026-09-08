@@ -34,64 +34,18 @@ export async function createObraAction(
     return { error: parsed.error }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { topes, ...obraData } = parsed.data
 
-  let finalPresupuesto = obraData.presupuesto_mxn
-
-  // Si se enviaron topes de materiales, verificar precios base en catálogo para garantizar cálculo
-  if (topes.length > 0 && finalPresupuesto === 0) {
-    const matIds = topes.map((t) => t.material_id)
-    const { data: mats } = await supabase
-      .from('catalogo_materiales')
-      .select('id, precio_base')
-      .in('id', matIds)
-
-    if (mats) {
-      const priceMap = new Map(mats.map((m) => [m.id, Number(m.precio_base ?? 0)]))
-      finalPresupuesto = topes.reduce((acc, t) => {
-        const p = priceMap.get(t.material_id) ?? 0
-        return acc + t.cantidad_contratada * p
-      }, 0)
-      finalPresupuesto = Math.round(finalPresupuesto * 100) / 100
-    }
-  }
-
-  const { data, error } = await supabase
-    .from('obras')
-    .insert({
-      ...obraData,
-      presupuesto_mxn: finalPresupuesto,
-      cerrado_en: obraData.estado === 'cerrada' ? new Date().toISOString() : null,
-    })
-    .select('id')
-    .single()
-
-  if (error || !data) {
-    return { error: 'No se pudo crear el proyecto. Intenta de nuevo.' }
-  }
-
-  if (topes.length > 0) {
-    const { error: errorTopes } = await supabase.from('obra_material_contratado').insert(
-      topes.map((t) => ({
-        obra_id: data.id,
-        material_id: t.material_id,
-        cantidad_contratada: t.cantidad_contratada,
-      }))
-    )
-    if (errorTopes) {
-      await supabase.from('obras').delete().eq('id', data.id)
-      if (errorTopes.code === '23505') {
-        return { error: 'Hay materiales duplicados en el presupuesto.' }
-      }
-      return {
-        error: 'No se pudo guardar el presupuesto de materiales. Intenta de nuevo.',
-      }
-    }
+  const { data, error } = await supabase.rpc('crear_proyecto_con_presupuesto', {
+    p_datos: obraData, p_topes: topes,
+  })
+  if (error || typeof data !== 'string') {
+    return { error: 'No se pudo crear el proyecto con su presupuesto. Revisa los datos o contacta al administrador.' }
   }
 
   revalidatePath('/')
-  redirect(`/obras/${data.id}`)
+  redirect(`/obras/${data}`)
 }
 
 export async function updateObraAction(
@@ -121,19 +75,9 @@ export async function updateObraAction(
   }
 
   const { topes: _topes, ...obraData } = parsed.data
-  const supabase = createClient()
-  const { error } = await supabase
-    .from('obras')
-    .update({
-      ...obraData,
-      cerrado_en: obraData.estado === 'cerrada' ? new Date().toISOString() : null,
-    })
-    .eq('id', obraId)
-
-  if (error) {
-    return { error: 'No se pudo actualizar el proyecto. Intenta de nuevo.' }
-  }
-
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('editar_proyecto', { p_id: obraId, p_datos: obraData })
+  if (error) return { error: 'No se pudo editar el proyecto. Si está cerrado, solicita su reapertura.' }
   revalidatePath('/')
   revalidatePath(`/obras/${obraId}`)
   redirect(`/obras/${obraId}`)

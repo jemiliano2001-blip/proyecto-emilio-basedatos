@@ -33,7 +33,7 @@ export async function listarNotificacionesAction(): Promise<NotificacionesResult
     return { error: 'No autenticado', items: [], noLeidas: 0 }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data, error } = await supabase
     .from('notificaciones')
     .select(
@@ -57,7 +57,7 @@ export async function contarNoLeidasAction(): Promise<{ error: string | null; no
     return { error: 'No autenticado', noLeidas: 0 }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { count, error } = await supabase
     .from('notificaciones')
     .select('id', { count: 'exact', head: true })
@@ -78,7 +78,7 @@ export async function marcarNotificacionLeidaAction(
     return { error: 'No autenticado' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.from('notificaciones').update({ leida: true }).eq('id', id)
 
   if (error) {

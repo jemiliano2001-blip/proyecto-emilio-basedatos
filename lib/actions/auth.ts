@@ -17,7 +17,7 @@ export async function loginAction(
     return { error: 'Escribe tu correo y contraseña.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
@@ -29,7 +29,7 @@ export async function loginAction(
 }
 
 export async function logoutAction(): Promise<void> {
-  const supabase = createClient()
+  const supabase = await createClient()
   await supabase.auth.signOut()
   revalidatePath('/', 'layout')
   redirect('/login')

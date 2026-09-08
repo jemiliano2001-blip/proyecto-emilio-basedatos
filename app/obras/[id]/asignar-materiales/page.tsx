@@ -10,18 +10,19 @@ import type { CatalogoMaterial, MaterialKitWithItems } from '@/lib/types'
 export default async function AsignarMaterialesPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeGestionarTopes(session.rol)) {
-    redirect(`/obras/${params.id}`)
+    redirect(`/obras/${resolvedparams.id}`)
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: obra } = await supabase
     .from('obras')
     .select('id, nombre')
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!obra) notFound()
@@ -114,20 +115,20 @@ export default async function AsignarMaterialesPage({
     })),
   }))
 
-  const action = asignarMaterialesMasivosAction.bind(null, params.id)
+  const action = asignarMaterialesMasivosAction.bind(null, resolvedparams.id)
 
   return (
     <main className="page-shell space-y-6">
       <PageHeader
         title="Asignar Materiales y Kits"
         description="Incorpora materiales individuales o configuraciones de kits de transformadores."
-        backHref={`/obras/${params.id}`}
+        backHref={`/obras/${resolvedparams.id}`}
         backLabel={`Volver a ${obra.nombre}`}
       />
 
       <AsignarMaterialesObraForm
         action={action}
-        obraId={params.id}
+        obraId={resolvedparams.id}
         obraNombre={obra.nombre}
         materiales={materiales}
         kits={kits}

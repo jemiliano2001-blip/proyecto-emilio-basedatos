@@ -10,32 +10,34 @@ import type { Obra } from '@/lib/types'
 export default async function EditarObraPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeGestionarObras(session.rol)) {
-    redirect(`/obras/${params.id}`)
+    redirect(`/obras/${resolvedparams.id}`)
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: obra } = await supabase
     .from('obras')
     .select(
       'id, nombre, cliente, ciudad, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn, creado_en'
     )
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!obra) notFound()
+  if (obra.estado === 'cerrada') redirect(`/obras/${resolvedparams.id}`)
 
-  const updateAction = updateObraAction.bind(null, params.id)
+  const updateAction = updateObraAction.bind(null, resolvedparams.id)
 
   return (
     <main className="page-shell">
       <PageHeader
         title="Editar proyecto"
         description={obra.nombre}
-        backHref={`/obras/${params.id}`}
+        backHref={`/obras/${resolvedparams.id}`}
         backLabel="Volver al proyecto"
       />
       <ObraForm

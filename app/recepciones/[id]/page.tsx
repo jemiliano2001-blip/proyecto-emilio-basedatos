@@ -44,16 +44,17 @@ function etiquetaEstado(estado: EstadoRecepcion): string {
 export default async function RecepcionDetallePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeVerRecepciones(session.rol)) {
     redirect('/')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data, error } = await supabase.rpc('detalle_recepcion', {
-    p_recepcion_id: params.id,
+    p_recepcion_id: resolvedparams.id,
   })
 
   if (error || !data) notFound()

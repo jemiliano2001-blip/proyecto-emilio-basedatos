@@ -46,7 +46,7 @@ export default async function RecepcionesPage() {
     redirect('/')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const puedeCapturar = puedeCapturarRecepcion(session.rol)
   const puedeRevisar = puedeRevisarRecepcion(session.rol)
 

@@ -43,6 +43,7 @@ async function syncOneRecepcion(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       id: record.id,
+      usuario_id: record.usuario_id,
       orden_id: record.orden_id,
       referencia_entrega: record.referencia_entrega,
       nota: record.nota,
@@ -107,6 +108,7 @@ async function syncOneSolicitud(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       id: record.id,
+      usuario_id: record.usuario_id,
       obra_id: record.obra_id,
       nota: record.nota,
       items: record.items,
@@ -155,7 +157,7 @@ async function syncOneSolicitud(
   return 'reintentar'
 }
 
-export async function syncOfflineQueues(): Promise<SyncSummary> {
+export async function runOfflineQueues(userId: string): Promise<SyncSummary> {
   const summary: SyncSummary = {
     recepcionesOk: 0,
     solicitudesOk: 0,
@@ -164,17 +166,17 @@ export async function syncOfflineQueues(): Promise<SyncSummary> {
     noAutenticado: false,
   }
 
-  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     return summary
   }
 
-  const recepciones = await listRecepcionesPendientes()
+  const recepciones = await listRecepcionesPendientes(userId)
   for (const record of recepciones) {
     if (record.status === 'conflicto') {
       summary.conflictos += 1
       continue
     }
-    const result = await syncOneRecepcion(record)
+    const result = await syncOneRecepcion(record).catch(() => 'reintentar' as const)
     if (result === 'ok') summary.recepcionesOk += 1
     if (result === 'conflicto') summary.conflictos += 1
     if (result === 'reintentar') summary.reintentos += 1
@@ -184,13 +186,14 @@ export async function syncOfflineQueues(): Promise<SyncSummary> {
     }
   }
 
-  const solicitudes = await listSolicitudesPendientes()
+  const solicitudes = await listSolicitudesPendientes(userId)
+  if (summary.noAutenticado) return summary
   for (const record of solicitudes) {
     if (record.status === 'conflicto') {
       summary.conflictos += 1
       continue
     }
-    const result = await syncOneSolicitud(record)
+    const result = await syncOneSolicitud(record).catch(() => 'reintentar' as const)
     if (result === 'ok') summary.solicitudesOk += 1
     if (result === 'conflicto') summary.conflictos += 1
     if (result === 'reintentar') summary.reintentos += 1
@@ -201,4 +204,14 @@ export async function syncOfflineQueues(): Promise<SyncSummary> {
   }
 
   return summary
+}
+
+const running = new Map<string, Promise<SyncSummary>>()
+export function syncOfflineQueues(userId: string): Promise<SyncSummary> {
+  if (!userId) return Promise.reject(new Error('Inicia sesión para sincronizar.'))
+  const current = running.get(userId)
+  if (current) return current
+  const work = runOfflineQueues(userId).finally(() => running.delete(userId))
+  running.set(userId, work)
+  return work
 }

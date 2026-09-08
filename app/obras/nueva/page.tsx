@@ -13,7 +13,7 @@ export default async function NuevaObraPage() {
     redirect('/')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   // Materiales con precio_base
   const { data: materialesRaw } = await supabase

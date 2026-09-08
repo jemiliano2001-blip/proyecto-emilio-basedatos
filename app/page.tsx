@@ -9,8 +9,7 @@ import { puedeGestionarObras } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import type { Obra } from '@/lib/types'
 
-const ESTATUS = ['activa', 'pausada', 'cerrada'] as const
-type EstatusFiltro = (typeof ESTATUS)[number]
+type EstatusFiltro = 'activa' | 'pausada' | 'cerrada'
 
 function asEstatus(value: string | undefined): EstatusFiltro {
   if (value === 'pausada' || value === 'cerrada') return value
@@ -26,12 +25,13 @@ function labelEstatus(estado: Obra['estado']): string {
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: { estatus?: string }
+  searchParams: Promise<{ estatus?: string }>
 }) {
+  const resolvedsearchParams = await searchParams
   const session = await getSessionUsuario()
-  const supabase = createClient()
+  const supabase = await createClient()
   const puedeCrear = puedeGestionarObras(session?.rol ?? null)
-  const estatus = asEstatus(searchParams.estatus)
+  const estatus = asEstatus(resolvedsearchParams.estatus)
 
   const { data: obras, error } = await supabase
     .from('obras')

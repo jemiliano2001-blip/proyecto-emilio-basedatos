@@ -60,7 +60,7 @@ function labelEstado(estado: EstadoTraspaso) {
 export default async function TraspasosPage() {
   const session = await getSessionUsuario()
   const puedeCrear = puedeSolicitarTraspaso(session?.rol ?? null)
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: traspasos, error } = await supabase
     .from('traspasos_obra')

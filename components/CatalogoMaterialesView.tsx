@@ -28,7 +28,7 @@ function MaterialCard({
     <>
       <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-200">
         {m.foto_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
+          // Imagen de catálogo servida por Storage
           <img
             src={m.foto_url}
             alt={m.nombre_base}

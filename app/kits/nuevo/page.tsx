@@ -13,7 +13,7 @@ export default async function NuevoKitPage() {
     redirect('/kits')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: materialesRaw } = await supabase
     .from('catalogo_materiales')
     .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria, precio_base, activo')

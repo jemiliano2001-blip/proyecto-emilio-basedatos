@@ -10,23 +10,24 @@ import type { Proveedor } from '@/lib/types'
 export default async function EditarProveedorPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const resolvedparams = await params
   const session = await getSessionUsuario()
   if (!session || !puedeGestionarProveedores(session.rol)) {
     redirect('/proveedores')
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: proveedor } = await supabase
     .from('proveedores')
     .select('id, nombre, contacto, telefono, activo, creado_en')
-    .eq('id', params.id)
+    .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!proveedor) notFound()
 
-  const updateAction = updateProveedorAction.bind(null, params.id)
+  const updateAction = updateProveedorAction.bind(null, resolvedparams.id)
 
   return (
     <main className="page-shell">

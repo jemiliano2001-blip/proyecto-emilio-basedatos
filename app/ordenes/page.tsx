@@ -1,3 +1,6 @@
+import { ListFilters, ListPagination } from '@/components/ListFilters'
+import { listFilters, type ListParams } from '@/lib/list-filters'
+const STATUSES = ["emitida","parcialmente_recibida","recibida","cancelada"] as const
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
@@ -21,19 +24,28 @@ interface OrdenRow {
   facturas?: { id: string }[] | null
 }
 
-export default async function OrdenesPage() {
+export default async function OrdenesPage({ searchParams }: { searchParams: Promise<ListParams> }) {
+  const params = await searchParams
+  const filters = listFilters(params, STATUSES)
   const session = await getSessionUsuario()
   if (!session || !puedeVerPrecios(session.rol)) {
     redirect('/')
   }
 
-  const supabase = createClient()
-  const { data: ordenes, error } = await supabase
+  const supabase = await createClient()
+  let query = supabase
     .from('ordenes_compra')
     .select(
-      'id, folio, folio_fisico, total, moneda, estado, creado_en, obra:obras(nombre), proveedor:proveedores(nombre), facturas:orden_compra_facturas(id)'
+      'id, folio, folio_fisico, total, moneda, estado, creado_en, obra:obras!inner(nombre), proveedor:proveedores(nombre), facturas:orden_compra_facturas(id)', { count: 'exact' }
     )
     .order('creado_en', { ascending: false })
+    .order('id', { ascending: false })
+  if (filters.estatus) query = query.eq('estado', filters.estatus)
+  if (filters.desde) query = query.gte('creado_en', filters.desde + 'T00:00:00Z')
+  if (filters.hasta) query = query.lt('creado_en', new Date(Date.parse(filters.hasta) + 86400000).toISOString())
+  if (filters.q) query = query.ilike('folio', '%' + filters.q + '%')
+  if (filters.proyecto) query = query.ilike('obra.nombre', '%' + filters.proyecto + '%')
+  const { data: ordenes, error, count } = await query.range(filters.from, filters.to)
 
   return (
     <main className="page-shell">
@@ -46,6 +58,7 @@ export default async function OrdenesPage() {
         }}
       />
 
+      <ListFilters path="/ordenes" params={params} statuses={STATUSES} searchLabel="Folio de orden" />
       {error && (
         <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
           No se pudieron cargar las órdenes.
@@ -114,6 +127,7 @@ export default async function OrdenesPage() {
           />
         )}
       </div>
+      {!error && <ListPagination path="/ordenes" params={params} page={filters.page} total={count ?? 0} />}
     </main>
   )
 }

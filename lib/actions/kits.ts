@@ -32,7 +32,7 @@ export async function createKitAction(
   }
 
   const { items, ...kitData } = parsed.data
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: kit, error: errKit } = await supabase
     .from('material_kits')
@@ -90,7 +90,7 @@ export async function updateKitAction(
   }
 
   const { items, ...kitData } = parsed.data
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { error: errKit } = await supabase
     .from('material_kits')
@@ -138,7 +138,7 @@ export async function deleteKitAction(kitId: string): Promise<ActionResult> {
     return { error: 'No tienes permiso para eliminar kits.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.from('material_kits').delete().eq('id', kitId)
 
   if (error) {

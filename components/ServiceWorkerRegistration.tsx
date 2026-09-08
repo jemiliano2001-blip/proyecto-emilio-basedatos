@@ -1,9 +1,11 @@
 'use client'
 
+import { useOfflineUser } from '@/components/OfflineUserProvider'
 import { useEffect, useState } from 'react'
 import { syncOfflineQueues } from '@/lib/offline/sync'
 
 export function ServiceWorkerRegistration() {
+  const userId = useOfflineUser()
   const [mensaje, setMensaje] = useState<string | null>(null)
 
   useEffect(() => {
@@ -19,8 +21,9 @@ export function ServiceWorkerRegistration() {
       })
 
     async function runSync() {
+      if (!userId) return
       try {
-        const summary = await syncOfflineQueues()
+        const summary = await syncOfflineQueues(userId!)
         if (cancelled) return
         if (summary.noAutenticado) {
           setMensaje('Hay cambios guardados en este teléfono. Inicia sesión para enviarlos.')
@@ -50,7 +53,7 @@ export function ServiceWorkerRegistration() {
       cancelled = true
       window.removeEventListener('online', onOnline)
     }
-  }, [])
+  }, [userId])
 
   if (!mensaje) return null
 
@@ -62,7 +65,7 @@ export function ServiceWorkerRegistration() {
           type="button"
           className="underline font-semibold shrink-0"
           onClick={() => {
-            void syncOfflineQueues().then((summary) => {
+            void syncOfflineQueues(userId!).then((summary) => {
               const total = summary.recepcionesOk + summary.solicitudesOk
               if (summary.noAutenticado) {
                 setMensaje('Sesión expirada. Vuelve a iniciar sesión.')
@@ -73,7 +76,7 @@ export function ServiceWorkerRegistration() {
               } else {
                 setMensaje('Nada pendiente por enviar.')
               }
-            })
+            }).catch(() => setMensaje("No se pudo conectar. Las capturas siguen guardadas."))
           }}
         >
           Reintentar

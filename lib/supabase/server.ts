@@ -5,8 +5,8 @@ import { cookies } from 'next/headers'
 // Sigue usando la anon key — la sesión del usuario autenticado es la que
 // determina qué puede ver/hacer, vía RLS. La service_role key (si algún día
 // se necesita para una Edge Function) NUNCA debe importarse desde aquí.
-export function createClient() {
-  const cookieStore = cookies()
+export async function createClient() {
+  const cookieStore = await cookies()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

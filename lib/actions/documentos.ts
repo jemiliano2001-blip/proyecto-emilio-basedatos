@@ -45,7 +45,7 @@ export async function uploadObraDocumentoAction(
     return { error: 'El archivo supera el tamaño máximo permitido de 30 MB.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const obraId = parsed.data.obra_id
   const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
   const storagePath = `obras/${obraId}/${crypto.randomUUID()}-${sanitizedFileName}`
@@ -102,7 +102,7 @@ export async function deleteObraDocumentoAction(
     return { error: 'No tienes permiso para eliminar documentos.' }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: doc, error: fetchError } = await supabase
     .from('obra_documentos')
