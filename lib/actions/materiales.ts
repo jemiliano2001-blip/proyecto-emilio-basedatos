@@ -9,6 +9,46 @@ import { validateMaterialInput } from '@/lib/validations/material'
 
 export type ActionResult = { error: string | null; ok?: boolean }
 
+async function uploadMaterialFoto(
+  supabase: ReturnType<typeof createClient>,
+  file: File | null
+): Promise<{ url?: string; error?: string }> {
+  if (!file || file.size === 0) return {}
+
+  if (!file.type.startsWith('image/')) {
+    return { error: 'El archivo adjunto debe ser una imagen válida (JPG, PNG, WebP, etc.).' }
+  }
+
+  // Límite de 10 MB para imágenes
+  if (file.size > 10 * 1024 * 1024) {
+    return { error: 'La imagen excede el límite máximo de 10 MB.' }
+  }
+
+  const sanitizedName = file.name
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .slice(0, 40)
+  const storagePath = `materiales/${crypto.randomUUID()}-${sanitizedName}`
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+
+  const { error: uploadError } = await supabase.storage
+    .from('materiales')
+    .upload(storagePath, buffer, {
+      contentType: file.type || 'image/jpeg',
+      upsert: false,
+    })
+
+  if (uploadError) {
+    return { error: `Error al subir la imagen al almacenamiento: ${uploadError.message}` }
+  }
+
+  const { data: publicData } = supabase.storage
+    .from('materiales')
+    .getPublicUrl(storagePath)
+
+  return { url: publicData.publicUrl }
+}
+
 export async function createMaterialAction(
   _prev: ActionResult,
   formData: FormData
@@ -16,6 +56,19 @@ export async function createMaterialAction(
   const session = await getSessionUsuario()
   if (!session || !puedeGestionarCatalogo(session.rol)) {
     return { error: 'No tienes permiso para crear materiales.' }
+  }
+
+  const supabase = createClient()
+
+  const fotoFile = formData.get('foto') as File | null
+  let foto_url: string | null = null
+
+  if (fotoFile && fotoFile.size > 0) {
+    const uploadRes = await uploadMaterialFoto(supabase, fotoFile)
+    if (uploadRes.error) {
+      return { error: uploadRes.error }
+    }
+    foto_url = uploadRes.url ?? null
   }
 
   const parsed = validateMaterialInput({
@@ -26,14 +79,14 @@ export async function createMaterialAction(
     subcategoria: formData.get('subcategoria'),
     especificacion: formData.get('especificacion'),
     precio_base: formData.get('precio_base'),
-    activo: true,
+    foto_url,
+    activo: formData.get('activo') !== 'false',
   })
 
   if (!parsed.ok) {
     return { error: parsed.error }
   }
 
-  const supabase = createClient()
   const { error } = await supabase.from('catalogo_materiales').insert(parsed.data)
 
   if (error) {
@@ -57,6 +110,25 @@ export async function updateMaterialAction(
     return { error: 'No tienes permiso para editar materiales.' }
   }
 
+  const supabase = createClient()
+
+  const fotoFile = formData.get('foto') as File | null
+  const fotoExistenteRaw = formData.get('foto_url_existente')
+  let foto_url: string | null =
+    typeof fotoExistenteRaw === 'string' && fotoExistenteRaw.trim() !== ''
+      ? fotoExistenteRaw.trim()
+      : null
+
+  if (fotoFile && fotoFile.size > 0) {
+    const uploadRes = await uploadMaterialFoto(supabase, fotoFile)
+    if (uploadRes.error) {
+      return { error: uploadRes.error }
+    }
+    if (uploadRes.url) {
+      foto_url = uploadRes.url
+    }
+  }
+
   const parsed = validateMaterialInput({
     nombre_base: formData.get('nombre_base'),
     variante: formData.get('variante'),
@@ -65,6 +137,7 @@ export async function updateMaterialAction(
     subcategoria: formData.get('subcategoria'),
     especificacion: formData.get('especificacion'),
     precio_base: formData.get('precio_base'),
+    foto_url,
     activo: formData.get('activo') !== 'false',
   })
 
@@ -72,7 +145,6 @@ export async function updateMaterialAction(
     return { error: parsed.error }
   }
 
-  const supabase = createClient()
   const { error } = await supabase
     .from('catalogo_materiales')
     .update(parsed.data)

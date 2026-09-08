@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useFormState } from 'react-dom'
+import Link from 'next/link'
 import type { ActionResult } from '@/lib/actions/kits'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -17,19 +18,38 @@ interface KitItemRow {
   cantidad: string
 }
 
+export interface KitInitialData {
+  id?: string
+  nombre?: string
+  material_principal_id?: string | null
+  configuracion?: string | null
+  descripcion?: string | null
+  activo?: boolean
+  items?: Array<{ material_id: string; cantidad: number | string }>
+}
+
 export function KitForm({
   action,
   materiales,
+  kit,
   submitLabel = 'Guardar Kit',
 }: {
   action: (prev: ActionResult, formData: FormData) => Promise<ActionResult>
   materiales: CatalogoMaterial[]
+  kit?: KitInitialData
   submitLabel?: string
 }) {
   const [state, formAction] = useFormState(action, initialState)
-  const [items, setItems] = useState<KitItemRow[]>([
-    { key: crypto.randomUUID(), material_id: '', cantidad: '1' },
-  ])
+  const [items, setItems] = useState<KitItemRow[]>(() => {
+    if (kit?.items && kit.items.length > 0) {
+      return kit.items.map((it) => ({
+        key: crypto.randomUUID(),
+        material_id: it.material_id,
+        cantidad: String(it.cantidad),
+      }))
+    }
+    return [{ key: crypto.randomUUID(), material_id: '', cantidad: '1' }]
+  })
 
   function agregarFila() {
     setItems((prev) => [
@@ -77,6 +97,7 @@ export function KitForm({
             id="nombre"
             name="nombre"
             required
+            defaultValue={kit?.nombre ?? ''}
             className="input-base"
             placeholder="ej. Kit Transformador 100 kVA - De Remate"
           />
@@ -90,6 +111,7 @@ export function KitForm({
             <select
               id="material_principal_id"
               name="material_principal_id"
+              defaultValue={kit?.material_principal_id ?? ''}
               className="input-base"
             >
               <option value="">-- Ninguno o genérico --</option>
@@ -111,6 +133,7 @@ export function KitForm({
             <input
               id="configuracion"
               name="configuracion"
+              defaultValue={kit?.configuracion ?? ''}
               className="input-base"
               placeholder="ej. De remate, De paso, Aéreo, Subterráneo"
             />
@@ -125,6 +148,7 @@ export function KitForm({
             id="descripcion"
             name="descripcion"
             rows={2}
+            defaultValue={kit?.descripcion ?? ''}
             className="input-base"
             placeholder="Detalles sobre cuándo aplica este ensamble o normas técnicas..."
           />
@@ -200,7 +224,12 @@ export function KitForm({
         </div>
       </div>
 
-      <SubmitButton>{submitLabel}</SubmitButton>
+      <div className="flex items-center gap-3">
+        <SubmitButton>{submitLabel}</SubmitButton>
+        <Link href="/kits" className="btn-secondary">
+          Cancelar
+        </Link>
+      </div>
     </form>
   )
 }

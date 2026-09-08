@@ -113,9 +113,19 @@ export default async function KitsPage() {
                   <p className="text-xs text-gray-400 mt-0.5">{kit.descripcion}</p>
                 )}
               </div>
-              <span className="text-xs text-gray-400 font-medium">
-                {kit.material_kit_items?.length ?? 0} componentes
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-gray-400 font-medium">
+                  {kit.material_kit_items?.length ?? 0} componentes
+                </span>
+                {puedeGestionar && (
+                  <Link
+                    href={`/kits/${kit.id}/editar`}
+                    className="btn-secondary text-xs px-2.5 py-1 min-h-[32px] inline-flex items-center"
+                  >
+                    Editar
+                  </Link>
+                )}
+              </div>
             </div>
 
             <div className="space-y-1">
