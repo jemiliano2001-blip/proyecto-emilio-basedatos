@@ -21,5 +21,6 @@ export async function databaseFixture() {
     grant usage on all sequences in schema public to authenticated;
   `)
   await db.exec(readFileSync('supabase/migrations/0016_integridad_proyectos_precios.sql','utf8'))
+  await db.exec(readFileSync('supabase/migrations/0017_crear_solicitud_atomica.sql','utf8'))
   return db
 }

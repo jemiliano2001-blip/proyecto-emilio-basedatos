@@ -8,11 +8,39 @@ const nextConfig = {
       allowedOrigins: ['localhost:3000', '*.devtunnels.ms'],
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.in',
+      },
+    ],
+  },
   async headers() {
+    const cspHeader = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' blob: data: https://*.supabase.co https://*.supabase.in",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "base-uri 'self'",
+    ].join('; ')
+
     return [
       {
         source: '/(.*)',
         headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader,
+          },
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',

@@ -163,6 +163,24 @@ export async function createSolicitudAction(
     }
   }
 
+  // 1. Creación atómica en PostgreSQL (Migración 0017)
+  const { data: rpcId, error: errorRpc } = await supabase.rpc('crear_solicitud_con_items', {
+    p_obra_id: parsed.data.obra_id,
+    p_nota: parsed.data.nota,
+    p_items: parsed.data.items,
+  })
+
+  if (!errorRpc && typeof rpcId === 'string') {
+    revalidatePath('/solicitudes')
+    revalidatePath(`/solicitudes/${rpcId}`)
+    redirect(`/solicitudes/${rpcId}`)
+  }
+
+  if (errorRpc && !errorRpc.message?.includes('could not find function') && !errorRpc.message?.includes('schema cache')) {
+    return { error: mapRpcError(errorRpc, 'No se pudo crear la requisición. Intenta de nuevo.') }
+  }
+
+  // 2. Fallback de compatibilidad
   const { data: solicitud, error: errorSolicitud } = await supabase
     .from('solicitudes_material')
     .insert({

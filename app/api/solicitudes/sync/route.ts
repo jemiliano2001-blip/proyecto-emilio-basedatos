@@ -1,9 +1,23 @@
 import { NextResponse } from 'next/server'
 import { syncSolicitudPayload } from '@/lib/actions/solicitudes'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request.headers)
+  const rate = checkRateLimit(`sync:solicitudes:${ip}`, {
+    maxRequests: 30,
+    windowMs: 60 * 1000,
+  })
+
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { status: 'reintentar', error: 'Demasiadas solicitudes de sincronización. Espera un momento.' },
+      { status: 429 }
+    )
+  }
+
   let body: unknown
   try {
     body = await request.json()

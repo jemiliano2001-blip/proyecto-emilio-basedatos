@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
@@ -325,9 +326,11 @@ export default async function ObraDetallePage({
                           <div className="w-14 h-14 rounded-lg bg-gray-100 border border-gray-200 shrink-0 flex items-center justify-center overflow-hidden">
                             {s.foto_url ? (
                               // Imagen de catálogo servida por Storage
-                              <img
+                              <Image
                                 src={s.foto_url}
                                 alt={s.nombre_base}
+                                width={56}
+                                height={56}
                                 className="w-full h-full object-cover"
                               />
                             ) : (

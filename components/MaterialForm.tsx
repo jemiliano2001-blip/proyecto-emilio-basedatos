@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useFormState } from 'react-dom'
 import type { ActionResult } from '@/lib/actions/materiales'
 import { FormError } from '@/components/FormError'
@@ -181,10 +182,13 @@ export function MaterialForm({
 
         {fotoPreview ? (
           <div className="mt-2 flex items-center gap-3 p-2 bg-teal-50/50 rounded-lg border border-teal-200">
-            {/* Imagen de catálogo servida por Storage */}
-            <img
+            {/* Vista previa de foto seleccionada */}
+            <Image
               src={fotoPreview}
               alt="Vista previa"
+              width={56}
+              height={56}
+              unoptimized
               className="w-14 h-14 object-cover rounded-md border border-teal-300"
             />
             <div>
@@ -195,9 +199,11 @@ export function MaterialForm({
         ) : material?.foto_url ? (
           <div className="mt-2 flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-gray-200">
             {/* Imagen de catálogo servida por Storage */}
-            <img
+            <Image
               src={material.foto_url}
               alt={material.nombre_base}
+              width={56}
+              height={56}
               className="w-14 h-14 object-cover rounded-md border border-gray-300"
             />
             <div>

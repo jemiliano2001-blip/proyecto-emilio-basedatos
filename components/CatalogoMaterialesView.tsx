@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { IconPlus, IconEditar, IconBasura, IconPaquete } from '@/components/icons'
 import { EmptyState } from '@/components/EmptyState'
@@ -29,9 +30,11 @@ function MaterialCard({
       <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-200">
         {m.foto_url ? (
           // Imagen de catálogo servida por Storage
-          <img
+          <Image
             src={m.foto_url}
             alt={m.nombre_base}
+            width={200}
+            height={200}
             className="object-cover w-full h-full"
           />
         ) : (
