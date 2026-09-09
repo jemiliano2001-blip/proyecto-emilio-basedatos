@@ -114,17 +114,46 @@ export function AsignarMaterialesObraForm({
     return materiales.filter((m) => !usados.has(m.id))
   }
 
-  function aplicarKitConcreto(kitId: string, cantidadBase: number) {
+  function aplicarKitConcreto(
+    kitId: string,
+    cantidadBase: number,
+    incluirMaterialPrincipal: boolean = true
+  ) {
     const kit = kits.find((k) => k.id === kitId)
-    if (!kit || !kit.items || kit.items.length === 0) return
+    if (!kit) return
 
     const factor = cantidadBase > 0 ? cantidadBase : 1
 
     setPartidas((prev) => {
-      const nuevas = [...prev]
+      // Si solo existe la fila inicial vacía, descartarla para que no quede #1 sin seleccionar
+      const basePartidas = prev.filter((p) => p.material_id && p.material_id.trim() !== '')
+      const nuevas = [...basePartidas]
       const mapaExistentes = new Map(nuevas.map((p, idx) => [p.material_id, idx]))
 
-      for (const item of kit.items) {
+      // 1. Agregar o incrementar el material principal (ej. el transformador) si corresponde
+      if (incluirMaterialPrincipal && kit.material_principal_id) {
+        const cantToAdd = factor
+        if (mapaExistentes.has(kit.material_principal_id)) {
+          const idx = mapaExistentes.get(kit.material_principal_id)!
+          const cantActual = parseQuantity(nuevas[idx].cantidad) ?? 0
+          nuevas[idx] = {
+            ...nuevas[idx],
+            cantidad: String(cantActual + cantToAdd),
+            origenKitNombre: kit.nombre,
+          }
+        } else {
+          nuevas.push({
+            key: crypto.randomUUID(),
+            material_id: kit.material_principal_id,
+            cantidad: String(cantToAdd),
+            origenKitNombre: kit.nombre,
+          })
+          mapaExistentes.set(kit.material_principal_id, nuevas.length - 1)
+        }
+      }
+
+      // 2. Agregar los componentes secundarios / accesorios del kit
+      for (const item of kit.items ?? []) {
         const cantToAdd = item.cantidad * factor
         if (mapaExistentes.has(item.material_id)) {
           const idx = mapaExistentes.get(item.material_id)!
@@ -144,6 +173,11 @@ export function AsignarMaterialesObraForm({
           mapaExistentes.set(item.material_id, nuevas.length - 1)
         }
       }
+
+      if (nuevas.length === 0) {
+        return [{ key: crypto.randomUUID(), material_id: '', cantidad: '1' }]
+      }
+
       return nuevas
     })
   }
@@ -151,7 +185,7 @@ export function AsignarMaterialesObraForm({
   function aplicarKit() {
     if (!selectedKitId) return
     const factor = parseQuantity(kitMultiplicador) ?? 1
-    aplicarKitConcreto(selectedKitId, factor)
+    aplicarKitConcreto(selectedKitId, factor, true)
     setSelectedKitId('')
     setKitMultiplicador('1')
     setMostrarModalKit(false)
@@ -416,7 +450,7 @@ export function AsignarMaterialesObraForm({
                       <button
                         key={k.id}
                         type="button"
-                        onClick={() => aplicarKitConcreto(k.id, item.cantNum || 1)}
+                        onClick={() => aplicarKitConcreto(k.id, item.cantNum || 1, false)}
                         className="px-2 py-1 rounded bg-white border border-teal-300 text-teal-800 font-semibold hover:bg-teal-100 shadow-sm"
                       >
                         + {k.configuracion || k.nombre}
