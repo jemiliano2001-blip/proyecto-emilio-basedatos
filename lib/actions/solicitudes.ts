@@ -11,6 +11,7 @@ import {
   puedeCrearSolicitudMultiObra,
 } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
+import { esRelacionAusente } from '@/lib/schema-disponible'
 import { validateSolicitudInput, type SolicitudItemInput } from '@/lib/validations/solicitud'
 
 export type ActionResult = { error: string | null; ok?: boolean }
@@ -176,7 +177,7 @@ export async function createSolicitudAction(
     redirect(`/solicitudes/${rpcId}`)
   }
 
-  if (errorRpc && !errorRpc.message?.includes('could not find function') && !errorRpc.message?.includes('schema cache')) {
+  if (errorRpc && !esRelacionAusente(errorRpc)) {
     return { error: mapRpcError(errorRpc, 'No se pudo crear la requisición. Intenta de nuevo.') }
   }
 

@@ -12,6 +12,7 @@ import {
   puedeVerPrecios,
 } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
+import { esRelacionAusente } from '@/lib/schema-disponible'
 import type { EstadoTraspaso } from '@/lib/types'
 
 interface TraspasoDetalle {
@@ -102,9 +103,13 @@ export default async function TraspasoDetallePage({
 
   if (verPrecios) {
     const { data: precios, error: preciosError } = await supabase.rpc('precios_traspaso', { p_traspaso_id: resolvedparams.id })
-    if (preciosError) throw new Error('No se pudieron cargar los precios del traspaso.')
-    const porId = new Map((precios as { id: string; precio_unitario_mxn: number | null }[]).map(p => [p.id, p.precio_unitario_mxn]))
-    data.items = data.items.map(item => ({ ...item, precio_unitario_mxn: porId.get(item.id) ?? null }))
+    if (preciosError && !esRelacionAusente(preciosError)) {
+      throw new Error('No se pudieron cargar los precios del traspaso.')
+    }
+    if (precios) {
+      const porId = new Map((precios as { id: string; precio_unitario_mxn: number | null }[]).map(p => [p.id, p.precio_unitario_mxn]))
+      data.items = data.items.map(item => ({ ...item, precio_unitario_mxn: porId.get(item.id) ?? null }))
+    }
   }
 
   // Valuación congelada al aprobar. Mientras el traspaso está 'solicitado'

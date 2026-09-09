@@ -5,10 +5,14 @@ export function esRelacionAusente(error: { message?: string; code?: string }): b
   const msg = (error.message ?? '').toLowerCase()
   return (
     code === 'PGRST205' ||
+    code === 'PGRST202' ||
     code === '42P01' ||
+    code === '42883' ||
     msg.includes('does not exist') ||
     msg.includes('schema cache') ||
-    msg.includes('could not find the table')
+    msg.includes('could not find the table') ||
+    msg.includes('could not find the function') ||
+    msg.includes('could not find function')
   )
 }
 
