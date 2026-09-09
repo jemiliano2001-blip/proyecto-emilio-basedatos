@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
+import { CopyButton } from '@/components/CopyButton'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeRevisarRecepcion, puedeVerRecepciones } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -90,9 +91,12 @@ export default async function RecepcionDetallePage({
       {(detalle.referencia_entrega || detalle.nota) && (
         <div className="card mb-4 space-y-1">
           {detalle.referencia_entrega && (
-            <p className="text-sm">
-              <span className="text-gray-500">Referencia:</span> {detalle.referencia_entrega}
-            </p>
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <p>
+                <span className="text-gray-500">Referencia:</span> {detalle.referencia_entrega}
+              </p>
+              <CopyButton text={detalle.referencia_entrega} label="Copiar ref." className="text-[11px]" />
+            </div>
           )}
           {detalle.nota && (
             <p className="text-sm">

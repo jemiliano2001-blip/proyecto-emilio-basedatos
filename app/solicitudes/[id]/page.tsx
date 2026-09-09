@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
+import { CopyButton } from '@/components/CopyButton'
 import {
   AprobarComprasButton,
   AprobarPagoButton,
@@ -146,10 +147,13 @@ export default async function SolicitudDetallePage({
             {detalle.obra?.fraccionamiento && (
               <p className="text-gray-500 text-sm">{detalle.obra.fraccionamiento}</p>
             )}
-            <p className="text-xs text-muted mt-1">
-              {detalle.solicitante?.nombre ? `${detalle.solicitante.nombre} · ` : ''}
-              {new Date(detalle.creado_en).toLocaleString('es-MX')}
-            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-xs text-muted">
+                {detalle.solicitante?.nombre ? `${detalle.solicitante.nombre} · ` : ''}
+                {new Date(detalle.creado_en).toLocaleString('es-MX')}
+              </p>
+              <CopyButton text={detalle.id} label="Copiar ID" className="text-[11px]" />
+            </div>
           </div>
         }
         backHref="/solicitudes"

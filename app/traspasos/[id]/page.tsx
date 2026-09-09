@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
+import { CopyButton } from '@/components/CopyButton'
 import { TraspasoAcciones } from '@/components/TraspasoAcciones'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { formatMoneyMx } from '@/lib/money'
@@ -139,7 +140,12 @@ export default async function TraspasoDetallePage({
         title={`Traspaso ${data.folio}`}
         backHref="/traspasos"
         backLabel="Volver a Traspasos"
-        description={`Solicitado el ${fechaCreacion}`}
+        description={
+          <div className="flex items-center gap-2 mt-1">
+            <span>Solicitado el {fechaCreacion}</span>
+            <CopyButton text={data.folio} label="Copiar folio" className="text-[11px]" />
+          </div>
+        }
         badge={
           <Badge variant={badgeVariant(data.estado)}>
             {String(data.estado ?? '').replace(/_/g, ' ')}

@@ -171,8 +171,14 @@ export function CommandPalette() {
       }
     }
 
+    const handleCustomOpen = () => setOpen(true)
+
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('open-command-palette', handleCustomOpen)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('open-command-palette', handleCustomOpen)
+    }
   }, [])
 
   // Auto-foco al abrir

@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { NotificacionCampanita } from '@/components/NotificacionCampanita'
+import { IconSearch } from '@/components/icons'
 import { tituloDeRuta } from '@/lib/nav'
 
 export function TopBar({ nombre }: { nombre: string | null }) {
@@ -20,7 +21,18 @@ export function TopBar({ nombre }: { nombre: string | null }) {
             <p className="truncate text-xs text-gray-500">{nombre}</p>
           )}
         </div>
-        <NotificacionCampanita />
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
+            className="p-2 rounded-lg text-gray-500 hover:text-ink hover:bg-gray-100 transition-colors"
+            title="Buscador y comandos (Ctrl+K)"
+            aria-label="Abrir buscador y comandos"
+          >
+            <IconSearch className="w-5 h-5" />
+          </button>
+          <NotificacionCampanita />
+        </div>
       </div>
     </header>
   )

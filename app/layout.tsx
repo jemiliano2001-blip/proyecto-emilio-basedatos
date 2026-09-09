@@ -12,6 +12,7 @@ import {
 import { traspasosSchemaDisponible } from '@/lib/schema-disponible'
 import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator'
 import { CommandPalette } from '@/components/CommandPalette'
+import { KeyboardShortcutsModal } from '@/components/KeyboardShortcutsModal'
 import { OfflineUserProvider } from '@/components/OfflineUserProvider'
 import './globals.css'
 
@@ -46,6 +47,7 @@ export default async function RootLayout({
         {showNav && <ServiceWorkerRegistration />}
         {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} />}
         {showNav && <CommandPalette />}
+        {showNav && <KeyboardShortcutsModal />}
         {children}
         {showNav && (
           <AppNav
