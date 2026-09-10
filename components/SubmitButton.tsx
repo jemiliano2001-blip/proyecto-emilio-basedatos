@@ -1,18 +1,26 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
+import { Button } from '@/components/ui/button'
 
 export function SubmitButton({
   children,
-  className = 'btn-primary w-full',
+  className = 'w-full',
+  variant = 'default',
 }: {
   children: React.ReactNode
   className?: string
+  variant?: 'default' | 'accent' | 'secondary' | 'destructive'
 }) {
   const { pending } = useFormStatus()
   return (
-    <button type="submit" className={className} disabled={pending} aria-busy={pending}>
+    <Button
+      type="submit"
+      variant={variant}
+      className={className}
+      loading={pending}
+    >
       {pending ? 'Guardando…' : children}
-    </button>
+    </Button>
   )
 }

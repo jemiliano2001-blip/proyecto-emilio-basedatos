@@ -1,21 +1,17 @@
 import React from 'react'
-import { cn } from '@/lib/utils'
+import { Badge as UiBadge, type BadgeProps as UiBadgeProps } from '@/components/ui/badge'
 
 export type BadgeVariant = 'teal' | 'amber' | 'red' | 'navy' | 'gray'
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface BadgeProps extends Omit<UiBadgeProps, 'variant'> {
   variant?: BadgeVariant
   children: React.ReactNode
 }
 
-const variantClasses: Record<BadgeVariant, string> = {
-  teal: 'badge-teal',
-  amber: 'badge-amber',
-  red: 'badge-red',
-  navy: 'badge-navy',
-  gray: 'badge-gray',
-}
-
+/**
+ * Componente Badge conectado a la primitiva oficial components/ui/badge.tsx
+ * Mantiene 100% de retrocompatibilidad con las variantes de negocio del proyecto.
+ */
 export function Badge({
   variant = 'gray',
   children,
@@ -23,8 +19,8 @@ export function Badge({
   ...props
 }: BadgeProps) {
   return (
-    <span className={cn(variantClasses[variant], className)} {...props}>
+    <UiBadge variant={variant} className={className} {...props}>
       {children}
-    </span>
+    </UiBadge>
   )
 }
