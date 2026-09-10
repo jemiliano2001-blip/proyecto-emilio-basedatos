@@ -22,7 +22,7 @@ async function uploadRecepcionFoto(
   supabase: Awaited<ReturnType<typeof createClient>>,
   file: File | null,
   prefijo: string
-): Promise<{ url?: string; error?: string }> {
+): Promise<{ url?: string; storagePath?: string; error?: string }> {
   if (!file || file.size === 0) return {}
   if (!file.type.startsWith('image/')) {
     return { error: 'El archivo adjunto debe ser una imagen válida (JPG, PNG, WebP).' }
@@ -45,7 +45,13 @@ async function uploadRecepcionFoto(
   const { data: publicData } = supabase.storage
     .from('materiales')
     .getPublicUrl(storagePath)
-  return { url: publicData.publicUrl }
+  return { url: publicData.publicUrl, storagePath }
+}
+
+function parseNumOrNull(val: FormDataEntryValue | null): number | null {
+  if (!val || typeof val !== 'string') return null
+  const num = parseFloat(val)
+  return Number.isFinite(num) ? num : null
 }
 
 export async function crearRecepcionAction(
@@ -65,17 +71,25 @@ export async function crearRecepcionAction(
 
   let foto_remision_url: string | null = (formData.get('foto_remision_existente') as string | null) || null
   let foto_evidencia_url: string | null = (formData.get('foto_evidencia_existente') as string | null) || null
+  let remisionStoragePath: string | null = null
+  let evidenciaStoragePath: string | null = null
 
   if (fotoRemisionFile && fotoRemisionFile.size > 0) {
     const upRemision = await uploadRecepcionFoto(supabase, fotoRemisionFile, 'remision')
     if (upRemision.error) return { error: upRemision.error }
-    if (upRemision.url) foto_remision_url = upRemision.url
+    if (upRemision.url) {
+      foto_remision_url = upRemision.url
+      remisionStoragePath = upRemision.storagePath ?? null
+    }
   }
 
   if (fotoEvidenciaFile && fotoEvidenciaFile.size > 0) {
     const upEvidencia = await uploadRecepcionFoto(supabase, fotoEvidenciaFile, 'evidencia')
     if (upEvidencia.error) return { error: upEvidencia.error }
-    if (upEvidencia.url) foto_evidencia_url = upEvidencia.url
+    if (upEvidencia.url) {
+      foto_evidencia_url = upEvidencia.url
+      evidenciaStoragePath = upEvidencia.storagePath ?? null
+    }
   }
 
   let itemsRaw: unknown = []
@@ -100,6 +114,41 @@ export async function crearRecepcionAction(
   })
 
   if (!parsed.ok) return { error: parsed.error }
+
+  // Subir fotos individuales de renglones si se adjuntaron
+  const itemFotosSubidas: {
+    orden_item_id: string
+    foto_url: string
+    storage_path: string
+    latitud: number | null
+    longitud: number | null
+    precision_gps_m: number | null
+    calidad_score: number | null
+    resolucion_px: string | null
+    estado: string
+  }[] = []
+
+  for (const item of parsed.data.items) {
+    const itemFile = formData.get(`foto_item_${item.orden_item_id}`) as File | null
+    if (itemFile && itemFile.size > 0) {
+      const upItem = await uploadRecepcionFoto(supabase, itemFile, `item-${item.orden_item_id.slice(0, 8)}`)
+      if (upItem.error) return { error: upItem.error }
+      if (upItem.url && upItem.storagePath) {
+        item.foto_url = upItem.url
+        itemFotosSubidas.push({
+          orden_item_id: item.orden_item_id,
+          foto_url: upItem.url,
+          storage_path: upItem.storagePath,
+          latitud: parseNumOrNull(formData.get(`foto_item_${item.orden_item_id}_latitud`)),
+          longitud: parseNumOrNull(formData.get(`foto_item_${item.orden_item_id}_longitud`)),
+          precision_gps_m: parseNumOrNull(formData.get(`foto_item_${item.orden_item_id}_precision_m`)),
+          calidad_score: parseNumOrNull(formData.get(`foto_item_${item.orden_item_id}_calidad_score`)),
+          resolucion_px: (formData.get(`foto_item_${item.orden_item_id}_resolucion`) as string | null) || null,
+          estado: item.estado,
+        })
+      }
+    }
+  }
 
   const { data, error } = await supabase.rpc('crear_recepcion', {
     p_id: parsed.data.id,
@@ -129,6 +178,71 @@ export async function crearRecepcionAction(
     } catch (err) {
       console.warn('Advertencia: No se pudieron asignar fotos a la recepción en base de datos:', err)
     }
+  }
+
+  // Registrar fotos en la tabla recepcion_fotos (con metadatos GPS y calidad)
+  try {
+    const fotosAInsertar = []
+
+    if (foto_remision_url && remisionStoragePath) {
+      fotosAInsertar.push({
+        recepcion_id: recepcionId,
+        tipo_foto: 'remision_documento',
+        storage_path: remisionStoragePath,
+        foto_url: foto_remision_url,
+        capturado_por: session.authUserId,
+        latitud: parseNumOrNull(formData.get('foto_remision_latitud')),
+        longitud: parseNumOrNull(formData.get('foto_remision_longitud')),
+        precision_gps_m: parseNumOrNull(formData.get('foto_remision_precision_m')),
+        calidad_score: parseNumOrNull(formData.get('foto_remision_calidad_score')),
+        resolucion_px: (formData.get('foto_remision_resolucion') as string | null) || null,
+      })
+    }
+
+    if (foto_evidencia_url && evidenciaStoragePath) {
+      fotosAInsertar.push({
+        recepcion_id: recepcionId,
+        tipo_foto: 'material_completo',
+        storage_path: evidenciaStoragePath,
+        foto_url: foto_evidencia_url,
+        capturado_por: session.authUserId,
+        latitud: parseNumOrNull(formData.get('foto_evidencia_latitud')),
+        longitud: parseNumOrNull(formData.get('foto_evidencia_longitud')),
+        precision_gps_m: parseNumOrNull(formData.get('foto_evidencia_precision_m')),
+        calidad_score: parseNumOrNull(formData.get('foto_evidencia_calidad_score')),
+        resolucion_px: (formData.get('foto_evidencia_resolucion') as string | null) || null,
+      })
+    }
+
+    for (const ifoto of itemFotosSubidas) {
+      fotosAInsertar.push({
+        recepcion_id: recepcionId,
+        tipo_foto: ifoto.estado === 'danado' ? 'dano_evidencia' : 'material_completo',
+        storage_path: ifoto.storage_path,
+        foto_url: ifoto.foto_url,
+        capturado_por: session.authUserId,
+        latitud: ifoto.latitud,
+        longitud: ifoto.longitud,
+        precision_gps_m: ifoto.precision_gps_m,
+        calidad_score: ifoto.calidad_score,
+        resolucion_px: ifoto.resolucion_px,
+      })
+    }
+
+    if (fotosAInsertar.length > 0) {
+      await supabase.from('recepcion_fotos').insert(fotosAInsertar)
+    }
+
+    // Actualizar foto_url en recepcion_items si existen
+    for (const ifoto of itemFotosSubidas) {
+      await supabase
+        .from('recepcion_items')
+        .update({ foto_url: ifoto.foto_url })
+        .eq('recepcion_id', recepcionId)
+        .eq('orden_item_id', ifoto.orden_item_id)
+    }
+  } catch (fotoErr) {
+    console.warn('Advertencia: No se pudieron registrar metadatos de recepcion_fotos:', fotoErr)
   }
 
   revalidatePath('/recepciones')

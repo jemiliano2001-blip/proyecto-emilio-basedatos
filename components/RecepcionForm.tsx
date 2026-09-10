@@ -324,6 +324,16 @@ export function RecepcionForm({
                       placeholder="Obligatoria si hay faltante o daño"
                     />
                   </div>
+
+                  <div className="pt-2 border-t border-gray-100">
+                    <PhotoUploadInput
+                      id={`foto_item_${line.orden_item_id}`}
+                      name={`foto_item_${line.orden_item_id}`}
+                      label="Foto del material / daño (opcional)"
+                      captureCamera={true}
+                      helpText="Evidencia fotográfica directa de este material recibido o pieza dañada."
+                    />
+                  </div>
                 </>
               )}
             </div>

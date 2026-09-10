@@ -151,6 +151,33 @@ export type MonedaOc = 'MXN' | 'USD'
 export type EstadoRecepcion = 'pendiente_revision' | 'aprobada' | 'rechazada'
 export type EstadoRecepcionItem = 'completo' | 'parcial' | 'faltante' | 'danado'
 
+export type TipoFotoEvidencia =
+  | 'remision_documento'
+  | 'material_completo'
+  | 'etiqueta_placa'
+  | 'dano_evidencia'
+  | 'firma_chofer'
+  | 'selfie_entrega'
+
+export interface RecepcionFoto {
+  id: string
+  recepcion_id: string
+  recepcion_item_id?: string | null
+  material_id?: string | null
+  tipo_foto: TipoFotoEvidencia
+  storage_path?: string
+  foto_url: string
+  capturado_por?: string
+  capturado_en?: string
+  latitud?: number | null
+  longitud?: number | null
+  precision_gps_m?: number | null
+  resolucion_px?: string | null
+  tamano_bytes?: number | null
+  calidad_score?: number | null
+  notas?: string | null
+}
+
 export interface RecepcionMaterial {
   id: string
   orden_id: string
@@ -165,6 +192,7 @@ export interface RecepcionMaterial {
   revisado_en: string | null
   nota_revision: string | null
   creado_en: string
+  fotos?: RecepcionFoto[]
 }
 
 export interface RecepcionItem {
@@ -175,6 +203,7 @@ export interface RecepcionItem {
   cantidad_danada: number
   estado: EstadoRecepcionItem
   observacion: string | null
+  foto_url?: string | null
 }
 
 export interface OrdenChecklistResumen {

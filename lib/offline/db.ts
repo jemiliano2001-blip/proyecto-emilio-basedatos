@@ -1,3 +1,5 @@
+import type { RecepcionFotoInput } from '@/lib/validations/recepcion'
+
 const DB_NAME = 'proyecto-emilio-offline'
 const DB_VERSION = 1
 
@@ -8,12 +10,31 @@ export type OfflineQueueStatus =
   | 'conflicto'
   | 'necesita_revision'
 
+export interface FotoPendienteRecord {
+  id: string
+  usuario_id: string
+  recepcion_id: string
+  orden_item_id?: string | null
+  tipo_foto: string
+  base64?: string
+  foto_url?: string
+  latitud?: number | null
+  longitud?: number | null
+  precision_gps_m?: number | null
+  resolucion_px?: string | null
+  tamano_bytes?: number | null
+  calidad_score?: number | null
+  created_at: string
+}
+
 export interface RecepcionPendienteRecord {
   usuario_id: string
   id: string
   orden_id: string
   referencia_entrega: string | null
   nota: string | null
+  foto_remision_url?: string | null
+  foto_evidencia_url?: string | null
   recibido_en: string
   items: {
     orden_item_id: string
@@ -21,7 +42,9 @@ export interface RecepcionPendienteRecord {
     cantidad_danada: number
     estado: string
     observacion: string | null
+    foto_url?: string | null
   }[]
+  fotos?: RecepcionFotoInput[]
   status: OfflineQueueStatus
   error: string | null
   created_at: string
@@ -66,6 +89,9 @@ function openDb(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains('catalogo_cache')) {
         db.createObjectStore('catalogo_cache', { keyPath: 'key' })
+      }
+      if (!db.objectStoreNames.contains('fotos_pendientes')) {
+        db.createObjectStore('fotos_pendientes', { keyPath: 'id' })
       }
     }
 
