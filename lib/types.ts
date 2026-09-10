@@ -23,6 +23,7 @@ export interface Obra {
   ubicacion: string | null
   estado: 'activa' | 'pausada' | 'cerrada'
   presupuesto_mxn: number
+  foto_url?: string | null
   creado_en: string
 }
 
@@ -157,6 +158,8 @@ export interface RecepcionMaterial {
   estado: EstadoRecepcion
   referencia_entrega: string | null
   nota: string | null
+  foto_remision_url?: string | null
+  foto_evidencia_url?: string | null
   recibido_en: string
   revisado_por: string | null
   revisado_en: string | null

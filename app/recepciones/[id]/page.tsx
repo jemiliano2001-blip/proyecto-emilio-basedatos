@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
 import { CopyButton } from '@/components/CopyButton'
+import { RecepcionEvidenciasViewer } from '@/components/RecepcionEvidenciasViewer'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeRevisarRecepcion, puedeVerRecepciones } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -13,6 +14,8 @@ interface DetalleRecepcion {
   estado: EstadoRecepcion
   nota: string | null
   referencia_entrega: string | null
+  foto_remision_url?: string | null
+  foto_evidencia_url?: string | null
   recibido_en: string
   revisado_en: string | null
   nota_revision: string | null
@@ -105,6 +108,13 @@ export default async function RecepcionDetallePage({
           )}
         </div>
       )}
+
+      {/* Evidencias fotográficas si existen */}
+      <RecepcionEvidenciasViewer
+        fotoRemisionUrl={detalle.foto_remision_url}
+        fotoEvidenciaUrl={detalle.foto_evidencia_url}
+        folioOrden={detalle.orden?.folio ?? ''}
+      />
 
       <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
         Renglones

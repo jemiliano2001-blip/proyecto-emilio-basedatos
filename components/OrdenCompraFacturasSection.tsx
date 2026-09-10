@@ -5,6 +5,7 @@ import type { OrdenCompraFactura } from '@/lib/types'
 import { eliminarFacturaOrdenAction, subirFacturaOrdenAction } from '@/lib/actions/ordenes'
 import { IconClip, IconOjo, IconBasura } from '@/components/icons'
 import { CopyButton } from '@/components/CopyButton'
+import { QuickLookModal } from '@/components/QuickLookModal'
 
 interface Props {
   ordenId: string
@@ -32,6 +33,7 @@ export function OrdenCompraFacturasSection({
   puedeGestionar,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
+  const [quickLookIndex, setQuickLookIndex] = useState<number | null>(null)
   const [archivo, setArchivo] = useState<File | null>(null)
   const [folioFactura, setFolioFactura] = useState('')
   const [montoFactura, setMontoFactura] = useState<string>(totalOrden > 0 ? String(totalOrden) : '')
@@ -180,15 +182,14 @@ export function OrdenCompraFacturasSection({
               </div>
 
               <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                <a
-                  href={f.archivo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-secondary text-xs px-3 py-1.5 inline-flex items-center gap-1.5"
+                <button
+                  type="button"
+                  onClick={() => setQuickLookIndex(facturas.findIndex((x) => x.id === f.id))}
+                  className="btn-secondary text-xs px-3 py-1.5 inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <IconOjo className="h-3.5 w-3.5" />
-                  <span>Ver documento</span>
-                </a>
+                  <span>Vista previa</span>
+                </button>
 
                 {puedeGestionar && (
                   <button
@@ -295,6 +296,21 @@ export function OrdenCompraFacturasSection({
           </div>
         </div>
       )}
+
+      {/* Visor QuickLook Modal para facturas y comprobantes */}
+      <QuickLookModal
+        open={quickLookIndex !== null}
+        initialIndex={quickLookIndex ?? 0}
+        onClose={() => setQuickLookIndex(null)}
+        items={facturas.map((f) => ({
+          url: f.archivo_url,
+          nombre: f.folio_factura ? `Factura ${f.folio_factura}` : f.archivo_nombre,
+          tipo: f.archivo_nombre.toLowerCase().endsWith('.pdf') ? 'pdf' : 'imagen',
+          tamano: formatBytes(f.tamano_bytes),
+          subidoPor: f.subido_por_nombre,
+          fecha: new Date(f.creado_en).toLocaleDateString('es-MX'),
+        }))}
+      />
     </section>
   )
 }

@@ -3,17 +3,17 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
-import { EmptyState } from '@/components/EmptyState'
-import { IconPlus, IconDocumento, IconPaquete } from '@/components/icons'
+import { IconPlus, IconDocumento } from '@/components/icons'
 import { CierreObraAcciones } from '@/components/CierreObraAcciones'
-import { EditTopeInline } from '@/components/EditTopeInline'
 import { ObraDocumentos } from '@/components/ObraDocumentos'
+import { ObraMaterialesList } from '@/components/ObraMaterialesList'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { formatMoneyMx } from '@/lib/money'
 import {
   puedeCerrarObra,
   puedeCrearSolicitudes,
   puedeEliminarDocumentos,
+  puedeGestionarCatalogo,
   puedeGestionarDocumentos,
   puedeGestionarObras,
   puedeGestionarTopes,
@@ -40,6 +40,7 @@ export default async function ObraDetallePage({
   const supabase = await createClient()
   const rol = session?.rol ?? null
   const puedeEditarObra = puedeGestionarObras(rol)
+  const puedeEditarCatalogo = puedeGestionarCatalogo(rol)
   const puedeTopes = puedeGestionarTopes(rol)
   const puedeSolicitar = puedeCrearSolicitudes(rol)
   const puedeCerrar = puedeCerrarObra(rol)
@@ -51,7 +52,7 @@ export default async function ObraDetallePage({
 
   const { data: obra } = await supabase
     .from('obras')
-    .select('id, nombre, cliente, ciudad, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn')
+    .select('id, nombre, cliente, ciudad, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn, foto_url')
     .eq('id', resolvedparams.id)
     .maybeSingle()
 
@@ -119,7 +120,6 @@ export default async function ObraDetallePage({
     subido_por_nombre: d.usuarios?.nombre ?? null,
   }))
 
-  const topePorMaterial = new Map((topes ?? []).map((t) => [t.material_id, t]))
   const presupuesto = saldoMx as SaldoPresupuestoObra | null
 
   return (
@@ -162,6 +162,25 @@ export default async function ObraDetallePage({
           ) : undefined
         }
       />
+      {/* FOTOGRAFÍA / PORTADA DEL PROYECTO */}
+      {obra.foto_url && (
+        <div className="card p-0 overflow-hidden border border-gray-200 shadow-sm relative group">
+          <div className="w-full h-44 sm:h-56 bg-slate-900 relative">
+            <Image
+              src={obra.foto_url}
+              alt={obra.nombre}
+              fill
+              unoptimized
+              className="object-cover group-hover:scale-[1.01] transition-transform duration-300"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent flex items-end p-4">
+              <span className="text-white text-xs font-semibold px-2.5 py-1 rounded bg-black/50 backdrop-blur-sm">
+                Fotografía del Proyecto
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 -mt-2">
         {verConciliacion && (
@@ -264,152 +283,14 @@ export default async function ObraDetallePage({
           )}
         </div>
 
-        {/* LISTADO DE MATERIALES AGRUPADOS POR RUBRO */}
-        <div className="space-y-6">
-          {(() => {
-            const listaSaldos = (saldos as SaldoMaterialObra[] | null) ?? []
-            if (listaSaldos.length === 0) {
-              return (
-                <EmptyState
-                  icon={IconPaquete}
-                  title="Sin materiales asignados"
-                  description="Todavía no hay materiales asignados en el presupuesto de este proyecto."
-                  action={
-                    puedeTopes
-                      ? {
-                          label: 'Asignar materiales',
-                          href: `/obras/${resolvedparams.id}/asignar-materiales`,
-                        }
-                      : undefined
-                  }
-                />
-              )
-            }
-
-            // Agrupación por rubro / categoría
-            const rubrosMap = new Map<string, SaldoMaterialObra[]>()
-            for (const s of listaSaldos) {
-              const rubro = s.categoria?.trim() || 'Sin rubro'
-              const arr = rubrosMap.get(rubro) ?? []
-              arr.push(s)
-              rubrosMap.set(rubro, arr)
-            }
-
-            return [...rubrosMap.entries()].map(([rubro, items]) => (
-              <div key={rubro} className="space-y-3">
-                <div className="flex items-center justify-between border-b border-gray-200 pb-1.5">
-                  <h3 className="text-sm font-bold text-ink uppercase tracking-wide">
-                    {rubro}
-                  </h3>
-                  <span className="text-xs text-gray-400 tabular-nums">
-                    {items.length} {items.length === 1 ? 'material' : 'materiales'}
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  {items.map((s) => {
-                    const tope = topePorMaterial.get(s.material_id)
-                    const asignado = Number(s.cantidad_asignada ?? s.cantidad_contratada ?? 0)
-                    const enProceso = Number(s.cantidad_en_proceso ?? s.cantidad_comprometida ?? 0)
-                    const comprado = Number(s.cantidad_comprada ?? 0)
-                    const entregado = Number(s.cantidad_entregada ?? s.cantidad_usada ?? 0)
-                    const disponible = Number(s.cantidad_disponible ?? 0)
-                    const sinSaldo = disponible <= 0
-
-                    return (
-                      <div
-                        key={s.material_id}
-                        className={`card ${sinSaldo ? 'border-red-200 bg-red-50/20' : ''}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          {/* Miniatura de foto o placeholder legible */}
-                          <div className="w-14 h-14 rounded-lg bg-gray-100 border border-gray-200 shrink-0 flex items-center justify-center overflow-hidden">
-                            {s.foto_url ? (
-                              // Imagen de catálogo servida por Storage
-                              <Image
-                                src={s.foto_url}
-                                alt={s.nombre_base}
-                                width={56}
-                                height={56}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-gray-500 text-[11px] font-medium text-center px-1 leading-tight">
-                                Sin foto
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="font-medium text-ink">
-                                  {s.nombre_base}
-                                  {s.variante && <span className="text-gray-500"> · {s.variante}</span>}
-                                </p>
-                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                                  <span>{s.unidad_medida}</span>
-                                  {s.subcategoria && (
-                                    <>
-                                      <span>·</span>
-                                      <span className="text-gray-400">{s.subcategoria}</span>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-
-                              {sinSaldo && (
-                                <Badge variant="red">
-                                  Sin saldo
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
-                          <div className="bg-slate-50 p-2 rounded">
-                            <p className="text-gray-500 font-medium">Asignado</p>
-                            <p className="tabular-nums font-semibold text-gray-900 text-sm mt-0.5">{asignado}</p>
-                          </div>
-                          <div className="bg-slate-50 p-2 rounded">
-                            <p className="text-gray-500 font-medium">En proceso</p>
-                            <p className="tabular-nums font-semibold text-gray-900 text-sm mt-0.5">{enProceso}</p>
-                          </div>
-                          <div className="bg-slate-50 p-2 rounded">
-                            <p className="text-gray-500 font-medium">Comprado</p>
-                            <p className="tabular-nums font-semibold text-gray-900 text-sm mt-0.5">{comprado}</p>
-                          </div>
-                          <div className="bg-slate-50 p-2 rounded">
-                            <p className="text-gray-500 font-medium">Entregado</p>
-                            <p className="tabular-nums font-semibold text-gray-900 text-sm mt-0.5">{entregado}</p>
-                          </div>
-                          <div className={`p-2 rounded col-span-2 sm:col-span-1 ${sinSaldo ? 'bg-red-100/70' : 'bg-teal-50'}`}>
-                            <p className={`font-semibold ${sinSaldo ? 'text-red-700' : 'text-teal-800'}`}>Disponible</p>
-                            <p className={`tabular-nums font-bold text-sm mt-0.5 ${sinSaldo ? 'text-red-600' : 'text-teal-700'}`}>
-                              {disponible}
-                            </p>
-                          </div>
-                        </div>
-
-                        {puedeTopes && tope && (
-                          <div className="mt-2 pt-2 border-t border-gray-100">
-                            <EditTopeInline
-                              topeId={tope.id}
-                              obraId={resolvedparams.id}
-                              materialId={s.material_id}
-                              cantidadActual={Number(tope.cantidad_contratada)}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            ))
-          })()}
-        </div>
+        <ObraMaterialesList
+          obraId={resolvedparams.id}
+          saldos={(saldos as SaldoMaterialObra[] | null) ?? []}
+          topes={topes ?? []}
+          puedeTopes={puedeTopes}
+          verPrecios={verPrecios}
+          puedeEditarCatalogo={puedeEditarCatalogo}
+        />
       </div>
     </main>
   )

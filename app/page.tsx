@@ -1,64 +1,71 @@
 import Link from 'next/link'
-import { IconChevron, IconPlus, IconDocumento } from '@/components/icons'
+import {
+  IconChevron,
+  IconPlus,
+  IconSolicitudes,
+  IconRecepcion,
+  IconProyectos,
+} from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
-import { FilterTabs } from '@/components/FilterTabs'
-import { Badge } from '@/components/Badge'
-import { EmptyState } from '@/components/EmptyState'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeGestionarObras } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
+import { HomeProjectsWorkbench } from '@/components/HomeProjectsWorkbench'
 import type { Obra } from '@/lib/types'
 
-type EstatusFiltro = 'activa' | 'pausada' | 'cerrada'
-
-function asEstatus(value: string | undefined): EstatusFiltro {
-  if (value === 'pausada' || value === 'cerrada') return value
-  return 'activa'
-}
-
-function labelEstatus(estado: Obra['estado']): string {
-  if (estado === 'pausada') return 'Pausado'
-  if (estado === 'cerrada') return 'Cerrado'
-  return 'Activo'
-}
-
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ estatus?: string }>
-}) {
-  const resolvedsearchParams = await searchParams
+export default async function HomePage() {
   const session = await getSessionUsuario()
   const supabase = await createClient()
   const puedeCrear = puedeGestionarObras(session?.rol ?? null)
-  const estatus = asEstatus(resolvedsearchParams.estatus)
 
-  const { data: obras, error } = await supabase
+  // Consulta defensiva de obras incluyendo foto_url si ya existe en schema
+  let obras: Pick<
+    Obra,
+    'id' | 'nombre' | 'ciudad' | 'fraccionamiento' | 'cliente' | 'estado' | 'foto_url'
+  >[] = []
+
+  const { data: obrasData, error: obrasError } = await supabase
     .from('obras')
-    .select('id, nombre, ciudad, fraccionamiento, cliente, estado')
-    .eq('estado', estatus)
+    .select('id, nombre, ciudad, fraccionamiento, cliente, estado, foto_url')
     .order('nombre')
 
-  const tabs = [
-    { key: 'activa', label: 'Activos', href: '/?estatus=activa', active: estatus === 'activa' },
-    { key: 'pausada', label: 'Pausados', href: '/?estatus=pausada', active: estatus === 'pausada' },
-    { key: 'cerrada', label: 'Cerrados', href: '/?estatus=cerrada', active: estatus === 'cerrada' },
-  ]
+  if (obrasError) {
+    // Fallback defensivo si la columna foto_url aún no se aplica en BD remota
+    const { data: fallbackData } = await supabase
+      .from('obras')
+      .select('id, nombre, ciudad, fraccionamiento, cliente, estado')
+      .order('nombre')
+    obras = (fallbackData ?? []).map((o) => ({ ...o, foto_url: null }))
+  } else {
+    obras = obrasData ?? []
+  }
+
+  // Contadores operativos en paralelo
+  const [reqResult, recResult] = await Promise.allSettled([
+    supabase
+      .from('solicitudes')
+      .select('id', { count: 'exact', head: true })
+      .in('status', ['recibida', 'en_proceso']),
+    supabase
+      .from('recepciones_material')
+      .select('id', { count: 'exact', head: true }),
+  ])
+
+  const requisicionesPendientes =
+    reqResult.status === 'fulfilled' ? reqResult.value.count ?? 0 : 0
+  const totalRecepciones =
+    recResult.status === 'fulfilled' ? recResult.value.count ?? 0 : 0
+  const proyectosActivos = obras.filter((o) => o.estado === 'activa').length
 
   return (
-    <main className="page-shell">
+    <main className="page-shell space-y-6">
+      {/* Encabezado Principal */}
       <PageHeader
-        title={
-          estatus === 'activa'
-            ? 'Proyectos activos'
-            : estatus === 'pausada'
-              ? 'Proyectos pausados'
-              : 'Proyectos cerrados'
-        }
+        title="Panel Operativo"
         subtitle={
           session?.perfil?.nombre
-            ? `Hola, ${session.perfil.nombre}`
-            : 'Materiales y proyectos'
+            ? `Bienvenido, ${session.perfil.nombre}`
+            : 'Trazabilidad y control de materiales'
         }
         action={
           puedeCrear
@@ -71,65 +78,132 @@ export default async function HomePage({
         }
       />
 
-      <FilterTabs tabs={tabs} className="mb-4" />
+      {/* Barra de Acciones Rápidas (1-Click SaaS Quick Actions) */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <Link
+          href="/solicitudes/nueva"
+          className="flex items-center justify-between p-3.5 rounded-xl bg-navy text-white hover:bg-slate-800 transition-colors shadow-sm group"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-white/10 text-teal-300">
+              <IconSolicitudes className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-bold text-sm leading-none">Nueva Requisición</p>
+              <p className="text-[11px] text-gray-300 mt-1">Solicitar materiales u obra</p>
+            </div>
+          </div>
+          <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
 
-      {error && (
-        <div className="card mb-4 border-red-300 bg-red-50 text-red-700">
-          No se pudieron cargar los proyectos. Revisa tu conexión.
-        </div>
-      )}
+        <Link
+          href="/recepciones/nueva"
+          className="flex items-center justify-between p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors group"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/50">
+              <IconRecepcion className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-ink leading-none">Recibir Material</p>
+              <p className="text-[11px] text-gray-500 mt-1">Captura y cotejo de remisiones</p>
+            </div>
+          </div>
+          <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
 
-      <div className="space-y-3">
-        {(obras as Pick<Obra, 'id' | 'nombre' | 'ciudad' | 'fraccionamiento' | 'cliente' | 'estado'>[] | null)?.map(
-          (obra) => (
-            <Link
-              key={obra.id}
-              href={`/obras/${obra.id}`}
-              className="card-interactive flex min-h-[48px] items-center justify-between gap-3"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-ink truncate">{obra.nombre}</p>
-                  <Badge
-                    variant={
-                      obra.estado === 'activa'
-                        ? 'teal'
-                        : obra.estado === 'pausada'
-                          ? 'amber'
-                          : 'gray'
-                    }
-                  >
-                    {labelEstatus(obra.estado)}
-                  </Badge>
-                </div>
-                {(obra.cliente || obra.ciudad || obra.fraccionamiento) && (
-                  <p className="text-sm text-gray-500 truncate mt-0.5">
-                    {[obra.cliente, obra.ciudad, obra.fraccionamiento].filter(Boolean).join(' · ')}
-                  </p>
-                )}
+        {puedeCrear ? (
+          <Link
+            href="/obras/nueva"
+            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors group"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-blue-50 text-blue-800 border border-blue-200/50">
+                <IconProyectos className="w-5 h-5" />
               </div>
-              <IconChevron className="h-5 w-5 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          )
+              <div>
+                <p className="font-bold text-sm text-ink leading-none">Nuevo Proyecto</p>
+                <p className="text-[11px] text-gray-500 mt-1">Alta de obra y presupuesto</p>
+              </div>
+            </div>
+            <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        ) : (
+          <Link
+            href="/materiales"
+            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors group"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-amber-50 text-amber-800 border border-amber-200/50">
+                <IconProyectos className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-bold text-sm text-ink leading-none">Catálogo Materiales</p>
+                <p className="text-[11px] text-gray-500 mt-1">Consulta especificaciones</p>
+              </div>
+            </div>
+            <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         )}
+      </section>
 
-        {obras?.length === 0 && (
-          <EmptyState
-            icon={<IconDocumento className="w-8 h-8" />}
-            title={`No hay proyectos ${estatus === 'activa' ? 'activos' : estatus === 'pausada' ? 'pausados' : 'cerrados'}`}
-            description={
-              puedeCrear && estatus === 'activa'
-                ? 'Comienza registrando tu primer proyecto para gestionar su presupuesto y materiales.'
-                : undefined
-            }
-            action={
-              puedeCrear && estatus === 'activa'
-                ? { label: 'Nuevo proyecto', href: '/obras/nueva' }
-                : undefined
-            }
-          />
-        )}
-      </div>
+      {/* Métricas Operativas (KPIs) */}
+      <section className="grid grid-cols-3 gap-2.5">
+        <div className="card p-3 sm:p-4 bg-gradient-to-br from-white to-slate-50 border-gray-200">
+          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500">
+            Proyectos activos
+          </span>
+          <p className="text-xl sm:text-2xl font-black text-ink mt-1 tabular-nums">
+            {proyectosActivos}
+          </p>
+        </div>
+
+        <Link
+          href="/solicitudes"
+          className="card-interactive p-3 sm:p-4 bg-gradient-to-br from-white to-teal-50/20 border-teal-100 block"
+        >
+          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-teal-800">
+            Requisiciones
+          </span>
+          <div className="flex items-baseline gap-1.5 mt-1">
+            <span className="text-xl sm:text-2xl font-black text-teal-900 tabular-nums">
+              {requisicionesPendientes}
+            </span>
+            <span className="text-[11px] text-teal-700 font-medium hidden sm:inline">
+              en proceso
+            </span>
+          </div>
+        </Link>
+
+        <Link
+          href="/recepciones"
+          className="card-interactive p-3 sm:p-4 bg-gradient-to-br from-white to-slate-50 border-gray-200 block"
+        >
+          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500">
+            Recepciones
+          </span>
+          <div className="flex items-baseline gap-1.5 mt-1">
+            <span className="text-xl sm:text-2xl font-black text-ink tabular-nums">
+              {totalRecepciones}
+            </span>
+            <span className="text-[11px] text-gray-400 font-medium hidden sm:inline">
+              registradas
+            </span>
+          </div>
+        </Link>
+      </section>
+
+      {/* Workbench de Proyectos: Búsqueda, Filtros y Lista con Miniaturas */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+          <h2 className="text-base font-bold text-ink">Proyectos</h2>
+          <span className="text-xs text-gray-400 font-medium">
+            {obras.length} registrado{obras.length === 1 ? '' : 's'}
+          </span>
+        </div>
+
+        <HomeProjectsWorkbench obras={obras} puedeCrear={puedeCrear} />
+      </section>
     </main>
   )
 }

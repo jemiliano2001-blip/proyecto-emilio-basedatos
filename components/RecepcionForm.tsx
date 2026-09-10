@@ -6,6 +6,7 @@ import { useOfflineUser } from '@/components/OfflineUserProvider'
 import { useRouter } from 'next/navigation'
 import type { ActionResult } from '@/lib/actions/recepciones'
 import { FormError } from '@/components/FormError'
+import { PhotoUploadInput } from '@/components/PhotoUploadInput'
 import { SubmitButton } from '@/components/SubmitButton'
 import { putRecepcionPendiente } from '@/lib/offline/db'
 import { parseQuantity } from '@/lib/money'
@@ -188,6 +189,27 @@ export function RecepcionForm({
           name="referencia_entrega"
           className="input-base"
           placeholder="Guía, remisión, nombre del chofer…"
+        />
+      </div>
+
+      {/* Evidencia fotográfica de entrega en obra */}
+      <div className="card space-y-4 border-teal-200/80 bg-teal-50/20">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-900">
+          Evidencia Fotográfica de Entrega
+        </h3>
+        <PhotoUploadInput
+          id="foto_remision"
+          name="foto_remision"
+          label="Foto de la remisión física o talón de entrega (opcional)"
+          captureCamera={true}
+          helpText="Foto legible del documento o papel de entrega firmado por el proveedor o chofer."
+        />
+        <PhotoUploadInput
+          id="foto_evidencia"
+          name="foto_evidencia"
+          label="Foto de materiales en obra o piezas con daño (opcional)"
+          captureCamera={true}
+          helpText="Fotografía del material descargado o piezas con empaques rotos/defectos."
         />
       </div>
 

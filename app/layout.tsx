@@ -45,7 +45,7 @@ export default async function RootLayout({
         <OfflineUserProvider key={session?.authUserId ?? 'anon'} userId={session?.authUserId ?? null}>
         <NetworkStatusIndicator />
         {showNav && <ServiceWorkerRegistration />}
-        {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} />}
+        {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} rol={rol} />}
         {showNav && <CommandPalette />}
         {showNav && <KeyboardShortcutsModal />}
         {children}

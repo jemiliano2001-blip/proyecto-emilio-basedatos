@@ -18,6 +18,36 @@ function rpcErrorMessage(error: { message?: string } | null, fallback: string): 
   return cleaned && cleaned.length > 0 ? cleaned : fallback
 }
 
+async function uploadRecepcionFoto(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  file: File | null,
+  prefijo: string
+): Promise<{ url?: string; error?: string }> {
+  if (!file || file.size === 0) return {}
+  if (!file.type.startsWith('image/')) {
+    return { error: 'El archivo adjunto debe ser una imagen válida (JPG, PNG, WebP).' }
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return { error: 'La fotografía excede el límite de 10 MB.' }
+  }
+  const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 40)
+  const storagePath = `recepciones/${prefijo}-${crypto.randomUUID()}-${sanitizedName}`
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const { error: uploadError } = await supabase.storage
+    .from('materiales')
+    .upload(storagePath, buffer, {
+      contentType: file.type || 'image/jpeg',
+      upsert: false,
+    })
+  if (uploadError) {
+    return { error: `Error al subir la fotografía: ${uploadError.message}` }
+  }
+  const { data: publicData } = supabase.storage
+    .from('materiales')
+    .getPublicUrl(storagePath)
+  return { url: publicData.publicUrl }
+}
+
 export async function crearRecepcionAction(
   _prev: ActionResult,
   formData: FormData
@@ -25,6 +55,27 @@ export async function crearRecepcionAction(
   const session = await getSessionUsuario()
   if (!session || !session.perfil || !puedeCapturarRecepcion(session.rol)) {
     return { error: 'No tienes permiso para registrar recepciones.' }
+  }
+
+  const supabase = await createClient()
+
+  // Procesar fotos de remisión y evidencia de entrega
+  const fotoRemisionFile = formData.get('foto_remision') as File | null
+  const fotoEvidenciaFile = formData.get('foto_evidencia') as File | null
+
+  let foto_remision_url: string | null = (formData.get('foto_remision_existente') as string | null) || null
+  let foto_evidencia_url: string | null = (formData.get('foto_evidencia_existente') as string | null) || null
+
+  if (fotoRemisionFile && fotoRemisionFile.size > 0) {
+    const upRemision = await uploadRecepcionFoto(supabase, fotoRemisionFile, 'remision')
+    if (upRemision.error) return { error: upRemision.error }
+    if (upRemision.url) foto_remision_url = upRemision.url
+  }
+
+  if (fotoEvidenciaFile && fotoEvidenciaFile.size > 0) {
+    const upEvidencia = await uploadRecepcionFoto(supabase, fotoEvidenciaFile, 'evidencia')
+    if (upEvidencia.error) return { error: upEvidencia.error }
+    if (upEvidencia.url) foto_evidencia_url = upEvidencia.url
   }
 
   let itemsRaw: unknown = []
@@ -42,13 +93,14 @@ export async function crearRecepcionAction(
     orden_id: formData.get('orden_id'),
     referencia_entrega: formData.get('referencia_entrega'),
     nota: formData.get('nota'),
+    foto_remision_url,
+    foto_evidencia_url,
     recibido_en: formData.get('recibido_en'),
     items: itemsRaw,
   })
 
   if (!parsed.ok) return { error: parsed.error }
 
-  const supabase = await createClient()
   const { data, error } = await supabase.rpc('crear_recepcion', {
     p_id: parsed.data.id,
     p_orden_id: parsed.data.orden_id,
@@ -63,6 +115,21 @@ export async function crearRecepcionAction(
   }
 
   const recepcionId = typeof data === 'string' ? data : parsed.data.id
+
+  // Actualizar fotos defensivamente en recepciones_material
+  if (foto_remision_url || foto_evidencia_url) {
+    try {
+      await supabase
+        .from('recepciones_material')
+        .update({
+          ...(foto_remision_url ? { foto_remision_url } : {}),
+          ...(foto_evidencia_url ? { foto_evidencia_url } : {}),
+        })
+        .eq('id', recepcionId)
+    } catch (err) {
+      console.warn('Advertencia: No se pudieron asignar fotos a la recepción en base de datos:', err)
+    }
+  }
 
   revalidatePath('/recepciones')
   revalidatePath(`/recepciones/${recepcionId}`)

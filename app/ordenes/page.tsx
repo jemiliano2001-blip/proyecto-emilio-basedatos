@@ -33,11 +33,13 @@ export default async function OrdenesPage({ searchParams }: { searchParams: Prom
   }
 
   const supabase = await createClient()
+  const selectQuery = filters.proyecto
+    ? 'id, folio, folio_fisico, total, moneda, estado, creado_en, obra:obras!inner(nombre), proveedor:proveedores(nombre), facturas:orden_compra_facturas(id)'
+    : 'id, folio, folio_fisico, total, moneda, estado, creado_en, obra:obras(nombre), proveedor:proveedores(nombre), facturas:orden_compra_facturas(id)'
+
   let query = supabase
     .from('ordenes_compra')
-    .select(
-      'id, folio, folio_fisico, total, moneda, estado, creado_en, obra:obras!inner(nombre), proveedor:proveedores(nombre), facturas:orden_compra_facturas(id)', { count: 'exact' }
-    )
+    .select(selectQuery, { count: 'exact' })
     .order('creado_en', { ascending: false })
     .order('id', { ascending: false })
   if (filters.estatus) query = query.eq('estado', filters.estatus)

@@ -14,6 +14,8 @@ export interface RecepcionInput {
   orden_id: string
   referencia_entrega: string | null
   nota: string | null
+  foto_remision_url?: string | null
+  foto_evidencia_url?: string | null
   recibido_en: string
   items: RecepcionItemInput[]
 }
@@ -167,6 +169,8 @@ export function validateRecepcionInput(raw: unknown): ValidationResult<Recepcion
       orden_id,
       referencia_entrega: trimOrNull(body.referencia_entrega),
       nota: trimOrNull(body.nota),
+      foto_remision_url: trimOrNull(body.foto_remision_url),
+      foto_evidencia_url: trimOrNull(body.foto_evidencia_url),
       recibido_en: new Date(recibido_en).toISOString(),
       items,
     },

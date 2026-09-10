@@ -16,6 +16,7 @@ import {
 import type { ObraDocumento } from '@/lib/types'
 import { EmptyState } from '@/components/EmptyState'
 import { IconPlus, IconDocumento } from '@/components/icons'
+import { QuickLookModal } from '@/components/QuickLookModal'
 
 const initialState: DocumentoActionResult = { error: null }
 
@@ -54,6 +55,7 @@ export function ObraDocumentos({
 }) {
   const [state, formAction] = useFormState(uploadObraDocumentoAction, initialState)
   const [mostrandoSubida, setMostrandoSubida] = useState(false)
+  const [quickLookIndex, setQuickLookIndex] = useState<number | null>(null)
   const [isDeleting, startDeleteTransition] = useTransition()
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -203,15 +205,14 @@ export function ObraDocumentos({
             </div>
 
             <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-              <a
-                href={doc.archivo_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary text-xs px-3 py-2 min-h-[36px] flex items-center gap-1 text-accent border-teal-300 hover:bg-teal-50"
+              <button
+                type="button"
+                onClick={() => setQuickLookIndex(documentos.findIndex((d) => d.id === doc.id))}
+                className="btn-secondary text-xs px-3 py-2 min-h-[36px] flex items-center gap-1 text-accent border-teal-300 hover:bg-teal-50 cursor-pointer"
               >
-                <span>Ver / Abrir</span>
+                <span>Vista previa</span>
                 <span aria-hidden="true">↗</span>
-              </a>
+              </button>
 
               <a
                 href={doc.archivo_url}
@@ -248,6 +249,21 @@ export function ObraDocumentos({
           />
         )}
       </div>
+
+      {/* Visor QuickLook Modal para PDFs del proyecto */}
+      <QuickLookModal
+        open={quickLookIndex !== null}
+        initialIndex={quickLookIndex ?? 0}
+        onClose={() => setQuickLookIndex(null)}
+        items={documentos.map((d) => ({
+          url: d.archivo_url,
+          nombre: d.nombre,
+          tipo: 'pdf',
+          tamano: formatBytes(d.tamano_bytes),
+          subidoPor: d.subido_por_nombre,
+          fecha: formatDate(d.creado_en),
+        }))}
+      />
     </div>
   )
 }

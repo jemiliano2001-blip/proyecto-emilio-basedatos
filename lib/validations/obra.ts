@@ -16,6 +16,7 @@ export interface ObraInput {
   ubicacion: string | null
   estado: EstadoObra
   presupuesto_mxn: number
+  foto_url?: string | null
   topes: TopeCreacionInput[]
 }
 
@@ -133,6 +134,7 @@ export function validateObraInput(raw: unknown): ValidationResult<ObraInput> {
       ubicacion: trimOrNull(body.ubicacion),
       estado: estadoRaw as EstadoObra,
       presupuesto_mxn: presupuesto,
+      foto_url: trimOrNull(body.foto_url),
       topes,
     },
   }

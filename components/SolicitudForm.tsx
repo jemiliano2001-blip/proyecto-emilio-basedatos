@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useCallback } from 'react'
 import { useFormState } from 'react-dom'
 import { useOfflineUser } from '@/components/OfflineUserProvider'
 import { useRouter } from 'next/navigation'
@@ -15,7 +15,8 @@ import {
   labelTipoLinea,
 } from '@/lib/validations/solicitud'
 import type { TipoLineaSolicitud } from '@/lib/types'
-import { IconPlus, IconAlerta } from '@/components/icons'
+import { IconPlus, IconAlerta, IconOjo } from '@/components/icons'
+import { SolicitudPreviewModal, type PreviewItemData } from '@/components/SolicitudPreviewModal'
 
 const initialState: ActionResult = { error: null }
 
@@ -82,10 +83,13 @@ export function SolicitudForm({
 }) {
   const router = useRouter()
   const userId = useOfflineUser()
+  const formRef = useRef<HTMLFormElement>(null)
   const [state, formAction] = useFormState(action, initialState)
   const [selectedObraId, setSelectedObraId] = useState<string>(defaultObraId ?? (obras[0]?.id ?? ''))
   const [items, setItems] = useState<ItemRow[]>([nuevaFila()])
   const [multiObra, setMultiObra] = useState(false)
+  const [notaGeneral, setNotaGeneral] = useState('')
+  const [showPreview, setShowPreview] = useState(false)
   const [offlineMsg, setOfflineMsg] = useState<string | null>(null)
   const [offlineError, setOfflineError] = useState<string | null>(null)
   const [clientValidationError, setClientValidationError] = useState<string | null>(null)
@@ -104,7 +108,7 @@ export function SolicitudForm({
     return map
   }, [saldos])
 
-  function getSaldoDisponible(obraId: string, materialId: string): number | null {
+  const getSaldoDisponible = useCallback((obraId: string, materialId: string): number | null => {
     if (!obraId || !materialId) return null
     const key = `${obraId}_${materialId}`
     if (saldoMap.has(key)) {
@@ -115,7 +119,50 @@ export function SolicitudForm({
       return 0
     }
     return null
-  }
+  }, [saldoMap, saldos.length])
+
+  const obraNombrePrincipal = useMemo(() => {
+    return obras.find((o) => o.id === selectedObraId)?.nombre ?? 'Proyecto'
+  }, [obras, selectedObraId])
+
+  const previewItems = useMemo<PreviewItemData[]>(() => {
+    return items.map((item) => {
+      if (item.tipo_linea === 'material') {
+        const mat = materialMap.get(item.material_id)
+        const effectiveObraId = multiObra ? item.obra_id : selectedObraId
+        const disp = getSaldoDisponible(effectiveObraId, item.material_id)
+        const cant = parseQuantity(item.cantidad) ?? 0
+        const monto = parseMoney(item.monto_mxn)
+        const obra = obras.find((o) => o.id === effectiveObraId)
+
+        return {
+          tipo_linea: 'material',
+          nombre: mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'Material no seleccionado',
+          variante: mat?.variante,
+          cantidad: cant,
+          unidad_medida: mat?.unidad_medida ?? 'PZA',
+          monto_mxn: monto,
+          nota: item.nota || null,
+          obraNombre: multiObra ? obra?.nombre : null,
+          disponible: disp,
+        }
+      } else {
+        const monto = parseMoney(item.monto_mxn)
+        const effectiveObraId = multiObra ? item.obra_id : selectedObraId
+        const obra = obras.find((o) => o.id === effectiveObraId)
+
+        return {
+          tipo_linea: item.tipo_linea,
+          nombre: item.descripcion || labelTipoLinea(item.tipo_linea),
+          cantidad: 1,
+          unidad_medida: 'SRV',
+          monto_mxn: monto,
+          nota: item.nota || null,
+          obraNombre: multiObra ? obra?.nombre : null,
+        }
+      }
+    })
+  }, [items, materialMap, multiObra, selectedObraId, obras, getSaldoDisponible])
 
   const itemsJson = useMemo(
     () =>
@@ -322,7 +369,7 @@ export function SolicitudForm({
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4">
+    <form ref={formRef} action={handleSubmit} className="space-y-4">
       <input type="hidden" name="items_json" value={itemsJson} />
       <FormError message={state.error ?? offlineError ?? clientValidationError} />
       {offlineMsg && (
@@ -368,85 +415,84 @@ export function SolicitudForm({
         </div>
       )}
 
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-            Renglones de la Requisición
-          </h2>
-        </div>
+      <div className="space-y-3">
+        <label className="block text-sm font-semibold text-ink">
+          Partidas de la requisición
+        </label>
 
-        <div className="space-y-3">
-          {items.map((item, index) => {
+        <div className="space-y-4">
+          {items.map((item, idx) => {
             const effectiveObraId = multiObra ? item.obra_id : selectedObraId
-            const disp = item.material_id ? getSaldoDisponible(effectiveObraId, item.material_id) : null
-            const cantNum = parseQuantity(item.cantidad) ?? 0
-            const esMaterial = item.tipo_linea === 'material'
-            const sinSaldo = esMaterial && item.material_id !== '' && disp !== null && disp <= 0
-            const saldoInsuficiente = esMaterial && item.material_id !== '' && disp !== null && disp > 0 && cantNum > disp
-            const mat = item.material_id ? materialMap.get(item.material_id) : null
+            const disp =
+              item.tipo_linea === 'material' && item.material_id
+                ? getSaldoDisponible(effectiveObraId, item.material_id)
+                : null
+            const cantNum = parseQuantity(item.cantidad)
+            const sinSaldo = disp !== null && disp <= 0
+            const saldoInsuficiente =
+              disp !== null && disp > 0 && cantNum !== null && cantNum > disp
 
             return (
               <div
                 key={item.key}
-                className={`card space-y-3 ${
-                  sinSaldo || saldoInsuficiente ? 'border-red-300 bg-red-50/30' : ''
+                className={`card relative space-y-3 transition-colors ${
+                  sinSaldo || saldoInsuficiente ? 'border-red-300 bg-red-50/20' : ''
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-400">
-                      Renglón {index + 1}
-                    </span>
-                    {esMaterial && disp !== null && (
-                      <span
-                        className={disp <= 0 ? 'badge-red' : 'badge-teal'}
-                      >
-                        {disp <= 0
-                          ? 'Saldo: 0 (Agotado)'
-                          : `Disponible: ${disp} ${mat?.unidad_medida ?? ''}`}
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-xs font-bold text-gray-500 font-mono">
+                    Partida #{idx + 1}
+                  </span>
                   {items.length > 1 && (
                     <button
                       type="button"
                       onClick={() => quitarFila(item.key)}
-                      className="text-xs text-red-600 font-semibold hover:text-red-800"
+                      className="text-xs text-red-600 hover:text-red-700 font-medium py-1 px-2 -mr-2 rounded hover:bg-red-50 transition-colors"
                     >
                       Quitar
                     </button>
                   )}
                 </div>
 
-                <select
-                  value={item.tipo_linea}
-                  onChange={(e) =>
-                    actualizarFila(item.key, {
-                      tipo_linea: e.target.value as TipoLineaSolicitud,
-                      material_id: '',
-                      cantidad: '',
-                      descripcion: '',
-                      monto_mxn: '',
-                    })
-                  }
-                  className="input-base"
-                >
-                  {TIPOS_LINEA_SOLICITUD.map((t) => (
-                    <option key={t} value={t}>
-                      {labelTipoLinea(t)}
-                    </option>
+                <div className="flex flex-wrap gap-1.5 p-1 bg-slate-100 rounded-lg">
+                  {TIPOS_LINEA_SOLICITUD.map((tipo) => (
+                    <button
+                      key={tipo}
+                      type="button"
+                      onClick={() =>
+                        actualizarFila(item.key, {
+                          tipo_linea: tipo,
+                          material_id: '',
+                          cantidad: '',
+                          descripcion: '',
+                          monto_mxn: '',
+                        })
+                      }
+                      className={`text-xs px-2.5 py-1 rounded-md font-medium transition-colors ${
+                        item.tipo_linea === tipo
+                          ? 'bg-white text-ink shadow-sm'
+                          : 'text-gray-600 hover:text-ink'
+                      }`}
+                    >
+                      {labelTipoLinea(tipo)}
+                    </button>
                   ))}
-                </select>
+                </div>
 
                 {multiObra && (
                   <select
                     value={item.obra_id}
-                    onChange={(e) => actualizarFila(item.key, { obra_id: e.target.value })}
-                    className="input-base"
+                    onChange={(e) =>
+                      actualizarFila(item.key, {
+                        obra_id: e.target.value,
+                        material_id: '',
+                      })
+                    }
+                    className="input-base text-sm"
                     required
                   >
                     <option value="" disabled>
-                      Selecciona el proyecto de este renglón
+                      Selecciona el proyecto de este renglón...
                     </option>
                     {obras.map((o) => (
                       <option key={o.id} value={o.id}>
@@ -570,17 +616,49 @@ export function SolicitudForm({
           id="nota"
           name="nota"
           rows={3}
+          value={notaGeneral}
+          onChange={(e) => setNotaGeneral(e.target.value)}
           className="input-base"
           placeholder="Nota"
         />
       </div>
 
-      <SubmitButton>
-        {guardandoOffline ? 'Guardando en el teléfono…' : 'Enviar requisición'}
-      </SubmitButton>
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5 pt-2">
+        <button
+          type="button"
+          onClick={() => {
+            setClientValidationError(null)
+            setShowPreview(true)
+          }}
+          className="btn-secondary text-sm py-2.5 px-4 inline-flex items-center justify-center gap-2"
+        >
+          <IconOjo className="w-4 h-4 text-teal-800" />
+          <span>Vista previa</span>
+        </button>
+        <div className="flex-1">
+          <SubmitButton>
+            {guardandoOffline ? 'Guardando en el teléfono…' : 'Enviar requisición'}
+          </SubmitButton>
+        </div>
+      </div>
       <p className="text-xs text-gray-500 text-center">
         Sin señal: se guarda en este teléfono y se envía al recuperar conexión.
       </p>
+
+      {/* Modal de Vista Previa de la Requisición */}
+      <SolicitudPreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        onConfirm={() => {
+          setShowPreview(false)
+          if (formRef.current) {
+            formRef.current.requestSubmit()
+          }
+        }}
+        obraNombrePrincipal={obraNombrePrincipal}
+        notaGeneral={notaGeneral}
+        items={previewItems}
+      />
     </form>
   )
 }

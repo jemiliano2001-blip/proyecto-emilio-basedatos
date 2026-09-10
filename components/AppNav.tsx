@@ -57,7 +57,7 @@ export function AppNav({
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-gray-200/80 bg-white/95 backdrop-blur-md"
+        className="fixed inset-x-0 bottom-0 z-20 md:hidden border-t border-gray-200/80 bg-white/95 backdrop-blur-md"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         aria-label="Principal"
       >

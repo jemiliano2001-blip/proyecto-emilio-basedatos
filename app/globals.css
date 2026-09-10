@@ -180,13 +180,25 @@ body {
   }
 
   .page-shell {
-    @apply max-w-2xl mx-auto p-4;
+    @apply max-w-2xl md:max-w-5xl lg:max-w-6xl mx-auto p-4 sm:p-6;
     padding-bottom: calc(var(--nav-height) + 1.5rem + env(safe-area-inset-bottom, 0px));
   }
 
+  @media (min-width: 768px) {
+    .page-shell {
+      padding-bottom: 2.5rem;
+    }
+  }
+
   .page-shell-wide {
-    @apply max-w-4xl mx-auto p-4;
+    @apply max-w-4xl md:max-w-6xl lg:max-w-7xl mx-auto p-4 sm:p-6;
     padding-bottom: calc(var(--nav-height) + 1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (min-width: 768px) {
+    .page-shell-wide {
+      padding-bottom: 2.5rem;
+    }
   }
 
   .tabular-nums {

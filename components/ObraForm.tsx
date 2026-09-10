@@ -5,6 +5,7 @@ import { useFormState } from 'react-dom'
 import type { ActionResult } from '@/lib/actions/obras'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
+import { PhotoUploadInput } from '@/components/PhotoUploadInput'
 import { IconPlus, IconBasura, IconRayo } from '@/components/icons'
 import { formatMoneyMx, parseQuantity } from '@/lib/money'
 import type { CatalogoMaterial, MaterialKitWithItems, Obra } from '@/lib/types'
@@ -38,6 +39,7 @@ export function ObraForm({
     | 'ubicacion'
     | 'estado'
     | 'presupuesto_mxn'
+    | 'foto_url'
   >
   submitLabel: string
   materiales?: CatalogoMaterial[]
@@ -313,6 +315,16 @@ export function ObraForm({
             defaultValue={obra?.ubicacion ?? ''}
             className="input-base"
             placeholder="ej. Av. Universidad #120 / Carretera a Reynosa Km 5"
+          />
+        </div>
+
+        <div>
+          <PhotoUploadInput
+            id="foto"
+            name="foto"
+            label="Fotografía de portada o plano (opcional)"
+            existingUrl={obra?.foto_url}
+            helpText="Imagen representativa de la fachada, entrada de obra o plano general."
           />
         </div>
       </div>

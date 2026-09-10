@@ -14,26 +14,28 @@ import {
   IconRecepcion,
   IconSearch,
   IconTraspasos,
+  IconProyectos,
 } from '@/components/icons'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 
 interface CommandItem {
   id: string
   label: string
-  category: 'Navegación' | 'Acciones Rápidas'
+  category: 'Proyectos' | 'Materiales' | 'Navegación' | 'Acciones Rápidas'
   href: string
   icon: React.ComponentType<{ className?: string }>
   keywords?: string
 }
 
-const COMMANDS: CommandItem[] = [
+const STATIC_COMMANDS: CommandItem[] = [
   // Navegación
   {
     id: 'nav-obras',
     label: 'Proyectos y Obras',
     category: 'Navegación',
     href: '/',
-    icon: IconPaquete,
+    icon: IconProyectos,
     keywords: 'proyectos obras lista clientes',
   },
   {
@@ -58,7 +60,7 @@ const COMMANDS: CommandItem[] = [
     category: 'Navegación',
     href: '/recepciones',
     icon: IconRecepcion,
-    keywords: 'recepcion sitio entrega revision',
+    keywords: 'recepcion sitio entrega revision remisiones',
   },
   {
     id: 'nav-traspasos',
@@ -119,6 +121,14 @@ const COMMANDS: CommandItem[] = [
     keywords: 'requisicion pedir material crear solicitud',
   },
   {
+    id: 'act-nueva-recepcion',
+    label: 'Recibir material en obra',
+    category: 'Acciones Rápidas',
+    href: '/recepciones/nueva',
+    icon: IconPlus,
+    keywords: 'remision cotejo captura llegada obra',
+  },
+  {
     id: 'act-nuevo-traspaso',
     label: 'Nuevo traspaso de materiales',
     category: 'Acciones Rápidas',
@@ -156,9 +166,13 @@ export function CommandPalette() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [dynamicResults, setDynamicResults] = useState<CommandItem[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null)
 
   // Atajo global Cmd+K o Ctrl+K
   useEffect(() => {
@@ -186,21 +200,96 @@ export function CommandPalette() {
     if (open) {
       setQuery('')
       setSelectedIndex(0)
+      setDynamicResults([])
       setTimeout(() => inputRef.current?.focus(), 50)
     }
   }, [open])
 
-  // Filtrado de comandos
+  // Búsqueda dinámica en Supabase para proyectos y materiales
+  useEffect(() => {
+    const trimmed = query.trim().toLowerCase()
+    if (trimmed.length < 2) {
+      setDynamicResults([])
+      setIsSearching(false)
+      return
+    }
+
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current)
+    }
+
+    setIsSearching(true)
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        const supabase = createClient()
+
+        const [obrasRes, matsRes] = await Promise.allSettled([
+          supabase
+            .from('obras')
+            .select('id, nombre, cliente')
+            .or(`nombre.ilike.%${trimmed}%,cliente.ilike.%${trimmed}%`)
+            .limit(4),
+          supabase
+            .from('catalogo_materiales')
+            .select('id, nombre_base, variante, unidad_medida')
+            .ilike('nombre_base', `%${trimmed}%`)
+            .limit(5),
+        ])
+
+        const items: CommandItem[] = []
+
+        if (obrasRes.status === 'fulfilled' && obrasRes.value.data) {
+          for (const o of obrasRes.value.data) {
+            items.push({
+              id: `obra-${o.id}`,
+              label: `${o.nombre}${o.cliente ? ` (${o.cliente})` : ''}`,
+              category: 'Proyectos',
+              href: `/obras/${o.id}`,
+              icon: IconProyectos,
+            })
+          }
+        }
+
+        if (matsRes.status === 'fulfilled' && matsRes.value.data) {
+          for (const m of matsRes.value.data) {
+            items.push({
+              id: `mat-${m.id}`,
+              label: `${m.nombre_base}${m.variante ? ` · ${m.variante}` : ''} (${m.unidad_medida})`,
+              category: 'Materiales',
+              href: `/materiales/${m.id}`,
+              icon: IconPaquete,
+            })
+          }
+        }
+
+        setDynamicResults(items)
+      } catch {
+        // En caso de fallo de red en búsqueda dinámica, continuar con estáticos
+      } finally {
+        setIsSearching(false)
+      }
+    }, 180)
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    }
+  }, [query])
+
+  // Filtrado de comandos estáticos y unión con dinámicos
   const filtered = useMemo(() => {
     const q = (query || '').toLowerCase().trim()
-    if (!q) return COMMANDS
-    return COMMANDS.filter(
-      (c) =>
-        (c.label || '').toLowerCase().includes(q) ||
-        (c.category || '').toLowerCase().includes(q) ||
-        (c.keywords && c.keywords.toLowerCase().includes(q))
-    )
-  }, [query])
+    const staticFiltered = !q
+      ? STATIC_COMMANDS
+      : STATIC_COMMANDS.filter(
+          (c) =>
+            (c.label || '').toLowerCase().includes(q) ||
+            (c.category || '').toLowerCase().includes(q) ||
+            (c.keywords && c.keywords.toLowerCase().includes(q))
+        )
+
+    // Resultados dinámicos primero si existen
+    return [...dynamicResults, ...staticFiltered]
+  }, [query, dynamicResults])
 
   // Ajustar selectedIndex al filtrar
   useEffect(() => {
@@ -256,7 +345,7 @@ export function CommandPalette() {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Buscador global y atajos"
+        aria-label="Buscador global y comandos"
         className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[80vh] z-10 animate-fade-in"
       >
         {/* Header con Input */}
@@ -268,9 +357,14 @@ export function CommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleInputKeyDown}
-            placeholder="Escribe para buscar proyectos, órdenes, materiales o acciones…"
+            placeholder="Escribe para buscar proyectos, materiales o comandos…"
             className="w-full bg-transparent text-sm text-ink placeholder-gray-400 outline-none font-medium"
           />
+          {isSearching && (
+            <span className="text-[10px] text-gray-400 font-mono animate-pulse">
+              Buscando...
+            </span>
+          )}
           {query && (
             <button
               type="button"
@@ -321,7 +415,11 @@ export function CommandPalette() {
                         'p-1.5 rounded-lg shrink-0',
                         isActive
                           ? 'bg-accent text-white'
-                          : 'bg-gray-100 text-gray-500'
+                          : item.category === 'Proyectos'
+                            ? 'bg-blue-50 text-blue-800'
+                            : item.category === 'Materiales'
+                              ? 'bg-teal-50 text-teal-800'
+                              : 'bg-gray-100 text-gray-500'
                       )}
                     >
                       <Icon className="w-4 h-4" />
@@ -331,9 +429,13 @@ export function CommandPalette() {
                   <span
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded font-medium shrink-0',
-                      item.category === 'Acciones Rápidas'
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'bg-gray-100 text-gray-500'
+                      item.category === 'Proyectos'
+                        ? 'bg-blue-100 text-blue-800 font-semibold'
+                        : item.category === 'Materiales'
+                          ? 'bg-teal-100 text-teal-800 font-semibold'
+                          : item.category === 'Acciones Rápidas'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-gray-100 text-gray-500'
                     )}
                   >
                     {item.category}
@@ -355,7 +457,7 @@ export function CommandPalette() {
               <kbd className="font-semibold text-gray-600">↵</kbd> seleccionar
             </span>
           </div>
-          <span>Atajo global: <strong>Cmd+K</strong></span>
+          <span>Atajo global: <strong>Ctrl+K</strong> / <strong>⌘K</strong></span>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { IconPlus, IconEditar, IconBasura, IconPaquete } from '@/components/icons'
 import { EmptyState } from '@/components/EmptyState'
+import { MaterialPreviewModal } from '@/components/MaterialPreviewModal'
 import { formatMoneyMx } from '@/lib/money'
 import type { CatalogoMaterial, MaterialCategoria } from '@/lib/types'
 import {
@@ -20,13 +21,38 @@ function MaterialCard({
   m,
   puedeEditar,
   verPrecios,
+  onSelect,
 }: {
   m: CatalogoMaterial
   puedeEditar: boolean
   verPrecios: boolean
+  onSelect: (m: CatalogoMaterial) => void
 }) {
-  const body = (
-    <>
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect(m)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelect(m)
+        }
+      }}
+      className="card-interactive relative text-left group cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-700/50"
+    >
+      {puedeEditar && (
+        <Link
+          href={`/materiales/${m.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute top-2 right-2 z-10 p-1.5 rounded-md bg-white/90 shadow-sm border border-gray-200 text-gray-400 hover:text-ink hover:bg-white transition-colors opacity-80 group-hover:opacity-100"
+          title="Editar material"
+          aria-label={`Editar ${m.nombre_base}`}
+        >
+          <IconEditar className="w-3.5 h-3.5" />
+        </Link>
+      )}
+
       <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-200">
         {m.foto_url ? (
           // Imagen de catálogo servida por Storage
@@ -35,13 +61,16 @@ function MaterialCard({
             alt={m.nombre_base}
             width={200}
             height={200}
-            className="object-cover w-full h-full"
+            unoptimized
+            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
           />
         ) : (
           <span className="text-gray-400 text-xs font-medium">Sin foto</span>
         )}
       </div>
-      <p className="font-bold text-sm text-ink line-clamp-2">{m.nombre_base}</p>
+      <p className="font-bold text-sm text-ink line-clamp-2 group-hover:text-navy transition-colors">
+        {m.nombre_base}
+      </p>
       {m.variante && <p className="text-xs text-gray-500 truncate">{m.variante}</p>}
       {m.subcategoria && (
         <p className="text-xs text-gray-400 mt-0.5">{m.subcategoria}</p>
@@ -54,15 +83,7 @@ function MaterialCard({
           </span>
         )}
       </div>
-    </>
-  )
-
-  return puedeEditar ? (
-    <Link href={`/materiales/${m.id}`} className="card-interactive block">
-      {body}
-    </Link>
-  ) : (
-    <div className="card">{body}</div>
+    </div>
   )
 }
 
@@ -84,6 +105,7 @@ export function CatalogoMaterialesView({
     initialCategoria ?? categorias[0]?.nombre ?? 'todas'
   )
 
+  const [previewMaterial, setPreviewMaterial] = useState<CatalogoMaterial | null>(null)
   const [isPending, startTransition] = useTransition()
   const [modalType, setModalType] = useState<
     | null
@@ -400,6 +422,7 @@ export function CatalogoMaterialesView({
                           m={m}
                           puedeEditar={puedeEditar}
                           verPrecios={verPrecios}
+                          onSelect={setPreviewMaterial}
                         />
                       ))}
                     </div>
@@ -446,6 +469,7 @@ export function CatalogoMaterialesView({
                         m={m}
                         puedeEditar={puedeEditar}
                         verPrecios={verPrecios}
+                        onSelect={setPreviewMaterial}
                       />
                     ))}
                   </div>
@@ -478,6 +502,7 @@ export function CatalogoMaterialesView({
                   m={m}
                   puedeEditar={puedeEditar}
                   verPrecios={verPrecios}
+                  onSelect={setPreviewMaterial}
                 />
               ))}
             </div>
@@ -508,6 +533,7 @@ export function CatalogoMaterialesView({
                         m={m}
                         puedeEditar={puedeEditar}
                         verPrecios={verPrecios}
+                        onSelect={setPreviewMaterial}
                       />
                     ))}
                   </div>
@@ -534,6 +560,7 @@ export function CatalogoMaterialesView({
                       m={m}
                       puedeEditar={puedeEditar}
                       verPrecios={verPrecios}
+                      onSelect={setPreviewMaterial}
                     />
                   ))}
                 </div>
@@ -675,6 +702,15 @@ export function CatalogoMaterialesView({
           </div>
         </div>
       )}
+
+      {/* Vista previa de ficha técnica de material */}
+      <MaterialPreviewModal
+        material={previewMaterial}
+        open={Boolean(previewMaterial)}
+        onClose={() => setPreviewMaterial(null)}
+        puedeEditar={puedeEditar}
+        verPrecios={verPrecios}
+      />
     </div>
   )
 }
