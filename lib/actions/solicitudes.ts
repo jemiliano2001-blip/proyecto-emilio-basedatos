@@ -123,15 +123,39 @@ export async function createSolicitudAction(
       return { error: 'Uno o más materiales están inactivos. Quítalos de la requisición.' }
     }
 
-    // Validación estricta de saldo disponible en campo
+    // Validación estricta de saldo disponible en campo (deduciendo provisionalmente pendientes)
     const matMap = new Map(materiales.map((m) => [m.id, m]))
     const { data: saldos } = await supabase
       .from('v_saldo_material_obra')
-      .select('obra_id, material_id, cantidad_disponible')
+      .select('obra_id, material_id, cantidad_disponible, cantidad_comprometida, cantidad_en_proceso')
       .in('material_id', materialIds)
 
+    const { data: itemsPendientes } = await supabase
+      .from('solicitud_items')
+      .select('material_id, obra_id, cantidad_solicitada, solicitud:solicitudes_material!inner(id, obra_id, estado)')
+      .in('material_id', materialIds)
+      .in('solicitud.estado', ['recibida', 'pendiente'])
+
+    const pendientesMap = new Map<string, number>()
+    for (const p of itemsPendientes ?? []) {
+      const sol = Array.isArray(p.solicitud) ? p.solicitud[0] : p.solicitud
+      const itemObraId = p.obra_id || sol?.obra_id
+      if (itemObraId && p.material_id && p.cantidad_solicitada) {
+        const key = `${itemObraId}_${p.material_id}`
+        pendientesMap.set(key, (pendientesMap.get(key) ?? 0) + Number(p.cantidad_solicitada))
+      }
+    }
+
     const saldoLookup = new Map(
-      (saldos ?? []).map((s) => [`${s.obra_id}_${s.material_id}`, Number(s.cantidad_disponible ?? 0)])
+      (saldos ?? []).map((s) => {
+        const key = `${s.obra_id}_${s.material_id}`
+        const pendiente = pendientesMap.get(key) ?? 0
+        const rawDisp = Number(s.cantidad_disponible ?? 0)
+        const rawComp = Number(s.cantidad_comprometida ?? s.cantidad_en_proceso ?? 0)
+        const yaIncluido = rawComp >= pendiente && pendiente > 0
+        const neto = Math.max(0, Math.round((rawDisp - (yaIncluido ? 0 : pendiente)) * 100) / 100)
+        return [key, neto]
+      })
     )
 
     for (const item of parsed.data.items) {

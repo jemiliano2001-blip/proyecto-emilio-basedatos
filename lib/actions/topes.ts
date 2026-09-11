@@ -187,3 +187,51 @@ export async function asignarMaterialesMasivosAction(
   revalidatePath('/')
   redirect(`/obras/${obraId}`)
 }
+
+export async function eliminarMaterialObraAction(
+  obraId: string,
+  materialId: string
+): Promise<ActionResult> {
+  const session = await getSessionUsuario()
+  if (!session || !puedeGestionarTopes(session.rol)) {
+    return { error: 'No tienes permiso para eliminar materiales asignados.' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('obra_material_contratado')
+    .delete()
+    .eq('obra_id', obraId)
+    .eq('material_id', materialId)
+
+  if (error) {
+    return { error: 'No se pudo eliminar el material del proyecto. Intenta de nuevo.' }
+  }
+
+  revalidatePath(`/obras/${obraId}`)
+  revalidatePath('/')
+  return { error: null, ok: true }
+}
+
+export async function eliminarTodosMaterialesObraAction(
+  obraId: string
+): Promise<ActionResult> {
+  const session = await getSessionUsuario()
+  if (!session || !puedeGestionarTopes(session.rol)) {
+    return { error: 'No tienes permiso para eliminar los materiales del proyecto.' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('obra_material_contratado')
+    .delete()
+    .eq('obra_id', obraId)
+
+  if (error) {
+    return { error: 'No se pudieron eliminar los materiales del proyecto. Intenta de nuevo.' }
+  }
+
+  revalidatePath(`/obras/${obraId}`)
+  revalidatePath('/')
+  return { error: null, ok: true }
+}

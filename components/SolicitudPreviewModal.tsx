@@ -26,6 +26,9 @@ interface SolicitudPreviewModalProps {
   notaGeneral?: string
   items: PreviewItemData[]
   isSubmitting?: boolean
+  fecha?: string
+  folio?: string
+  ordenCompraFolio?: string
 }
 
 export function SolicitudPreviewModal({
@@ -36,8 +39,19 @@ export function SolicitudPreviewModal({
   notaGeneral,
   items,
   isSubmitting = false,
+  fecha,
+  folio,
+  ordenCompraFolio,
 }: SolicitudPreviewModalProps) {
   if (!open) return null
+
+  const displayFecha =
+    fecha ||
+    new Date().toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
 
   // Verificar si alguna partida tiene saldo insuficiente
   const itemsConAlerta = items.filter(
@@ -62,33 +76,49 @@ export function SolicitudPreviewModal({
         className="relative flex flex-col w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Encabezado formal */}
-        <header className="px-5 py-4 border-b border-gray-200 bg-slate-50/90 flex items-center justify-between shrink-0">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-100 text-teal-800">
-                VISTA PREVIA
-              </span>
+        {/* Encabezado formal con metadatos destacados */}
+        <header className="px-5 py-4 border-b border-gray-200 bg-slate-50/90 shrink-0">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-100 text-teal-800">
+                  VISTA PREVIA
+                </span>
+                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-200/80 text-navy border border-slate-300/60">
+                  {folio ? `FOLIO: ${folio}` : 'FOLIO: REQ-NUEVA'}
+                </span>
+                {ordenCompraFolio && (
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-300">
+                    OC: {ordenCompraFolio}
+                  </span>
+                )}
+              </div>
               <h2
                 id="solicitud-preview-title"
                 className="text-base font-bold text-ink"
               >
                 Solicitud para requisición de materiales
               </h2>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 mt-1">
+                <p>
+                  Proyecto: <strong className="text-ink font-semibold">{obraNombrePrincipal}</strong>
+                </p>
+                <span>·</span>
+                <p>
+                  Fecha: <strong className="text-gray-700 font-medium">{displayFecha}</strong>
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">
-              Proyecto principal: <strong className="text-ink font-semibold">{obraNombrePrincipal}</strong>
-            </p>
-          </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-ink rounded-lg hover:bg-gray-200/80 transition-colors"
-            aria-label="Cerrar vista previa"
-          >
-            <IconCerrar className="w-5 h-5" />
-          </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 text-gray-400 hover:text-ink rounded-lg hover:bg-gray-200/80 transition-colors"
+              aria-label="Cerrar vista previa"
+            >
+              <IconCerrar className="w-5 h-5" />
+            </button>
+          </div>
         </header>
 
         {/* Alerta si hay saldo insuficiente */}

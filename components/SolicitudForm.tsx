@@ -9,11 +9,7 @@ import { FormError } from '@/components/FormError'
 import { MaterialSearchCombobox } from '@/components/MaterialSearchCombobox'
 import { SubmitButton } from '@/components/SubmitButton'
 import { putSolicitudPendiente } from '@/lib/offline/db'
-import { parseMoney, parseQuantity } from '@/lib/money'
-import {
-  TIPOS_LINEA_SOLICITUD,
-  labelTipoLinea,
-} from '@/lib/validations/solicitud'
+import { parseQuantity } from '@/lib/money'
 import type { TipoLineaSolicitud } from '@/lib/types'
 import { IconPlus, IconAlerta, IconOjo } from '@/components/icons'
 import { SolicitudPreviewModal, type PreviewItemData } from '@/components/SolicitudPreviewModal'
@@ -40,15 +36,13 @@ interface SaldoItemOption {
   obra_id: string
   material_id: string
   cantidad_disponible: number
+  cantidad_comprometida?: number
 }
 
 interface ItemRow {
   key: string
-  tipo_linea: TipoLineaSolicitud
   material_id: string
   cantidad: string
-  descripcion: string
-  monto_mxn: string
   nota: string
   obra_id: string
 }
@@ -56,11 +50,8 @@ interface ItemRow {
 function nuevaFila(): ItemRow {
   return {
     key: crypto.randomUUID(),
-    tipo_linea: 'material',
     material_id: '',
     cantidad: '',
-    descripcion: '',
-    monto_mxn: '',
     nota: '',
     obra_id: '',
   }
@@ -101,25 +92,32 @@ export function SolicitudForm({
   }, [materiales])
 
   const saldoMap = useMemo(() => {
-    const map = new Map<string, number>()
+    const map = new Map<string, { disponible: number; comprometido: number }>()
     for (const s of saldos) {
-      map.set(`${s.obra_id}_${s.material_id}`, s.cantidad_disponible)
+      map.set(`${s.obra_id}_${s.material_id}`, {
+        disponible: s.cantidad_disponible,
+        comprometido: s.cantidad_comprometida ?? 0,
+      })
     }
     return map
   }, [saldos])
 
-  const getSaldoDisponible = useCallback((obraId: string, materialId: string): number | null => {
-    if (!obraId || !materialId) return null
-    const key = `${obraId}_${materialId}`
-    if (saldoMap.has(key)) {
-      return saldoMap.get(key)!
-    }
-    // Si la obra tiene datos de saldos cargados y este material no está en la tabla, su asignación es 0
-    if (saldos.length > 0) {
-      return 0
-    }
-    return null
-  }, [saldoMap, saldos.length])
+  const getSaldoInfo = useCallback(
+    (obraId: string, materialId: string): { disponible: number | null; comprometido: number | null } => {
+      if (!obraId || !materialId) return { disponible: null, comprometido: null }
+      const key = `${obraId}_${materialId}`
+      if (saldoMap.has(key)) {
+        const item = saldoMap.get(key)!
+        return { disponible: item.disponible, comprometido: item.comprometido }
+      }
+      // Si la obra tiene datos de saldos cargados y este material no está en la tabla, su asignación es 0
+      if (saldos.length > 0) {
+        return { disponible: 0, comprometido: 0 }
+      }
+      return { disponible: null, comprometido: null }
+    },
+    [saldoMap, saldos.length]
+  )
 
   const obraNombrePrincipal = useMemo(() => {
     return obras.find((o) => o.id === selectedObraId)?.nombre ?? 'Proyecto'
@@ -127,53 +125,36 @@ export function SolicitudForm({
 
   const previewItems = useMemo<PreviewItemData[]>(() => {
     return items.map((item) => {
-      if (item.tipo_linea === 'material') {
-        const mat = materialMap.get(item.material_id)
-        const effectiveObraId = multiObra ? item.obra_id : selectedObraId
-        const disp = getSaldoDisponible(effectiveObraId, item.material_id)
-        const cant = parseQuantity(item.cantidad) ?? 0
-        const monto = parseMoney(item.monto_mxn)
-        const obra = obras.find((o) => o.id === effectiveObraId)
+      const mat = materialMap.get(item.material_id)
+      const effectiveObraId = multiObra ? item.obra_id : selectedObraId
+      const info = getSaldoInfo(effectiveObraId, item.material_id)
+      const cant = parseQuantity(item.cantidad) ?? 0
+      const obra = obras.find((o) => o.id === effectiveObraId)
 
-        return {
-          tipo_linea: 'material',
-          nombre: mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'Material no seleccionado',
-          variante: mat?.variante,
-          cantidad: cant,
-          unidad_medida: mat?.unidad_medida ?? 'PZA',
-          monto_mxn: monto,
-          nota: item.nota || null,
-          obraNombre: multiObra ? obra?.nombre : null,
-          disponible: disp,
-        }
-      } else {
-        const monto = parseMoney(item.monto_mxn)
-        const effectiveObraId = multiObra ? item.obra_id : selectedObraId
-        const obra = obras.find((o) => o.id === effectiveObraId)
-
-        return {
-          tipo_linea: item.tipo_linea,
-          nombre: item.descripcion || labelTipoLinea(item.tipo_linea),
-          cantidad: 1,
-          unidad_medida: 'SRV',
-          monto_mxn: monto,
-          nota: item.nota || null,
-          obraNombre: multiObra ? obra?.nombre : null,
-        }
+      return {
+        tipo_linea: 'material',
+        nombre: mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'Material no seleccionado',
+        variante: mat?.variante,
+        cantidad: cant,
+        unidad_medida: mat?.unidad_medida ?? 'PZA',
+        monto_mxn: null,
+        nota: item.nota || null,
+        obraNombre: multiObra ? obra?.nombre : null,
+        disponible: info.disponible,
       }
     })
-  }, [items, materialMap, multiObra, selectedObraId, obras, getSaldoDisponible])
+  }, [items, materialMap, multiObra, selectedObraId, obras, getSaldoInfo])
 
   const itemsJson = useMemo(
     () =>
       JSON.stringify(
         items.map((item) => ({
-          tipo_linea: item.tipo_linea,
-          material_id: item.tipo_linea === 'material' ? item.material_id : null,
-          cantidad_solicitada: item.tipo_linea === 'material' ? item.cantidad : null,
-          descripcion: item.tipo_linea === 'material' ? null : item.descripcion,
-          monto_mxn: item.monto_mxn.trim() === '' ? null : item.monto_mxn,
-          nota: item.nota,
+          tipo_linea: 'material',
+          material_id: item.material_id || null,
+          cantidad_solicitada: item.cantidad || null,
+          descripcion: null,
+          monto_mxn: null,
+          nota: item.nota || null,
           obra_id: multiObra && item.obra_id !== '' ? item.obra_id : null,
         }))
       ),
@@ -196,7 +177,7 @@ export function SolicitudForm({
   function materialesDisponiblesPara(key: string, obraId: string) {
     const usados = new Set(
       items
-        .filter((i) => i.key !== key && i.tipo_linea === 'material' && i.material_id)
+        .filter((i) => i.key !== key && i.material_id)
         .filter((i) => !multiObra || i.obra_id === obraId)
         .map((i) => i.material_id)
     )
@@ -204,38 +185,41 @@ export function SolicitudForm({
     return materiales
       .filter((m) => !usados.has(m.id))
       .map((m) => {
-        const disp = getSaldoDisponible(effectiveObraId, m.id)
+        const info = getSaldoInfo(effectiveObraId, m.id)
         return {
           ...m,
-          disponible: disp,
-          disabled: disp !== null && disp <= 0,
+          disponible: info.disponible,
+          comprometido: info.comprometido,
         }
       })
+      // Listar únicamente materiales que cuenten con saldo disponible en la obra (> 0)
+      .filter((m) => m.disponible !== null && m.disponible > 0)
   }
 
   function validarSaldos(): string | null {
     for (const item of items) {
-      if (item.tipo_linea === 'material') {
-        if (!item.material_id) {
-          return 'Selecciona un material en todos los renglones.'
-        }
-        const effectiveObraId = multiObra ? item.obra_id : selectedObraId
-        if (!effectiveObraId) {
-          return 'Selecciona el proyecto para la requisición.'
-        }
+      if (!item.material_id) {
+        return 'Selecciona un material en todos los renglones.'
+      }
+      const effectiveObraId = multiObra ? item.obra_id : selectedObraId
+      if (!effectiveObraId) {
+        return 'Selecciona el proyecto para la requisición.'
+      }
 
-        const disp = getSaldoDisponible(effectiveObraId, item.material_id)
-        const mat = materialMap.get(item.material_id)
-        const matNombre = mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'el material'
+      const info = getSaldoInfo(effectiveObraId, item.material_id)
+      const mat = materialMap.get(item.material_id)
+      const matNombre = mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'el material'
 
-        if (disp !== null) {
-          if (disp <= 0) {
-            return `Saldo insuficiente: El material "${matNombre}" no tiene saldo disponible en este proyecto (Disponible: 0).`
-          }
-          const cantNum = parseQuantity(item.cantidad)
-          if (cantNum !== null && cantNum > disp) {
-            return `Cantidad excesiva: Para "${matNombre}", solicitas ${cantNum} pero solo hay ${disp} disponible.`
-          }
+      if (info.disponible !== null) {
+        if (info.disponible <= 0) {
+          return `Saldo insuficiente: El material "${matNombre}" no tiene saldo disponible en este proyecto (Disponible: 0).`
+        }
+        const cantNum = parseQuantity(item.cantidad)
+        if (cantNum === null || cantNum <= 0) {
+          return `Indica una cantidad válida mayor a cero para "${matNombre}".`
+        }
+        if (cantNum > info.disponible) {
+          return `Cantidad excesiva: Para "${matNombre}", solicitas ${cantNum} pero solo hay ${info.disponible} disponible.`
         }
       }
     }
@@ -282,52 +266,23 @@ export function SolicitudForm({
       }[] = []
 
       for (const item of items) {
-        if (item.tipo_linea === 'material') {
-          if (!item.material_id) {
-            setOfflineError('Selecciona material en todos los renglones de material.')
-            return
-          }
-          const cantidad = parseQuantity(item.cantidad)
-          if (cantidad === null || cantidad <= 0) {
-            setOfflineError('Revisa las cantidades: deben ser mayores a cero.')
-            return
-          }
-          let monto_mxn: number | null = null
-          if (item.monto_mxn.trim() !== '') {
-            const monto = parseMoney(item.monto_mxn)
-            if (monto === null || monto < 0) {
-              setOfflineError('Revisa los montos MXN.')
-              return
-            }
-            monto_mxn = monto
-          }
-          parsedItems.push({
-            tipo_linea: 'material',
-            material_id: item.material_id,
-            cantidad_solicitada: cantidad,
-            descripcion: null,
-            monto_mxn,
-            nota: item.nota.trim() === '' ? null : item.nota.trim(),
-          })
-        } else {
-          if (item.descripcion.trim() === '') {
-            setOfflineError('Indica descripción en flete/camiones/mantenimiento/otro.')
-            return
-          }
-          const monto = parseMoney(item.monto_mxn)
-          if (monto === null || monto <= 0) {
-            setOfflineError('Los renglones no-material requieren monto MXN mayor a cero.')
-            return
-          }
-          parsedItems.push({
-            tipo_linea: item.tipo_linea,
-            material_id: null,
-            cantidad_solicitada: null,
-            descripcion: item.descripcion.trim(),
-            monto_mxn: monto,
-            nota: item.nota.trim() === '' ? null : item.nota.trim(),
-          })
+        if (!item.material_id) {
+          setOfflineError('Selecciona un material en todos los renglones.')
+          return
         }
+        const cantidad = parseQuantity(item.cantidad)
+        if (cantidad === null || cantidad <= 0) {
+          setOfflineError('Revisa las cantidades: deben ser mayores a cero.')
+          return
+        }
+        parsedItems.push({
+          tipo_linea: 'material',
+          material_id: item.material_id,
+          cantidad_solicitada: cantidad,
+          descripcion: null,
+          monto_mxn: null,
+          nota: item.nota.trim() === '' ? null : item.nota.trim(),
+        })
       }
 
       const now = new Date().toISOString()
@@ -369,7 +324,16 @@ export function SolicitudForm({
   }
 
   return (
-    <form ref={formRef} action={handleSubmit} className="space-y-4">
+    <form
+      ref={formRef}
+      action={handleSubmit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+          e.preventDefault()
+        }
+      }}
+      className="space-y-5"
+    >
       <input type="hidden" name="items_json" value={itemsJson} />
       <FormError message={state.error ?? offlineError ?? clientValidationError} />
       {offlineMsg && (
@@ -417,20 +381,19 @@ export function SolicitudForm({
 
       <div className="space-y-3">
         <label className="block text-sm font-semibold text-ink">
-          Partidas de la requisición
+          Partidas de materiales
         </label>
 
         <div className="space-y-4">
           {items.map((item, idx) => {
             const effectiveObraId = multiObra ? item.obra_id : selectedObraId
-            const disp =
-              item.tipo_linea === 'material' && item.material_id
-                ? getSaldoDisponible(effectiveObraId, item.material_id)
-                : null
+            const info = item.material_id ? getSaldoInfo(effectiveObraId, item.material_id) : { disponible: null, comprometido: null }
+            const disp = info.disponible
             const cantNum = parseQuantity(item.cantidad)
             const sinSaldo = disp !== null && disp <= 0
             const saldoInsuficiente =
               disp !== null && disp > 0 && cantNum !== null && cantNum > disp
+            const selectedMat = materialMap.get(item.material_id)
 
             return (
               <div
@@ -452,31 +415,6 @@ export function SolicitudForm({
                       Quitar
                     </button>
                   )}
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 p-1 bg-slate-100 rounded-lg">
-                  {TIPOS_LINEA_SOLICITUD.map((tipo) => (
-                    <button
-                      key={tipo}
-                      type="button"
-                      onClick={() =>
-                        actualizarFila(item.key, {
-                          tipo_linea: tipo,
-                          material_id: '',
-                          cantidad: '',
-                          descripcion: '',
-                          monto_mxn: '',
-                        })
-                      }
-                      className={`text-xs px-2.5 py-1 rounded-md font-medium transition-colors ${
-                        item.tipo_linea === tipo
-                          ? 'bg-white text-ink shadow-sm'
-                          : 'text-gray-600 hover:text-ink'
-                      }`}
-                    >
-                      {labelTipoLinea(tipo)}
-                    </button>
-                  ))}
                 </div>
 
                 {multiObra && (
@@ -502,89 +440,54 @@ export function SolicitudForm({
                   </select>
                 )}
 
-                {item.tipo_linea === 'material' ? (
-                  <>
-                    <div>
-                      <MaterialSearchCombobox
-                        materials={materialesDisponiblesPara(item.key, item.obra_id)}
-                        value={item.material_id}
-                        onChange={(material_id) =>
-                          actualizarFila(item.key, { material_id })
-                        }
-                      />
-                      {sinSaldo && (
-                        <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5">
-                          <IconAlerta className="w-3.5 h-3.5 shrink-0" />
-                          <span>Este material no tiene presupuesto asignado o se encuentra agotado en el proyecto. No podrás enviar esta requisición.</span>
-                        </p>
-                      )}
-                      {saldoInsuficiente && (
-                        <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5">
-                          <IconAlerta className="w-3.5 h-3.5 shrink-0" />
-                          <span>La cantidad solicitada ({cantNum}) supera el saldo disponible ({disp}). Ajusta la cantidad.</span>
-                        </p>
-                      )}
-                    </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                    Material *
+                  </label>
+                  <MaterialSearchCombobox
+                    materials={materialesDisponiblesPara(item.key, item.obra_id)}
+                    value={item.material_id}
+                    onChange={(material_id) =>
+                      actualizarFila(item.key, { material_id })
+                    }
+                  />
+                  {sinSaldo && (
+                    <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5">
+                      <IconAlerta className="w-3.5 h-3.5 shrink-0" />
+                      <span>Este material no tiene presupuesto asignado o se encuentra agotado en el proyecto.</span>
+                    </p>
+                  )}
+                  {saldoInsuficiente && (
+                    <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5">
+                      <IconAlerta className="w-3.5 h-3.5 shrink-0" />
+                      <span>La cantidad solicitada ({cantNum}) supera el saldo disponible ({disp}). Ajusta la cantidad.</span>
+                    </p>
+                  )}
+                </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[11px] font-semibold text-gray-500 mb-1">
-                          Cantidad *
-                        </label>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          required
-                          placeholder="Cantidad solicitada"
-                          value={item.cantidad}
-                          onChange={(e) =>
-                            actualizarFila(item.key, { cantidad: e.target.value })
-                          }
-                          className="input-base"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-semibold text-gray-500 mb-1">
-                          Monto MXN estimado (opcional)
-                        </label>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          placeholder="0.00"
-                          value={item.monto_mxn}
-                          onChange={(e) =>
-                            actualizarFila(item.key, { monto_mxn: e.target.value })
-                          }
-                          className="input-base"
-                        />
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Descripción del gasto (flete, flete camión, mantenimiento, etc.)"
-                      value={item.descripcion}
-                      onChange={(e) =>
-                        actualizarFila(item.key, { descripcion: e.target.value })
-                      }
-                      className="input-base"
-                    />
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                    Cantidad solicitada {selectedMat ? `(${selectedMat.unidad_medida})` : ''} *
+                  </label>
+                  <div className="relative">
                     <input
                       type="text"
                       inputMode="decimal"
                       required
-                      placeholder="Monto estimado MXN *"
-                      value={item.monto_mxn}
+                      placeholder="0"
+                      value={item.cantidad}
                       onChange={(e) =>
-                        actualizarFila(item.key, { monto_mxn: e.target.value })
+                        actualizarFila(item.key, { cantidad: e.target.value })
                       }
-                      className="input-base"
+                      className="input-base pr-12"
                     />
-                  </>
-                )}
+                    {selectedMat && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 pointer-events-none">
+                        {selectedMat.unidad_medida}
+                      </span>
+                    )}
+                  </div>
+                </div>
 
                 <input
                   type="text"
@@ -604,7 +507,7 @@ export function SolicitudForm({
           className="mt-3 w-full rounded-xl border border-dashed border-rule py-3 text-sm font-semibold text-accent hover:bg-teal-50/50 inline-flex items-center justify-center gap-1.5 transition-colors"
         >
           <IconPlus className="w-4 h-4" />
-          <span>Agregar otro renglón</span>
+          <span>Agregar otro material</span>
         </button>
       </div>
 
@@ -623,7 +526,8 @@ export function SolicitudForm({
         />
       </div>
 
-      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5 pt-2">
+      {/* Botones de acción principales reubicados al final de la página */}
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 border-t border-gray-100">
         <button
           type="button"
           onClick={() => {

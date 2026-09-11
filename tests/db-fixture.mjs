@@ -22,5 +22,6 @@ export async function databaseFixture() {
   `)
   await db.exec(readFileSync('supabase/migrations/0016_integridad_proyectos_precios.sql','utf8'))
   await db.exec(readFileSync('supabase/migrations/0017_crear_solicitud_atomica.sql','utf8'))
+  await db.exec(readFileSync('supabase/migrations/0020_reserva_provisional_y_borrado_materiales.sql','utf8'))
   return db
 }
