@@ -37,7 +37,7 @@ export function TopBar({
   const desktopLinkClass = (active: boolean) =>
     `inline-flex min-h-[44px] items-center px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
       active
-        ? 'bg-slate-100 text-ink font-bold'
+        ? 'bg-ink text-white font-bold shadow-sm'
         : 'text-gray-500 hover:text-ink hover:bg-slate-50'
     }`
 

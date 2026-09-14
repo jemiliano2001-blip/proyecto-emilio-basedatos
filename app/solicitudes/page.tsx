@@ -163,6 +163,8 @@ export default async function SolicitudesPage({
         searchLabel="Proyecto principal"
         obras={obras}
         hideEstatus={colaOperativa}
+        estatusAsChips={!colaOperativa}
+        compact
       />
       {error && (
         <div className="card mb-4 border-red-300 bg-red-50 text-red-700">
@@ -194,14 +196,18 @@ export default async function SolicitudesPage({
           )}
         </div>
       )}
-      <div className="space-y-3">
+      <div className="space-y-2 md:space-y-0 md:rounded-xl md:border md:border-gray-200 md:bg-white md:divide-y md:divide-gray-100 md:overflow-hidden">
         {lista.map((s) => {
           const reqCode = `REQ-${s.id.slice(0, 8).toUpperCase()}`
           const ordenes = (s.ordenes ?? []) as { id: string; folio: string }[]
           return (
-            <Link key={s.id} href={`/solicitudes/${s.id}`} className="card-interactive block">
-              <div className="flex items-start justify-between gap-2">
-                <div>
+            <Link
+              key={s.id}
+              href={`/solicitudes/${s.id}`}
+              className="card-interactive block min-h-[72px] md:rounded-none md:border-0 md:shadow-none md:hover:bg-slate-50"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-navy border border-slate-200/70">
                       {reqCode}
@@ -215,25 +221,21 @@ export default async function SolicitudesPage({
                       </span>
                     ))}
                   </div>
-                  <p className="font-semibold text-ink">{s.obra?.nombre ?? 'Proyecto'}</p>
-                  {s.obra?.fraccionamiento && (
-                    <p className="text-xs text-gray-500">{s.obra.fraccionamiento}</p>
-                  )}
+                  <p className="font-semibold text-ink truncate">
+                    {s.obra?.nombre ?? 'Proyecto'}
+                  </p>
+                  <p className="mt-1 text-xs sm:text-sm text-gray-500 truncate">
+                    {labelMateriales(s.items.length)}
+                    {esMultiObra(s) ? ' · varios proyectos' : ''}
+                    {verTodas && s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
+                    {' · '}
+                    {new Date(s.creado_en).toLocaleString('es-MX', {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    })}
+                  </p>
                 </div>
                 <Badge variant={badgeVariant(s.estado)}>{labelEstado(s.estado)}</Badge>
-              </div>
-              <div className="mt-2.5 flex items-center justify-between text-xs sm:text-sm text-gray-500 pt-1.5 border-t border-gray-100">
-                <span>
-                  {labelMateriales(s.items.length)}
-                  {esMultiObra(s) ? ' · varios proyectos' : ''}
-                  {verTodas && s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
-                </span>
-                <span className="font-medium text-gray-600">
-                  {new Date(s.creado_en).toLocaleString('es-MX', {
-                    dateStyle: 'short',
-                    timeStyle: 'short',
-                  })}
-                </span>
               </div>
             </Link>
           )

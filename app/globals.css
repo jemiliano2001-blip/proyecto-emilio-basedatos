@@ -201,6 +201,16 @@ body {
     }
   }
 
+  .list-stack {
+    @apply rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden;
+  }
+
+  .list-row {
+    @apply flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3
+           hover:bg-slate-50 transition-colors
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent;
+  }
+
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }

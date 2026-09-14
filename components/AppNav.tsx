@@ -22,8 +22,18 @@ import {
 
 function linkClass(active: boolean): string {
   return cn(
-    'flex min-h-[44px] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[11px] font-semibold sm:text-xs transition-colors',
+    'relative flex min-h-[44px] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[11px] font-semibold sm:text-xs transition-colors',
     active ? 'text-ink font-bold' : 'text-gray-500 hover:text-ink/80'
+  )
+}
+
+function ActiveIndicator({ active }: { active: boolean }) {
+  if (!active) return null
+  return (
+    <span
+      aria-hidden
+      className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-accent"
+    />
   )
 }
 
@@ -84,6 +94,7 @@ export function AppNav({
             >
               <IconProyectos className="h-5 w-5" />
               Proyectos
+              <ActiveIndicator active={enProyectos} />
             </Link>
           )}
           <Link
@@ -93,6 +104,7 @@ export function AppNav({
           >
             <IconSolicitudes className="h-5 w-5" />
             Solicitudes
+            <ActiveIndicator active={enSolicitudes} />
           </Link>
           {mostrarRecepcion && (
             <Link
@@ -102,6 +114,7 @@ export function AppNav({
             >
               <IconRecepcion className="h-5 w-5" />
               Recepción
+              <ActiveIndicator active={enRecepcion} />
             </Link>
           )}
           {mostrarInventarioTab && (
@@ -112,6 +125,7 @@ export function AppNav({
             >
               <IconPaquete className="h-5 w-5" />
               Inventario
+              <ActiveIndicator active={enInventario} />
             </Link>
           )}
           {mostrarOrdenesTab && (
@@ -122,6 +136,7 @@ export function AppNav({
             >
               <IconOrdenes className="h-5 w-5" />
               Órdenes
+              <ActiveIndicator active={enOrdenes} />
             </Link>
           )}
           <button
@@ -134,6 +149,7 @@ export function AppNav({
           >
             <IconMas className="h-5 w-5" />
             Más
+            <ActiveIndicator active={enMas || masAbierto} />
           </button>
         </div>
       </nav>

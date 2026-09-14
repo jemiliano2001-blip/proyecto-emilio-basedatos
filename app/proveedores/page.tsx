@@ -47,42 +47,45 @@ export default async function ProveedoresPage() {
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
         {lista.map((p) => (
           <Link
             key={p.id}
             href={puedeGestionar ? `/proveedores/${p.id}` : '#'}
-            className={puedeGestionar ? 'card-interactive block' : 'card block'}
+            className={
+              puedeGestionar
+                ? 'flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-slate-50 transition-colors'
+                : 'flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3'
+            }
           >
-            <div className="flex justify-between items-start gap-2">
-              <div>
-                <p className="font-semibold text-ink">{p.nombre}</p>
-                {p.contacto && <p className="text-sm text-gray-500">{p.contacto}</p>}
-                {p.telefono && <p className="text-xs text-gray-400">{p.telefono}</p>}
-              </div>
-              {!p.activo && (
-                <Badge variant="gray">
-                  Inactivo
-                </Badge>
+            <div className="min-w-0">
+              <p className="font-semibold text-ink">{p.nombre}</p>
+              {(p.contacto || p.telefono) && (
+                <p className="text-xs text-gray-500 mt-0.5 truncate">
+                  {[p.contacto, p.telefono].filter(Boolean).join(' · ')}
+                </p>
               )}
             </div>
+            {!p.activo && <Badge variant="gray">Inactivo</Badge>}
           </Link>
         ))}
         {lista.length === 0 && !error && (
-          <EmptyState
-            icon={IconDocumento}
-            title="No hay proveedores registrados"
-            description="Agrega los proveedores autorizados para compras y cotizaciones."
-            action={
-              puedeGestionar
-                ? {
-                    label: 'Nuevo proveedor',
-                    href: '/proveedores/nuevo',
-                    icon: IconPlus,
-                  }
-                : undefined
-            }
-          />
+          <div className="p-4">
+            <EmptyState
+              icon={IconDocumento}
+              title="No hay proveedores registrados"
+              description="Agrega los proveedores autorizados para compras y cotizaciones."
+              action={
+                puedeGestionar
+                  ? {
+                      label: 'Nuevo proveedor',
+                      href: '/proveedores/nuevo',
+                      icon: IconPlus,
+                    }
+                  : undefined
+              }
+            />
+          </div>
         )}
       </div>
     </main>

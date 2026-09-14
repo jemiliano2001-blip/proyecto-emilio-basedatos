@@ -86,18 +86,26 @@ export default async function InventarioPage() {
             <Link
               key={o.id}
               href={`/inventario/${o.id}`}
-              className="card-interactive flex items-center justify-between gap-3"
+              className="card-interactive flex items-center justify-between gap-3 min-h-[72px]"
             >
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-semibold text-ink">{o.nombre}</p>
                 {o.fraccionamiento && (
                   <p className="text-xs text-gray-500">{o.fraccionamiento}</p>
                 )}
                 <p className="text-xs text-gray-500 mt-1">
                   {o.materiales} material{o.materiales === 1 ? '' : 'es'}
-                  {o.pendientes > 0
-                    ? ` · ${o.pendientes} con pendiente de instalar`
-                    : ' · todo instalado o sin pendiente'}
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-accent">
+                  Pendiente
+                </p>
+                <p className="text-2xl font-black tabular-nums text-accent leading-none">
+                  {o.pendientes}
+                </p>
+                <p className="text-[11px] text-gray-500 mt-0.5">
+                  {o.pendientes === 1 ? 'material' : 'materiales'}
                 </p>
               </div>
               <IconChevron className="h-5 w-5 text-gray-400 shrink-0" />

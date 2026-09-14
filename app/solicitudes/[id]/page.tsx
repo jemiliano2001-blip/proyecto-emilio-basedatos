@@ -9,6 +9,10 @@ import {
   RechazarSolicitudForm,
 } from '@/components/AprobarRequisicion'
 import { CancelarSolicitudButton } from '@/components/CancelarSolicitudButton'
+import {
+  SolicitudesWorkbenchNav,
+  type SolicitudNavRow,
+} from '@/components/SolicitudesWorkbenchNav'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { formatMoneyMx } from '@/lib/money'
 import {
@@ -16,6 +20,7 @@ import {
   puedeAprobarPago,
   puedeCotizar,
   puedeVerPrecios,
+  puedeVerTodasLasSolicitudes,
 } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import { labelTipoLinea } from '@/lib/validations/solicitud'
@@ -162,8 +167,36 @@ export default async function SolicitudDetallePage({
       }
     })
 
+  const verTodas = puedeVerTodasLasSolicitudes(session?.rol ?? null)
+  let colaQuery = supabase
+    .from('solicitudes_material')
+    .select('id, estado, creado_en, obra:obras(nombre)')
+    .order('creado_en', { ascending: false })
+    .limit(40)
+  if (!verTodas && session?.perfil?.id) {
+    colaQuery = colaQuery.eq('solicitante_id', session.perfil.id)
+  }
+  const { data: colaData } = await colaQuery
+  const colaNav: SolicitudNavRow[] = (
+    (colaData as unknown as {
+      id: string
+      estado: EstadoSolicitud
+      creado_en: string
+      obra: { nombre: string } | null
+    }[] | null) ?? []
+  ).map((s) => ({
+    id: s.id,
+    estado: s.estado,
+    creado_en: s.creado_en,
+    obraNombre: s.obra?.nombre ?? 'Proyecto',
+  }))
+
   return (
     <main className="page-shell">
+      <div className="lg:flex lg:items-start lg:gap-5">
+        <SolicitudesWorkbenchNav items={colaNav} activeId={detalle.id} />
+
+        <div className="min-w-0 flex-1">
       <PageHeader
         title={detalle.obra?.nombre ?? 'Proyecto'}
         description={
@@ -205,7 +238,7 @@ export default async function SolicitudDetallePage({
         {(detalle.items ?? []).map((item) => {
           const tipo = item.tipo_linea ?? 'material'
           return (
-            <div key={item.id} className="p-4 space-y-1">
+            <div key={item.id} className="p-3 sm:p-4 space-y-1">
               <p className="text-xs font-semibold text-gray-400 uppercase mb-1">
                 {labelTipoLinea(tipo)}
               </p>
@@ -285,7 +318,7 @@ export default async function SolicitudDetallePage({
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-3 mt-2 lg:sticky lg:bottom-4 lg:z-10 lg:rounded-xl lg:border lg:border-gray-200 lg:bg-white/95 lg:backdrop-blur-sm lg:p-3 lg:shadow-sm">
         {(puedeCompras || puedeFinanzas || verPrecios) && (
           <Link
             href={`/solicitudes/${detalle.id}/formato`}
@@ -318,6 +351,8 @@ export default async function SolicitudDetallePage({
           Aprobada por Compras — pendiente de pago en Finanzas.
         </p>
       )}
+        </div>
+      </div>
     </main>
   )
 }

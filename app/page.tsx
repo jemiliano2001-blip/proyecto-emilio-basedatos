@@ -79,7 +79,6 @@ export default async function HomePage({
 
   return (
     <main className="page-shell space-y-6">
-      {/* Encabezado Principal */}
       <PageHeader
         title="Panel Operativo"
         subtitle={
@@ -87,129 +86,113 @@ export default async function HomePage({
             ? `Bienvenido, ${session.perfil.nombre}`
             : 'Trazabilidad y control de materiales'
         }
-        action={
-          puedeCrear
-            ? {
-                label: 'Nuevo proyecto',
-                href: '/obras/nueva',
-                icon: <IconPlus className="w-4 h-4" />,
-              }
-            : undefined
-        }
       />
 
-      {/* Barra de Acciones Rápidas (1-Click SaaS Quick Actions) */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      {/* Una sola primary dominante; secundarias outline */}
+      <section className="space-y-2.5">
         <Link
-          href={puedeSolicitar ? '/solicitudes/nueva' : puedeConsultarOrdenes ? '/ordenes' : '/solicitudes'}
-          className="flex items-center justify-between p-3.5 rounded-xl bg-navy text-white hover:bg-slate-800 transition-colors shadow-sm group"
+          href={
+            puedeSolicitar
+              ? '/solicitudes/nueva'
+              : puedeConsultarOrdenes
+                ? '/ordenes'
+                : '/solicitudes'
+          }
+          className="btn-primary w-full justify-between gap-3 px-4 shadow-sm group"
         >
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-white/10 text-teal-300">
-              <IconSolicitudes className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="font-bold text-sm leading-none">{puedeSolicitar ? 'Nueva requisición' : puedeConsultarOrdenes ? 'Órdenes de compra' : 'Ver solicitudes'}</p>
-              <p className="text-xs text-gray-300 mt-1">{puedeSolicitar ? 'Solicitar materiales o servicios' : 'Abrir trabajo pendiente'}</p>
-            </div>
-          </div>
-          <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
+          <span className="inline-flex items-center gap-2.5 min-w-0">
+            <IconSolicitudes className="w-5 h-5 shrink-0 text-teal-300" />
+            <span className="text-left min-w-0">
+              <span className="block font-bold leading-tight">
+                {puedeSolicitar
+                  ? 'Nueva requisición'
+                  : puedeConsultarOrdenes
+                    ? 'Órdenes de compra'
+                    : 'Ver solicitudes'}
+              </span>
+              <span className="block text-xs font-medium text-white/70 mt-0.5">
+                {puedeSolicitar
+                  ? 'Solicitar materiales o servicios'
+                  : 'Abrir trabajo pendiente'}
+              </span>
+            </span>
+          </span>
+          <IconChevron className="w-4 h-4 shrink-0 opacity-70 group-hover:translate-x-0.5 transition-transform" />
         </Link>
 
-        <Link
-          href={puedeRecibir ? '/recepciones' : '/materiales'}
-          className="flex items-center justify-between p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors group"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/50">
-              <IconRecepcion className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="font-bold text-sm text-ink leading-none">{puedeRecibir ? 'Recibir material' : 'Consultar materiales'}</p>
-              <p className="text-xs text-gray-500 mt-1">{puedeRecibir ? 'Seleccionar una OC por recibir' : 'Existencias y especificaciones'}</p>
-            </div>
-          </div>
-          <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
-        </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <Link
+            href={puedeRecibir ? '/recepciones' : '/materiales'}
+            className="btn-secondary w-full justify-between gap-2 text-sm"
+          >
+            <span className="inline-flex items-center gap-2 min-w-0">
+              <IconRecepcion className="w-4 h-4 shrink-0 text-accent" />
+              <span className="truncate">
+                {puedeRecibir ? 'Recibir material' : 'Consultar materiales'}
+              </span>
+            </span>
+            <IconChevron className="w-4 h-4 shrink-0 text-gray-400" />
+          </Link>
 
-        {puedeCrear ? (
-          <Link
-            href="/obras/nueva"
-            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors group"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-800 border border-blue-200/50">
-                <IconProyectos className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="font-bold text-sm text-ink leading-none">Nuevo Proyecto</p>
-                <p className="text-[11px] text-gray-500 mt-1">Alta de obra y presupuesto</p>
-              </div>
-            </div>
-            <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        ) : (
-          <Link
-            href="/materiales"
-            className="flex items-center justify-between p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors group"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-amber-50 text-amber-800 border border-amber-200/50">
-                <IconProyectos className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="font-bold text-sm text-ink leading-none">Catálogo Materiales</p>
-                <p className="text-[11px] text-gray-500 mt-1">Consulta especificaciones</p>
-              </div>
-            </div>
-            <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        )}
+          {puedeCrear ? (
+            <Link
+              href="/obras/nueva"
+              className="btn-secondary w-full justify-between gap-2 text-sm"
+            >
+              <span className="inline-flex items-center gap-2 min-w-0">
+                <IconPlus className="w-4 h-4 shrink-0 text-accent" />
+                <span className="truncate">Nuevo proyecto</span>
+              </span>
+              <IconChevron className="w-4 h-4 shrink-0 text-gray-400" />
+            </Link>
+          ) : (
+            <Link
+              href="/materiales"
+              className="btn-secondary w-full justify-between gap-2 text-sm"
+            >
+              <span className="inline-flex items-center gap-2 min-w-0">
+                <IconProyectos className="w-4 h-4 shrink-0 text-accent" />
+                <span className="truncate">Catálogo materiales</span>
+              </span>
+              <IconChevron className="w-4 h-4 shrink-0 text-gray-400" />
+            </Link>
+          )}
+        </div>
       </section>
 
-      {/* Métricas Operativas (KPIs) */}
-      <section className="grid grid-cols-3 gap-2.5">
-        <div className="card p-3 sm:p-4 bg-gradient-to-br from-white to-slate-50 border-gray-200">
-          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Proyectos activos
+      {/* KPIs compactos — no compiten con el CTA */}
+      <section className="grid grid-cols-3 gap-2 rounded-xl border border-gray-200 bg-white p-2 sm:p-2.5">
+        <div className="px-1.5 py-1 sm:px-2 text-center sm:text-left">
+          <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+            Activos
           </span>
-          <p className="text-xl sm:text-2xl font-black text-ink mt-1 tabular-nums">
+          <p className="text-lg sm:text-xl font-black text-ink tabular-nums leading-tight mt-0.5">
             {proyectosActivos}
           </p>
         </div>
 
         <Link
           href="/solicitudes"
-          className="card-interactive p-3 sm:p-4 bg-gradient-to-br from-white to-teal-50/20 border-teal-100 block"
+          className="px-1.5 py-1 sm:px-2 text-center sm:text-left rounded-lg hover:bg-teal-50/60 transition-colors"
         >
-          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-teal-800">
+          <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-teal-800">
             Requisiciones
           </span>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-xl sm:text-2xl font-black text-teal-900 tabular-nums">
-              {requisicionesPendientes ?? '—'}
-            </span>
-            <span className="text-[11px] text-teal-700 font-medium hidden sm:inline">
-              en proceso
-            </span>
-          </div>
+          <p className="text-lg sm:text-xl font-black text-teal-900 tabular-nums leading-tight mt-0.5">
+            {requisicionesPendientes ?? '—'}
+          </p>
         </Link>
 
         <Link
           href="/recepciones"
-          className="card-interactive p-3 sm:p-4 bg-gradient-to-br from-white to-slate-50 border-gray-200 block"
+          className="px-1.5 py-1 sm:px-2 text-center sm:text-left rounded-lg hover:bg-slate-50 transition-colors"
         >
-          <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500">
+          <span className="block text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-gray-500">
             Recepciones
           </span>
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-xl sm:text-2xl font-black text-ink tabular-nums">
-              {totalRecepciones ?? '—'}
-            </span>
-            <span className="text-[11px] text-gray-400 font-medium hidden sm:inline">
-              registradas
-            </span>
-          </div>
+          <p className="text-lg sm:text-xl font-black text-ink tabular-nums leading-tight mt-0.5">
+            {totalRecepciones ?? '—'}
+          </p>
         </Link>
       </section>
 

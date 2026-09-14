@@ -86,6 +86,7 @@ export function HomeProjectsWorkbench({
   return (
     <div className="space-y-4">
       {/* Barra de control: Búsqueda y Filtro de estatus */}
+      <div className="sticky top-[calc(3.25rem+env(safe-area-inset-top,0px))] z-10 -mx-1 space-y-3 bg-paper/95 px-1 py-2 backdrop-blur-md sm:static sm:bg-transparent sm:backdrop-blur-none sm:py-0">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Buscador reactivo */}
         <div className="relative flex-1">
@@ -157,6 +158,7 @@ export function HomeProjectsWorkbench({
             Todos <span className="text-[11px] opacity-75">({counts.todas})</span>
           </button>
         </div>
+      </div>
       </div>
 
       {/* Lista de Proyectos */}

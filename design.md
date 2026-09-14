@@ -95,6 +95,9 @@ Light mode only. Campo al sol; no dark mode en este lote.
   `Escape` limpia la selección. La barra de lote siempre usa `print:hidden`.
 - Los paneles de detalle conservan el contexto de la lista, atrapan el foco y
   lo devuelven al control que los abrió.
+- Listas de oficina densas: `.list-stack` + `.list-row` (o divide-y equivalente);
+  filtros con `ListFilters` `compact` + `estatusAsChips` en colas (solicitudes, órdenes).
+- Detalle de solicitudes en `lg+`: workbench 2 columnas (`SolicitudesWorkbenchNav`).
 
 ## Exports
 

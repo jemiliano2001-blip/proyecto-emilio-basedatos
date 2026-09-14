@@ -83,12 +83,12 @@ export default async function RecepcionesPage() {
               No hay órdenes pendientes de recepción.
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
               {ordenesChecklist.map((orden) => (
                 <Link
                   key={orden.id}
                   href={`/ordenes/${orden.id}/recibir`}
-                  className="card block hover:bg-gray-50"
+                  className="block px-3.5 py-3 hover:bg-slate-50 transition-colors"
                 >
                   <div className="flex justify-between gap-2 items-baseline">
                     <p className="font-semibold text-ink">{orden.folio}</p>
@@ -96,8 +96,8 @@ export default async function RecepcionesPage() {
                       {orden.estado.replaceAll('_', ' ')}
                     </Badge>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{orden.obra_nombre}</p>
-                  <p className="text-xs text-gray-400">{orden.proveedor_nombre}</p>
+                  <p className="text-sm text-gray-600 mt-0.5 truncate">{orden.obra_nombre}</p>
+                  <p className="text-xs text-gray-500 truncate">{orden.proveedor_nombre}</p>
                 </Link>
               ))}
             </div>
@@ -113,22 +113,22 @@ export default async function RecepcionesPage() {
           {pendientes.length === 0 ? (
             <div className="card text-sm text-gray-500 py-4 text-center">Nada por revisar.</div>
           ) : (
-            <div className="space-y-2">
+            <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
               {pendientes.map((r) => (
                 <Link
                   key={r.id}
                   href={`/recepciones/${r.id}/revisar`}
-                  className="card-interactive block border-l-4 border-l-amber-500"
+                  className="block px-3.5 py-3 hover:bg-slate-50 transition-colors border-l-4 border-l-amber-500"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <p className="font-semibold text-ink">{r.orden_folio}</p>
                     <Badge variant="amber">Por revisar</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 mt-0.5">
                     {r.receptor_nombre} ·{' '}
                     {new Date(r.recibido_en).toLocaleString('es-MX')}
                   </p>
-                  <p className="text-xs text-accent font-medium mt-1">Revisar checklist</p>
+                  <p className="text-xs text-accent font-medium mt-0.5">Revisar checklist</p>
                 </Link>
               ))}
             </div>
@@ -147,12 +147,12 @@ export default async function RecepcionesPage() {
             description="Aún no hay recepciones de material en el historial."
           />
         ) : (
-          <div className="space-y-2">
+          <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
             {(puedeRevisar ? otras : rows).map((r) => (
               <Link
                 key={r.id}
                 href={`/recepciones/${r.id}`}
-                className="card-interactive block"
+                className="block px-3.5 py-3 hover:bg-slate-50 transition-colors"
               >
                 <div className="flex justify-between items-center gap-2">
                   <p className="font-semibold text-ink">{r.orden_folio}</p>
@@ -168,7 +168,7 @@ export default async function RecepcionesPage() {
                     {etiquetaEstado(r.estado)}
                   </Badge>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-gray-500 mt-0.5 tabular-nums">
                   {new Date(r.recibido_en).toLocaleString('es-MX')}
                 </p>
               </Link>

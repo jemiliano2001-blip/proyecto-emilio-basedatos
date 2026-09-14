@@ -44,7 +44,7 @@ export function PageHeader({
   }
 
   return (
-    <header className={cn('mb-6 pt-2', className)}>
+    <header className={cn('mb-4 sm:mb-6 pt-1 sm:pt-2', className)}>
       {backHref && (
         <div className="mb-2">
           <Link
@@ -60,7 +60,7 @@ export function PageHeader({
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-2xl font-bold text-ink tracking-tight">{title}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">{title}</h1>
             {badge && <div className="shrink-0">{badge}</div>}
           </div>
           {desc && (
