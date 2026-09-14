@@ -20,7 +20,6 @@ interface LineState {
   cantidad_danada: string
   estado: EstadoRecepcionItem
   observacion: string
-  incluido: boolean
 }
 
 function sugerirEstado(
@@ -56,38 +55,45 @@ export function RecepcionForm({
       .filter((item) => Number(item.pendiente) > 0)
       .map((item) => ({
         orden_item_id: item.orden_item_id,
-        cantidad_recibida: '',
+        cantidad_recibida: String(Number(item.pendiente)),
         cantidad_danada: '0',
-        estado: 'parcial',
+        estado: 'completo' as EstadoRecepcionItem,
         observacion: '',
-        incluido: true,
       }))
   )
 
   const itemsJson = useMemo(() => {
-    const payload = lines
-      .filter((line) => line.incluido)
-      .map((line) => {
-        const buena = parseQuantity(line.cantidad_recibida) ?? 0
-        const danada = parseQuantity(line.cantidad_danada) ?? 0
-        const meta = items.find((i) => i.orden_item_id === line.orden_item_id)
-        const pendiente = meta ? Number(meta.pendiente) : 0
-        return {
-          orden_item_id: line.orden_item_id,
-          cantidad_recibida: buena,
-          cantidad_danada: danada,
-          estado: line.estado || sugerirEstado(buena, danada, pendiente),
-          observacion: line.observacion.trim() === '' ? null : line.observacion.trim(),
-        }
-      })
+    const payload = lines.map((line) => {
+      const buena = parseQuantity(line.cantidad_recibida) ?? 0
+      const danada = parseQuantity(line.cantidad_danada) ?? 0
+      return {
+        orden_item_id: line.orden_item_id,
+        cantidad_recibida: buena,
+        cantidad_danada: danada,
+        estado: line.estado,
+        observacion: line.observacion.trim() === '' ? null : line.observacion.trim(),
+      }
+    })
     return JSON.stringify(payload)
-  }, [lines, items])
+  }, [lines])
 
   function actualizar(ordenItemId: string, cambios: Partial<LineState>) {
     setLines((prev) =>
-      prev.map((line) =>
-        line.orden_item_id === ordenItemId ? { ...line, ...cambios } : line
-      )
+      prev.map((line) => {
+        if (line.orden_item_id !== ordenItemId) return line
+        const next = { ...line, ...cambios }
+        if (
+          cambios.cantidad_recibida !== undefined ||
+          cambios.cantidad_danada !== undefined
+        ) {
+          const meta = items.find((i) => i.orden_item_id === ordenItemId)
+          const pendiente = meta ? Number(meta.pendiente) : 0
+          const buena = parseQuantity(next.cantidad_recibida) ?? 0
+          const danada = parseQuantity(next.cantidad_danada) ?? 0
+          next.estado = sugerirEstado(buena, danada, pendiente)
+        }
+        return next
+      })
     )
   }
 
@@ -213,128 +219,115 @@ export function RecepcionForm({
       </div>
 
       <div className="space-y-3">
+        <p className="text-sm text-gray-600">
+          Checklist obligatorio: captura cada material pendiente (cantidad, faltante o
+          daño). No se puede omitir ninguno.
+        </p>
         {lines.map((line) => {
           const meta = items.find((i) => i.orden_item_id === line.orden_item_id)
           if (!meta) return null
           return (
             <div key={line.orden_item_id} className="card space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-medium text-sm">
-                    {meta.nombre_base}
-                    {meta.variante ? (
-                      <span className="text-gray-500"> · {meta.variante}</span>
-                    ) : null}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Pedido {Number(meta.cantidad_pedida)} {meta.unidad_medida} · Ya
-                    recibido {Number(meta.cantidad_recibida_buena)} · Pendiente{' '}
-                    {Number(meta.pendiente)}
-                  </p>
-                </div>
-                <label className="flex items-center gap-2 text-sm shrink-0">
-                  <input
-                    type="checkbox"
-                    checked={line.incluido}
-                    onChange={(e) =>
-                      actualizar(line.orden_item_id, { incluido: e.target.checked })
-                    }
-                    className="h-5 w-5"
-                  />
-                  Incluir
-                </label>
+              <div>
+                <p className="font-medium text-sm">
+                  {meta.nombre_base}
+                  {meta.variante ? (
+                    <span className="text-gray-500"> · {meta.variante}</span>
+                  ) : null}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Pedido {Number(meta.cantidad_pedida)} {meta.unidad_medida} · Ya
+                  recibido {Number(meta.cantidad_recibida_buena)} · Pendiente{' '}
+                  {Number(meta.pendiente)}
+                </p>
               </div>
 
-              {line.incluido && (
-                <>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Cantidad buena
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        className="input-base"
-                        value={line.cantidad_recibida}
-                        onChange={(e) =>
-                          actualizar(line.orden_item_id, {
-                            cantidad_recibida: e.target.value,
-                          })
-                        }
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Cantidad dañada
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        className="input-base"
-                        value={line.cantidad_danada}
-                        onChange={(e) =>
-                          actualizar(line.orden_item_id, {
-                            cantidad_danada: e.target.value,
-                          })
-                        }
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Cantidad buena
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    className="input-base"
+                    value={line.cantidad_recibida}
+                    onChange={(e) =>
+                      actualizar(line.orden_item_id, {
+                        cantidad_recibida: e.target.value,
+                      })
+                    }
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Cantidad dañada
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    className="input-base"
+                    value={line.cantidad_danada}
+                    onChange={(e) =>
+                      actualizar(line.orden_item_id, {
+                        cantidad_danada: e.target.value,
+                      })
+                    }
+                    placeholder="0"
+                  />
+                </div>
+              </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Estado del renglón
-                    </label>
-                    <select
-                      className="input-base"
-                      value={line.estado}
-                      onChange={(e) =>
-                        actualizar(line.orden_item_id, {
-                          estado: e.target.value as EstadoRecepcionItem,
-                        })
-                      }
-                    >
-                      <option value="completo">Completo</option>
-                      <option value="parcial">Parcial</option>
-                      <option value="faltante">Faltante</option>
-                      <option value="danado">Dañado</option>
-                    </select>
-                  </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Estado del material
+                </label>
+                <select
+                  className="input-base"
+                  value={line.estado}
+                  onChange={(e) =>
+                    actualizar(line.orden_item_id, {
+                      estado: e.target.value as EstadoRecepcionItem,
+                    })
+                  }
+                >
+                  <option value="completo">Completo</option>
+                  <option value="parcial">Parcial</option>
+                  <option value="faltante">Faltante</option>
+                  <option value="danado">Dañado</option>
+                </select>
+              </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Observación
-                      {(line.estado === 'faltante' ||
-                        line.estado === 'danado' ||
-                        (parseQuantity(line.cantidad_danada) ?? 0) > 0) && (
-                        <span className="text-red-600"> *</span>
-                      )}
-                    </label>
-                    <textarea
-                      className="input-base"
-                      rows={2}
-                      value={line.observacion}
-                      onChange={(e) =>
-                        actualizar(line.orden_item_id, { observacion: e.target.value })
-                      }
-                      placeholder="Obligatoria si hay faltante o daño"
-                    />
-                  </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Observación
+                  {(line.estado === 'faltante' ||
+                    line.estado === 'danado' ||
+                    (parseQuantity(line.cantidad_danada) ?? 0) > 0) && (
+                    <span className="text-red-600"> *</span>
+                  )}
+                </label>
+                <textarea
+                  className="input-base"
+                  rows={2}
+                  value={line.observacion}
+                  onChange={(e) =>
+                    actualizar(line.orden_item_id, { observacion: e.target.value })
+                  }
+                  placeholder="Obligatoria si hay faltante o daño"
+                />
+              </div>
 
-                  <div className="pt-2 border-t border-gray-100">
-                    <PhotoUploadInput
-                      id={`foto_item_${line.orden_item_id}`}
-                      name={`foto_item_${line.orden_item_id}`}
-                      label="Foto del material / daño (opcional)"
-                      captureCamera={true}
-                      helpText="Evidencia fotográfica directa de este material recibido o pieza dañada."
-                    />
-                  </div>
-                </>
-              )}
+              <div className="pt-2 border-t border-gray-100">
+                <PhotoUploadInput
+                  id={`foto_item_${line.orden_item_id}`}
+                  name={`foto_item_${line.orden_item_id}`}
+                  label="Foto del material / daño (opcional)"
+                  captureCamera={true}
+                  helpText="Evidencia fotográfica directa de este material recibido o pieza dañada."
+                />
+              </div>
             </div>
           )
         })}

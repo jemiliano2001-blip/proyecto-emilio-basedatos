@@ -113,29 +113,70 @@ export async function subirFacturaOrdenAction(
 
   const archivoUrl = publicUrlData?.publicUrl || storagePath
 
-  const { error: dbError } = await supabase.from('orden_compra_facturas').insert({
-    orden_id,
-    obra_id,
-    folio_factura,
-    monto_factura,
-    archivo_path: storagePath,
-    archivo_url: archivoUrl,
-    archivo_nombre: file.name,
-    tamano_bytes: file.size,
-    tipo_archivo: tipoArchivo,
-    subido_por: session.perfil.id,
-  })
+  const { data: facturaRow, error: dbError } = await supabase
+    .from('orden_compra_facturas')
+    .insert({
+      orden_id,
+      obra_id,
+      folio_factura,
+      monto_factura,
+      archivo_path: storagePath,
+      archivo_url: archivoUrl,
+      archivo_nombre: file.name,
+      tamano_bytes: file.size,
+      tipo_archivo: tipoArchivo,
+      subido_por: session.perfil.id,
+    })
+    .select('id')
+    .single()
 
-  if (dbError) {
-    // Si falla la BD, limpiar storage
+  if (dbError || !facturaRow) {
     await supabase.storage.from('obra-documentos').remove([storagePath])
-    return { error: `No se pudo registrar la factura: ${dbError.message}` }
+    return { error: `No se pudo registrar la factura: ${dbError?.message ?? 'error desconocido'}` }
+  }
+
+  const itemIds = formData
+    .getAll('item_ids')
+    .map((v) => (typeof v === 'string' ? v.trim() : ''))
+    .filter((id) => UUID_RE.test(id))
+
+  if (itemIds.length > 0) {
+    // Solo ítems de esta OC
+    const { data: itemsOk } = await supabase
+      .from('orden_compra_items')
+      .select('id')
+      .eq('orden_id', orden_id)
+      .in('id', itemIds)
+
+    const validIds = new Set((itemsOk ?? []).map((r) => r.id))
+    const rows = itemIds
+      .filter((id) => validIds.has(id))
+      .map((orden_item_id) => ({
+        factura_id: facturaRow.id,
+        orden_item_id,
+      }))
+
+    if (rows.length > 0) {
+      const { error: linkError } = await supabase
+        .from('orden_compra_factura_items')
+        .insert(rows)
+      if (linkError) {
+        revalidatePath(`/ordenes/${orden_id}`)
+        revalidatePath('/ordenes')
+        return {
+          error: `Factura subida, pero no se ligaron materiales: ${linkError.message}. Recarga y evita subir el mismo archivo otra vez; la factura ya quedó registrada.`,
+        }
+      }
+    }
   }
 
   revalidatePath(`/ordenes/${orden_id}`)
   revalidatePath('/ordenes')
   return { error: null, ok: true }
 }
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 /**
  * Elimina una factura adjunta a una Orden de Compra.

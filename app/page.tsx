@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import {
   IconChevron,
   IconPlus,
@@ -9,6 +10,7 @@ import {
 import { PageHeader } from '@/components/PageHeader'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
+  homePathForRol,
   puedeCapturarRecepcion,
   puedeCrearSolicitudes,
   puedeGestionarObras,
@@ -25,6 +27,11 @@ export default async function HomePage({
 }) {
   const initialFilters = await searchParams
   const session = await getSessionUsuario()
+  const landing = homePathForRol(session?.rol ?? null)
+  if (landing !== '/') {
+    redirect(landing)
+  }
+
   const supabase = await createClient()
   const puedeCrear = puedeGestionarObras(session?.rol ?? null)
   const puedeSolicitar = puedeCrearSolicitudes(session?.rol ?? null)

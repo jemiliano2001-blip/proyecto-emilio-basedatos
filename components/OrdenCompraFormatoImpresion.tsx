@@ -29,11 +29,19 @@ interface OrdenFormatoProps {
     autorizado_por: string
     items: ItemImpresion[]
   }
+  volverHref?: string
+  volverLabel?: string
 }
 
-export function OrdenCompraFormatoImpresion({ orden }: OrdenFormatoProps) {
+export function OrdenCompraFormatoImpresion({
+  orden,
+  volverHref,
+  volverLabel,
+}: OrdenFormatoProps) {
   const [estiloPapel, setEstiloPapel] = useState<'amarillo' | 'blanco'>('amarillo')
   const [copiado, setCopiado] = useState(false)
+  const hrefVolver = volverHref ?? `/ordenes/${orden.id}`
+  const labelVolver = volverLabel ?? 'Volver a la orden'
 
   // Formatear fecha en español legible (ej. "2 de septiembre de 2026")
   const fechaObj = new Date(orden.creado_en)
@@ -103,11 +111,11 @@ export function OrdenCompraFormatoImpresion({ orden }: OrdenFormatoProps) {
       <div className="card max-w-4xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-3 p-4 shadow-xs border border-rule print:hidden">
         <div className="flex items-center gap-2">
           <Link
-            href={`/ordenes/${orden.id}`}
+            href={hrefVolver}
             className="text-sm font-semibold text-accent hover:underline inline-flex items-center gap-1"
           >
             <IconFlechaAtras className="w-4 h-4" />
-            <span>Volver a la orden</span>
+            <span>{labelVolver}</span>
           </Link>
           <span className="text-muted">|</span>
           <span className="text-xs font-bold px-2.5 py-1 rounded bg-ink text-white">

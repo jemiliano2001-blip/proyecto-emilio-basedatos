@@ -27,6 +27,12 @@ function mapRpcError(error: { message?: string } | null, fallback: string): stri
   if (msg.includes('no tiene presupuesto de cantidad')) {
     return 'Ese material no tiene presupuesto de cantidad en el proyecto.'
   }
+  if (msg.includes('Falta el precio cotizado')) {
+    return 'Captura el precio cotizado en todos los materiales antes de aprobar.'
+  }
+  if (msg.includes('precio cotizado no puede ser negativo')) {
+    return 'El precio cotizado no puede ser negativo.'
+  }
   if (msg.length > 0 && msg.length < 180) return msg
   return fallback
 }
@@ -518,16 +524,35 @@ export async function cancelSolicitudAction(
 export async function aprobarSolicitudComprasAction(
   solicitudId: string,
   _prev: ActionResult,
-  _formData: FormData
+  formData: FormData
 ): Promise<ActionResult> {
   const session = await getSessionUsuario()
   if (!session || !puedeAprobarCompras(session.rol)) {
     return { error: 'No tienes permiso para aprobar como Compras.' }
   }
 
+  const precios: { item_id: string; precio_unitario: number }[] = []
+  for (const [key, value] of formData.entries()) {
+    if (!key.startsWith('precio_unitario_')) continue
+    const itemId = key.slice('precio_unitario_'.length)
+    const raw = String(value).trim().replace(',', '.')
+    if (!raw) {
+      return { error: 'Captura el precio cotizado en todos los materiales.' }
+    }
+    const precio = Number(raw)
+    if (!Number.isFinite(precio) || precio < 0) {
+      return { error: 'Hay un precio cotizado inválido.' }
+    }
+    precios.push({
+      item_id: itemId,
+      precio_unitario: Math.round(precio * 100) / 100,
+    })
+  }
+
   const supabase = await createClient()
   const { error } = await supabase.rpc('aprobar_solicitud_compras', {
     p_solicitud_id: solicitudId,
+    p_precios: precios,
   })
 
   if (error) {
@@ -537,7 +562,7 @@ export async function aprobarSolicitudComprasAction(
   revalidatePath('/solicitudes')
   revalidatePath(`/solicitudes/${solicitudId}`)
   revalidatePath('/')
-  return { error: null, ok: true }
+  redirect('/solicitudes?estatus=recibida')
 }
 
 export async function aprobarPagoSolicitudAction(
@@ -551,7 +576,7 @@ export async function aprobarPagoSolicitudAction(
   }
 
   const supabase = await createClient()
-  const { data, error } = await supabase.rpc('aprobar_pago_solicitud', {
+  const { data: _ordenesEmitidas, error } = await supabase.rpc('aprobar_pago_solicitud', {
     p_solicitud_id: solicitudId,
   })
 
@@ -563,11 +588,7 @@ export async function aprobarPagoSolicitudAction(
   revalidatePath(`/solicitudes/${solicitudId}`)
   revalidatePath('/ordenes')
   revalidatePath('/')
-  const ordenes = Array.isArray(data) ? (data as string[]) : []
-  if (ordenes.length === 1) {
-    redirect(`/ordenes/${ordenes[0]}`)
-  }
-  return { error: null, ok: true }
+  redirect('/solicitudes?estatus=en_proceso')
 }
 
 export async function rechazarSolicitudAction(

@@ -15,6 +15,7 @@ import {
   puedeAprobarCompras,
   puedeAprobarPago,
   puedeCotizar,
+  puedeVerPrecios,
 } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import { labelTipoLinea } from '@/lib/validations/solicitud'
@@ -41,6 +42,7 @@ interface SolicitudDetalle {
       nombre_base: string
       variante: string | null
       unidad_medida: string
+      precio_base: number | null
     } | null
   }[]
 }
@@ -100,7 +102,7 @@ export default async function SolicitudDetallePage({
        solicitante:usuarios(nombre),
        items:solicitud_items(
          id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn, nota, obra_id,
-         material:catalogo_materiales(nombre_base, variante, unidad_medida),
+         material:catalogo_materiales(nombre_base, variante, unidad_medida, precio_base),
          item_obra:obras!solicitud_items_obra_id_fkey(nombre)
        )`
     )
@@ -137,6 +139,28 @@ export default async function SolicitudDetallePage({
     (detalle.estado === 'pendiente' ||
       detalle.estado === 'en_cotizacion' ||
       detalle.estado === 'aprobada')
+  const verPrecios = puedeVerPrecios(session?.rol ?? null)
+  const fechaVisible = new Date(detalle.creado_en).toLocaleString('es-MX', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  })
+  const materialesParaAprobar = (detalle.items ?? [])
+    .filter((i) => (i.tipo_linea ?? 'material') === 'material' && i.material)
+    .map((i) => {
+      const cant = Number(i.cantidad_solicitada ?? 0)
+      const monto = i.monto_mxn != null ? Number(i.monto_mxn) : null
+      return {
+        id: i.id,
+        nombre:
+          `${i.material!.nombre_base}${i.material!.variante ? ` · ${i.material!.variante}` : ''}`,
+        cantidad: cant,
+        unidad: i.material!.unidad_medida,
+        precioBase:
+          i.material!.precio_base != null ? Number(i.material!.precio_base) : null,
+        precioUnitarioActual:
+          monto != null && cant > 0 ? Math.round((monto / cant) * 100) / 100 : null,
+      }
+    })
 
   return (
     <main className="page-shell">
@@ -147,10 +171,10 @@ export default async function SolicitudDetallePage({
             {detalle.obra?.fraccionamiento && (
               <p className="text-gray-500 text-sm">{detalle.obra.fraccionamiento}</p>
             )}
+            <p className="text-sm font-semibold text-ink mt-2">{fechaVisible}</p>
             <div className="flex items-center gap-2 mt-1">
               <p className="text-xs text-muted">
-                {detalle.solicitante?.nombre ? `${detalle.solicitante.nombre} · ` : ''}
-                {new Date(detalle.creado_en).toLocaleString('es-MX')}
+                {detalle.solicitante?.nombre ? `${detalle.solicitante.nombre}` : 'Solicitante'}
               </p>
               <CopyButton text={detalle.id} label="Copiar ID" className="text-[11px]" />
             </div>
@@ -175,13 +199,13 @@ export default async function SolicitudDetallePage({
       )}
 
       <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-        Renglones
+        Materiales
       </h2>
-      <div className="space-y-2 mb-6">
+      <div className="card mb-6 divide-y divide-gray-100 p-0 overflow-hidden">
         {(detalle.items ?? []).map((item) => {
           const tipo = item.tipo_linea ?? 'material'
           return (
-            <div key={item.id} className="card">
+            <div key={item.id} className="p-4 space-y-1">
               <p className="text-xs font-semibold text-gray-400 uppercase mb-1">
                 {labelTipoLinea(tipo)}
               </p>
@@ -191,31 +215,50 @@ export default async function SolicitudDetallePage({
                 </p>
               )}
               {tipo === 'material' ? (
-                <div className="flex justify-between items-baseline">
+                <div className="flex justify-between items-baseline gap-3">
                   <p className="font-medium">
                     {item.material?.nombre_base}
                     {item.material?.variante && (
                       <span className="text-gray-500"> · {item.material.variante}</span>
                     )}
                   </p>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 shrink-0">
                     {item.cantidad_solicitada} {item.material?.unidad_medida}
                   </span>
                 </div>
               ) : (
-                <div className="flex justify-between items-baseline">
+                <div className="flex justify-between items-baseline gap-3">
                   <p className="font-medium">{item.descripcion}</p>
-                  {item.monto_mxn != null && (
-                    <span className="text-sm text-gray-500">
+                  {verPrecios && item.monto_mxn != null && (
+                    <span className="text-sm text-gray-500 shrink-0">
                       {formatMoneyMx(Number(item.monto_mxn))}
                     </span>
                   )}
                 </div>
               )}
-              {tipo === 'material' && item.monto_mxn != null && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Monto: {formatMoneyMx(Number(item.monto_mxn))}
-                </p>
+              {verPrecios && tipo === 'material' && (
+                <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                  {item.material?.precio_base != null &&
+                    Number(item.material.precio_base) > 0 && (
+                      <p>
+                        Precio base ref.:{' '}
+                        {formatMoneyMx(Number(item.material.precio_base))} /{' '}
+                        {item.material.unidad_medida}
+                      </p>
+                    )}
+                  {item.monto_mxn != null && Number(item.monto_mxn) > 0 && (
+                    <p>
+                      Cotizado:{' '}
+                      {formatMoneyMx(
+                        Number(item.cantidad_solicitada) > 0
+                          ? Number(item.monto_mxn) / Number(item.cantidad_solicitada)
+                          : Number(item.monto_mxn)
+                      )}{' '}
+                      / {item.material?.unidad_medida} · Total{' '}
+                      {formatMoneyMx(Number(item.monto_mxn))}
+                    </p>
+                  )}
+                </div>
               )}
               {item.nota && <p className="text-xs text-gray-400 mt-1">{item.nota}</p>}
             </div>
@@ -243,7 +286,20 @@ export default async function SolicitudDetallePage({
       )}
 
       <div className="space-y-3">
-        {puedeCompras && <AprobarComprasButton solicitudId={detalle.id} />}
+        {(puedeCompras || puedeFinanzas || verPrecios) && (
+          <Link
+            href={`/solicitudes/${detalle.id}/formato`}
+            className="btn-secondary w-full text-center block text-sm"
+          >
+            Ver plantilla OC (imprimir)
+          </Link>
+        )}
+        {puedeCompras && (
+          <AprobarComprasButton
+            solicitudId={detalle.id}
+            materiales={materialesParaAprobar}
+          />
+        )}
         {puedeFinanzas && <AprobarPagoButton solicitudId={detalle.id} />}
         {puedeRechazar && <RechazarSolicitudForm solicitudId={detalle.id} />}
         {mostrarCotizarLegacy && (

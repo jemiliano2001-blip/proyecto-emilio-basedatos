@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useTransition } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
 import { EditTopeInline } from '@/components/EditTopeInline'
@@ -62,6 +63,7 @@ export function ObraMaterialesList({
   const [modalBorrarTodo, setModalBorrarTodo] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const topePorMaterial = useMemo(
     () => new Map(topes.map((t) => [t.material_id, t])),
@@ -158,6 +160,7 @@ export function ObraMaterialesList({
         setDeleteError(res.error)
       } else {
         setMaterialAEliminar(null)
+        router.refresh()
       }
     })
   }
@@ -171,6 +174,7 @@ export function ObraMaterialesList({
         setDeleteError(res.error)
       } else {
         setModalBorrarTodo(false)
+        router.refresh()
       }
     })
   }

@@ -121,17 +121,37 @@ export default async function OrdenDetallePage({
     proveedores = (provs ?? []) as { id: string; nombre: string }[]
   }
 
-  // Cargar facturas adjuntas a la orden de compra
+  // Cargar facturas adjuntas + materiales ligados
   const { data: facturasData } = await supabase
     .from('orden_compra_facturas')
     .select(
       `id, orden_id, obra_id, folio_factura, monto_factura,
        archivo_path, archivo_url, archivo_nombre, tamano_bytes,
        tipo_archivo, subido_por, creado_en,
-       subidor:usuarios!orden_compra_facturas_subido_por_fkey(nombre)`
+       subidor:usuarios!orden_compra_facturas_subido_por_fkey(nombre),
+       items:orden_compra_factura_items(
+         orden_item_id,
+         orden_item:orden_compra_items(
+           id, cantidad,
+           material:catalogo_materiales(nombre_base, variante, unidad_medida)
+         )
+       )`
     )
     .eq('orden_id', resolvedparams.id)
     .order('creado_en', { ascending: false })
+
+  type FacturaItemJoin = {
+    orden_item_id: string
+    orden_item: {
+      id: string
+      cantidad: number
+      material: {
+        nombre_base: string
+        variante: string | null
+        unidad_medida: string
+      } | null
+    } | null
+  }
 
   type FacturaRow = {
     id: string
@@ -147,6 +167,7 @@ export default async function OrdenDetallePage({
     subido_por: string | null
     creado_en: string
     subidor: { nombre: string } | null
+    items: FacturaItemJoin[] | null
   }
 
   const facturas: OrdenCompraFactura[] = (
@@ -165,6 +186,27 @@ export default async function OrdenDetallePage({
     subido_por: f.subido_por,
     creado_en: f.creado_en,
     subido_por_nombre: f.subidor?.nombre,
+    items: (f.items ?? []).map((link) => {
+      const mat = link.orden_item?.material
+      const nombre = mat
+        ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}`
+        : 'Material'
+      return {
+        orden_item_id: link.orden_item_id,
+        nombre,
+        cantidad: Number(link.orden_item?.cantidad ?? 0),
+        unidad: mat?.unidad_medida ?? 'PZA',
+      }
+    }),
+  }))
+
+  const itemsParaFactura = (detalle.items ?? []).map((it) => ({
+    id: it.id,
+    nombre: it.material
+      ? `${it.material.nombre_base}${it.material.variante ? ` · ${it.material.variante}` : ''}`
+      : 'Material',
+    cantidad: Number(it.cantidad),
+    unidad: it.material?.unidad_medida ?? 'PZA',
   }))
 
   return (
@@ -265,7 +307,7 @@ export default async function OrdenDetallePage({
       </div>
 
       <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-        Renglones
+        Materiales
       </h2>
       <div className="space-y-2 mb-4">
         {(detalle.items ?? []).map((item) => {
@@ -313,6 +355,7 @@ export default async function OrdenDetallePage({
         totalOrden={Number(detalle.total)}
         moneda={detalle.moneda}
         facturas={facturas}
+        items={itemsParaFactura}
         puedeGestionar={puedeGestionarFacturas}
       />
 

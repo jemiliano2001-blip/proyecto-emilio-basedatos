@@ -350,6 +350,20 @@ export interface ConciliacionPresupuestoObra {
   variacion_saldo_mxn: number
 }
 
+/** Vista `v_inventario_campo_obra` — recibido en sitio vs instalado. */
+export interface InventarioCampoObra {
+  obra_id: string
+  material_id: string
+  nombre_base: string
+  variante: string | null
+  unidad_medida: string
+  categoria: string | null
+  subcategoria: string | null
+  cantidad_recibida: number
+  cantidad_instalada: number
+  cantidad_pendiente_instalar: number
+}
+
 /** Vista `v_conciliacion_obra_material` (Fase 7) — cantidades físicas. */
 export interface ConciliacionMaterialObra {
   obra_id: string
@@ -449,6 +463,20 @@ export interface OrdenCompraFactura {
   subido_por: string | null
   creado_en: string
   subido_por_nombre?: string | null
+  /** Materiales ligados a esta factura (Ola 3). */
+  items?: {
+    orden_item_id: string
+    nombre: string
+    cantidad: number
+    unidad: string
+  }[]
+}
+
+export interface OrdenItemParaFactura {
+  id: string
+  nombre: string
+  cantidad: number
+  unidad: string
 }
 
 

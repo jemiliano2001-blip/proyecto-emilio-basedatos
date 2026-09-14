@@ -158,4 +158,39 @@ export function puedeAsignarProveedorOC(rol: RolUsuario | null): boolean {
   return rol === 'acceso_total' || rol === 'compras' || rol === 'finanzas'
 }
 
+/** Tab/link Proyectos en nav: Compras y Personal no gestionan obras. */
+export function puedeVerNavProyectos(rol: RolUsuario | null): boolean {
+  return rol !== null && rol !== 'compras' && rol !== 'personal'
+}
+
+/** Landing post-login / home: colas operativas van directo a solicitudes. */
+export function homePathForRol(rol: RolUsuario | null): string {
+  if (rol === 'compras' || rol === 'personal') return '/solicitudes'
+  return '/'
+}
+
+/** Personal en campo: shell reducido (requisiciones + recepción + inventario). */
+export function esVistaCampoLimitada(rol: RolUsuario | null): boolean {
+  return rol === 'personal'
+}
+
+export function puedeReportarInstalacion(rol: RolUsuario | null): boolean {
+  return (
+    rol === 'acceso_total' ||
+    rol === 'personal' ||
+    rol === 'operacion' ||
+    rol === 'proyectos'
+  )
+}
+
+export function puedeVerInventarioCampo(rol: RolUsuario | null): boolean {
+  return (
+    rol === 'acceso_total' ||
+    rol === 'personal' ||
+    rol === 'operacion' ||
+    rol === 'proyectos' ||
+    rol === 'compras'
+  )
+}
+
 

@@ -198,14 +198,21 @@ export async function eliminarMaterialObraAction(
   }
 
   const supabase = await createClient()
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('obra_material_contratado')
     .delete()
     .eq('obra_id', obraId)
     .eq('material_id', materialId)
+    .select('id')
 
   if (error) {
     return { error: 'No se pudo eliminar el material del proyecto. Intenta de nuevo.' }
+  }
+  if (!data || data.length === 0) {
+    return {
+      error:
+        'No se eliminó el material. Puede que ya no esté asignado o falte permiso en la base (política de borrado).',
+    }
   }
 
   revalidatePath(`/obras/${obraId}`)
@@ -222,13 +229,20 @@ export async function eliminarTodosMaterialesObraAction(
   }
 
   const supabase = await createClient()
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('obra_material_contratado')
     .delete()
     .eq('obra_id', obraId)
+    .select('id')
 
   if (error) {
     return { error: 'No se pudieron eliminar los materiales del proyecto. Intenta de nuevo.' }
+  }
+  if (!data || data.length === 0) {
+    return {
+      error:
+        'No se eliminó ningún material. Revisa que haya partidas asignadas o que la política de borrado esté aplicada.',
+    }
   }
 
   revalidatePath(`/obras/${obraId}`)

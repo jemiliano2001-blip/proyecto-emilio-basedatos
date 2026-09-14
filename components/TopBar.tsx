@@ -6,7 +6,13 @@ import { NotificacionCampanita } from '@/components/NotificacionCampanita'
 import { IconSearch } from '@/components/icons'
 import { tituloDeRuta } from '@/lib/nav'
 import type { RolUsuario } from '@/lib/types'
-import { puedeVerPrecios, puedeVerRecepciones, puedeVerTraspasos } from '@/lib/roles'
+import {
+  puedeVerInventarioCampo,
+  puedeVerNavProyectos,
+  puedeVerPrecios,
+  puedeVerRecepciones,
+  puedeVerTraspasos,
+} from '@/lib/roles'
 
 export function TopBar({
   nombre,
@@ -23,6 +29,7 @@ export function TopBar({
   const enProyectos = pathname === '/' || pathname.startsWith('/obras')
   const enSolicitudes = pathname.startsWith('/solicitudes')
   const enRecepciones = pathname.startsWith('/recepciones')
+  const enInventario = pathname.startsWith('/inventario')
   const enMateriales = pathname.startsWith('/materiales')
   const enOrdenes = pathname.startsWith('/ordenes')
   const enTraspasos = pathname.startsWith('/traspasos')
@@ -69,9 +76,11 @@ export function TopBar({
 
         {/* Centro: Enlaces de navegación en Desktop (>= md) */}
         <nav className="hidden md:flex items-center gap-1">
-          <Link href="/" className={desktopLinkClass(enProyectos)}>
-            Proyectos
-          </Link>
+          {puedeVerNavProyectos(rol ?? null) && (
+            <Link href="/" className={desktopLinkClass(enProyectos)}>
+              Proyectos
+            </Link>
+          )}
           <Link href="/solicitudes" className={desktopLinkClass(enSolicitudes)}>
             Solicitudes
           </Link>
@@ -80,15 +89,24 @@ export function TopBar({
               Recepción
             </Link>
           )}
-          <Link href="/materiales" className={desktopLinkClass(enMateriales)}>
-            Catálogo
-          </Link>
+          {puedeVerInventarioCampo(rol ?? null) && (
+            <Link href="/inventario" className={desktopLinkClass(enInventario)}>
+              Inventario
+            </Link>
+          )}
+          {rol !== 'personal' && (
+            <Link href="/materiales" className={desktopLinkClass(enMateriales)}>
+              Catálogo
+            </Link>
+          )}
           {puedeVerPrecios(rol ?? null) ? (
             <Link href="/ordenes" className={desktopLinkClass(enOrdenes)}>
               Órdenes
             </Link>
           ) : null}
-          {traspasosDisponibles && puedeVerTraspasos(rol ?? null) ? (
+          {traspasosDisponibles &&
+          puedeVerTraspasos(rol ?? null) &&
+          rol !== 'personal' ? (
             <Link href="/traspasos" className={desktopLinkClass(enTraspasos)}>
               Traspasos
             </Link>

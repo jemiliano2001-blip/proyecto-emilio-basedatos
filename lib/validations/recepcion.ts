@@ -76,27 +76,27 @@ function isIsoUtc(value: string): boolean {
 
 function validateItem(raw: unknown, index: number): ValidationResult<RecepcionItemInput> {
   if (typeof raw !== 'object' || raw === null) {
-    return { ok: false, error: `Renglón ${index + 1}: datos inválidos.` }
+    return { ok: false, error: `Material ${index + 1}: datos inválidos.` }
   }
 
   const body = raw as Record<string, unknown>
   const orden_item_id = typeof body.orden_item_id === 'string' ? body.orden_item_id.trim() : ''
   if (!UUID_RE.test(orden_item_id)) {
-    return { ok: false, error: `Renglón ${index + 1}: material de la orden inválido.` }
+    return { ok: false, error: `Material ${index + 1}: material de la orden inválido.` }
   }
 
   const cantidad_recibida = parseQty(body.cantidad_recibida)
   const cantidad_danada = parseQty(body.cantidad_danada ?? 0)
   if (cantidad_recibida === null || cantidad_recibida < 0) {
-    return { ok: false, error: `Renglón ${index + 1}: cantidad buena inválida.` }
+    return { ok: false, error: `Material ${index + 1}: cantidad buena inválida.` }
   }
   if (cantidad_danada === null || cantidad_danada < 0) {
-    return { ok: false, error: `Renglón ${index + 1}: cantidad dañada inválida.` }
+    return { ok: false, error: `Material ${index + 1}: cantidad dañada inválida.` }
   }
 
   const estadoRaw = typeof body.estado === 'string' ? body.estado : ''
   if (!ESTADOS_ITEM.includes(estadoRaw as EstadoRecepcionItem)) {
-    return { ok: false, error: `Renglón ${index + 1}: estado no válido.` }
+    return { ok: false, error: `Material ${index + 1}: estado no válido.` }
   }
   const estado = estadoRaw as EstadoRecepcionItem
   const observacion = trimOrNull(body.observacion)
@@ -107,14 +107,14 @@ function validateItem(raw: unknown, index: number): ValidationResult<RecepcionIt
   ) {
     return {
       ok: false,
-      error: `Renglón ${index + 1}: indica una observación para faltante o daño.`,
+      error: `Material ${index + 1}: indica una observación para faltante o daño.`,
     }
   }
 
   if (cantidad_recibida === 0 && cantidad_danada === 0 && estado !== 'faltante') {
     return {
       ok: false,
-      error: `Renglón ${index + 1}: captura cantidad o márcalo como faltante.`,
+      error: `Material ${index + 1}: captura cantidad o márcalo como faltante.`,
     }
   }
 
@@ -159,10 +159,10 @@ export function validateRecepcionInput(raw: unknown): ValidationResult<Recepcion
   }
 
   if (!Array.isArray(body.items) || body.items.length === 0) {
-    return { ok: false, error: 'Agrega al menos un renglón al checklist.' }
+    return { ok: false, error: 'Agrega al menos un material al checklist.' }
   }
   if (body.items.length > MAX_ITEMS) {
-    return { ok: false, error: 'Demasiados renglones en una recepción.' }
+    return { ok: false, error: 'Demasiados materiales en una recepción.' }
   }
 
   const items: RecepcionItemInput[] = []
@@ -174,7 +174,7 @@ export function validateRecepcionInput(raw: unknown): ValidationResult<Recepcion
     if (vistos.has(parsedItem.data.orden_item_id)) {
       return {
         ok: false,
-        error: `Renglón ${i + 1}: ese material ya está en este checklist.`,
+        error: `Material ${i + 1}: ese material ya está en este checklist.`,
       }
     }
     vistos.add(parsedItem.data.orden_item_id)

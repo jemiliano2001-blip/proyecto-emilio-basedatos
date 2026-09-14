@@ -270,7 +270,7 @@ export function SolicitudForm({
   function validarSaldos(): string | null {
     for (const item of items) {
       if (!item.material_id) {
-        return 'Selecciona un material en todos los renglones.'
+        return 'Selecciona el material en cada partida.'
       }
       const effectiveObraId = multiObra ? item.obra_id : selectedObraId
       if (!effectiveObraId) {
@@ -338,7 +338,7 @@ export function SolicitudForm({
 
       for (const item of items) {
         if (!item.material_id) {
-          setOfflineError('Selecciona un material en todos los renglones.')
+          setOfflineError('Selecciona el material en cada partida.')
           return
         }
         const cantidad = parseQuantity(item.cantidad)
@@ -432,7 +432,7 @@ export function SolicitudForm({
             checked={multiObra}
             onChange={(e) => setMultiObra(e.target.checked)}
           />
-          Requisición a varios proyectos (cada renglón elige el suyo)
+          Requisición a varios proyectos (cada material elige el suyo)
         </label>
       )}
 
@@ -466,10 +466,10 @@ export function SolicitudForm({
 
       <div className="space-y-3">
         <label className="block text-sm font-semibold text-ink">
-          Partidas de materiales
+          Materiales
         </label>
 
-        <div className="space-y-4">
+        <div className="card space-y-0 divide-y divide-gray-100 p-0 overflow-hidden">
           {items.map((item, idx) => {
             const effectiveObraId = multiObra ? item.obra_id : selectedObraId
             const info = item.material_id ? getSaldoInfo(effectiveObraId, item.material_id) : { disponible: null, comprometido: null }
@@ -483,13 +483,13 @@ export function SolicitudForm({
             return (
               <div
                 key={item.key}
-                className={`card relative space-y-3 transition-colors ${
-                  sinSaldo || saldoInsuficiente ? 'border-red-300 bg-red-50/20' : ''
+                className={`relative space-y-3 p-4 transition-colors ${
+                  sinSaldo || saldoInsuficiente ? 'bg-red-50/40' : ''
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-gray-500 font-mono">
-                    Partida #{idx + 1}
+                    Material #{idx + 1}
                   </span>
                   {items.length > 1 && (
                     <button
@@ -515,7 +515,7 @@ export function SolicitudForm({
                     required
                   >
                     <option value="" disabled>
-                      Selecciona el proyecto de este renglón...
+                      Selecciona el proyecto de este material...
                     </option>
                     {obras.map((o) => (
                       <option key={o.id} value={o.id}>
@@ -576,7 +576,7 @@ export function SolicitudForm({
 
                 <input
                   type="text"
-                  placeholder="Nota del renglón (opcional)"
+                  placeholder="Nota (opcional)"
                   value={item.nota}
                   onChange={(e) => actualizarFila(item.key, { nota: e.target.value })}
                   className="input-base text-sm"

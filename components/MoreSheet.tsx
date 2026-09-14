@@ -7,6 +7,7 @@ import {
   IconCerrar,
   IconMateriales,
   IconOrdenes,
+  IconPaquete,
   IconProveedores,
   IconRayo,
   IconRecepcion,
@@ -24,6 +25,8 @@ export function MoreSheet({
   mostrarOrdenesEnMas,
   mostrarRecepcionEnMas,
   traspasosDisponibles,
+  vistaCampoLimitada = false,
+  puedeVerInventario = false,
 }: {
   open: boolean
   onClose: () => void
@@ -34,6 +37,8 @@ export function MoreSheet({
   mostrarOrdenesEnMas: boolean
   mostrarRecepcionEnMas: boolean
   traspasosDisponibles: boolean
+  vistaCampoLimitada?: boolean
+  puedeVerInventario?: boolean
 }) {
   const panelRef = useRef<HTMLDivElement>(null)
   const previousFocus = useRef<HTMLElement | null>(null)
@@ -100,20 +105,31 @@ export function MoreSheet({
         </div>
 
         <nav className="flex flex-col gap-1">
-          <Link href="/materiales" className={itemClass} onClick={onClose}>
-            <IconMateriales className="h-5 w-5 shrink-0" />
-            Materiales
-          </Link>
+          {!vistaCampoLimitada && (
+            <Link href="/materiales" className={itemClass} onClick={onClose}>
+              <IconMateriales className="h-5 w-5 shrink-0" />
+              Materiales
+            </Link>
+          )}
 
-          <Link href="/kits" className={itemClass} onClick={onClose}>
-            <IconRayo className="h-5 w-5 shrink-0 text-amber-500" />
-            Kits y Ensambles
-          </Link>
+          {!vistaCampoLimitada && (
+            <Link href="/kits" className={itemClass} onClick={onClose}>
+              <IconRayo className="h-5 w-5 shrink-0 text-amber-500" />
+              Kits y Ensambles
+            </Link>
+          )}
 
           {mostrarRecepcionEnMas && puedeVerRecepciones && (
             <Link href="/recepciones" className={itemClass} onClick={onClose}>
               <IconRecepcion className="h-5 w-5 shrink-0" />
               Recepción
+            </Link>
+          )}
+
+          {puedeVerInventario && (
+            <Link href="/inventario" className={itemClass} onClick={onClose}>
+              <IconPaquete className="h-5 w-5 shrink-0" />
+              Inventario en obra
             </Link>
           )}
 
@@ -136,6 +152,13 @@ export function MoreSheet({
               <IconProveedores className="h-5 w-5 shrink-0" />
               Proveedores
             </Link>
+          )}
+
+          {vistaCampoLimitada && (
+            <p className="px-3 py-2 text-sm text-gray-500">
+              En campo ves el estatus de tus requisiciones, la recepción y el
+              inventario por instalar.
+            </p>
           )}
         </nav>
 

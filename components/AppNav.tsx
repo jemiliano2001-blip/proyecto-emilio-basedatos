@@ -7,12 +7,18 @@ import { MoreSheet } from '@/components/MoreSheet'
 import {
   IconMas,
   IconOrdenes,
+  IconPaquete,
   IconProyectos,
   IconRecepcion,
   IconSolicitudes,
 } from '@/components/icons'
 import type { RolUsuario } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import {
+  esVistaCampoLimitada,
+  puedeVerInventarioCampo,
+  puedeVerNavProyectos,
+} from '@/lib/roles'
 
 function linkClass(active: boolean): string {
   return cn(
@@ -39,20 +45,28 @@ export function AppNav({
   const pathname = usePathname()
   const [masAbierto, setMasAbierto] = useState(false)
 
+  const mostrarProyectos = puedeVerNavProyectos(rol)
+  const vistaCampo = esVistaCampoLimitada(rol)
+  const mostrarInventario = puedeVerInventarioCampo(rol)
+
   const enProyectos = pathname === '/' || pathname.startsWith('/obras')
   const enSolicitudes = pathname.startsWith('/solicitudes')
   const enRecepcion =
     pathname.startsWith('/recepciones') || pathname.includes('/recibir')
+  const enInventario = pathname.startsWith('/inventario')
   const enOrdenes = pathname.startsWith('/ordenes') && !pathname.includes('/recibir')
   const enMas =
     pathname.startsWith('/materiales') ||
     pathname.startsWith('/traspasos') ||
     pathname.startsWith('/proveedores') ||
     pathname.startsWith('/notificaciones') ||
+    (!vistaCampo && enInventario) ||
     (rol === 'finanzas' ? enRecepcion : enOrdenes)
 
   const mostrarRecepcion = puedeVerRecepciones && rol !== 'finanzas'
   const mostrarOrdenesTab = rol === 'finanzas' && puedeVerPrecios
+  const mostrarInventarioTab = vistaCampo && mostrarInventario
+  const mostrarInventarioEnMas = mostrarInventario && !mostrarInventarioTab
 
   return (
     <>
@@ -62,10 +76,16 @@ export function AppNav({
         aria-label="Principal"
       >
         <div className="mx-auto flex max-w-2xl items-stretch gap-1 px-1">
-          <Link href="/" className={linkClass(enProyectos)} aria-current={enProyectos ? 'page' : undefined}>
-            <IconProyectos className="h-5 w-5" />
-            Proyectos
-          </Link>
+          {mostrarProyectos && (
+            <Link
+              href="/"
+              className={linkClass(enProyectos)}
+              aria-current={enProyectos ? 'page' : undefined}
+            >
+              <IconProyectos className="h-5 w-5" />
+              Proyectos
+            </Link>
+          )}
           <Link
             href="/solicitudes"
             className={linkClass(enSolicitudes)}
@@ -82,6 +102,16 @@ export function AppNav({
             >
               <IconRecepcion className="h-5 w-5" />
               Recepción
+            </Link>
+          )}
+          {mostrarInventarioTab && (
+            <Link
+              href="/inventario"
+              className={linkClass(enInventario)}
+              aria-current={enInventario ? 'page' : undefined}
+            >
+              <IconPaquete className="h-5 w-5" />
+              Inventario
             </Link>
           )}
           {mostrarOrdenesTab && (
@@ -111,12 +141,14 @@ export function AppNav({
         open={masAbierto}
         onClose={() => setMasAbierto(false)}
         puedeVerPrecios={puedeVerPrecios}
-        puedeVerTraspasos={puedeVerTraspasos}
-        puedeGestionarProveedores={puedeGestionarProveedores}
+        puedeVerTraspasos={puedeVerTraspasos && !vistaCampo}
+        puedeGestionarProveedores={puedeGestionarProveedores && !vistaCampo}
         puedeVerRecepciones={puedeVerRecepciones}
-        mostrarOrdenesEnMas={!mostrarOrdenesTab}
+        mostrarOrdenesEnMas={!mostrarOrdenesTab && !vistaCampo}
         mostrarRecepcionEnMas={!mostrarRecepcion}
-        traspasosDisponibles={traspasosDisponibles}
+        traspasosDisponibles={traspasosDisponibles && !vistaCampo}
+        vistaCampoLimitada={vistaCampo}
+        puedeVerInventario={mostrarInventarioEnMas}
       />
     </>
   )

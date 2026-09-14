@@ -27,6 +27,8 @@ import {
   puedeGestionarKits,
   puedeGestionarObras,
   puedeGestionarProveedores,
+  puedeVerInventarioCampo,
+  puedeVerNavProyectos,
   puedeVerPrecios,
   puedeVerRecepciones,
   puedeVerTraspasos,
@@ -75,6 +77,14 @@ const STATIC_COMMANDS: CommandItem[] = [
     href: '/recepciones',
     icon: IconRecepcion,
     keywords: 'recepcion sitio entrega revision remisiones',
+  },
+  {
+    id: 'nav-inventario',
+    label: 'Inventario en obra',
+    category: 'Navegación',
+    href: '/inventario',
+    icon: IconPaquete,
+    keywords: 'inventario instalado pendiente campo stock recibido',
   },
   {
     id: 'nav-traspasos',
@@ -177,10 +187,13 @@ const STATIC_COMMANDS: CommandItem[] = [
 ]
 
 function commandAllowed(command: CommandItem, rol: RolUsuario | null, traspasosDisponibles: boolean): boolean {
+  if (command.id === 'nav-obras') return puedeVerNavProyectos(rol)
   if (command.id === 'nav-ordenes') return puedeVerPrecios(rol)
   if (command.id === 'nav-recepciones') return puedeVerRecepciones(rol)
+  if (command.id === 'nav-inventario') return puedeVerInventarioCampo(rol)
   if (command.id === 'nav-traspasos' || command.id === 'act-nuevo-traspaso') return traspasosDisponibles && puedeVerTraspasos(rol)
   if (command.id === 'nav-proveedores' || command.id === 'act-nuevo-proveedor') return puedeGestionarProveedores(rol)
+  if (command.id === 'nav-materiales' || command.id === 'nav-kits') return rol !== 'personal'
   if (command.id === 'act-nueva-obra') return puedeGestionarObras(rol)
   if (command.id === 'act-nueva-solicitud') return puedeCrearSolicitudes(rol)
   if (command.id === 'act-nueva-recepcion') return puedeCapturarRecepcion(rol)

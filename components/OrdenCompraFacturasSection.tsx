@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useState, useTransition, useRef } from 'react'
-import type { OrdenCompraFactura } from '@/lib/types'
+import type { OrdenCompraFactura, OrdenItemParaFactura } from '@/lib/types'
 import { eliminarFacturaOrdenAction, subirFacturaOrdenAction } from '@/lib/actions/ordenes'
-import { IconClip, IconOjo, IconBasura } from '@/components/icons'
-import { CopyButton } from '@/components/CopyButton'
+import { IconClip, IconOjo, IconBasura, IconChevron } from '@/components/icons'
 import { QuickLookModal } from '@/components/QuickLookModal'
 
 interface Props {
@@ -13,6 +12,7 @@ interface Props {
   totalOrden: number
   moneda: string
   facturas: OrdenCompraFactura[]
+  items: OrdenItemParaFactura[]
   puedeGestionar: boolean
 }
 
@@ -30,17 +30,40 @@ export function OrdenCompraFacturasSection({
   totalOrden,
   moneda,
   facturas,
+  items,
   puedeGestionar,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
   const [quickLookIndex, setQuickLookIndex] = useState<number | null>(null)
   const [archivo, setArchivo] = useState<File | null>(null)
   const [folioFactura, setFolioFactura] = useState('')
-  const [montoFactura, setMontoFactura] = useState<string>(totalOrden > 0 ? String(totalOrden) : '')
+  const [montoFactura, setMontoFactura] = useState<string>(
+    totalOrden > 0 ? String(totalOrden) : ''
+  )
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set())
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function toggleExpand(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleItem(id: string) {
+    setSelectedItemIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -68,6 +91,9 @@ export function OrdenCompraFacturasSection({
       if (montoFactura.trim()) {
         formData.append('monto_factura', montoFactura.trim())
       }
+      for (const id of selectedItemIds) {
+        formData.append('item_ids', id)
+      }
 
       const res = await subirFacturaOrdenAction({ error: null }, formData)
       if (res.error) {
@@ -77,6 +103,7 @@ export function OrdenCompraFacturasSection({
         setArchivo(null)
         setFolioFactura('')
         setMontoFactura(totalOrden > 0 ? String(totalOrden) : '')
+        setSelectedItemIds(new Set())
       }
     })
   }
@@ -135,92 +162,121 @@ export function OrdenCompraFacturasSection({
           )}
         </div>
       ) : (
-        <div className="space-y-2">
-          {facturas.map((f) => (
-            <div
-              key={f.id}
-              className="card flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-gray-300 transition-colors"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold text-xs shrink-0 border border-red-100">
-                  {f.tipo_archivo === 'pdf' ? 'PDF' : f.tipo_archivo === 'xml' ? 'XML' : 'IMG'}
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-sm text-ink break-all">
-                      {f.archivo_nombre}
-                    </p>
-                    {f.folio_factura && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                        <span>Folio: {f.folio_factura}</span>
-                        <CopyButton text={f.folio_factura} label="Copiar folio factura" className="py-0 px-1 text-[10px]" />
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs text-gray-500 mt-1 flex-wrap">
-                    <span>{formatBytes(f.tamano_bytes)}</span>
-                    <span>·</span>
-                    <span>{new Date(f.creado_en).toLocaleDateString('es-MX')}</span>
-                    {f.monto_factura !== null && f.monto_factura !== undefined && (
-                      <>
-                        <span>·</span>
-                        <span className="font-semibold text-gray-700">
-                          ${Number(f.monto_factura).toLocaleString('es-MX', { minimumFractionDigits: 2 })} {moneda}
-                        </span>
-                      </>
-                    )}
-                    {f.subido_por_nombre && (
-                      <>
-                        <span>·</span>
-                        <span className="text-gray-400">Por {f.subido_por_nombre}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setQuickLookIndex(facturas.findIndex((x) => x.id === f.id))}
-                  className="btn-secondary text-xs px-3 py-1.5 inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <IconOjo className="h-3.5 w-3.5" />
-                  <span>Vista previa</span>
-                </button>
-
-                {puedeGestionar && (
+        <div className="card divide-y divide-gray-100 p-0 overflow-hidden">
+          {facturas.map((f) => {
+            const abiertos = expandedIds.has(f.id)
+            const mats = f.items ?? []
+            const titulo =
+              f.folio_factura?.trim() ||
+              f.archivo_nombre ||
+              'Factura'
+            return (
+              <div key={f.id} className="bg-white">
+                <div className="flex items-stretch gap-1">
                   <button
                     type="button"
-                    onClick={() => handleEliminar(f.id)}
-                    disabled={deletingId === f.id}
-                    className="p-2 text-gray-400 hover:text-danger rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                    title="Eliminar factura"
+                    onClick={() => toggleExpand(f.id)}
+                    className="flex-1 flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 min-h-[52px]"
+                    aria-expanded={abiertos}
                   >
-                    <IconBasura className="h-4 w-4" />
+                    <IconChevron
+                      className={`h-4 w-4 shrink-0 text-gray-400 transition-transform ${
+                        abiertos ? 'rotate-90' : ''
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <a
+                        href={f.archivo_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="font-semibold text-sm text-accent hover:underline break-all"
+                      >
+                        {titulo}
+                      </a>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {mats.length === 0
+                          ? 'Sin materiales ligados'
+                          : `${mats.length} material${mats.length === 1 ? '' : 'es'}`}
+                        {f.monto_factura != null
+                          ? ` · $${Number(f.monto_factura).toLocaleString('es-MX', {
+                              minimumFractionDigits: 2,
+                            })} ${moneda}`
+                          : ''}
+                      </p>
+                    </div>
                   </button>
+                  <div className="flex items-center gap-1 pr-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setQuickLookIndex(facturas.findIndex((x) => x.id === f.id))
+                      }
+                      className="p-2 text-gray-500 hover:text-ink rounded-lg hover:bg-gray-100"
+                      title="Vista previa"
+                    >
+                      <IconOjo className="h-4 w-4" />
+                    </button>
+                    {puedeGestionar && (
+                      <button
+                        type="button"
+                        onClick={() => handleEliminar(f.id)}
+                        disabled={deletingId === f.id}
+                        className="p-2 text-gray-400 hover:text-danger rounded-lg hover:bg-red-50 disabled:opacity-50"
+                        title="Eliminar factura"
+                      >
+                        <IconBasura className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {abiertos && (
+                  <div className="px-4 pb-3 pl-11 space-y-1.5 bg-slate-50/60">
+                    {mats.length === 0 ? (
+                      <p className="text-xs text-gray-500 py-1">
+                        Esta factura no tiene materiales asignados.
+                      </p>
+                    ) : (
+                      mats.map((m) => (
+                        <div
+                          key={m.orden_item_id}
+                          className="flex justify-between gap-2 text-sm py-1 border-b border-gray-100 last:border-0"
+                        >
+                          <span className="text-ink">{m.nombre}</span>
+                          <span className="text-gray-500 shrink-0 tabular-nums">
+                            {m.cantidad} {m.unidad}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                    <p className="text-[11px] text-gray-400 pt-1">
+                      {formatBytes(f.tamano_bytes)} ·{' '}
+                      {new Date(f.creado_en).toLocaleDateString('es-MX')}
+                      {f.subido_por_nombre ? ` · ${f.subido_por_nombre}` : ''}
+                    </p>
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
-      {/* Modal para adjuntar factura */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-gray-100">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl border border-gray-100 max-h-[90dvh] overflow-y-auto">
             <h3 className="text-lg font-bold text-ink mb-1">
               Adjuntar factura del proveedor
             </h3>
             <p className="text-xs text-gray-500 mb-4">
-              Sube el archivo PDF o fotografía de la factura correspondiente a esta orden de compra.
+              Sube el PDF y marca qué materiales cubre esta factura.
             </p>
 
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-xs border border-red-200" role="alert">
+              <div
+                className="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-xs border border-red-200"
+                role="alert"
+              >
                 {error}
               </div>
             )}
@@ -250,7 +306,7 @@ export function OrdenCompraFacturasSection({
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej. F-14329 o UUID del SAT"
+                  placeholder="Ej. F-14329"
                   value={folioFactura}
                   onChange={(e) => setFolioFactura(e.target.value)}
                   className="input-base text-sm"
@@ -269,10 +325,42 @@ export function OrdenCompraFacturasSection({
                   onChange={(e) => setMontoFactura(e.target.value)}
                   className="input-base text-sm"
                 />
-                <p className="text-[11px] text-gray-400 mt-1">
-                  Total de la orden: ${Number(totalOrden).toLocaleString('es-MX', { minimumFractionDigits: 2 })} {moneda}
-                </p>
               </div>
+
+              {items.length > 0 && (
+                <fieldset>
+                  <legend className="text-xs font-semibold text-gray-700 mb-2">
+                    Materiales de esta factura
+                  </legend>
+                  <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200 divide-y divide-gray-100">
+                    {items.map((it) => {
+                      const checked = selectedItemIds.has(it.id)
+                      return (
+                        <label
+                          key={it.id}
+                          className="flex items-start gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleItem(it.id)}
+                            className="mt-1"
+                          />
+                          <span className="min-w-0">
+                            <span className="font-medium text-ink block">{it.nombre}</span>
+                            <span className="text-xs text-gray-500">
+                              {it.cantidad} {it.unidad}
+                            </span>
+                          </span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Opcional: deja vacío si aún no repartes materiales.
+                  </p>
+                </fieldset>
+              )}
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
@@ -297,7 +385,6 @@ export function OrdenCompraFacturasSection({
         </div>
       )}
 
-      {/* Visor QuickLook Modal para facturas y comprobantes */}
       <QuickLookModal
         open={quickLookIndex !== null}
         initialIndex={quickLookIndex ?? 0}
