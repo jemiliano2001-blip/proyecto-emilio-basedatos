@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { IconCerrar } from '@/components/icons'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 export interface QuickLookItem {
   url: string
@@ -28,6 +29,8 @@ export function QuickLookModal({
 }: QuickLookModalProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [zoomNivel, setZoomNivel] = useState(1)
+  const panelRef = useRef<HTMLDivElement>(null)
+  useModalFocus(open, panelRef)
 
   useEffect(() => {
     setCurrentIndex(initialIndex)
@@ -64,12 +67,24 @@ export function QuickLookModal({
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault()
         handlePrev()
+      } else if (e.key === ' ' && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLAnchorElement)) {
+        e.preventDefault()
+        onClose()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [open, onClose, handleNext, handlePrev])
+
+  useEffect(() => {
+    if (!open) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [open])
 
   if (!open || !itemActual) return null
 
@@ -93,6 +108,8 @@ export function QuickLookModal({
       onClick={onClose}
     >
       <div
+        ref={panelRef}
+        tabIndex={-1}
         className="relative flex flex-col w-full max-w-5xl h-[92vh] max-h-[900px] bg-white rounded-2xl shadow-2xl border border-gray-200/80 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -135,7 +152,8 @@ export function QuickLookModal({
                 <button
                   type="button"
                   onClick={() => setZoomNivel((z) => Math.max(0.5, z - 0.25))}
-                  className="px-1.5 py-0.5 hover:bg-gray-200 rounded font-bold text-gray-700"
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded font-bold text-gray-700 hover:bg-gray-200"
+                  aria-label="Reducir zoom"
                   title="Reducir zoom"
                 >
                   −
@@ -146,7 +164,8 @@ export function QuickLookModal({
                 <button
                   type="button"
                   onClick={() => setZoomNivel((z) => Math.min(3, z + 0.25))}
-                  className="px-1.5 py-0.5 hover:bg-gray-200 rounded font-bold text-gray-700"
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded font-bold text-gray-700 hover:bg-gray-200"
+                  aria-label="Aumentar zoom"
                   title="Aumentar zoom"
                 >
                   +
@@ -154,7 +173,7 @@ export function QuickLookModal({
                 <button
                   type="button"
                   onClick={() => setZoomNivel(1)}
-                  className="ml-1 text-[10px] text-accent hover:underline"
+                  className="ml-1 min-h-[44px] px-2 text-xs font-semibold text-accent hover:underline"
                 >
                   Reiniciar
                 </button>
@@ -167,7 +186,7 @@ export function QuickLookModal({
               download={itemActual.nombre}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary px-2.5 py-1.5 text-xs font-semibold inline-flex items-center gap-1 min-h-[36px]"
+              className="btn-secondary px-3 py-2 text-sm font-semibold inline-flex items-center gap-1 min-h-[44px]"
               title="Descargar o abrir en pestaña externa"
             >
               <span>Descargar</span>
@@ -178,7 +197,7 @@ export function QuickLookModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-gray-400 hover:text-ink rounded-lg hover:bg-gray-200/80 transition-colors ml-1 min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className="text-gray-400 hover:text-ink rounded-lg hover:bg-gray-200/80 transition-colors ml-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Cerrar vista previa (Esc)"
               title="Cerrar vista previa (Esc)"
             >
@@ -242,7 +261,7 @@ export function QuickLookModal({
               <button
                 type="button"
                 onClick={handlePrev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-white/90 hover:bg-white text-ink rounded-full shadow-lg border border-gray-200/80 transition-transform active:scale-95"
+                className="absolute left-3 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center bg-white/90 hover:bg-white text-ink rounded-full shadow-lg border border-gray-200/80 transition-transform active:scale-95"
                 title="Elemento anterior (←)"
                 aria-label="Elemento anterior"
               >
@@ -252,7 +271,7 @@ export function QuickLookModal({
               <button
                 type="button"
                 onClick={handleNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-white/90 hover:bg-white text-ink rounded-full shadow-lg border border-gray-200/80 transition-transform active:scale-95"
+                className="absolute right-3 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center bg-white/90 hover:bg-white text-ink rounded-full shadow-lg border border-gray-200/80 transition-transform active:scale-95"
                 title="Elemento siguiente (→)"
                 aria-label="Elemento siguiente"
               >

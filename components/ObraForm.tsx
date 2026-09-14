@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import type { ActionResult } from '@/lib/actions/obras'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -9,6 +8,7 @@ import { PhotoUploadInput } from '@/components/PhotoUploadInput'
 import { IconPlus, IconBasura, IconRayo } from '@/components/icons'
 import { formatMoneyMx, parseQuantity } from '@/lib/money'
 import type { CatalogoMaterial, MaterialKitWithItems, Obra } from '@/lib/types'
+import { useOfflineUser } from '@/components/OfflineUserProvider'
 
 const initialState: ActionResult = { error: null }
 
@@ -47,8 +47,69 @@ export function ObraForm({
   allowTopesOnCreate?: boolean
   isEdit?: boolean
 }) {
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
   const [partidas, setPartidas] = useState<PartidaPresupuesto[]>([])
+  const userId = useOfflineUser()
+  const formRef = useRef<HTMLFormElement>(null)
+  const saveTimer = useRef<number | null>(null)
+  const [draftReady, setDraftReady] = useState(false)
+  const [draftRecovered, setDraftRecovered] = useState(false)
+  const [lastRemoved, setLastRemoved] = useState<{ item: PartidaPresupuesto; index: number } | null>(null)
+  const undoTimer = useRef<number | null>(null)
+  const draftEnabled = allowTopesOnCreate && !isEdit
+  const draftKey = `obra_track_project_draft_${userId ?? 'anon'}`
+
+  function clearDraft() {
+    window.localStorage.removeItem(draftKey)
+    setDraftRecovered(false)
+  }
+
+  function saveDraft() {
+    if (!draftEnabled || !draftReady || !formRef.current) return
+    if (saveTimer.current) window.clearTimeout(saveTimer.current)
+    saveTimer.current = window.setTimeout(() => {
+      const form = formRef.current
+      if (!form) return
+      const fields: Record<string, string> = {}
+      const formData = new FormData(form)
+      for (const [key, value] of formData.entries()) {
+        if (typeof value === 'string' && key !== 'topes_json' && key !== 'presupuesto_mxn') fields[key] = value
+      }
+      window.localStorage.setItem(draftKey, JSON.stringify({ fields, partidas }))
+    }, 250)
+  }
+
+  useEffect(() => {
+    if (!draftEnabled || !userId || !formRef.current) {
+      setDraftReady(true)
+      return
+    }
+    try {
+      const raw = window.localStorage.getItem(draftKey)
+      if (raw) {
+        const draft = JSON.parse(raw) as { fields?: Record<string, string>; partidas?: PartidaPresupuesto[] }
+        for (const [name, value] of Object.entries(draft.fields ?? {})) {
+          const field = formRef.current.elements.namedItem(name)
+          if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement) field.value = value
+        }
+        if (Array.isArray(draft.partidas)) {
+          const valid = draft.partidas.filter((item) => item && typeof item.key === 'string')
+          if (valid.length > 0) setPartidas(valid)
+        }
+        setDraftRecovered(true)
+      }
+    } catch {
+      window.localStorage.removeItem(draftKey)
+    }
+    setDraftReady(true)
+  }, [draftEnabled, draftKey, userId])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) window.clearTimeout(saveTimer.current)
+      if (undoTimer.current) window.clearTimeout(undoTimer.current)
+    }
+  }, [])
 
   // Modal / Selector de Kits
   const [selectedKitId, setSelectedKitId] = useState<string>('')
@@ -118,7 +179,23 @@ export function ObraForm({
   }
 
   function quitarPartida(key: string) {
-    setPartidas((prev) => prev.filter((t) => t.key !== key))
+    const index = partidas.findIndex((item) => item.key === key)
+    if (index < 0) return
+    setLastRemoved({ item: partidas[index], index })
+    setPartidas((prev) => prev.filter((item) => item.key !== key))
+    if (undoTimer.current) window.clearTimeout(undoTimer.current)
+    undoTimer.current = window.setTimeout(() => setLastRemoved(null), 5000)
+  }
+
+  function undoRemove() {
+    if (!lastRemoved) return
+    setPartidas((current) => {
+      const next = [...current]
+      next.splice(Math.min(lastRemoved.index, next.length), 0, lastRemoved.item)
+      return next
+    })
+    setLastRemoved(null)
+    if (undoTimer.current) window.clearTimeout(undoTimer.current)
   }
 
   function materialesDisponibles(key: string) {
@@ -208,7 +285,15 @@ export function ObraForm({
   const selectedKitObj = kits.find((k) => k.id === selectedKitId)
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form
+      ref={formRef}
+      action={(formData) => {
+        if (draftEnabled) clearDraft()
+        formAction(formData)
+      }}
+      onInput={saveDraft}
+      className="space-y-6"
+    >
       <input
         type="hidden"
         name="topes_json"
@@ -225,6 +310,18 @@ export function ObraForm({
       />
 
       <FormError message={state.error} />
+      {draftRecovered && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900" role="status">
+          <span>Recuperamos el borrador de este nuevo proyecto.</span>
+          <button type="button" className="min-h-[44px] px-3 font-semibold underline" onClick={clearDraft}>Descartar borrador</button>
+        </div>
+      )}
+      {lastRemoved && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm" role="status">
+          <span>Partida eliminada.</span>
+          <button type="button" className="min-h-[44px] px-3 font-semibold text-accent underline" onClick={undoRemove}>Deshacer</button>
+        </div>
+      )}
 
       {/* SECCIÓN 1: DATOS GENERALES DEL PROYECTO */}
       <div className="card space-y-4">
@@ -347,7 +444,7 @@ export function ObraForm({
                 <button
                   type="button"
                   onClick={() => setMostrarModalKit(true)}
-                  className="btn-secondary text-xs px-3 py-2 min-h-[38px] text-teal-800 border-teal-300 hover:bg-teal-50 flex items-center gap-1.5"
+                  className="btn-secondary text-sm px-3 py-2 min-h-[44px] text-teal-800 border-teal-300 hover:bg-teal-50 flex items-center gap-1.5"
                 >
                   <IconRayo className="w-3.5 h-3.5 text-amber-500" />
                   <span>Cargar Kit / Ensamble</span>
@@ -356,7 +453,7 @@ export function ObraForm({
               <button
                 type="button"
                 onClick={agregarMaterialIndividual}
-                className="btn-primary text-xs px-3 py-2 min-h-[38px] flex items-center gap-1.5"
+                className="btn-primary text-sm px-3 py-2 min-h-[44px] flex items-center gap-1.5"
                 disabled={materiales.length === 0}
               >
                 <IconPlus className="w-3.5 h-3.5" />
@@ -465,7 +562,7 @@ export function ObraForm({
                 <button
                   type="button"
                   onClick={() => setMostrarModalKit(false)}
-                  className="btn-secondary text-xs px-3 py-1.5 min-h-[34px]"
+                  className="btn-secondary text-sm px-3 py-2 min-h-[44px]"
                 >
                   Cancelar
                 </button>
@@ -473,7 +570,7 @@ export function ObraForm({
                   type="button"
                   onClick={aplicarKit}
                   disabled={!selectedKitId}
-                  className="btn-primary text-xs px-4 py-1.5 min-h-[34px] bg-teal-800"
+                  className="btn-primary text-sm px-4 py-2 min-h-[44px] bg-teal-800"
                 >
                   Insertar partidas del Kit
                 </button>

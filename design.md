@@ -57,6 +57,8 @@ Light mode only. Campo al sol; no dark mode en este lote.
 - Silent success (el dato nuevo en pantalla basta). Sin toasts celebratorios.
 - Loading en el botón que disparó la acción (`aria-busy`).
 - Confirmación solo en destructivos (cerrar proyecto).
+- Eliminaciones locales reversibles ofrecen **Deshacer** durante 5 segundos.
+- Formularios largos de alta guardan un borrador local aislado por usuario.
 
 ## CTA voice
 
@@ -83,6 +85,16 @@ Light mode only. Campo al sol; no dark mode en este lote.
 
 - Acciones primarias según rol.
 - Densidad de datos (conciliación puede ser `max-w-4xl`).
+
+## Data productivity
+
+- Filtros compartibles se reflejan en la URL y conservan el contexto al volver.
+- El catálogo permite densidad cómoda/compacta, mostrar/ocultar fotografías y
+  guardar vistas localmente.
+- La selección múltiple usa checkbox visible; `Shift + clic` amplía un rango y
+  `Escape` limpia la selección. La barra de lote siempre usa `print:hidden`.
+- Los paneles de detalle conservan el contexto de la lista, atrapan el foco y
+  lo devuelven al control que los abrió.
 
 ## Exports
 

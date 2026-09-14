@@ -120,7 +120,7 @@ export default async function KitsPage() {
                 {puedeGestionar && (
                   <Link
                     href={`/kits/${kit.id}/editar`}
-                    className="btn-secondary text-xs px-2.5 py-1 min-h-[32px] inline-flex items-center"
+                    className="btn-secondary text-sm px-2.5 py-2 min-h-[44px] inline-flex items-center"
                   >
                     Editar
                   </Link>

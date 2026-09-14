@@ -18,6 +18,20 @@ import {
 } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { ejecutarConCache } from '@/lib/cache-query-cliente'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
+import {
+  puedeCapturarRecepcion,
+  puedeCrearSolicitudes,
+  puedeGestionarCatalogo,
+  puedeGestionarKits,
+  puedeGestionarObras,
+  puedeGestionarProveedores,
+  puedeVerPrecios,
+  puedeVerRecepciones,
+  puedeVerTraspasos,
+} from '@/lib/roles'
+import type { RolUsuario } from '@/lib/types'
 
 interface CommandItem {
   id: string
@@ -124,7 +138,7 @@ const STATIC_COMMANDS: CommandItem[] = [
     id: 'act-nueva-recepcion',
     label: 'Recibir material en obra',
     category: 'Acciones Rápidas',
-    href: '/recepciones/nueva',
+    href: '/recepciones',
     icon: IconPlus,
     keywords: 'remision cotejo captura llegada obra',
   },
@@ -162,17 +176,43 @@ const STATIC_COMMANDS: CommandItem[] = [
   },
 ]
 
-export function CommandPalette() {
+function commandAllowed(command: CommandItem, rol: RolUsuario | null, traspasosDisponibles: boolean): boolean {
+  if (command.id === 'nav-ordenes') return puedeVerPrecios(rol)
+  if (command.id === 'nav-recepciones') return puedeVerRecepciones(rol)
+  if (command.id === 'nav-traspasos' || command.id === 'act-nuevo-traspaso') return traspasosDisponibles && puedeVerTraspasos(rol)
+  if (command.id === 'nav-proveedores' || command.id === 'act-nuevo-proveedor') return puedeGestionarProveedores(rol)
+  if (command.id === 'act-nueva-obra') return puedeGestionarObras(rol)
+  if (command.id === 'act-nueva-solicitud') return puedeCrearSolicitudes(rol)
+  if (command.id === 'act-nueva-recepcion') return puedeCapturarRecepcion(rol)
+  if (command.id === 'act-nuevo-material') return puedeGestionarCatalogo(rol)
+  if (command.id === 'act-nuevo-kit') return puedeGestionarKits(rol)
+  return true
+}
+
+export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: RolUsuario | null; userId: string; traspasosDisponibles: boolean }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [dynamicResults, setDynamicResults] = useState<CommandItem[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [searchError, setSearchError] = useState(false)
 
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const debounceTimer = useRef<NodeJS.Timeout | null>(null)
+  const requestSequence = useRef(0)
+  useModalFocus(open, dialogRef, inputRef)
+
+  useEffect(() => {
+    if (!open) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [open])
 
   // Atajo global Cmd+K o Ctrl+K
   useEffect(() => {
@@ -201,6 +241,7 @@ export function CommandPalette() {
       setQuery('')
       setSelectedIndex(0)
       setDynamicResults([])
+      setSearchError(false)
       setTimeout(() => inputRef.current?.focus(), 50)
     }
   }, [open])
@@ -208,9 +249,12 @@ export function CommandPalette() {
   // Búsqueda dinámica en Supabase para proyectos y materiales
   useEffect(() => {
     const trimmed = query.trim().toLowerCase()
-    if (trimmed.length < 2) {
+    const safeTerm = trimmed.replace(/[%_,().]/g, ' ').replace(/\s+/g, ' ').trim()
+    if (safeTerm.length < 2) {
+      requestSequence.current += 1
       setDynamicResults([])
       setIsSearching(false)
+      setSearchError(false)
       return
     }
 
@@ -219,68 +263,58 @@ export function CommandPalette() {
     }
 
     setIsSearching(true)
+    setSearchError(false)
+    const requestId = ++requestSequence.current
     debounceTimer.current = setTimeout(async () => {
       try {
-        const supabase = createClient()
-
-        const [obrasRes, matsRes] = await Promise.allSettled([
-          supabase
-            .from('obras')
-            .select('id, nombre, cliente')
-            .or(`nombre.ilike.%${trimmed}%,cliente.ilike.%${trimmed}%`)
-            .limit(4),
-          supabase
-            .from('catalogo_materiales')
-            .select('id, nombre_base, variante, unidad_medida')
-            .ilike('nombre_base', `%${trimmed}%`)
-            .limit(5),
-        ])
-
-        const items: CommandItem[] = []
-
-        if (obrasRes.status === 'fulfilled' && obrasRes.value.data) {
-          for (const o of obrasRes.value.data) {
-            items.push({
-              id: `obra-${o.id}`,
-              label: `${o.nombre}${o.cliente ? ` (${o.cliente})` : ''}`,
-              category: 'Proyectos',
-              href: `/obras/${o.id}`,
-              icon: IconProyectos,
-            })
-          }
-        }
-
-        if (matsRes.status === 'fulfilled' && matsRes.value.data) {
-          for (const m of matsRes.value.data) {
-            items.push({
-              id: `mat-${m.id}`,
-              label: `${m.nombre_base}${m.variante ? ` · ${m.variante}` : ''} (${m.unidad_medida})`,
-              category: 'Materiales',
-              href: `/materiales/${m.id}`,
-              icon: IconPaquete,
-            })
-          }
-        }
-
-        setDynamicResults(items)
+        const items = await ejecutarConCache(
+          `command:${userId}:${safeTerm}`,
+          async () => {
+            const supabase = createClient()
+            const [obrasRes, matsRes] = await Promise.all([
+              supabase.from('obras').select('id, nombre, cliente').or(`nombre.ilike.%${safeTerm}%,cliente.ilike.%${safeTerm}%`).limit(4),
+              supabase.from('catalogo_materiales').select('id, nombre_base, variante, unidad_medida').ilike('nombre_base', `%${safeTerm}%`).limit(5),
+            ])
+            if (obrasRes.error || matsRes.error) throw obrasRes.error ?? matsRes.error
+            return [
+              ...(obrasRes.data ?? []).map((o) => ({
+                id: `obra-${o.id}`,
+                label: `${o.nombre}${o.cliente ? ` (${o.cliente})` : ''}`,
+                category: 'Proyectos' as const,
+                href: `/obras/${o.id}`,
+                icon: IconProyectos,
+              })),
+              ...(matsRes.data ?? []).map((m) => ({
+                id: `mat-${m.id}`,
+                label: `${m.nombre_base}${m.variante ? ` · ${m.variante}` : ''} (${m.unidad_medida})`,
+                category: 'Materiales' as const,
+                href: `/materiales/${m.id}`,
+                icon: IconPaquete,
+              })),
+            ]
+          },
+          60_000
+        )
+        if (requestId === requestSequence.current) setDynamicResults(items)
       } catch {
-        // En caso de fallo de red en búsqueda dinámica, continuar con estáticos
+        if (requestId === requestSequence.current) setSearchError(true)
       } finally {
-        setIsSearching(false)
+        if (requestId === requestSequence.current) setIsSearching(false)
       }
     }, 180)
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current)
     }
-  }, [query])
+  }, [query, userId])
 
   // Filtrado de comandos estáticos y unión con dinámicos
   const filtered = useMemo(() => {
     const q = (query || '').toLowerCase().trim()
+    const allowedCommands = STATIC_COMMANDS.filter((command) => commandAllowed(command, rol, traspasosDisponibles))
     const staticFiltered = !q
-      ? STATIC_COMMANDS
-      : STATIC_COMMANDS.filter(
+      ? allowedCommands
+      : allowedCommands.filter(
           (c) =>
             (c.label || '').toLowerCase().includes(q) ||
             (c.category || '').toLowerCase().includes(q) ||
@@ -289,7 +323,7 @@ export function CommandPalette() {
 
     // Resultados dinámicos primero si existen
     return [...dynamicResults, ...staticFiltered]
-  }, [query, dynamicResults])
+  }, [query, dynamicResults, rol, traspasosDisponibles])
 
   // Ajustar selectedIndex al filtrar
   useEffect(() => {
@@ -343,6 +377,8 @@ export function CommandPalette() {
 
       {/* Modal Dialog */}
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="Buscador global y comandos"
@@ -359,6 +395,8 @@ export function CommandPalette() {
             onKeyDown={handleInputKeyDown}
             placeholder="Escribe para buscar proyectos, materiales o comandos…"
             className="w-full bg-transparent text-sm text-ink placeholder-gray-400 outline-none font-medium"
+            aria-controls="command-results"
+            aria-activedescendant={filtered[selectedIndex] ? `command-${filtered[selectedIndex].id}` : undefined}
           />
           {isSearching && (
             <span className="text-[10px] text-gray-400 font-mono animate-pulse">
@@ -369,7 +407,8 @@ export function CommandPalette() {
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="text-xs text-gray-400 hover:text-gray-600 p-1"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-xs text-gray-400 hover:text-gray-600"
+              aria-label="Limpiar búsqueda"
             >
               <IconCerrar className="w-4 h-4" />
             </button>
@@ -382,11 +421,16 @@ export function CommandPalette() {
         {/* Lista de Resultados */}
         <div
           ref={listRef}
+          id="command-results"
           role="listbox"
           aria-label="Resultados de búsqueda"
           className="overflow-y-auto p-2 divide-y divide-gray-100 flex-1"
         >
-          {filtered.length === 0 ? (
+          {searchError ? (
+            <div className="py-8 text-center text-sm text-red-700" role="status">
+              No se pudo completar la búsqueda en línea. Revisa tu conexión e intenta de nuevo.
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="py-8 text-center text-xs text-gray-400">
               No se encontraron coincidencias para &quot;{query}&quot;.
             </div>
@@ -397,6 +441,7 @@ export function CommandPalette() {
               return (
                 <div
                   key={item.id}
+                  id={`command-${item.id}`}
                   role="option"
                   aria-selected={isActive}
                   data-active={isActive ? 'true' : 'false'}

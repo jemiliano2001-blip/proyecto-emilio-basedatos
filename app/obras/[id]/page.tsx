@@ -275,7 +275,7 @@ export default async function ObraDetallePage({
           {puedeTopes && (
             <Link
               href={`/obras/${resolvedparams.id}/asignar-materiales`}
-              className="btn-primary shrink-0 text-xs px-3 py-2 min-h-[38px] inline-flex items-center gap-1.5"
+              className="btn-primary shrink-0 text-sm px-3 py-2 min-h-[44px] inline-flex items-center gap-1.5"
             >
               <IconPlus className="w-3.5 h-3.5" />
               <span>Asignar materiales</span>

@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useState, useTransition } from 'react'
 import {
   uploadObraDocumentoAction,
   deleteObraDocumentoAction,
@@ -53,7 +52,7 @@ export function ObraDocumentos({
   puedeGestionar?: boolean
   puedeEliminar?: boolean
 }) {
-  const [state, formAction] = useFormState(uploadObraDocumentoAction, initialState)
+  const [state, formAction] = useActionState(uploadObraDocumentoAction, initialState)
   const [mostrandoSubida, setMostrandoSubida] = useState(false)
   const [quickLookIndex, setQuickLookIndex] = useState<number | null>(null)
   const [isDeleting, startDeleteTransition] = useTransition()
@@ -208,7 +207,7 @@ export function ObraDocumentos({
               <button
                 type="button"
                 onClick={() => setQuickLookIndex(documentos.findIndex((d) => d.id === doc.id))}
-                className="btn-secondary text-xs px-3 py-2 min-h-[36px] flex items-center gap-1 text-accent border-teal-300 hover:bg-teal-50 cursor-pointer"
+                className="btn-secondary text-sm px-3 py-2 min-h-[44px] flex items-center gap-1 text-accent border-teal-300 hover:bg-teal-50 cursor-pointer"
               >
                 <span>Vista previa</span>
                 <span aria-hidden="true">↗</span>
@@ -217,7 +216,7 @@ export function ObraDocumentos({
               <a
                 href={doc.archivo_url}
                 download={doc.nombre.endsWith('.pdf') ? doc.nombre : `${doc.nombre}.pdf`}
-                className="btn-secondary text-xs px-3 py-2 min-h-[36px]"
+                className="btn-secondary text-sm px-3 py-2 min-h-[44px]"
               >
                 Descargar
               </a>
@@ -227,7 +226,7 @@ export function ObraDocumentos({
                   type="button"
                   onClick={() => handleDelete(doc.id, doc.nombre)}
                   disabled={isDeleting && deletingId === doc.id}
-                  className="text-xs text-red-600 hover:text-red-800 font-medium px-2 py-1 min-h-[36px]"
+                  className="text-sm text-red-600 hover:text-red-800 font-medium px-3 py-2 min-h-[44px]"
                   title="Eliminar documento"
                 >
                   {isDeleting && deletingId === doc.id ? 'Borrando…' : 'Eliminar'}

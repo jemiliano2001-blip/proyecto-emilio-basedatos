@@ -3,10 +3,13 @@
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 interface DialogContextValue {
   open: boolean
   setOpen: (open: boolean) => void
+  titleId: string
+  descriptionId: string
 }
 
 const DialogContext = React.createContext<DialogContextValue | null>(null)
@@ -26,6 +29,8 @@ export interface DialogProps {
 }
 
 export function Dialog({ open: controlledOpen, onOpenChange, children }: DialogProps) {
+  const titleId = React.useId()
+  const descriptionId = React.useId()
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : uncontrolledOpen
@@ -40,7 +45,7 @@ export function Dialog({ open: controlledOpen, onOpenChange, children }: DialogP
     [isControlled, onOpenChange]
   )
 
-  return <DialogContext.Provider value={{ open, setOpen }}>{children}</DialogContext.Provider>
+  return <DialogContext.Provider value={{ open, setOpen, titleId, descriptionId }}>{children}</DialogContext.Provider>
 }
 
 export interface DialogTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -69,8 +74,10 @@ export interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement>
 }
 
 export function DialogContent({ className, children, onClose, ...props }: DialogContentProps) {
-  const { open, setOpen } = useDialog()
+  const { open, setOpen, titleId, descriptionId } = useDialog()
   const [mounted, setMounted] = React.useState(false)
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  useModalFocus(open, contentRef)
 
   React.useEffect(() => {
     setMounted(true)
@@ -112,10 +119,14 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 print:hidden"
     >
       {/* Backdrop */}
       <div
+        ref={contentRef}
+        tabIndex={-1}
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
@@ -132,7 +143,7 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 rounded-md p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-accent"
+          className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-accent"
           aria-label="Cerrar modal"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -161,11 +172,13 @@ export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLD
 }
 
 export function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn('text-xl font-bold tracking-tight text-navy', className)} {...props} />
+  const { titleId } = useDialog()
+  return <h2 id={titleId} className={cn('text-xl font-bold tracking-tight text-navy', className)} {...props} />
 }
 
 export function DialogDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn('text-sm text-gray-500 leading-relaxed', className)} {...props} />
+  const { descriptionId } = useDialog()
+  return <p id={descriptionId} className={cn('text-sm text-muted-foreground leading-relaxed', className)} {...props} />
 }
 
 export function DialogClose({ children, onClick, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {

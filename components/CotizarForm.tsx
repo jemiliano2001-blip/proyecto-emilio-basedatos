@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useMemo, useState } from 'react'
 import { createCotizacionAction, type ActionResult } from '@/lib/actions/cotizaciones'
 import { AprobarRechazarCotizacion } from '@/components/AprobarRechazarCotizacion'
 import { FormError } from '@/components/FormError'
@@ -48,7 +47,7 @@ export function CotizarForm({
   proveedores: ProveedorOption[]
   cotizacionExistente: CotizacionExistente | null
 }) {
-  const [state, formAction] = useFormState(createCotizacionAction, initialState)
+  const [state, formAction] = useActionState(createCotizacionAction, initialState)
   const [proveedorId, setProveedorId] = useState(proveedores[0]?.id ?? '')
   const [moneda, setMoneda] = useState<'MXN' | 'USD'>('MXN')
   const [precios, setPrecios] = useState<Record<string, string>>(() => {

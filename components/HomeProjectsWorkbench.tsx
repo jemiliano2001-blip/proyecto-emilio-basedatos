@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   IconChevron,
   IconDocumento,
   IconProyectos,
+  IconSearch,
+  IconCerrar,
 } from '@/components/icons'
 import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
@@ -18,6 +21,8 @@ interface HomeProjectsWorkbenchProps {
     'id' | 'nombre' | 'ciudad' | 'fraccionamiento' | 'cliente' | 'estado' | 'foto_url'
   >[]
   puedeCrear: boolean
+  initialSearch?: string
+  initialStatus?: string
 }
 
 type EstatusTab = 'todas' | 'activa' | 'pausada' | 'cerrada'
@@ -25,9 +30,30 @@ type EstatusTab = 'todas' | 'activa' | 'pausada' | 'cerrada'
 export function HomeProjectsWorkbench({
   obras,
   puedeCrear,
+  initialSearch = '',
+  initialStatus,
 }: HomeProjectsWorkbenchProps) {
-  const [search, setSearch] = useState('')
-  const [selectedTab, setSelectedTab] = useState<EstatusTab>('activa')
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const initialTab: EstatusTab = ['todas', 'activa', 'pausada', 'cerrada'].includes(initialStatus ?? '')
+    ? (initialStatus as EstatusTab)
+    : 'activa'
+  const [search, setSearch] = useState(initialSearch)
+  const [selectedTab, setSelectedTab] = useState<EstatusTab>(initialTab)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (search.trim()) params.set('q', search.trim())
+      else params.delete('q')
+      if (selectedTab !== 'activa') params.set('estatus', selectedTab)
+      else params.delete('estatus')
+      const query = params.toString()
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+    }, 180)
+    return () => window.clearTimeout(timer)
+  }, [pathname, router, search, searchParams, selectedTab])
 
   const filteredObras = useMemo(() => {
     return obras.filter((obra) => {
@@ -64,33 +90,32 @@ export function HomeProjectsWorkbench({
         {/* Buscador reactivo */}
         <div className="relative flex-1">
           <input
+            aria-label="Buscar proyectos"
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre, cliente, ciudad..."
-            className="input-base text-sm pl-9 pr-8"
+            className="input-base text-base pl-11 pr-11"
           />
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-            🔍
-          </span>
+          <IconSearch className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           {search && (
             <button
               type="button"
               onClick={() => setSearch('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-ink text-xs p-1"
+              className="absolute right-0 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center text-muted-foreground hover:text-ink"
               aria-label="Limpiar búsqueda"
             >
-              ✕
+              <IconCerrar className="h-4 w-4" />
             </button>
           )}
         </div>
 
         {/* Pestañas de estatus */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl overflow-x-auto shrink-0">
+        <div className="flex items-center gap-1.5 p-1 bg-muted rounded-xl overflow-x-auto shrink-0" role="tablist" aria-label="Estatus del proyecto">
           <button
             type="button"
             onClick={() => setSelectedTab('activa')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            role="tab" aria-selected={selectedTab === 'activa'} className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedTab === 'activa'
                 ? 'bg-white text-navy font-bold shadow-sm'
                 : 'text-gray-600 hover:text-ink'
@@ -101,7 +126,7 @@ export function HomeProjectsWorkbench({
           <button
             type="button"
             onClick={() => setSelectedTab('pausada')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            role="tab" aria-selected={selectedTab === 'pausada'} className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedTab === 'pausada'
                 ? 'bg-white text-navy font-bold shadow-sm'
                 : 'text-gray-600 hover:text-ink'
@@ -112,7 +137,7 @@ export function HomeProjectsWorkbench({
           <button
             type="button"
             onClick={() => setSelectedTab('cerrada')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            role="tab" aria-selected={selectedTab === 'cerrada'} className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedTab === 'cerrada'
                 ? 'bg-white text-navy font-bold shadow-sm'
                 : 'text-gray-600 hover:text-ink'
@@ -123,7 +148,7 @@ export function HomeProjectsWorkbench({
           <button
             type="button"
             onClick={() => setSelectedTab('todas')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            role="tab" aria-selected={selectedTab === 'todas'} className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedTab === 'todas'
                 ? 'bg-white text-navy font-bold shadow-sm'
                 : 'text-gray-600 hover:text-ink'

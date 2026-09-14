@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { IconPlus, IconEditar, IconBasura, IconPaquete } from '@/components/icons'
 import { EmptyState } from '@/components/EmptyState'
 import { MaterialPreviewModal } from '@/components/MaterialPreviewModal'
 import { formatMoneyMx } from '@/lib/money'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
 import type { CatalogoMaterial, MaterialCategoria } from '@/lib/types'
 import {
   crearCategoriaAction,
@@ -22,11 +24,19 @@ function MaterialCard({
   puedeEditar,
   verPrecios,
   onSelect,
+  selected,
+  onToggleSelected,
+  compact,
+  showImage,
 }: {
   m: CatalogoMaterial
   puedeEditar: boolean
   verPrecios: boolean
   onSelect: (m: CatalogoMaterial) => void
+  selected: boolean
+  onToggleSelected: (event: React.MouseEvent<HTMLInputElement>) => void
+  compact: boolean
+  showImage: boolean
 }) {
   return (
     <div
@@ -39,13 +49,23 @@ function MaterialCard({
           onSelect(m)
         }
       }}
-      className="card-interactive relative text-left group cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-700/50"
+      className={`card-interactive relative text-left group cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-700/50 ${compact ? 'p-2' : ''} ${showImage ? '' : 'pt-14'}`}
     >
+      <label className="absolute left-2 top-2 z-10 flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg bg-white/95 shadow-sm border border-gray-200" onClick={(event) => event.stopPropagation()}>
+        <span className="sr-only">Seleccionar {m.nombre_base}</span>
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => undefined}
+          onClick={onToggleSelected}
+          className="h-5 w-5 accent-teal-800"
+        />
+      </label>
       {puedeEditar && (
         <Link
           href={`/materiales/${m.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="absolute top-2 right-2 z-10 p-1.5 rounded-md bg-white/90 shadow-sm border border-gray-200 text-gray-400 hover:text-ink hover:bg-white transition-colors opacity-80 group-hover:opacity-100"
+          className="absolute top-2 right-2 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-white/90 shadow-sm border border-gray-200 text-gray-400 hover:text-ink hover:bg-white transition-colors opacity-80 group-hover:opacity-100"
           title="Editar material"
           aria-label={`Editar ${m.nombre_base}`}
         >
@@ -53,7 +73,7 @@ function MaterialCard({
         </Link>
       )}
 
-      <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-200">
+      {showImage && <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-200">
         {m.foto_url ? (
           // Imagen de catálogo servida por Storage
           <Image
@@ -67,7 +87,7 @@ function MaterialCard({
         ) : (
           <span className="text-gray-400 text-xs font-medium">Sin foto</span>
         )}
-      </div>
+      </div>}
       <p className="font-bold text-sm text-ink line-clamp-2 group-hover:text-navy transition-colors">
         {m.nombre_base}
       </p>
@@ -104,7 +124,13 @@ export function CatalogoMaterialesView({
   const [selectedCat, setSelectedCat] = useState<string>(
     initialCategoria ?? categorias[0]?.nombre ?? 'todas'
   )
-
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [density, setDensity] = useState<'comfortable' | 'compact'>(() => 'comfortable')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+  const [showImages, setShowImages] = useState(true)
+  const [savedViews, setSavedViews] = useState<string[]>([])
   const [previewMaterial, setPreviewMaterial] = useState<CatalogoMaterial | null>(null)
   const [isPending, startTransition] = useTransition()
   const [modalType, setModalType] = useState<
@@ -116,6 +142,89 @@ export function CatalogoMaterialesView({
     | 'editar_sub'
     | 'eliminar_sub'
   >(null)
+  const lastSelectedIndex = useRef<number | null>(null)
+
+  useEffect(() => {
+    const storedDensity = window.localStorage.getItem('obra_track_catalog_density')
+    if (storedDensity === 'compact') setDensity('compact')
+    if (window.localStorage.getItem('obra_track_catalog_images') === 'hidden') setShowImages(false)
+    try {
+      const storedViews = JSON.parse(window.localStorage.getItem('obra_track_catalog_views') ?? '[]')
+      if (Array.isArray(storedViews)) setSavedViews(storedViews.filter((value): value is string => typeof value === 'string'))
+    } catch {
+      window.localStorage.removeItem('obra_track_catalog_views')
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || previewMaterial) return
+      if (modalType) {
+        setModalType(null)
+        setTargetCat(null)
+        setTargetSub(null)
+        setInputNombre('')
+        setFormError(null)
+      } else setSelectedIds(new Set())
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [modalType, previewMaterial])
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (selectedCat === 'todas') params.delete('categoria')
+    else params.set('categoria', selectedCat)
+    const query = params.toString()
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+  }, [pathname, router, searchParams, selectedCat])
+
+  const selectedMaterials = useMemo(
+    () => materiales.filter((material) => selectedIds.has(material.id)),
+    [materiales, selectedIds]
+  )
+
+  const selectableMaterials = useMemo(() => {
+    if (selectedCat === 'todas') return materiales
+    if (selectedCat === 'sin_categoria') return materiales.filter((material) => !material.categoria)
+    return materiales.filter((material) => material.categoria === selectedCat)
+  }, [materiales, selectedCat])
+
+  useEffect(() => {
+    lastSelectedIndex.current = null
+  }, [selectedCat])
+
+  function toggleMaterial(material: CatalogoMaterial, event: React.MouseEvent<HTMLInputElement>) {
+    const index = selectableMaterials.findIndex((item) => item.id === material.id)
+    if (index < 0) return
+    setSelectedIds((current) => {
+      const next = new Set(current)
+      if (event.shiftKey && lastSelectedIndex.current !== null) {
+        const start = Math.min(lastSelectedIndex.current, index)
+        const end = Math.max(lastSelectedIndex.current, index)
+        for (let position = start; position <= end; position += 1) next.add(selectableMaterials[position].id)
+      } else if (next.has(material.id)) next.delete(material.id)
+      else next.add(material.id)
+      return next
+    })
+    lastSelectedIndex.current = index
+  }
+
+  function toggleSavedView() {
+    const next = savedViews.includes(selectedCat)
+      ? savedViews.filter((view) => view !== selectedCat)
+      : [...savedViews, selectedCat]
+    setSavedViews(next)
+    window.localStorage.setItem('obra_track_catalog_views', JSON.stringify(next))
+  }
+
+  async function exportSelected() {
+    const { descargarMaterialesCsv } = await import('@/lib/export-selected-materials')
+    descargarMaterialesCsv(selectedMaterials, verPrecios)
+  }
+
+  const categoryDialogRef = useRef<HTMLDivElement>(null)
+  useModalFocus(Boolean(modalType), categoryDialogRef)
 
   // Datos para modales
   const [targetCat, setTargetCat] = useState<MaterialCategoria | null>(null)
@@ -261,6 +370,45 @@ export function CatalogoMaterialesView({
           )}
         </div>
 
+        <div className="flex flex-wrap items-center gap-2" aria-label="Preferencias del catálogo">
+          <button
+            type="button"
+            className="btn-secondary px-3 py-2 text-sm"
+            onClick={() => {
+              const next = density === 'comfortable' ? 'compact' : 'comfortable'
+              setDensity(next)
+              window.localStorage.setItem('obra_track_catalog_density', next)
+            }}
+            aria-pressed={density === 'compact'}
+          >
+            Densidad: {density === 'compact' ? 'compacta' : 'cómoda'}
+          </button>
+          <button type="button" className="btn-secondary px-3 py-2 text-sm" onClick={toggleSavedView} aria-pressed={savedViews.includes(selectedCat)}>
+            {savedViews.includes(selectedCat) ? 'Quitar vista guardada' : 'Guardar esta vista'}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary px-3 py-2 text-sm"
+            onClick={() => {
+              const next = !showImages
+              setShowImages(next)
+              window.localStorage.setItem('obra_track_catalog_images', next ? 'visible' : 'hidden')
+            }}
+            aria-pressed={showImages}
+          >
+            {showImages ? 'Ocultar fotos' : 'Mostrar fotos'}
+          </button>
+          {savedViews.length > 0 && (
+            <label className="text-sm font-semibold text-ink">
+              <span className="sr-only">Abrir vista guardada</span>
+              <select className="input-base min-w-48 py-2" value="" onChange={(event) => event.target.value && setSelectedCat(event.target.value)}>
+                <option value="">Vistas guardadas</option>
+                {savedViews.map((view) => <option key={view} value={view}>{view === 'todas' ? 'Todas' : view.replaceAll('_', ' ')}</option>)}
+              </select>
+            </label>
+          )}
+        </div>
+
         {/* Botones de selección de categoría (Pills) */}
         <div className="flex flex-wrap items-center gap-2">
           {categorias.map((cat) => {
@@ -271,7 +419,7 @@ export function CatalogoMaterialesView({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCat(cat.nombre)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
                   isSelected
                     ? 'bg-navy text-white shadow-sm'
                     : 'bg-slate-100 text-gray-700 hover:bg-slate-200'
@@ -286,7 +434,7 @@ export function CatalogoMaterialesView({
             <button
               type="button"
               onClick={() => setSelectedCat('sin_categoria')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+              className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
                 selectedCat === 'sin_categoria'
                   ? 'bg-navy text-white shadow-sm'
                   : 'bg-slate-100 text-gray-700 hover:bg-slate-200'
@@ -299,7 +447,7 @@ export function CatalogoMaterialesView({
           <button
             type="button"
             onClick={() => setSelectedCat('todas')}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
               selectedCat === 'todas'
                 ? 'bg-navy text-white shadow-sm'
                 : 'bg-slate-100 text-gray-700 hover:bg-slate-200'
@@ -423,6 +571,10 @@ export function CatalogoMaterialesView({
                           puedeEditar={puedeEditar}
                           verPrecios={verPrecios}
                           onSelect={setPreviewMaterial}
+                          selected={selectedIds.has(m.id)}
+                          onToggleSelected={(event) => toggleMaterial(m, event)}
+                          compact={density === 'compact'}
+                          showImage={showImages}
                         />
                       ))}
                     </div>
@@ -470,6 +622,10 @@ export function CatalogoMaterialesView({
                         puedeEditar={puedeEditar}
                         verPrecios={verPrecios}
                         onSelect={setPreviewMaterial}
+                        selected={selectedIds.has(m.id)}
+                        onToggleSelected={(event) => toggleMaterial(m, event)}
+                        compact={density === 'compact'}
+                        showImage={showImages}
                       />
                     ))}
                   </div>
@@ -503,6 +659,10 @@ export function CatalogoMaterialesView({
                   puedeEditar={puedeEditar}
                   verPrecios={verPrecios}
                   onSelect={setPreviewMaterial}
+                  selected={selectedIds.has(m.id)}
+                  onToggleSelected={(event) => toggleMaterial(m, event)}
+                  compact={density === 'compact'}
+                  showImage={showImages}
                 />
               ))}
             </div>
@@ -534,6 +694,10 @@ export function CatalogoMaterialesView({
                         puedeEditar={puedeEditar}
                         verPrecios={verPrecios}
                         onSelect={setPreviewMaterial}
+                        selected={selectedIds.has(m.id)}
+                        onToggleSelected={(event) => toggleMaterial(m, event)}
+                        compact={density === 'compact'}
+                        showImage={showImages}
                       />
                     ))}
                   </div>
@@ -561,6 +725,10 @@ export function CatalogoMaterialesView({
                       puedeEditar={puedeEditar}
                       verPrecios={verPrecios}
                       onSelect={setPreviewMaterial}
+                      selected={selectedIds.has(m.id)}
+                      onToggleSelected={(event) => toggleMaterial(m, event)}
+                      compact={density === 'compact'}
+                      showImage={showImages}
                     />
                   ))}
                 </div>
@@ -569,6 +737,16 @@ export function CatalogoMaterialesView({
           </section>
         )}
       </div>
+
+      {selectedIds.size > 0 && (
+        <div className="fixed inset-x-3 bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom,0px)+0.75rem)] z-40 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-md md:bottom-6 print:hidden" role="region" aria-label="Acciones de materiales seleccionados">
+          <p className="text-sm font-semibold text-ink"><span className="tabular-nums">{selectedIds.size}</span> seleccionados</p>
+          <div className="flex items-center gap-2">
+            <button type="button" className="btn-primary px-3 py-2 text-sm" onClick={() => void exportSelected()}>Exportar CSV</button>
+            <button type="button" className="btn-secondary px-3 py-2 text-sm" onClick={() => setSelectedIds(new Set())}>Limpiar</button>
+          </div>
+        </div>
+      )}
 
       {materiales.length === 0 && (
         <EmptyState
@@ -589,9 +767,9 @@ export function CatalogoMaterialesView({
 
       {/* 3. MODALES DE GESTIÓN DE CATEGORÍAS Y SUBCATEGORÍAS */}
       {modalType && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl border border-gray-200">
-            <h3 className="text-base font-bold text-ink">
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 print:hidden" onMouseDown={(event) => event.target === event.currentTarget && cerrarModal()}>
+          <div ref={categoryDialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="category-dialog-title" className="bg-white rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl border border-gray-200">
+            <h3 id="category-dialog-title" className="text-base font-bold text-ink">
               {modalType === 'nueva_cat' && 'Nueva categoría'}
               {modalType === 'editar_cat' && `Renombrar categoría: ${targetCat?.nombre}`}
               {modalType === 'eliminar_cat' && `Eliminar categoría: ${targetCat?.nombre}`}

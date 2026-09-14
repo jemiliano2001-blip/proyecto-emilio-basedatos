@@ -4,10 +4,13 @@ import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 interface SheetContextValue {
   open: boolean
   setOpen: (open: boolean) => void
+  titleId: string
+  descriptionId: string
 }
 
 const SheetContext = React.createContext<SheetContextValue | null>(null)
@@ -27,6 +30,8 @@ export interface SheetProps {
 }
 
 export function Sheet({ open: controlledOpen, onOpenChange, children }: SheetProps) {
+  const titleId = React.useId()
+  const descriptionId = React.useId()
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : uncontrolledOpen
@@ -41,7 +46,7 @@ export function Sheet({ open: controlledOpen, onOpenChange, children }: SheetPro
     [isControlled, onOpenChange]
   )
 
-  return <SheetContext.Provider value={{ open, setOpen }}>{children}</SheetContext.Provider>
+  return <SheetContext.Provider value={{ open, setOpen, titleId, descriptionId }}>{children}</SheetContext.Provider>
 }
 
 export function SheetTrigger({
@@ -95,8 +100,10 @@ export function SheetContent({
   onClose,
   ...props
 }: SheetContentProps) {
-  const { open, setOpen } = useSheet()
+  const { open, setOpen, titleId, descriptionId } = useSheet()
   const [mounted, setMounted] = React.useState(false)
+  const contentRef = React.useRef<HTMLDivElement>(null)
+  useModalFocus(open, contentRef)
 
   React.useEffect(() => {
     setMounted(true)
@@ -133,7 +140,7 @@ export function SheetContent({
   if (!mounted || !open) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50 flex print:hidden" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
@@ -142,11 +149,11 @@ export function SheetContent({
       />
 
       {/* Sheet panel */}
-      <div className={cn(sheetVariants({ side }), className)} {...props}>
+      <div ref={contentRef} tabIndex={-1} className={cn(sheetVariants({ side }), className)} {...props}>
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 rounded-md p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-accent"
+          className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-accent"
           aria-label="Cerrar panel"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -175,11 +182,13 @@ export function SheetFooter({ className, ...props }: React.HTMLAttributes<HTMLDi
 }
 
 export function SheetTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn('text-xl font-bold tracking-tight text-navy', className)} {...props} />
+  const { titleId } = useSheet()
+  return <h2 id={titleId} className={cn('text-xl font-bold tracking-tight text-navy', className)} {...props} />
 }
 
 export function SheetDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn('text-sm text-gray-500 leading-relaxed', className)} {...props} />
+  const { descriptionId } = useSheet()
+  return <p id={descriptionId} className={cn('text-sm text-muted-foreground leading-relaxed', className)} {...props} />
 }
 
 export function SheetClose({

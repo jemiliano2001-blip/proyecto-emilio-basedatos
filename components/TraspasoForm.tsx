@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState, useMemo, useState } from 'react'
+import { useFormStatus } from 'react-dom'
 import type { ActionResult } from '@/lib/actions/traspasos'
 import { parseQuantity } from '@/lib/money'
 
@@ -60,7 +60,7 @@ export function TraspasoForm({
   materiales: MaterialOption[]
   saldos: SaldoItem[]
 }) {
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
 
 
   const [obraOrigenId, setObraOrigenId] = useState<string>(obras[0]?.id || '')

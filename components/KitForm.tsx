@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { ActionResult } from '@/lib/actions/kits'
 import { FormError } from '@/components/FormError'
@@ -39,7 +38,7 @@ export function KitForm({
   kit?: KitInitialData
   submitLabel?: string
 }) {
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
   const [items, setItems] = useState<KitItemRow[]>(() => {
     if (kit?.items && kit.items.length > 0) {
       return kit.items.map((it) => ({

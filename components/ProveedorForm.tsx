@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useActionState } from 'react'
 import type { ActionResult } from '@/lib/actions/proveedores'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -17,7 +17,7 @@ export function ProveedorForm({
   proveedor?: Proveedor
   submitLabel: string
 }) {
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
 
   return (
     <form action={formAction} className="space-y-4">

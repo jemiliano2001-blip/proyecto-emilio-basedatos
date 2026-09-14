@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useState } from 'react'
 import { cancelSolicitudAction, type ActionResult } from '@/lib/actions/solicitudes'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -11,7 +10,7 @@ const initialState: ActionResult = { error: null }
 export function CancelarSolicitudButton({ solicitudId }: { solicitudId: string }) {
   const [confirmando, setConfirmando] = useState(false)
   const bound = cancelSolicitudAction.bind(null, solicitudId)
-  const [state, formAction] = useFormState(bound, initialState)
+  const [state, formAction] = useActionState(bound, initialState)
 
   if (state.ok) {
     return <p className="text-sm text-gray-500">Solicitud cancelada.</p>

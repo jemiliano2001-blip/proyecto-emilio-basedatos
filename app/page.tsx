@@ -8,15 +8,28 @@ import {
 } from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeGestionarObras } from '@/lib/roles'
+import {
+  puedeCapturarRecepcion,
+  puedeCrearSolicitudes,
+  puedeGestionarObras,
+  puedeVerPrecios,
+} from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import { HomeProjectsWorkbench } from '@/components/HomeProjectsWorkbench'
 import type { Obra } from '@/lib/types'
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; estatus?: string }>
+}) {
+  const initialFilters = await searchParams
   const session = await getSessionUsuario()
   const supabase = await createClient()
   const puedeCrear = puedeGestionarObras(session?.rol ?? null)
+  const puedeSolicitar = puedeCrearSolicitudes(session?.rol ?? null)
+  const puedeRecibir = puedeCapturarRecepcion(session?.rol ?? null)
+  const puedeConsultarOrdenes = puedeVerPrecios(session?.rol ?? null)
 
   // Consulta defensiva de obras incluyendo foto_url si ya existe en schema
   let obras: Pick<
@@ -43,18 +56,18 @@ export default async function HomePage() {
   // Contadores operativos en paralelo
   const [reqResult, recResult] = await Promise.allSettled([
     supabase
-      .from('solicitudes')
+      .from('solicitudes_material')
       .select('id', { count: 'exact', head: true })
-      .in('status', ['recibida', 'en_proceso']),
+      .in('estado', ['recibida', 'en_proceso']),
     supabase
       .from('recepciones_material')
       .select('id', { count: 'exact', head: true }),
   ])
 
   const requisicionesPendientes =
-    reqResult.status === 'fulfilled' ? reqResult.value.count ?? 0 : 0
+    reqResult.status === 'fulfilled' && !reqResult.value.error ? reqResult.value.count ?? 0 : null
   const totalRecepciones =
-    recResult.status === 'fulfilled' ? recResult.value.count ?? 0 : 0
+    recResult.status === 'fulfilled' && !recResult.value.error ? recResult.value.count ?? 0 : null
   const proyectosActivos = obras.filter((o) => o.estado === 'activa').length
 
   return (
@@ -81,7 +94,7 @@ export default async function HomePage() {
       {/* Barra de Acciones Rápidas (1-Click SaaS Quick Actions) */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <Link
-          href="/solicitudes/nueva"
+          href={puedeSolicitar ? '/solicitudes/nueva' : puedeConsultarOrdenes ? '/ordenes' : '/solicitudes'}
           className="flex items-center justify-between p-3.5 rounded-xl bg-navy text-white hover:bg-slate-800 transition-colors shadow-sm group"
         >
           <div className="flex items-center gap-2.5">
@@ -89,15 +102,15 @@ export default async function HomePage() {
               <IconSolicitudes className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-bold text-sm leading-none">Nueva Requisición</p>
-              <p className="text-[11px] text-gray-300 mt-1">Solicitar materiales u obra</p>
+              <p className="font-bold text-sm leading-none">{puedeSolicitar ? 'Nueva requisición' : puedeConsultarOrdenes ? 'Órdenes de compra' : 'Ver solicitudes'}</p>
+              <p className="text-xs text-gray-300 mt-1">{puedeSolicitar ? 'Solicitar materiales o servicios' : 'Abrir trabajo pendiente'}</p>
             </div>
           </div>
           <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
         </Link>
 
         <Link
-          href="/recepciones/nueva"
+          href={puedeRecibir ? '/recepciones' : '/materiales'}
           className="flex items-center justify-between p-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors group"
         >
           <div className="flex items-center gap-2.5">
@@ -105,8 +118,8 @@ export default async function HomePage() {
               <IconRecepcion className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-bold text-sm text-ink leading-none">Recibir Material</p>
-              <p className="text-[11px] text-gray-500 mt-1">Captura y cotejo de remisiones</p>
+              <p className="font-bold text-sm text-ink leading-none">{puedeRecibir ? 'Recibir material' : 'Consultar materiales'}</p>
+              <p className="text-xs text-gray-500 mt-1">{puedeRecibir ? 'Seleccionar una OC por recibir' : 'Existencias y especificaciones'}</p>
             </div>
           </div>
           <IconChevron className="w-4 h-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" />
@@ -167,7 +180,7 @@ export default async function HomePage() {
           </span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl sm:text-2xl font-black text-teal-900 tabular-nums">
-              {requisicionesPendientes}
+              {requisicionesPendientes ?? '—'}
             </span>
             <span className="text-[11px] text-teal-700 font-medium hidden sm:inline">
               en proceso
@@ -184,7 +197,7 @@ export default async function HomePage() {
           </span>
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="text-xl sm:text-2xl font-black text-ink tabular-nums">
-              {totalRecepciones}
+              {totalRecepciones ?? '—'}
             </span>
             <span className="text-[11px] text-gray-400 font-medium hidden sm:inline">
               registradas
@@ -192,6 +205,12 @@ export default async function HomePage() {
           </div>
         </Link>
       </section>
+
+      {(requisicionesPendientes === null || totalRecepciones === null) && (
+        <p className="-mt-4 text-sm text-warn" role="status">
+          Algunas métricas no están disponibles por el momento. Los accesos operativos siguen funcionando.
+        </p>
+      )}
 
       {/* Workbench de Proyectos: Búsqueda, Filtros y Lista con Miniaturas */}
       <section className="space-y-3">
@@ -202,7 +221,12 @@ export default async function HomePage() {
           </span>
         </div>
 
-        <HomeProjectsWorkbench obras={obras} puedeCrear={puedeCrear} />
+      <HomeProjectsWorkbench
+        obras={obras}
+        puedeCrear={puedeCrear}
+        initialSearch={initialFilters.q ?? ''}
+        initialStatus={initialFilters.estatus}
+      />
       </section>
     </main>
   )

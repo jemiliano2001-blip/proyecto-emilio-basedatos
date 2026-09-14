@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { useFormState } from 'react-dom'
+import { useActionState } from 'react'
 import type { ActionResult } from '@/lib/actions/materiales'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -25,7 +25,7 @@ export function MaterialForm({
   initialCategoria?: string
   initialSubcategoria?: string
 }) {
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
   const [categoria, setCategoria] = useState(material?.categoria ?? initialCategoria ?? '')
   const [subcategoria, setSubcategoria] = useState(material?.subcategoria ?? initialSubcategoria ?? '')
   const [fotoPreview, setFotoPreview] = useState<string | null>(null)

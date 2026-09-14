@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useActionState } from 'react'
 import {
   aprobarCotizacionAction,
   rechazarCotizacionAction,
@@ -14,8 +14,8 @@ const initialState: ActionResult = { error: null }
 export function AprobarRechazarCotizacion({ cotizacionId }: { cotizacionId: string }) {
   const aprobar = aprobarCotizacionAction.bind(null, cotizacionId)
   const rechazar = rechazarCotizacionAction.bind(null, cotizacionId)
-  const [aprobarState, aprobarAction] = useFormState(aprobar, initialState)
-  const [rechazarState, rechazarAction] = useFormState(rechazar, initialState)
+  const [aprobarState, aprobarAction] = useActionState(aprobar, initialState)
+  const [rechazarState, rechazarAction] = useActionState(rechazar, initialState)
 
   return (
     <div className="space-y-3">

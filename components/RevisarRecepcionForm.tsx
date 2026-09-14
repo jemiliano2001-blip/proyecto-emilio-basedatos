@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useActionState } from 'react'
 import type { ActionResult } from '@/lib/actions/recepciones'
 import { revisarRecepcionAction } from '@/lib/actions/recepciones'
 import { FormError } from '@/components/FormError'
@@ -11,8 +11,8 @@ const initialState: ActionResult = { error: null }
 export function RevisarRecepcionForm({ recepcionId }: { recepcionId: string }) {
   const aprobarBound = revisarRecepcionAction.bind(null, recepcionId, true)
   const rechazarBound = revisarRecepcionAction.bind(null, recepcionId, false)
-  const [aprobarState, aprobarAction] = useFormState(aprobarBound, initialState)
-  const [rechazarState, rechazarAction] = useFormState(rechazarBound, initialState)
+  const [aprobarState, aprobarAction] = useActionState(aprobarBound, initialState)
+  const [rechazarState, rechazarAction] = useActionState(rechazarBound, initialState)
 
   return (
     <div className="space-y-4">

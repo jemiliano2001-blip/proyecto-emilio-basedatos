@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useState, useRef, useCallback } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { useOfflineUser } from '@/components/OfflineUserProvider'
 import { useRouter } from 'next/navigation'
 import type { ActionResult } from '@/lib/actions/solicitudes'
@@ -75,7 +74,7 @@ export function SolicitudForm({
   const router = useRouter()
   const userId = useOfflineUser()
   const formRef = useRef<HTMLFormElement>(null)
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
   const [selectedObraId, setSelectedObraId] = useState<string>(defaultObraId ?? (obras[0]?.id ?? ''))
   const [items, setItems] = useState<ItemRow[]>([nuevaFila()])
   const [multiObra, setMultiObra] = useState(false)
@@ -85,6 +84,61 @@ export function SolicitudForm({
   const [offlineError, setOfflineError] = useState<string | null>(null)
   const [clientValidationError, setClientValidationError] = useState<string | null>(null)
   const [guardandoOffline, setGuardandoOffline] = useState(false)
+  const [lastRemoved, setLastRemoved] = useState<{ item: ItemRow; index: number } | null>(null)
+  const undoTimer = useRef<number | null>(null)
+  const [draftReady, setDraftReady] = useState(false)
+  const [draftRecovered, setDraftRecovered] = useState(false)
+  const draftKey = `obra_track_solicitud_draft_${userId ?? 'anon'}`
+
+  useEffect(() => {
+    if (!userId) {
+      setDraftReady(true)
+      return
+    }
+    try {
+      const raw = window.localStorage.getItem(draftKey)
+      if (raw) {
+        const draft = JSON.parse(raw) as {
+          selectedObraId?: string
+          items?: ItemRow[]
+          multiObra?: boolean
+          notaGeneral?: string
+        }
+        if (draft.selectedObraId && obras.some((obra) => obra.id === draft.selectedObraId)) setSelectedObraId(draft.selectedObraId)
+        if (Array.isArray(draft.items) && draft.items.length > 0) {
+          const validItems = draft.items.filter((item) => item && typeof item.key === 'string').map((item) => ({
+            ...item,
+            material_id: materiales.some((material) => material.id === item.material_id) ? item.material_id : '',
+            obra_id: obras.some((obra) => obra.id === item.obra_id) ? item.obra_id : '',
+          }))
+          if (validItems.length > 0) setItems(validItems)
+        }
+        setMultiObra(Boolean(draft.multiObra && permiteMultiObra))
+        setNotaGeneral(typeof draft.notaGeneral === 'string' ? draft.notaGeneral : '')
+        setDraftRecovered(true)
+      }
+    } catch {
+      window.localStorage.removeItem(draftKey)
+    }
+    setDraftReady(true)
+  }, [draftKey, materiales, obras, permiteMultiObra, userId])
+
+  useEffect(() => {
+    if (!draftReady || !userId) return
+    const timer = window.setTimeout(() => {
+      window.localStorage.setItem(draftKey, JSON.stringify({ selectedObraId, items, multiObra, notaGeneral }))
+    }, 250)
+    return () => window.clearTimeout(timer)
+  }, [draftKey, draftReady, items, multiObra, notaGeneral, selectedObraId, userId])
+
+  useEffect(() => () => {
+    if (undoTimer.current) window.clearTimeout(undoTimer.current)
+  }, [])
+
+  function clearDraft() {
+    window.localStorage.removeItem(draftKey)
+    setDraftRecovered(false)
+  }
 
   // Mapas de ayuda
   const materialMap = useMemo(() => {
@@ -171,7 +225,24 @@ export function SolicitudForm({
   }
 
   function quitarFila(key: string) {
-    setItems((prev) => (prev.length > 1 ? prev.filter((item) => item.key !== key) : prev))
+    if (items.length <= 1) return
+    const index = items.findIndex((item) => item.key === key)
+    if (index < 0) return
+    setLastRemoved({ item: items[index], index })
+    setItems((prev) => prev.filter((item) => item.key !== key))
+    if (undoTimer.current) window.clearTimeout(undoTimer.current)
+    undoTimer.current = window.setTimeout(() => setLastRemoved(null), 5000)
+  }
+
+  function undoRemove() {
+    if (!lastRemoved) return
+    setItems((current) => {
+      const next = [...current]
+      next.splice(Math.min(lastRemoved.index, next.length), 0, lastRemoved.item)
+      return next
+    })
+    setLastRemoved(null)
+    if (undoTimer.current) window.clearTimeout(undoTimer.current)
   }
 
   function materialesDisponiblesPara(key: string, obraId: string) {
@@ -300,6 +371,7 @@ export function SolicitudForm({
       })
 
       setOfflineMsg('Guardado en este teléfono. Se enviará cuando haya conexión.')
+      clearDraft()
       router.push('/solicitudes')
     } catch {
       setOfflineError('No se pudo guardar en este teléfono. Intenta de nuevo.')
@@ -320,6 +392,7 @@ export function SolicitudForm({
       void guardarOffline(formData)
       return
     }
+    clearDraft()
     formAction(formData)
   }
 
@@ -336,6 +409,18 @@ export function SolicitudForm({
     >
       <input type="hidden" name="items_json" value={itemsJson} />
       <FormError message={state.error ?? offlineError ?? clientValidationError} />
+      {draftRecovered && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900" role="status">
+          <span>Recuperamos el borrador guardado en este dispositivo.</span>
+          <button type="button" className="min-h-[44px] px-3 font-semibold text-teal-900 underline" onClick={clearDraft}>Descartar borrador</button>
+        </div>
+      )}
+      {lastRemoved && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm" role="status">
+          <span>Partida eliminada.</span>
+          <button type="button" className="min-h-[44px] px-3 font-semibold text-accent underline" onClick={undoRemove}>Deshacer</button>
+        </div>
+      )}
       {offlineMsg && (
         <p className="rounded-lg bg-teal-50 text-teal-800 text-sm px-3 py-2">{offlineMsg}</p>
       )}

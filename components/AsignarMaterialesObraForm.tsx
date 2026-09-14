@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useMemo, useState } from 'react'
 import type { ActionResult } from '@/lib/actions/topes'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -57,7 +56,7 @@ export function AsignarMaterialesObraForm({
   materiales?: CatalogoMaterial[]
   kits?: MaterialKitWithItems[]
 }) {
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
 
   // Kits estructurados asignados
   const [kitsAsignados, setKitsAsignados] = useState<KitAsignado[]>([])
@@ -343,7 +342,7 @@ export function AsignarMaterialesObraForm({
               <button
                 type="button"
                 onClick={() => abrirModalKitPara()}
-                className="btn-secondary text-xs px-3 py-2 min-h-[38px] text-teal-800 border-teal-300 hover:bg-teal-50 flex items-center gap-1.5"
+                className="btn-secondary text-sm px-3 py-2 min-h-[44px] text-teal-800 border-teal-300 hover:bg-teal-50 flex items-center gap-1.5"
               >
                 <IconRayo className="w-3.5 h-3.5 text-amber-500" />
                 <span>Cargar Kit / Ensamble</span>
@@ -352,7 +351,7 @@ export function AsignarMaterialesObraForm({
             <button
               type="button"
               onClick={agregarMaterialIndividual}
-              className="btn-primary text-xs px-3 py-2 min-h-[38px] flex items-center gap-1.5"
+              className="btn-primary text-sm px-3 py-2 min-h-[44px] flex items-center gap-1.5"
               disabled={materiales.length === 0}
             >
               <IconPlus className="w-3.5 h-3.5" />
@@ -485,7 +484,7 @@ export function AsignarMaterialesObraForm({
               <button
                 type="button"
                 onClick={() => setMostrarModalKit(false)}
-                className="btn-secondary text-xs px-3 py-1.5 min-h-[34px]"
+                className="btn-secondary text-sm px-3 py-2 min-h-[44px]"
               >
                 Cancelar
               </button>
@@ -493,7 +492,7 @@ export function AsignarMaterialesObraForm({
                 type="button"
                 onClick={handleInsertarKit}
                 disabled={!selectedKitId}
-                className="btn-primary text-xs px-4 py-1.5 min-h-[34px] bg-teal-800"
+                className="btn-primary text-sm px-4 py-2 min-h-[44px] bg-teal-800"
               >
                 Cargar Kit al Proyecto
               </button>

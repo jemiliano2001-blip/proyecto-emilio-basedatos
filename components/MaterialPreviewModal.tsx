@@ -1,12 +1,13 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { IconCerrar, IconEditar, IconPaquete } from '@/components/icons'
 import { Badge } from '@/components/Badge'
 import { formatMoneyMx } from '@/lib/money'
 import type { CatalogoMaterial } from '@/lib/types'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 interface MaterialPreviewModalProps {
   material: CatalogoMaterial | null
@@ -23,6 +24,23 @@ export function MaterialPreviewModal({
   puedeEditar = false,
   verPrecios = false,
 }: MaterialPreviewModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useModalFocus(open, dialogRef)
+
+  useEffect(() => {
+    if (!open) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose, open])
+
   if (!open || !material) return null
 
   return (
@@ -30,11 +48,13 @@ export function MaterialPreviewModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="material-preview-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-stretch justify-end bg-slate-950/75 backdrop-blur-sm transition-opacity print:hidden"
       onClick={onClose}
     >
       <div
-        className="relative flex flex-col w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[90vh]"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative flex h-full w-full max-w-lg flex-col overflow-hidden border-l border-gray-200 bg-white shadow-2xl animate-slide-in-right sm:rounded-l-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera con categorías y botón cerrar */}
@@ -50,7 +70,7 @@ export function MaterialPreviewModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-ink rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center text-gray-400 hover:text-ink rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Cerrar ficha de material"
           >
             <IconCerrar className="w-5 h-5" />
@@ -125,14 +145,14 @@ export function MaterialPreviewModal({
           <button
             type="button"
             onClick={onClose}
-            className="btn-secondary text-xs px-3 py-2"
+            className="btn-secondary text-sm px-3 py-2"
           >
             Cerrar
           </button>
           {puedeEditar && (
             <Link
               href={`/materiales/${material.id}`}
-              className="btn-primary text-xs px-3.5 py-2 inline-flex items-center gap-1.5"
+              className="btn-primary text-sm px-3.5 py-2 inline-flex items-center gap-1.5"
             >
               <IconEditar className="w-3.5 h-3.5" />
               <span>Editar material</span>

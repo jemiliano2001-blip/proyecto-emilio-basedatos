@@ -11,8 +11,7 @@ import {
 } from '@/lib/roles'
 import { traspasosSchemaDisponible } from '@/lib/schema-disponible'
 import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator'
-import { CommandPalette } from '@/components/CommandPalette'
-import { KeyboardShortcutsModal } from '@/components/KeyboardShortcutsModal'
+import { GlobalClientTools } from '@/components/GlobalClientTools'
 import { OfflineUserProvider } from '@/components/OfflineUserProvider'
 import './globals.css'
 
@@ -45,9 +44,8 @@ export default async function RootLayout({
         <OfflineUserProvider key={session?.authUserId ?? 'anon'} userId={session?.authUserId ?? null}>
         <NetworkStatusIndicator />
         {showNav && <ServiceWorkerRegistration />}
-        {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} rol={rol} />}
-        {showNav && <CommandPalette />}
-        {showNav && <KeyboardShortcutsModal />}
+        {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} rol={rol} traspasosDisponibles={traspasosDisponibles} />}
+        {showNav && <GlobalClientTools rol={rol} userId={session?.authUserId ?? 'anon'} traspasosDisponibles={traspasosDisponibles} />}
         {children}
         {showNav && (
           <AppNav

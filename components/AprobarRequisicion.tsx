@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useActionState } from 'react'
 import {
   aprobarPagoSolicitudAction,
   aprobarSolicitudComprasAction,
@@ -14,7 +14,7 @@ const initialState: ActionResult = { error: null }
 
 export function AprobarComprasButton({ solicitudId }: { solicitudId: string }) {
   const action = aprobarSolicitudComprasAction.bind(null, solicitudId)
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
 
   return (
     <form action={formAction} className="space-y-2">
@@ -26,7 +26,7 @@ export function AprobarComprasButton({ solicitudId }: { solicitudId: string }) {
 
 export function AprobarPagoButton({ solicitudId }: { solicitudId: string }) {
   const action = aprobarPagoSolicitudAction.bind(null, solicitudId)
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
 
   return (
     <form action={formAction} className="space-y-2">
@@ -38,7 +38,7 @@ export function AprobarPagoButton({ solicitudId }: { solicitudId: string }) {
 
 export function RechazarSolicitudForm({ solicitudId }: { solicitudId: string }) {
   const action = rechazarSolicitudAction.bind(null, solicitudId)
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
 
   return (
     <form action={formAction} className="space-y-2">

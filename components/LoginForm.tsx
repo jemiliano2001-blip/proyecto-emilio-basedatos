@@ -1,6 +1,6 @@
 'use client'
 
-import { useFormState } from 'react-dom'
+import { useActionState } from 'react'
 import { loginAction } from '@/lib/actions/auth'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -8,7 +8,7 @@ import { SubmitButton } from '@/components/SubmitButton'
 const initialState = { error: null as string | null }
 
 export function LoginForm({ next }: { next: string }) {
-  const [state, formAction] = useFormState(loginAction, initialState)
+  const [state, formAction] = useActionState(loginAction, initialState)
 
   return (
     <form action={formAction} className="space-y-4">

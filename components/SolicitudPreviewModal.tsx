@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { IconCerrar, IconAlerta, IconCheck } from '@/components/icons'
 import { formatMoneyMx } from '@/lib/money'
 import { labelTipoLinea } from '@/lib/validations/solicitud'
 import type { TipoLineaSolicitud } from '@/lib/types'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 export interface PreviewItemData {
   tipo_linea: TipoLineaSolicitud
@@ -43,6 +44,18 @@ export function SolicitudPreviewModal({
   folio,
   ordenCompraFolio,
 }: SolicitudPreviewModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useModalFocus(open, dialogRef)
+
+  useEffect(() => {
+    if (!open) return
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isSubmitting) onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isSubmitting, onClose, open])
+
   if (!open) return null
 
   const displayFecha =
@@ -73,6 +86,8 @@ export function SolicitudPreviewModal({
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="relative flex flex-col w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
@@ -113,7 +128,7 @@ export function SolicitudPreviewModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 text-gray-400 hover:text-ink rounded-lg hover:bg-gray-200/80 transition-colors"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-gray-400 hover:text-ink rounded-lg hover:bg-gray-200/80 transition-colors"
               aria-label="Cerrar vista previa"
             >
               <IconCerrar className="w-5 h-5" />
@@ -234,7 +249,7 @@ export function SolicitudPreviewModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="btn-secondary text-xs px-3.5 py-2.5 min-h-[40px]"
+            className="btn-secondary text-sm px-3.5 py-2.5 min-h-[44px]"
           >
             Modificar partidas
           </button>
@@ -243,7 +258,7 @@ export function SolicitudPreviewModal({
             type="button"
             onClick={onConfirm}
             disabled={isSubmitting || items.length === 0}
-            className="btn-primary text-xs px-4 py-2.5 min-h-[40px] inline-flex items-center gap-1.5"
+            className="btn-primary text-sm px-4 py-2.5 min-h-[44px] inline-flex items-center gap-1.5"
           >
             <IconCheck className="w-4 h-4" />
             <span>{isSubmitting ? 'Creando requisición…' : 'Confirmar y levantar'}</span>

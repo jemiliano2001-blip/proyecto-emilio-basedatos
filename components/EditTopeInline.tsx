@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useState } from 'react'
 import { updateTopeAction, type ActionResult } from '@/lib/actions/topes'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -21,7 +20,7 @@ export function EditTopeInline({
 }) {
   const [open, setOpen] = useState(false)
   const bound = updateTopeAction.bind(null, topeId, obraId)
-  const [state, formAction] = useFormState(bound, initialState)
+  const [state, formAction] = useActionState(bound, initialState)
 
   if (!open) {
     return (
@@ -51,6 +50,19 @@ export function EditTopeInline({
           required
           defaultValue={String(cantidadActual)}
           className="input-base mt-1"
+          autoFocus
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault()
+              setOpen(false)
+            }
+          }}
+          onBlur={(event) => {
+            const next = event.relatedTarget
+            if (!(next instanceof Node) || !event.currentTarget.form?.contains(next)) {
+              event.currentTarget.form?.requestSubmit()
+            }
+          }}
         />
       </label>
       <div className="flex gap-2">

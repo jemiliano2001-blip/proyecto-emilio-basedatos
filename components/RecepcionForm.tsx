@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useMemo, useState } from 'react'
 import { useOfflineUser } from '@/components/OfflineUserProvider'
 import { useRouter } from 'next/navigation'
 import type { ActionResult } from '@/lib/actions/recepciones'
@@ -46,7 +45,7 @@ export function RecepcionForm({
 }) {
   const router = useRouter()
   const userId = useOfflineUser()
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
   const [offlineError, setOfflineError] = useState<string | null>(null)
   const [offlineMsg, setOfflineMsg] = useState<string | null>(null)
   const recepcionId = useMemo(() => crypto.randomUUID(), [])

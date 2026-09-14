@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { IconCerrar } from '@/components/icons'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 interface ShortcutRow {
   keyLabel: string
@@ -25,10 +26,22 @@ const SHORTCUTS: ShortcutRow[] = [
     description: 'Cerrar cualquier buscador, diálogo o panel abierto',
     category: 'General',
   },
+  {
+    keyLabel: 'Espacio',
+    description: 'Abrir el elemento enfocado o cerrar una vista previa',
+    category: 'Archivos y catálogo',
+  },
+  {
+    keyLabel: 'Shift + clic',
+    description: 'Seleccionar un rango de materiales en el catálogo',
+    category: 'Selección',
+  },
 ]
 
 export function KeyboardShortcutsModal() {
   const [open, setOpen] = useState(false)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useModalFocus(open, dialogRef)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -69,6 +82,8 @@ export function KeyboardShortcutsModal() {
       onClick={() => setOpen(false)}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -83,7 +98,7 @@ export function KeyboardShortcutsModal() {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Cerrar ventana de atajos"
           >
             <IconCerrar className="w-5 h-5" />

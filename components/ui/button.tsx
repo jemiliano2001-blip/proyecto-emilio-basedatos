@@ -18,7 +18,7 @@ const buttonVariants = cva(
       size: {
         // Mobile-first: default cumple los 44px mínimos táctiles para obra
         default: 'min-h-[44px] px-5 py-3 text-base rounded-lg gap-2',
-        sm: 'min-h-[36px] h-9 px-3 text-sm rounded-md gap-1.5',
+        sm: 'min-h-[44px] px-3 text-sm rounded-md gap-1.5',
         lg: 'min-h-[48px] h-12 px-8 text-base rounded-lg gap-2.5',
         icon: 'min-h-[44px] min-w-[44px] size-11 p-0 rounded-lg justify-center',
       },

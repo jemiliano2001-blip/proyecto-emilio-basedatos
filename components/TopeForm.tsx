@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useFormState } from 'react-dom'
+import { useActionState, useEffect } from 'react'
 import type { ActionResult } from '@/lib/actions/topes'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
@@ -32,7 +31,7 @@ export function TopeForm({
   submitLabel: string
   onSuccess?: () => void
 }) {
-  const [state, formAction] = useFormState(action, initialState)
+  const [state, formAction] = useActionState(action, initialState)
 
   useEffect(() => {
     if (state.ok && onSuccess) {

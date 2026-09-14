@@ -6,13 +6,16 @@ import { NotificacionCampanita } from '@/components/NotificacionCampanita'
 import { IconSearch } from '@/components/icons'
 import { tituloDeRuta } from '@/lib/nav'
 import type { RolUsuario } from '@/lib/types'
+import { puedeVerPrecios, puedeVerRecepciones, puedeVerTraspasos } from '@/lib/roles'
 
 export function TopBar({
   nombre,
   rol,
+  traspasosDisponibles,
 }: {
   nombre: string | null
   rol?: RolUsuario | null
+  traspasosDisponibles: boolean
 }) {
   const pathname = usePathname()
   const titulo = tituloDeRuta(pathname)
@@ -25,7 +28,7 @@ export function TopBar({
   const enTraspasos = pathname.startsWith('/traspasos')
 
   const desktopLinkClass = (active: boolean) =>
-    `px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+    `inline-flex min-h-[44px] items-center px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
       active
         ? 'bg-slate-100 text-ink font-bold'
         : 'text-gray-500 hover:text-ink hover:bg-slate-50'
@@ -72,7 +75,7 @@ export function TopBar({
           <Link href="/solicitudes" className={desktopLinkClass(enSolicitudes)}>
             Solicitudes
           </Link>
-          {rol !== 'finanzas' && (
+          {puedeVerRecepciones(rol ?? null) && (
             <Link href="/recepciones" className={desktopLinkClass(enRecepciones)}>
               Recepción
             </Link>
@@ -80,12 +83,12 @@ export function TopBar({
           <Link href="/materiales" className={desktopLinkClass(enMateriales)}>
             Catálogo
           </Link>
-          {rol === 'finanzas' || rol === 'compras' || rol === 'acceso_total' ? (
+          {puedeVerPrecios(rol ?? null) ? (
             <Link href="/ordenes" className={desktopLinkClass(enOrdenes)}>
               Órdenes
             </Link>
           ) : null}
-          {rol === 'proyectos' || rol === 'operacion' || rol === 'acceso_total' ? (
+          {traspasosDisponibles && puedeVerTraspasos(rol ?? null) ? (
             <Link href="/traspasos" className={desktopLinkClass(enTraspasos)}>
               Traspasos
             </Link>
@@ -97,7 +100,7 @@ export function TopBar({
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-gray-500 hover:text-ink hover:bg-gray-100 border border-transparent sm:border-gray-200 transition-colors text-xs"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 px-2.5 py-2 rounded-lg text-gray-500 hover:text-ink hover:bg-gray-100 border border-transparent sm:border-gray-200 transition-colors text-sm"
             title="Buscador y comandos (Ctrl+K)"
             aria-label="Abrir buscador y comandos"
           >
