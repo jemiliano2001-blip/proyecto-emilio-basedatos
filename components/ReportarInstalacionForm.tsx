@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import {
   reportarInstalacionAction,
   type InventarioActionResult,
@@ -23,14 +23,25 @@ export function ReportarInstalacionForm({
 }) {
   const action = reportarInstalacionAction.bind(null, obraId, materialId)
   const [state, formAction] = useActionState(action, initial)
+  const [offlineError, setOfflineError] = useState<string | null>(null)
 
   if (pendiente <= 0) {
     return <p className="text-xs text-teal-800 font-medium">Todo instalado</p>
   }
 
   return (
-    <form action={formAction} className="space-y-2 mt-2">
-      <FormError message={state.error} />
+    <form
+      action={formAction}
+      onSubmit={(event) => {
+        setOfflineError(null)
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          event.preventDefault()
+          setOfflineError('El reporte de instalación necesita conexión; todavía no tiene cola local.')
+        }
+      }}
+      className="space-y-2 mt-2"
+    >
+      <FormError message={state.error ?? offlineError} />
       {state.ok && (
         <p className="text-xs text-teal-800 font-medium">Instalación registrada.</p>
       )}

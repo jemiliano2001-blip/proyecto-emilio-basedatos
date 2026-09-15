@@ -43,6 +43,7 @@ export default async function HomePage({
     Obra,
     'id' | 'nombre' | 'ciudad' | 'fraccionamiento' | 'cliente' | 'estado' | 'foto_url'
   >[] = []
+  let obrasLoadError = false
 
   const { data: obrasData, error: obrasError } = await supabase
     .from('obras')
@@ -51,11 +52,12 @@ export default async function HomePage({
 
   if (obrasError) {
     // Fallback defensivo si la columna foto_url aún no se aplica en BD remota
-    const { data: fallbackData } = await supabase
+    const { data: fallbackData, error: fallbackError } = await supabase
       .from('obras')
       .select('id, nombre, ciudad, fraccionamiento, cliente, estado')
       .order('nombre')
     obras = (fallbackData ?? []).map((o) => ({ ...o, foto_url: null }))
+    obrasLoadError = Boolean(fallbackError)
   } else {
     obras = obrasData ?? []
   }
@@ -199,6 +201,11 @@ export default async function HomePage({
       {(requisicionesPendientes === null || totalRecepciones === null) && (
         <p className="-mt-4 text-sm text-warn" role="status">
           Algunas métricas no están disponibles por el momento. Los accesos operativos siguen funcionando.
+        </p>
+      )}
+      {obrasLoadError && (
+        <p className="-mt-4 text-sm text-red-700" role="alert">
+          No se pudo cargar la lista de proyectos. Revisa la conexión e intenta de nuevo.
         </p>
       )}
 

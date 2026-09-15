@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
 import { CopyButton } from '@/components/CopyButton'
@@ -9,6 +9,7 @@ import {
   puedeAprobarTraspaso,
   puedeCancelarTraspaso,
   puedeConfirmarTraspaso,
+  puedeVerTraspasos,
   puedeVerPrecios,
 } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -59,6 +60,9 @@ export default async function TraspasoDetallePage({
 }) {
   const resolvedparams = await params
   const session = await getSessionUsuario()
+  if (!session || !puedeVerTraspasos(session.rol)) {
+    redirect('/solicitudes')
+  }
   const supabase = await createClient()
 
   const { data: traspaso, error } = await supabase

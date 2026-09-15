@@ -47,6 +47,7 @@ export function PhotoUploadInput({
   onMetadataChange,
 }: PhotoUploadInputProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(existingUrl ?? null)
+  const [removeExisting, setRemoveExisting] = useState(false)
   const [isCompressing, startCompressTransition] = useTransition()
   const [compressionInfo, setCompressionInfo] = useState<{ original: number; optimizado: number } | null>(null)
   const [calidadDiagnostico, setCalidadDiagnostico] = useState<DiagnosticoCalidadImagen | null>(null)
@@ -105,6 +106,7 @@ export function PhotoUploadInput({
 
       const url = URL.createObjectURL(compressedFile)
       setPreviewUrl(url)
+      setRemoveExisting(false)
       onChangeFile?.(compressedFile)
     })
   }
@@ -112,7 +114,7 @@ export function PhotoUploadInput({
   const handleNativeFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawFile = e.target.files?.[0]
     if (!rawFile) {
-      setPreviewUrl(existingUrl ?? null)
+      setPreviewUrl(removeExisting ? null : (existingUrl ?? null))
       setCompressionInfo(null)
       setCalidadDiagnostico(null)
       onChangeFile?.(null)
@@ -147,6 +149,7 @@ export function PhotoUploadInput({
     setCompressionInfo(null)
     setCalidadDiagnostico(null)
     setGps(null)
+    setRemoveExisting(true)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -175,9 +178,10 @@ export function PhotoUploadInput({
       </div>
 
       {/* Inputs ocultos de metadatos para persistencia en el servidor */}
-      {existingUrl && (
+      {existingUrl && !removeExisting && (
         <input type="hidden" name={`${name}_existente`} value={existingUrl} />
       )}
+      {removeExisting && <input type="hidden" name={`${name}_eliminar`} value="true" />}
       {gps?.latitud != null && (
         <input type="hidden" name={`${name}_latitud`} value={gps.latitud} />
       )}

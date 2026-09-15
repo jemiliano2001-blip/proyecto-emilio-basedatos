@@ -33,6 +33,13 @@ function sugerirEstado(
   return 'parcial'
 }
 
+function hayFotografiasPendientes(formData: FormData): boolean {
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith('foto_') && value instanceof File && value.size > 0) return true
+  }
+  return false
+}
+
 export function RecepcionForm({
   action,
   ordenId,
@@ -102,6 +109,10 @@ export function RecepcionForm({
     setOfflineError(null)
     setOfflineMsg(null)
     try {
+      if (hayFotografiasPendientes(formData)) {
+        setOfflineError('Las fotografías requieren conexión para cargarse. Conéctate antes de enviar esta recepción para no perder evidencia.')
+        return
+      }
       let itemsRaw: unknown = []
       const itemsJson = formData.get('items_json')
       if (typeof itemsJson === 'string' && itemsJson.trim() !== '') {
@@ -154,6 +165,10 @@ export function RecepcionForm({
 
   function handleSubmit(formData: FormData) {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      if (hayFotografiasPendientes(formData)) {
+        setOfflineError('Las fotografías requieren conexión para cargarse. Conéctate antes de enviar esta recepción para no perder evidencia.')
+        return
+      }
       void guardarOffline(formData)
       return
     }
@@ -283,20 +298,12 @@ export function RecepcionForm({
                 <label className="block text-xs font-medium text-gray-600 mb-1">
                   Estado del material
                 </label>
-                <select
-                  className="input-base"
-                  value={line.estado}
-                  onChange={(e) =>
-                    actualizar(line.orden_item_id, {
-                      estado: e.target.value as EstadoRecepcionItem,
-                    })
-                  }
-                >
-                  <option value="completo">Completo</option>
-                  <option value="parcial">Parcial</option>
-                  <option value="faltante">Faltante</option>
-                  <option value="danado">Dañado</option>
-                </select>
+                <p className="input-base bg-slate-50 text-sm capitalize" aria-live="polite">
+                  {line.estado}
+                </p>
+                <p className="mt-1 text-[11px] text-gray-500">
+                  Se calcula automáticamente según las cantidades buenas y dañadas.
+                </p>
               </div>
 
               <div>
@@ -342,7 +349,7 @@ export function RecepcionForm({
 
       <SubmitButton>Enviar checklist a Compras</SubmitButton>
       <p className="text-xs text-gray-500 text-center">
-        Sin señal: se guarda en este teléfono y se envía al recuperar conexión.
+        Sin señal: los checklists sin fotografías se guardan en este teléfono. Para adjuntar evidencia fotográfica necesitas conexión.
       </p>
     </form>
   )

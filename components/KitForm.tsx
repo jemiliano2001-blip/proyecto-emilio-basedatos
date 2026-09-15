@@ -6,7 +6,6 @@ import type { ActionResult } from '@/lib/actions/kits'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
 import { IconPlus, IconBasura } from '@/components/icons'
-import { parseQuantity } from '@/lib/money'
 import type { CatalogoMaterial } from '@/lib/types'
 
 const initialState: ActionResult = { error: null }
@@ -72,11 +71,17 @@ export function KitForm({
           .filter((it) => it.material_id && it.cantidad.trim() !== '')
           .map((it) => ({
             material_id: it.material_id,
-            cantidad: parseQuantity(it.cantidad) ?? 1,
+            cantidad: it.cantidad,
           }))
       ),
     [items]
   )
+
+  const selectedMaterialIds = useMemo(
+    () => new Set(items.map((item) => item.material_id).filter(Boolean)),
+    [items]
+  )
+  const hasDuplicateMaterial = selectedMaterialIds.size !== items.filter((item) => item.material_id).length
 
   return (
     <form action={formAction} className="space-y-6">
@@ -175,6 +180,11 @@ export function KitForm({
         </div>
 
         <div className="space-y-3">
+          {hasDuplicateMaterial && (
+            <p role="alert" className="text-sm font-medium text-danger">
+              Cada componente sólo puede agregarse una vez. Ajusta la cantidad en el mismo renglón.
+            </p>
+          )}
           {items.map((it) => (
             <div
               key={it.key}
@@ -189,7 +199,7 @@ export function KitForm({
                 >
                   <option value="">-- Selecciona material accesorio --</option>
                   {materiales.map((m) => (
-                    <option key={m.id} value={m.id}>
+                    <option key={m.id} value={m.id} disabled={m.id !== it.material_id && selectedMaterialIds.has(m.id)}>
                       {m.nombre_base} {m.variante ? `· ${m.variante}` : ''} ({m.unidad_medida})
                     </option>
                   ))}
@@ -224,7 +234,7 @@ export function KitForm({
       </div>
 
       <div className="flex items-center gap-3">
-        <SubmitButton>{submitLabel}</SubmitButton>
+          <SubmitButton disabled={hasDuplicateMaterial}>{submitLabel}</SubmitButton>
         <Link href="/kits" className="btn-secondary">
           Cancelar
         </Link>

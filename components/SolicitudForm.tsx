@@ -8,7 +8,7 @@ import { FormError } from '@/components/FormError'
 import { MaterialSearchCombobox } from '@/components/MaterialSearchCombobox'
 import { SubmitButton } from '@/components/SubmitButton'
 import { putSolicitudPendiente } from '@/lib/offline/db'
-import { parseQuantity } from '@/lib/money'
+import { parseMoney, parseQuantity } from '@/lib/money'
 import type { TipoLineaSolicitud } from '@/lib/types'
 import { IconPlus, IconAlerta, IconOjo } from '@/components/icons'
 import { SolicitudPreviewModal, type PreviewItemData } from '@/components/SolicitudPreviewModal'
@@ -40,17 +40,23 @@ interface SaldoItemOption {
 
 interface ItemRow {
   key: string
+  tipo_linea: TipoLineaSolicitud
   material_id: string
   cantidad: string
+  descripcion: string
+  monto_mxn: string
   nota: string
   obra_id: string
 }
 
-function nuevaFila(): ItemRow {
+function nuevaFila(tipo_linea: TipoLineaSolicitud = 'material'): ItemRow {
   return {
     key: crypto.randomUUID(),
+    tipo_linea,
     material_id: '',
     cantidad: '',
+    descripcion: '',
+    monto_mxn: '',
     nota: '',
     obra_id: '',
   }
@@ -108,7 +114,12 @@ export function SolicitudForm({
         if (Array.isArray(draft.items) && draft.items.length > 0) {
           const validItems = draft.items.filter((item) => item && typeof item.key === 'string').map((item) => ({
             ...item,
+            tipo_linea: ['material', 'flete', 'camiones', 'mantenimiento', 'otro'].includes(item.tipo_linea)
+              ? item.tipo_linea
+              : 'material',
             material_id: materiales.some((material) => material.id === item.material_id) ? item.material_id : '',
+            descripcion: typeof item.descripcion === 'string' ? item.descripcion : '',
+            monto_mxn: typeof item.monto_mxn === 'string' ? item.monto_mxn : '',
             obra_id: obras.some((obra) => obra.id === item.obra_id) ? item.obra_id : '',
           }))
           if (validItems.length > 0) setItems(validItems)
@@ -186,12 +197,14 @@ export function SolicitudForm({
       const obra = obras.find((o) => o.id === effectiveObraId)
 
       return {
-        tipo_linea: 'material',
-        nombre: mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'Material no seleccionado',
+        tipo_linea: item.tipo_linea,
+        nombre: item.tipo_linea === 'material'
+          ? (mat ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}` : 'Material no seleccionado')
+          : (item.descripcion || 'Servicio sin descripción'),
         variante: mat?.variante,
         cantidad: cant,
         unidad_medida: mat?.unidad_medida ?? 'PZA',
-        monto_mxn: null,
+        monto_mxn: item.tipo_linea === 'material' ? null : (parseMoney(item.monto_mxn) ?? null),
         nota: item.nota || null,
         obraNombre: multiObra ? obra?.nombre : null,
         disponible: info.disponible,
@@ -203,11 +216,11 @@ export function SolicitudForm({
     () =>
       JSON.stringify(
         items.map((item) => ({
-          tipo_linea: 'material',
-          material_id: item.material_id || null,
-          cantidad_solicitada: item.cantidad || null,
-          descripcion: null,
-          monto_mxn: null,
+          tipo_linea: item.tipo_linea,
+          material_id: item.tipo_linea === 'material' ? (item.material_id || null) : null,
+          cantidad_solicitada: item.tipo_linea === 'material' ? (item.cantidad || null) : null,
+          descripcion: item.tipo_linea === 'material' ? null : (item.descripcion || null),
+          monto_mxn: item.tipo_linea === 'material' ? null : (item.monto_mxn || null),
           nota: item.nota || null,
           obra_id: multiObra && item.obra_id !== '' ? item.obra_id : null,
         }))
@@ -220,8 +233,8 @@ export function SolicitudForm({
     setItems((prev) => prev.map((item) => (item.key === key ? { ...item, ...cambios } : item)))
   }
 
-  function agregarFila() {
-    setItems((prev) => [...prev, nuevaFila()])
+  function agregarFila(tipo: TipoLineaSolicitud = 'material') {
+    setItems((prev) => [...prev, nuevaFila(tipo)])
   }
 
   function quitarFila(key: string) {
@@ -269,6 +282,7 @@ export function SolicitudForm({
 
   function validarSaldos(): string | null {
     for (const item of items) {
+      if (item.tipo_linea !== 'material') continue
       if (!item.material_id) {
         return 'Selecciona el material en cada partida.'
       }
@@ -337,23 +351,31 @@ export function SolicitudForm({
       }[] = []
 
       for (const item of items) {
-        if (!item.material_id) {
-          setOfflineError('Selecciona el material en cada partida.')
-          return
+        if (item.tipo_linea === 'material') {
+          if (!item.material_id) {
+            setOfflineError('Selecciona el material en cada partida.')
+            return
+          }
+          const cantidad = parseQuantity(item.cantidad)
+          if (cantidad === null || cantidad <= 0) {
+            setOfflineError('Revisa las cantidades: deben ser mayores a cero.')
+            return
+          }
+          parsedItems.push({
+            tipo_linea: 'material', material_id: item.material_id, cantidad_solicitada: cantidad,
+            descripcion: null, monto_mxn: null, nota: item.nota.trim() === '' ? null : item.nota.trim(),
+          })
+        } else {
+          const monto = parseMoney(item.monto_mxn)
+          if (!item.descripcion.trim() || monto === null || monto <= 0) {
+            setOfflineError('Cada servicio requiere descripción y monto mayor a cero.')
+            return
+          }
+          parsedItems.push({
+            tipo_linea: item.tipo_linea, material_id: null, cantidad_solicitada: null,
+            descripcion: item.descripcion.trim(), monto_mxn: monto, nota: item.nota.trim() === '' ? null : item.nota.trim(),
+          })
         }
-        const cantidad = parseQuantity(item.cantidad)
-        if (cantidad === null || cantidad <= 0) {
-          setOfflineError('Revisa las cantidades: deben ser mayores a cero.')
-          return
-        }
-        parsedItems.push({
-          tipo_linea: 'material',
-          material_id: item.material_id,
-          cantidad_solicitada: cantidad,
-          descripcion: null,
-          monto_mxn: null,
-          nota: item.nota.trim() === '' ? null : item.nota.trim(),
-        })
       }
 
       const now = new Date().toISOString()
@@ -466,7 +488,7 @@ export function SolicitudForm({
 
       <div className="space-y-3">
         <label className="block text-sm font-semibold text-ink">
-          Materiales
+          Renglones de la requisición
         </label>
 
         <div className="card space-y-0 divide-y divide-gray-100 p-0 overflow-hidden">
@@ -489,7 +511,7 @@ export function SolicitudForm({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-gray-500 font-mono">
-                    Material #{idx + 1}
+                    {item.tipo_linea === 'material' ? 'Material' : item.tipo_linea} #{idx + 1}
                   </span>
                   {items.length > 1 && (
                     <button
@@ -502,7 +524,7 @@ export function SolicitudForm({
                   )}
                 </div>
 
-                {multiObra && (
+                {multiObra && item.tipo_linea === 'material' && (
                   <select
                     value={item.obra_id}
                     onChange={(e) =>
@@ -525,6 +547,7 @@ export function SolicitudForm({
                   </select>
                 )}
 
+                {item.tipo_linea === 'material' ? <>
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-500 mb-1">
                     Material *
@@ -581,19 +604,62 @@ export function SolicitudForm({
                   onChange={(e) => actualizarFila(item.key, { nota: e.target.value })}
                   className="input-base text-sm"
                 />
+                </> : <>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 mb-1">Descripción *</label>
+                    <input
+                      type="text"
+                      required
+                      value={item.descripcion}
+                      onChange={(e) => actualizarFila(item.key, { descripcion: e.target.value })}
+                      className="input-base text-sm"
+                      placeholder="Describe el servicio o gasto"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 mb-1">Monto MXN *</label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      required
+                      value={item.monto_mxn}
+                      onChange={(e) => actualizarFila(item.key, { monto_mxn: e.target.value })}
+                      className="input-base text-sm"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Nota (opcional)"
+                    value={item.nota}
+                    onChange={(e) => actualizarFila(item.key, { nota: e.target.value })}
+                    className="input-base text-sm"
+                  />
+                </>}
               </div>
             )
           })}
         </div>
 
-        <button
-          type="button"
-          onClick={agregarFila}
-          className="mt-3 w-full rounded-xl border border-dashed border-rule py-3 text-sm font-semibold text-accent hover:bg-teal-50/50 inline-flex items-center justify-center gap-1.5 transition-colors"
-        >
-          <IconPlus className="w-4 h-4" />
-          <span>Agregar otro material</span>
-        </button>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button type="button" onClick={() => agregarFila('material')} className="rounded-xl border border-dashed border-rule py-3 text-sm font-semibold text-accent hover:bg-teal-50/50 inline-flex items-center justify-center gap-1.5">
+            <IconPlus className="w-4 h-4" /><span>Agregar material</span>
+          </button>
+          <label className="rounded-xl border border-dashed border-rule px-3 py-2 text-sm font-semibold text-accent hover:bg-teal-50/50 inline-flex items-center justify-center gap-1.5">
+            <span className="sr-only">Agregar servicio o gasto</span>
+            <IconPlus className="w-4 h-4" />
+            <select className="bg-transparent text-sm outline-none" defaultValue="" onChange={(event) => {
+              const tipo = event.target.value as TipoLineaSolicitud
+              if (tipo) { agregarFila(tipo); event.target.value = '' }
+            }}>
+              <option value="" disabled>Agregar flete, camiones, mantenimiento u otro</option>
+              <option value="flete">Flete</option>
+              <option value="camiones">Camiones</option>
+              <option value="mantenimiento">Mantenimiento</option>
+              <option value="otro">Otro</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <div>

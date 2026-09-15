@@ -30,7 +30,7 @@ export default async function InventarioPage() {
   }
 
   const supabase = await createClient()
-  const { data: invData } = await supabase
+  const { data: invData, error: invError } = await supabase
     .from('v_inventario_campo_obra')
     .select(
       'obra_id, material_id, cantidad_recibida, cantidad_instalada, cantidad_pendiente_instalar'
@@ -74,7 +74,13 @@ export default async function InventarioPage() {
         subtitle="Material recibido en sitio y pendiente de instalar"
       />
 
-      {lista.length === 0 ? (
+      {invError && (
+        <div role="alert" className="card mb-4 border-red-300 bg-red-50 text-red-700">
+          No se pudo cargar el inventario. Revisa la conexión e intenta de nuevo.
+        </div>
+      )}
+
+      {lista.length === 0 && !invError ? (
         <EmptyState
           icon={IconPaquete}
           title="Sin inventario aún"

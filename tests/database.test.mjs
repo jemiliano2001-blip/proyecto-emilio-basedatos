@@ -28,6 +28,26 @@ test('integridad de proyectos y precios con PostgreSQL aislado y roles reales', 
     await assert.rejects(db.query('select crear_proyecto_con_presupuesto($1,$2)', [data, [...topes, ...topes]]), /duplicate/)
     assert.equal((await db.query('select count(*)::int as n from obras')).rows[0].n, before)
   })
+  await t.test('asignación masiva valida todo antes de alterar topes o presupuesto', async () => {
+    const presupuestoAntes = (await db.query('select presupuesto_mxn from obras where id=$1', [id])).rows[0]
+      .presupuesto_mxn
+    await assert.rejects(
+      db.query('select asignar_materiales_proyecto($1,$2)', [
+        id,
+        [
+          { material_id: material, cantidad: 3 },
+          { material_id: '30000000-0000-4000-8000-000000000099', cantidad: 2 },
+        ],
+      ]),
+      /material no está disponible/
+    )
+    assert.equal(
+      (await db.query('select cantidad_contratada from obra_material_contratado where obra_id=$1 and material_id=$2', [id, material]))
+        .rows[0].cantidad_contratada,
+      '2.00'
+    )
+    assert.equal((await db.query('select presupuesto_mxn from obras where id=$1', [id])).rows[0].presupuesto_mxn, presupuestoAntes)
+  })
   await t.test('PATCH directo no puede cerrar, reabrir ni falsificar fecha', async () => {
     await asUser(operator)
     for (const change of ["estado='cerrada'", "estado='activa'", 'cerrado_en=now()', "cierre_nota='falsa'"]) {

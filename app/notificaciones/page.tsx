@@ -2,10 +2,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
 import { IconDocumento } from '@/components/icons'
-import {
-  abrirNotificacionAction,
-  marcarNotificacionLeidaFormAction,
-} from '@/lib/actions/notificaciones'
+import { NotificacionAcciones } from '@/components/NotificacionAcciones'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { hrefNotificacion } from '@/lib/nav'
 import { createClient } from '@/lib/supabase/server'
@@ -66,22 +63,7 @@ export default async function NotificacionesPage() {
                   </Badge>
                 )}
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {href && (
-                  <form action={abrirNotificacionAction.bind(null, n.id, href)}>
-                    <button type="submit" className="btn-primary text-sm py-2 px-4">
-                      Ver
-                    </button>
-                  </form>
-                )}
-                {!n.leida && (
-                  <form action={marcarNotificacionLeidaFormAction.bind(null, n.id)}>
-                    <button type="submit" className="btn-secondary text-sm py-2 px-4">
-                      Marcar leído
-                    </button>
-                  </form>
-                )}
-              </div>
+              <NotificacionAcciones id={n.id} href={href} leida={n.leida} />
             </article>
           )
         })}

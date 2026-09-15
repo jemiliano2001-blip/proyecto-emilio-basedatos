@@ -93,7 +93,7 @@ export function MoreSheet({
         aria-modal="true"
         aria-labelledby="mas-titulo"
         ref={panelRef}
-        className="absolute inset-x-0 bottom-0 rounded-t-2xl border-t border-gray-200 bg-white px-4 pt-3 shadow-lg"
+        className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-gray-200 bg-white px-4 pt-3 shadow-lg"
         style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <div className="mb-2 flex items-center justify-between">

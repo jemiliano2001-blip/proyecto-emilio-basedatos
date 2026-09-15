@@ -44,7 +44,7 @@ export default async function InventarioObraPage({
 
   if (!obra) notFound()
 
-  const { data: inv } = await supabase
+  const { data: inv, error: invError } = await supabase
     .from('v_inventario_campo_obra')
     .select(
       `obra_id, material_id, nombre_base, variante, unidad_medida, categoria,
@@ -78,6 +78,12 @@ export default async function InventarioObraPage({
         backLabel="Inventario"
       />
 
+      {invError && (
+        <div role="alert" className="card mb-4 border-red-300 bg-red-50 text-red-700">
+          No se pudo cargar el inventario de este proyecto. Revisa la conexión e intenta de nuevo.
+        </div>
+      )}
+
       {lista.length > 0 && (
         <section className="card mb-4 bg-gradient-to-br from-white to-teal-50/40 border-teal-100">
           <p className="text-xs font-semibold uppercase tracking-wide text-accent">
@@ -109,7 +115,7 @@ export default async function InventarioObraPage({
         </section>
       )}
 
-      {lista.length === 0 ? (
+      {lista.length === 0 && !invError ? (
         <EmptyState
           icon={IconPaquete}
           title="Sin material recibido"

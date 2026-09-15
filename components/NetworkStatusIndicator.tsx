@@ -48,7 +48,7 @@ export function NetworkStatusIndicator() {
         className="fixed top-0 inset-x-0 z-50 bg-amber-600 text-white text-xs font-semibold px-4 py-2 text-center flex items-center justify-center gap-2 shadow-md print:hidden"
       >
         <IconWifiOff className="h-4 w-4 shrink-0" />
-        <span>Sin conexión a internet. Los registros capturados en campo se guardarán localmente.</span>
+        <span>Sin conexión a internet. Solo requisiciones y recepciones sin fotografías pueden guardarse en este teléfono.</span>
       </div>
     )
   }

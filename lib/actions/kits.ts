@@ -34,31 +34,13 @@ export async function createKitAction(
   const { items, ...kitData } = parsed.data
   const supabase = await createClient()
 
-  const { data: kit, error: errKit } = await supabase
-    .from('material_kits')
-    .insert(kitData)
-    .select('id')
-    .single()
+  const { error } = await supabase.rpc('crear_kit_con_items', {
+    p_datos: kitData,
+    p_items: items,
+  })
 
-  if (errKit || !kit) {
-    return { error: 'No se pudo registrar el kit. Intenta de nuevo.' }
-  }
-
-  if (items.length > 0) {
-    const { error: errItems } = await supabase
-      .from('material_kit_items')
-      .insert(
-        items.map((it) => ({
-          kit_id: kit.id,
-          material_id: it.material_id,
-          cantidad: it.cantidad,
-        }))
-      )
-
-    if (errItems) {
-      await supabase.from('material_kits').delete().eq('id', kit.id)
-      return { error: 'No se pudieron guardar los componentes del kit.' }
-    }
+  if (error) {
+    return { error: 'No se pudo registrar el kit completo. Intenta de nuevo.' }
   }
 
   revalidatePath('/kits')
@@ -92,39 +74,14 @@ export async function updateKitAction(
   const { items, ...kitData } = parsed.data
   const supabase = await createClient()
 
-  const { error: errKit } = await supabase
-    .from('material_kits')
-    .update(kitData)
-    .eq('id', kitId)
+  const { error } = await supabase.rpc('actualizar_kit_con_items', {
+    p_kit_id: kitId,
+    p_datos: kitData,
+    p_items: items,
+  })
 
-  if (errKit) {
-    return { error: 'No se pudo actualizar el kit. Intenta de nuevo.' }
-  }
-
-  // Reemplazar componentes del kit
-  const { error: errDel } = await supabase
-    .from('material_kit_items')
-    .delete()
-    .eq('kit_id', kitId)
-
-  if (errDel) {
-    return { error: 'No se pudieron actualizar los componentes del kit.' }
-  }
-
-  if (items.length > 0) {
-    const { error: errItems } = await supabase
-      .from('material_kit_items')
-      .insert(
-        items.map((it) => ({
-          kit_id: kitId,
-          material_id: it.material_id,
-          cantidad: it.cantidad,
-        }))
-      )
-
-    if (errItems) {
-      return { error: 'No se pudieron guardar los nuevos componentes del kit.' }
-    }
+  if (error) {
+    return { error: 'No se pudo actualizar el kit completo. Intenta de nuevo.' }
   }
 
   revalidatePath('/kits')

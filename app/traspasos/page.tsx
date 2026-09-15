@@ -4,7 +4,8 @@ import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
 import { IconPlus, IconPaquete } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeSolicitarTraspaso } from '@/lib/roles'
+import { puedeSolicitarTraspaso, puedeVerTraspasos } from '@/lib/roles'
+import { redirect } from 'next/navigation'
 import { esRelacionAusente } from '@/lib/schema-disponible'
 import { createClient } from '@/lib/supabase/server'
 import type { EstadoTraspaso } from '@/lib/types'
@@ -59,6 +60,9 @@ function labelEstado(estado: EstadoTraspaso) {
 
 export default async function TraspasosPage() {
   const session = await getSessionUsuario()
+  if (!session || !puedeVerTraspasos(session.rol)) {
+    redirect('/solicitudes')
+  }
   const puedeCrear = puedeSolicitarTraspaso(session?.rol ?? null)
   const supabase = await createClient()
 

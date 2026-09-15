@@ -91,6 +91,9 @@ function MaterialCard({
       <p className="font-bold text-sm text-ink line-clamp-2 group-hover:text-navy transition-colors">
         {m.nombre_base}
       </p>
+      {!m.activo && (
+        <p className="mt-1 text-[11px] font-semibold text-amber-800">Inactivo: no se puede seleccionar en requisiciones.</p>
+      )}
       {m.variante && <p className="text-xs text-gray-500 truncate">{m.variante}</p>}
       {m.subcategoria && (
         <p className="text-xs text-gray-400 mt-0.5">{m.subcategoria}</p>
@@ -112,12 +115,14 @@ export function CatalogoMaterialesView({
   categorias,
   puedeEditar,
   verPrecios,
+  hasLoadError = false,
   initialCategoria,
 }: {
   materiales: CatalogoMaterial[]
   categorias: MaterialCategoria[]
   puedeEditar: boolean
   verPrecios: boolean
+  hasLoadError?: boolean
   initialCategoria?: string
 }) {
   // Selector de categoría: si viene por query inicial o la primera categoría disponible
@@ -748,7 +753,7 @@ export function CatalogoMaterialesView({
         </div>
       )}
 
-      {materiales.length === 0 && (
+      {materiales.length === 0 && !hasLoadError && (
         <EmptyState
           icon={IconPaquete}
           title="El catálogo está vacío"

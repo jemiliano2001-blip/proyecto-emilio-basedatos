@@ -89,12 +89,22 @@ export async function marcarNotificacionLeidaAction(
   return { error: null }
 }
 
-export async function marcarNotificacionLeidaFormAction(id: string, _formData: FormData): Promise<void> {
-  await marcarNotificacionLeidaAction(id)
+export async function marcarNotificacionLeidaFormAction(
+  id: string,
+  _prev: { error: string | null },
+  _formData: FormData
+): Promise<{ error: string | null }> {
+  return marcarNotificacionLeidaAction(id)
 }
 
-export async function abrirNotificacionAction(id: string, href: string, _formData: FormData): Promise<void> {
+export async function abrirNotificacionAction(
+  id: string,
+  href: string,
+  _prev: { error: string | null },
+  _formData: FormData
+): Promise<{ error: string | null }> {
   const next = sanitizeNextPath(href)
-  await marcarNotificacionLeidaAction(id)
+  const result = await marcarNotificacionLeidaAction(id)
+  if (result.error) return result
   redirect(next)
 }

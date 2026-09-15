@@ -13,7 +13,7 @@ export type OrdenActionResult = { error: string | null; ok?: boolean }
  */
 export async function asignarProveedorOrdenAction(
   ordenId: string,
-  proveedorId: string | null,
+  proveedorId: string,
   folioFisico?: string | null
 ): Promise<OrdenActionResult> {
   const session = await getSessionUsuario()
@@ -23,9 +23,12 @@ export async function asignarProveedorOrdenAction(
 
   const supabase = await createClient()
 
-  const updates: { proveedor_id?: string | null; folio_fisico?: string | null } = {}
-  if (proveedorId !== undefined) {
-    updates.proveedor_id = proveedorId && proveedorId.trim().length > 0 ? proveedorId.trim() : null
+  if (proveedorId.trim().length === 0) {
+    return { error: 'Selecciona un proveedor antes de guardar la orden de compra.' }
+  }
+
+  const updates: { proveedor_id: string; folio_fisico?: string | null } = {
+    proveedor_id: proveedorId.trim(),
   }
   if (folioFisico !== undefined) {
     updates.folio_fisico = folioFisico && folioFisico.trim().length > 0 ? folioFisico.trim() : null

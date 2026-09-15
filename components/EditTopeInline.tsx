@@ -57,12 +57,6 @@ export function EditTopeInline({
               setOpen(false)
             }
           }}
-          onBlur={(event) => {
-            const next = event.relatedTarget
-            if (!(next instanceof Node) || !event.currentTarget.form?.contains(next)) {
-              event.currentTarget.form?.requestSubmit()
-            }
-          }}
         />
       </label>
       <div className="flex gap-2">

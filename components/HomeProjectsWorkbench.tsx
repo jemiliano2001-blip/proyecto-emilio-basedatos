@@ -255,9 +255,8 @@ export function HomeProjectsWorkbench({
             }
             action={
               search
-                ? {
+                  ? {
                     label: 'Limpiar búsqueda',
-                    href: '#',
                     onClick: () => setSearch(''),
                   }
                 : puedeCrear && selectedTab === 'activa'

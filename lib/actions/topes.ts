@@ -112,75 +112,13 @@ export async function asignarMaterialesMasivosAction(
   }
 
   const supabase = await createClient()
+  const { error } = await supabase.rpc('asignar_materiales_proyecto', {
+    p_obra_id: obraId,
+    p_partidas: partidas,
+  })
 
-  // 1. Obtener precios base de los materiales para cálculo de presupuesto adicional
-  const matIds = partidas.map((p) => p.material_id)
-  const { data: mats } = await supabase
-    .from('catalogo_materiales')
-    .select('id, precio_base')
-    .in('id', matIds)
-
-  const priceMap = new Map((mats ?? []).map((m) => [m.id, Number(m.precio_base ?? 0)]))
-  let costoAdicional = 0
-
-  for (const p of partidas) {
-    const pb = priceMap.get(p.material_id) ?? 0
-    costoAdicional += p.cantidad * pb
-  }
-  costoAdicional = Math.round(costoAdicional * 100) / 100
-
-  // 2. Obtener asignaciones existentes en esta obra
-  const { data: existentes } = await supabase
-    .from('obra_material_contratado')
-    .select('id, material_id, cantidad_contratada')
-    .eq('obra_id', obraId)
-    .in('material_id', matIds)
-
-  const existentesMap = new Map(
-    (existentes ?? []).map((e) => [e.material_id, { id: e.id, cantidad: Number(e.cantidad_contratada) }])
-  )
-
-  // 3. Upsert o insert según corresponda
-  for (const p of partidas) {
-    const existente = existentesMap.get(p.material_id)
-    if (existente) {
-      const nuevaCantidad = existente.cantidad + p.cantidad
-      const { error: errUpd } = await supabase
-        .from('obra_material_contratado')
-        .update({ cantidad_contratada: nuevaCantidad })
-        .eq('id', existente.id)
-
-      if (errUpd) {
-        return { error: 'Error al actualizar material existente.' }
-      }
-    } else {
-      const { error: errIns } = await supabase
-        .from('obra_material_contratado')
-        .insert({
-          obra_id: obraId,
-          material_id: p.material_id,
-          cantidad_contratada: p.cantidad,
-        })
-
-      if (errIns) {
-        return { error: 'Error al insertar nuevo material asignado.' }
-      }
-    }
-  }
-
-  // 4. Sumar el costo al presupuesto del proyecto si costoAdicional > 0
-  if (costoAdicional > 0) {
-    const { data: obraActual } = await supabase
-      .from('obras')
-      .select('presupuesto_mxn')
-      .eq('id', obraId)
-      .single()
-
-    const presActual = Number(obraActual?.presupuesto_mxn ?? 0)
-    await supabase
-      .from('obras')
-      .update({ presupuesto_mxn: presActual + costoAdicional })
-      .eq('id', obraId)
+  if (error) {
+    return { error: 'No se pudieron asignar todos los materiales. No se aplicó ningún cambio.' }
   }
 
   revalidatePath(`/obras/${obraId}`)

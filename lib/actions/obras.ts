@@ -60,7 +60,9 @@ export async function createObraAction(
 
   // Procesar subida de foto si se adjuntó
   const fotoFile = formData.get('foto') as File | null
-  let foto_url: string | null = (formData.get('foto_existente') as string | null) || null
+  let foto_url: string | null = formData.get('foto_eliminar') === 'true'
+    ? null
+    : (formData.get('foto_existente') as string | null) || null
 
   if (fotoFile && fotoFile.size > 0) {
     const uploadRes = await uploadObraFoto(supabase, fotoFile)
@@ -188,7 +190,9 @@ export async function updateObraAction(
 
   // Procesar subida de foto si se adjuntó
   const fotoFile = formData.get('foto') as File | null
-  let foto_url: string | null = (formData.get('foto_existente') as string | null) || null
+  let foto_url: string | null = formData.get('foto_eliminar') === 'true'
+    ? null
+    : (formData.get('foto_existente') as string | null) || null
 
   if (fotoFile && fotoFile.size > 0) {
     const uploadRes = await uploadObraFoto(supabase, fotoFile)

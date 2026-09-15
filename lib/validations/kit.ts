@@ -65,7 +65,9 @@ export function validateMaterialKitInput(raw: unknown): ValidationResult<Materia
     if (typeof row !== 'object' || row === null) continue
     const material_id = typeof row.material_id === 'string' ? row.material_id.trim() : ''
     if (!material_id || !UUID_RE.test(material_id)) continue
-    if (vistos.has(material_id)) continue
+    if (vistos.has(material_id)) {
+      return { ok: false, error: `El componente ${i + 1} está repetido. Cada material sólo puede aparecer una vez en un kit.` }
+    }
 
     const cantNum = typeof row.cantidad === 'number' ? row.cantidad : parseFloat(String(row.cantidad))
     if (!Number.isFinite(cantNum) || cantNum <= 0) {

@@ -207,22 +207,32 @@ export function OrdenCompraFacturasSection({
                     </div>
                   </button>
                   <div className="flex items-center gap-1 pr-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setQuickLookIndex(facturas.findIndex((x) => x.id === f.id))
-                      }
-                      className="p-2 text-gray-500 hover:text-ink rounded-lg hover:bg-gray-100"
-                      title="Vista previa"
-                    >
-                      <IconOjo className="h-4 w-4" />
-                    </button>
+                    {f.tipo_archivo === 'xml' ? (
+                      <a
+                        href={f.archivo_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-xs font-semibold text-accent hover:underline"
+                        title="Abrir XML"
+                      >
+                        XML
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setQuickLookIndex(facturas.findIndex((x) => x.id === f.id))}
+                        className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-gray-500 hover:text-ink rounded-lg hover:bg-gray-100"
+                        title="Vista previa"
+                      >
+                        <IconOjo className="h-4 w-4" />
+                      </button>
+                    )}
                     {puedeGestionar && (
                       <button
                         type="button"
                         onClick={() => handleEliminar(f.id)}
                         disabled={deletingId === f.id}
-                        className="p-2 text-gray-400 hover:text-danger rounded-lg hover:bg-red-50 disabled:opacity-50"
+                        className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-gray-400 hover:text-danger rounded-lg hover:bg-red-50 disabled:opacity-50"
                         title="Eliminar factura"
                       >
                         <IconBasura className="h-4 w-4" />

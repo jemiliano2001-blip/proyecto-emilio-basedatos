@@ -32,10 +32,15 @@ export function OrdenCompraProveedorModal({
     e.preventDefault()
     setError(null)
 
+    if (!proveedorId) {
+      setError('Selecciona un proveedor antes de guardar la orden de compra.')
+      return
+    }
+
     startTransition(async () => {
       const res = await asignarProveedorOrdenAction(
         ordenId,
-        proveedorId || null,
+        proveedorId,
         folioFisico || null
       )
       if (res.error) {
@@ -75,15 +80,17 @@ export function OrdenCompraProveedorModal({
 
             <form onSubmit={handleGuardar} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-ink mb-1">
-                  Proveedor
+                <label htmlFor="proveedor_id" className="block text-xs font-semibold text-ink mb-1">
+                  Proveedor *
                 </label>
                 <select
+                  id="proveedor_id"
                   value={proveedorId}
                   onChange={(e) => setProveedorId(e.target.value)}
                   className="input-base"
+                  required
                 >
-                  <option value="">-- Sin proveedor seleccionado --</option>
+                  <option value="" disabled>Selecciona proveedor</option>
                   {proveedores.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.nombre}
@@ -93,10 +100,11 @@ export function OrdenCompraProveedorModal({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-ink mb-1">
+                <label htmlFor="folio_fisico" className="block text-xs font-semibold text-ink mb-1">
                   Folio físico / No. de talonario (Opcional)
                 </label>
                 <input
+                  id="folio_fisico"
                   type="text"
                   placeholder="Ej. 14329"
                   value={folioFisico}

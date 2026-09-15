@@ -18,7 +18,6 @@ import { formatMoneyMx } from '@/lib/money'
 import {
   puedeAprobarCompras,
   puedeAprobarPago,
-  puedeCotizar,
   puedeVerPrecios,
   puedeVerTodasLasSolicitudes,
 } from '@/lib/roles'
@@ -139,11 +138,6 @@ export default async function SolicitudDetallePage({
   const puedeFinanzas =
     puedeAprobarPago(session?.rol ?? null) && detalle.estado === 'en_proceso'
   const puedeRechazar = puedeCompras || puedeFinanzas
-  const mostrarCotizarLegacy =
-    puedeCotizar(session?.rol ?? null) &&
-    (detalle.estado === 'pendiente' ||
-      detalle.estado === 'en_cotizacion' ||
-      detalle.estado === 'aprobada')
   const verPrecios = puedeVerPrecios(session?.rol ?? null)
   const fechaVisible = new Date(detalle.creado_en).toLocaleString('es-MX', {
     dateStyle: 'long',
@@ -335,14 +329,6 @@ export default async function SolicitudDetallePage({
         )}
         {puedeFinanzas && <AprobarPagoButton solicitudId={detalle.id} />}
         {puedeRechazar && <RechazarSolicitudForm solicitudId={detalle.id} />}
-        {mostrarCotizarLegacy && (
-          <Link
-            href={`/solicitudes/${detalle.id}/cotizar`}
-            className="btn-secondary w-full text-center block text-sm"
-          >
-            Cotizar (flujo anterior)
-          </Link>
-        )}
         {puedeCancelar && <CancelarSolicitudButton solicitudId={detalle.id} />}
       </div>
 

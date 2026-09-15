@@ -47,6 +47,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  if (user) {
+    const { data: perfil } = await supabase
+      .from('usuarios')
+      .select('id, activo, rol')
+      .eq('id', user.id)
+      .maybeSingle()
+    if (!perfil || perfil.activo === false || !perfil.rol) {
+      if (!isLogin) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        url.search = ''
+        url.searchParams.set('reason', 'access')
+        return NextResponse.redirect(url)
+      }
+      return supabaseResponse
+    }
+  }
+
   if (user && isLogin) {
     const url = request.nextUrl.clone()
     url.pathname = '/'

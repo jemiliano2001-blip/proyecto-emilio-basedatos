@@ -236,7 +236,7 @@ export function ObraMaterialesList({
             <button
               type="button"
               onClick={() => setCategoriaSeleccionada('sin_categoria')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+              className={`min-h-[44px] px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 categoriaSeleccionada === 'sin_categoria'
                   ? 'bg-navy text-white shadow-sm'
                   : 'bg-slate-100 text-gray-700 hover:bg-slate-200'
@@ -254,7 +254,7 @@ export function ObraMaterialesList({
               setDeleteError(null)
               setModalBorrarTodo(true)
             }}
-            className="text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2.5 py-1.5 rounded-md border border-red-200 transition-colors inline-flex items-center gap-1.5 font-medium shrink-0 self-start sm:self-auto"
+            className="min-h-[44px] text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2.5 py-1.5 rounded-md border border-red-200 transition-colors inline-flex items-center gap-1.5 font-medium shrink-0 self-start sm:self-auto"
             title="Eliminar todas las partidas contratadas en este proyecto"
           >
             <IconBasura className="w-3.5 h-3.5" />
@@ -443,7 +443,7 @@ export function ObraMaterialesList({
                                 setDeleteError(null)
                                 setMaterialAEliminar(s)
                               }}
-                              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded border border-red-200 transition-colors inline-flex items-center gap-1 self-end sm:self-center font-medium"
+                              className="min-h-[44px] text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded border border-red-200 transition-colors inline-flex items-center gap-1 self-end sm:self-center font-medium"
                               title="Eliminar este material del proyecto"
                             >
                               <IconBasura className="w-3.5 h-3.5" />

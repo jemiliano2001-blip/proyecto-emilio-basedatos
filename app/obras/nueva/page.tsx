@@ -16,7 +16,7 @@ export default async function NuevaObraPage() {
   const supabase = await createClient()
 
   // Materiales con precio_base
-  const { data: materialesRaw } = await supabase
+  const { data: materialesRaw, error: materialesError } = await supabase
     .from('catalogo_materiales')
     .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, precio_base, activo, foto_url')
     .eq('activo', true)
@@ -28,7 +28,7 @@ export default async function NuevaObraPage() {
   }))
 
   // Kits / Ensambles con items asociados
-  const { data: kitsRaw } = await supabase
+  const { data: kitsRaw, error: kitsError } = await supabase
     .from('material_kits')
     .select(`
       id,
@@ -114,13 +114,19 @@ export default async function NuevaObraPage() {
         backLabel="Volver a proyectos"
       />
 
-      <ObraForm
+      {(materialesError || kitsError) && (
+        <div role="alert" className="card mb-4 border-red-300 bg-red-50 text-red-700">
+          No se pudo cargar el catálogo completo para crear el proyecto. Revisa la conexión e intenta de nuevo.
+        </div>
+      )}
+
+      {!materialesError && !kitsError && <ObraForm
         action={createObraAction}
         submitLabel="Crear proyecto"
         materiales={materiales}
         kits={kits}
         allowTopesOnCreate
-      />
+      />}
     </main>
   )
 }

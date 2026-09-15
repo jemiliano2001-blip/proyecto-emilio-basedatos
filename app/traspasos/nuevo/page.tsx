@@ -14,19 +14,19 @@ export default async function NuevoTraspasoPage() {
 
   const supabase = await createClient()
 
-  const { data: obras } = await supabase
+  const { data: obras, error: obrasError } = await supabase
     .from('obras')
     .select('id, nombre, fraccionamiento')
     .eq('estado', 'activa')
     .order('nombre')
 
-  const { data: materiales } = await supabase
+  const { data: materiales, error: materialesError } = await supabase
     .from('catalogo_materiales')
     .select('id, nombre_base, variante, unidad_medida')
     .eq('activo', true)
     .order('nombre_base')
 
-  const { data: saldos } = await supabase
+  const { data: saldos, error: saldosError } = await supabase
     .from('v_saldo_material_obra')
     .select('obra_id, material_id, cantidad_disponible')
 
@@ -39,7 +39,11 @@ export default async function NuevoTraspasoPage() {
         backLabel="Traspasos"
       />
 
-      {!obras || obras.length < 2 ? (
+      {(obrasError || materialesError || saldosError) ? (
+        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          No se pudieron cargar los datos necesarios para el traspaso. Revisa la conexión e intenta de nuevo.
+        </div>
+      ) : !obras || obras.length < 2 ? (
         <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
           Se requieren al menos 2 proyectos activos para realizar un traspaso.
         </div>

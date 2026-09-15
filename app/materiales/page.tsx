@@ -18,13 +18,14 @@ export default async function MaterialesPage({
   const supabase = await createClient()
 
   // 1. Consulta de materiales activos
-  const { data: materiales, error: errMateriales } = await supabase
+  let materialesQuery = supabase
     .from('catalogo_materiales')
     .select(
       'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, precio_base, activo'
     )
-    .eq('activo', true)
     .order('nombre_base')
+  if (!puedeEditar) materialesQuery = materialesQuery.eq('activo', true)
+  const { data: materiales, error: errMateriales } = await materialesQuery
 
   // 2. Consulta de categorías dinámicas y sus subcategorías desde base de datos
   const { data: categoriasRaw, error: errCategorias } = await supabase
@@ -74,6 +75,7 @@ export default async function MaterialesPage({
         categorias={categorias}
         puedeEditar={puedeEditar}
         verPrecios={verPrecios}
+        hasLoadError={Boolean(errMateriales || errCategorias)}
         initialCategoria={resolvedSearchParams?.categoria}
       />
     </main>

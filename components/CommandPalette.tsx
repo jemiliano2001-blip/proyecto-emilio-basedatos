@@ -315,8 +315,12 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
           async () => {
             const supabase = createClient()
             const [obrasRes, matsRes] = await Promise.all([
-              supabase.from('obras').select('id, nombre, cliente').or(`nombre.ilike.%${safeTerm}%,cliente.ilike.%${safeTerm}%`).limit(4),
-              supabase.from('catalogo_materiales').select('id, nombre_base, variante, unidad_medida').ilike('nombre_base', `%${safeTerm}%`).limit(5),
+              puedeVerNavProyectos(rol)
+                ? supabase.from('obras').select('id, nombre, cliente').or(`nombre.ilike.%${safeTerm}%,cliente.ilike.%${safeTerm}%`).limit(4)
+                : Promise.resolve({ data: [], error: null }),
+              rol !== 'personal'
+                ? supabase.from('catalogo_materiales').select('id, nombre_base, variante, unidad_medida').ilike('nombre_base', `%${safeTerm}%`).limit(5)
+                : Promise.resolve({ data: [], error: null }),
             ])
             if (obrasRes.error || matsRes.error) throw obrasRes.error ?? matsRes.error
             return [
@@ -349,7 +353,7 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current)
     }
-  }, [query, userId])
+  }, [query, rol, userId])
 
   // Filtrado de comandos estáticos y unión con dinámicos
   const filtered = useMemo(() => {
@@ -504,7 +508,7 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
                         isActive
                           ? 'bg-accent text-white'
                           : item.category === 'Proyectos'
-                            ? 'bg-blue-50 text-blue-800'
+                            ? 'bg-slate-100 text-ink'
                             : item.category === 'Materiales'
                               ? 'bg-teal-50 text-teal-800'
                               : 'bg-gray-100 text-gray-500'
@@ -518,7 +522,7 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded font-medium shrink-0',
                       item.category === 'Proyectos'
-                        ? 'bg-blue-100 text-blue-800 font-semibold'
+                        ? 'bg-slate-100 text-ink font-semibold'
                         : item.category === 'Materiales'
                           ? 'bg-teal-100 text-teal-800 font-semibold'
                           : item.category === 'Acciones Rápidas'

@@ -36,7 +36,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await getSessionUsuario()
-  const showNav = Boolean(session)
+  const showNav = Boolean(session?.perfil && session.rol)
   const rol = session?.rol ?? null
   const traspasosDisponibles = showNav ? await traspasosSchemaDisponible() : false
 

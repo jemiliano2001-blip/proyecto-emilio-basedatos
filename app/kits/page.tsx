@@ -14,7 +14,7 @@ export default async function KitsPage() {
   const verPrecios = puedeVerPrecios(session?.rol ?? null)
   const supabase = await createClient()
 
-  const { data: kitsRaw } = await supabase
+  const { data: kitsRaw, error } = await supabase
     .from('material_kits')
     .select(`
       id,
@@ -92,6 +92,11 @@ export default async function KitsPage() {
       />
 
       <div className="space-y-4">
+        {error && (
+          <div role="alert" className="card border-red-200 bg-red-50 text-red-800">
+            No se pudieron cargar los kits. Revisa tu conexión e intenta de nuevo.
+          </div>
+        )}
         {kits.map((kit) => (
           <div key={kit.id} className="card space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-2">
@@ -103,6 +108,7 @@ export default async function KitsPage() {
                       {kit.configuracion}
                     </Badge>
                   )}
+                  {!kit.activo && <Badge variant="gray">Inactivo</Badge>}
                 </div>
                 {kit.material_principal && (
                   <p className="text-xs text-gray-500 mt-0.5">
@@ -164,7 +170,7 @@ export default async function KitsPage() {
           </div>
         ))}
 
-        {kits.length === 0 && (
+        {kits.length === 0 && !error && (
           <EmptyState
             icon={IconPaquete}
             title="No hay kits registrados aún"
