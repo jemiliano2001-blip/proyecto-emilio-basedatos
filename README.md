@@ -125,4 +125,9 @@ cambian presupuestos, dejan traspasos completados). No los corras a ciegas.
 
 Lee `.cursorrules` antes de tocar cualquier tabla nueva. RLS obligatorio desde el commit en que se crea la tabla. La `service_role` key NUNCA debe ir en `app/` ni `components/`.
 
+### Administración de usuarios y bitácora
+- UI: `/usuarios` (solo `acceso_total`) y `/bitacora` (`acceso_total` + `operacion`)
+- Migración **aplicada** en remoto: [`supabase/migrations/0024_usuarios_admin_bitacora.sql`](supabase/migrations/0024_usuarios_admin_bitacora.sql) (columna `email`, RLS insert/update, trigger de auditoría en `usuarios`)
+- En `.env.local` hace falta `SUPABASE_SERVICE_ROLE_KEY` (solo servidor) para crear cuentas Auth y resetear contraseñas. El cliente admin vive en `lib/supabase/admin.ts` y solo lo importan server actions. Sin esa key, listar usuarios/bitácora sí funciona; crear/reset password no.
+
 Cambios de estado de requisición y descuentos de presupuesto van por RPC (`security definer`) con validación de `usuarios.rol` vía `auth_rol()`. Las vistas de recepción son internas; el cliente usa RPCs `listar_*`, `detalle_*`, `crear_recepcion`, `revisar_recepcion`.

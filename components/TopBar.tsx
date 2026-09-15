@@ -7,6 +7,8 @@ import { IconSearch } from '@/components/icons'
 import { tituloDeRuta } from '@/lib/nav'
 import type { RolUsuario } from '@/lib/types'
 import {
+  puedeGestionarUsuarios,
+  puedeVerBitacora,
   puedeVerInventarioCampo,
   puedeVerNavProyectos,
   puedeVerPrecios,
@@ -33,6 +35,8 @@ export function TopBar({
   const enMateriales = pathname.startsWith('/materiales')
   const enOrdenes = pathname.startsWith('/ordenes')
   const enTraspasos = pathname.startsWith('/traspasos')
+  const enUsuarios = pathname.startsWith('/usuarios')
+  const enBitacora = pathname.startsWith('/bitacora')
 
   const desktopLinkClass = (active: boolean) =>
     `inline-flex min-h-[44px] items-center px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
@@ -109,6 +113,16 @@ export function TopBar({
           rol !== 'personal' ? (
             <Link href="/traspasos" className={desktopLinkClass(enTraspasos)}>
               Traspasos
+            </Link>
+          ) : null}
+          {puedeGestionarUsuarios(rol ?? null) ? (
+            <Link href="/usuarios" className={desktopLinkClass(enUsuarios)}>
+              Usuarios
+            </Link>
+          ) : null}
+          {puedeVerBitacora(rol ?? null) ? (
+            <Link href="/bitacora" className={desktopLinkClass(enBitacora)}>
+              Bitácora
             </Link>
           ) : null}
         </nav>

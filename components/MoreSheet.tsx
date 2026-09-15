@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { logoutAction } from '@/lib/actions/auth'
 import {
+  IconBitacora,
   IconCerrar,
   IconMateriales,
   IconOrdenes,
@@ -13,6 +14,7 @@ import {
   IconRecepcion,
   IconSalir,
   IconTraspasos,
+  IconUsuarios,
 } from '@/components/icons'
 
 export function MoreSheet({
@@ -27,6 +29,8 @@ export function MoreSheet({
   traspasosDisponibles,
   vistaCampoLimitada = false,
   puedeVerInventario = false,
+  puedeGestionarUsuarios = false,
+  puedeVerBitacora = false,
 }: {
   open: boolean
   onClose: () => void
@@ -39,6 +43,8 @@ export function MoreSheet({
   traspasosDisponibles: boolean
   vistaCampoLimitada?: boolean
   puedeVerInventario?: boolean
+  puedeGestionarUsuarios?: boolean
+  puedeVerBitacora?: boolean
 }) {
   const panelRef = useRef<HTMLDivElement>(null)
   const previousFocus = useRef<HTMLElement | null>(null)
@@ -151,6 +157,20 @@ export function MoreSheet({
             <Link href="/proveedores" className={itemClass} onClick={onClose}>
               <IconProveedores className="h-5 w-5 shrink-0" />
               Proveedores
+            </Link>
+          )}
+
+          {puedeGestionarUsuarios && (
+            <Link href="/usuarios" className={itemClass} onClick={onClose}>
+              <IconUsuarios className="h-5 w-5 shrink-0" />
+              Usuarios
+            </Link>
+          )}
+
+          {puedeVerBitacora && (
+            <Link href="/bitacora" className={itemClass} onClick={onClose}>
+              <IconBitacora className="h-5 w-5 shrink-0" />
+              Bitácora
             </Link>
           )}
 

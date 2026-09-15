@@ -5,6 +5,8 @@ import { TopBar } from '@/components/TopBar'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
   puedeGestionarProveedores,
+  puedeGestionarUsuarios,
+  puedeVerBitacora,
   puedeVerPrecios,
   puedeVerRecepciones,
   puedeVerTraspasos,
@@ -54,6 +56,8 @@ export default async function RootLayout({
             puedeVerRecepciones={puedeVerRecepciones(rol)}
             puedeVerTraspasos={puedeVerTraspasos(rol)}
             puedeGestionarProveedores={puedeGestionarProveedores(rol)}
+            puedeGestionarUsuarios={puedeGestionarUsuarios(rol)}
+            puedeVerBitacora={puedeVerBitacora(rol)}
             traspasosDisponibles={traspasosDisponibles}
           />
         )}

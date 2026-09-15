@@ -43,6 +43,8 @@ export function AppNav({
   puedeVerRecepciones,
   puedeVerTraspasos,
   puedeGestionarProveedores,
+  puedeGestionarUsuarios,
+  puedeVerBitacora,
   traspasosDisponibles,
 }: {
   rol: RolUsuario | null
@@ -50,6 +52,8 @@ export function AppNav({
   puedeVerRecepciones: boolean
   puedeVerTraspasos: boolean
   puedeGestionarProveedores: boolean
+  puedeGestionarUsuarios: boolean
+  puedeVerBitacora: boolean
   traspasosDisponibles: boolean
 }) {
   const pathname = usePathname()
@@ -70,6 +74,8 @@ export function AppNav({
     pathname.startsWith('/traspasos') ||
     pathname.startsWith('/proveedores') ||
     pathname.startsWith('/notificaciones') ||
+    pathname.startsWith('/usuarios') ||
+    pathname.startsWith('/bitacora') ||
     (!vistaCampo && enInventario) ||
     (rol === 'finanzas' ? enRecepcion : enOrdenes)
 
@@ -165,6 +171,8 @@ export function AppNav({
         traspasosDisponibles={traspasosDisponibles && !vistaCampo}
         vistaCampoLimitada={vistaCampo}
         puedeVerInventario={mostrarInventarioEnMas}
+        puedeGestionarUsuarios={puedeGestionarUsuarios && !vistaCampo}
+        puedeVerBitacora={puedeVerBitacora && !vistaCampo}
       />
     </>
   )

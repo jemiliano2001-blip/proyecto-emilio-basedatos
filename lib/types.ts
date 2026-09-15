@@ -9,8 +9,22 @@ export type RolUsuario =
 export interface Usuario {
   id: string
   nombre: string
+  email?: string | null
   rol: RolUsuario
   activo: boolean
+  creado_en?: string
+}
+
+export interface AuditoriaEvento {
+  id: string
+  tabla: string
+  registro_id: string
+  usuario_id: string | null
+  accion: string
+  datos_antes: Record<string, unknown> | null
+  datos_despues: Record<string, unknown> | null
+  creado_en: string
+  usuario?: { id: string; nombre: string; email?: string | null } | null
 }
 
 export interface Obra {

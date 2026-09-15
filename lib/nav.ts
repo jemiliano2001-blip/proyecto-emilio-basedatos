@@ -1,5 +1,7 @@
 export function tituloDeRuta(pathname: string): string {
   if (pathname.startsWith('/notificaciones')) return 'Avisos'
+  if (pathname.startsWith('/usuarios')) return 'Usuarios'
+  if (pathname.startsWith('/bitacora')) return 'Bitácora'
   if (pathname.startsWith('/solicitudes')) return 'Solicitudes'
   if (pathname.startsWith('/recepciones') || pathname.includes('/recibir')) return 'Recepción'
   if (pathname.startsWith('/inventario')) return 'Inventario'

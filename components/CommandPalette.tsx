@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  IconBitacora,
   IconCerrar,
   IconDocumento,
   IconMateriales,
@@ -15,6 +16,7 @@ import {
   IconSearch,
   IconTraspasos,
   IconProyectos,
+  IconUsuarios,
 } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -27,6 +29,8 @@ import {
   puedeGestionarKits,
   puedeGestionarObras,
   puedeGestionarProveedores,
+  puedeGestionarUsuarios,
+  puedeVerBitacora,
   puedeVerInventarioCampo,
   puedeVerNavProyectos,
   puedeVerPrecios,
@@ -119,6 +123,22 @@ const STATIC_COMMANDS: CommandItem[] = [
     keywords: 'proveedor empresas contactos compras',
   },
   {
+    id: 'nav-usuarios',
+    label: 'Usuarios y roles',
+    category: 'Navegación',
+    href: '/usuarios',
+    icon: IconUsuarios,
+    keywords: 'usuarios cuentas roles acceso total admin',
+  },
+  {
+    id: 'nav-bitacora',
+    label: 'Bitácora de auditoría',
+    category: 'Navegación',
+    href: '/bitacora',
+    icon: IconBitacora,
+    keywords: 'bitacora auditoria cambios historial',
+  },
+  {
     id: 'nav-avisos',
     label: 'Avisos y Notificaciones',
     category: 'Navegación',
@@ -184,6 +204,14 @@ const STATIC_COMMANDS: CommandItem[] = [
     icon: IconPlus,
     keywords: 'registrar proveedor alta proveedor',
   },
+  {
+    id: 'act-nuevo-usuario',
+    label: 'Nuevo usuario',
+    category: 'Acciones Rápidas',
+    href: '/usuarios/nuevo',
+    icon: IconPlus,
+    keywords: 'crear usuario alta cuenta',
+  },
 ]
 
 function commandAllowed(command: CommandItem, rol: RolUsuario | null, traspasosDisponibles: boolean): boolean {
@@ -193,6 +221,8 @@ function commandAllowed(command: CommandItem, rol: RolUsuario | null, traspasosD
   if (command.id === 'nav-inventario') return puedeVerInventarioCampo(rol)
   if (command.id === 'nav-traspasos' || command.id === 'act-nuevo-traspaso') return traspasosDisponibles && puedeVerTraspasos(rol)
   if (command.id === 'nav-proveedores' || command.id === 'act-nuevo-proveedor') return puedeGestionarProveedores(rol)
+  if (command.id === 'nav-usuarios' || command.id === 'act-nuevo-usuario') return puedeGestionarUsuarios(rol)
+  if (command.id === 'nav-bitacora') return puedeVerBitacora(rol)
   if (command.id === 'nav-materiales' || command.id === 'nav-kits') return rol !== 'personal'
   if (command.id === 'act-nueva-obra') return puedeGestionarObras(rol)
   if (command.id === 'act-nueva-solicitud') return puedeCrearSolicitudes(rol)

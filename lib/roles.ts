@@ -193,4 +193,14 @@ export function puedeVerInventarioCampo(rol: RolUsuario | null): boolean {
   )
 }
 
+/** Solo Emilio (acceso_total): alta/edición de cuentas. */
+export function puedeGestionarUsuarios(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total'
+}
+
+/** Emilio + operación (Iveth): lectura de la bitácora de auditoría. */
+export function puedeVerBitacora(rol: RolUsuario | null): boolean {
+  return rol === 'acceso_total' || rol === 'operacion'
+}
+
 
