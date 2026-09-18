@@ -88,18 +88,18 @@ export function SolicitudPreviewModal({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="relative flex flex-col w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[92vh]"
+        className="relative flex flex-col w-full max-w-2xl bg-card rounded-2xl shadow-2xl border border-border overflow-hidden max-h-[92vh] animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Encabezado formal con metadatos destacados */}
-        <header className="px-5 py-4 border-b border-gray-200 bg-slate-50/90 shrink-0">
+        <header className="px-5 py-4 border-b border-border bg-muted/40 shrink-0">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-100 text-teal-800">
                   VISTA PREVIA
                 </span>
-                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-200/80 text-navy border border-slate-300/60">
+                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-muted text-foreground border border-border">
                   {folio ? `FOLIO: ${folio}` : 'FOLIO: REQ-NUEVA'}
                 </span>
                 {ordenCompraFolio && (
@@ -110,17 +110,17 @@ export function SolicitudPreviewModal({
               </div>
               <h2
                 id="solicitud-preview-title"
-                className="text-base font-bold text-ink"
+                className="text-base font-bold text-foreground"
               >
                 Solicitud para requisición de materiales
               </h2>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 mt-1">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
                 <p>
-                  Proyecto: <strong className="text-ink font-semibold">{obraNombrePrincipal}</strong>
+                  Proyecto: <strong className="text-foreground font-semibold">{obraNombrePrincipal}</strong>
                 </p>
                 <span>·</span>
                 <p>
-                  Fecha: <strong className="text-gray-700 font-medium">{displayFecha}</strong>
+                  Fecha: <strong className="text-foreground font-medium">{displayFecha}</strong>
                 </p>
               </div>
             </div>
@@ -128,7 +128,7 @@ export function SolicitudPreviewModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-gray-400 hover:text-ink rounded-lg hover:bg-gray-200/80 transition-colors"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
               aria-label="Cerrar vista previa"
             >
               <IconCerrar className="w-5 h-5" />
@@ -150,18 +150,18 @@ export function SolicitudPreviewModal({
         )}
 
         {/* Nota general */}
-        {notaGeneral && notaGeneral.trim() && (
-          <div className="mx-5 mt-3 p-3 bg-gray-50 rounded-xl border border-gray-200/80 text-xs">
-            <p className="font-bold text-gray-500 uppercase tracking-wider text-[10px] mb-0.5">
+        {Boolean(notaGeneral?.trim()) && (
+          <div className="mx-5 mt-3 p-3 bg-muted/40 rounded-xl border border-border text-xs">
+            <p className="font-bold text-muted-foreground uppercase tracking-wider text-[10px] mb-0.5">
               Nota general:
             </p>
-            <p className="text-gray-700">{notaGeneral}</p>
+            <p className="text-foreground">{notaGeneral}</p>
           </div>
         )}
 
         {/* Lista de partidas */}
         <div className="p-5 overflow-y-auto space-y-2.5">
-          <div className="flex items-center justify-between text-xs text-gray-500 pb-1 border-b border-gray-100 font-semibold uppercase tracking-wider">
+          <div className="flex items-center justify-between text-xs text-muted-foreground pb-1 border-b border-border/50 font-semibold uppercase tracking-wider">
             <span>Partidas a solicitar ({items.length})</span>
             <span>Cantidad / Monto</span>
           </div>
@@ -179,34 +179,34 @@ export function SolicitudPreviewModal({
                 className={`p-3 rounded-xl border transition-colors ${
                   insuficiente
                     ? 'border-red-200 bg-red-50/40'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    : 'border-border bg-card hover:border-input'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-xs font-bold text-gray-400 font-mono">
+                      <span className="text-xs font-bold text-muted-foreground font-mono">
                         #{idx + 1}
                       </span>
-                      <p className="text-sm font-semibold text-ink">
+                      <p className="text-sm font-semibold text-foreground">
                         {it.nombre}
                       </p>
                       {it.variante && (
-                        <span className="text-xs text-gray-500">· {it.variante}</span>
+                        <span className="text-xs text-muted-foreground">· {it.variante}</span>
                       )}
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-medium">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-medium">
                         {labelTipoLinea(it.tipo_linea)}
                       </span>
                     </div>
 
                     {it.obraNombre && it.obraNombre !== obraNombrePrincipal && (
-                      <p className="text-xs font-semibold text-teal-700 mt-1">
+                      <p className="text-xs font-semibold text-accent mt-1">
                         Proyecto destino: {it.obraNombre}
                       </p>
                     )}
 
                     {it.nota && (
-                      <p className="text-xs text-gray-500 mt-1 italic">
+                      <p className="text-xs text-muted-foreground mt-1 italic">
                         &quot;{it.nota}&quot;
                       </p>
                     )}
@@ -214,7 +214,7 @@ export function SolicitudPreviewModal({
 
                   <div className="text-right shrink-0">
                     {it.tipo_linea === 'material' ? (
-                      <p className="text-sm font-bold text-ink tabular-nums">
+                      <p className="text-sm font-bold text-foreground tabular-nums">
                         {it.cantidad} {it.unidad_medida}
                       </p>
                     ) : (
@@ -229,8 +229,8 @@ export function SolicitudPreviewModal({
                       <p
                         className={`text-[11px] tabular-nums mt-0.5 ${
                           insuficiente
-                            ? 'text-red-600 font-semibold'
-                            : 'text-gray-400'
+                            ? 'text-danger font-semibold'
+                            : 'text-muted-foreground'
                         }`}
                       >
                         Disponible: {it.disponible}
@@ -244,7 +244,7 @@ export function SolicitudPreviewModal({
         </div>
 
         {/* Pie de acciones */}
-        <footer className="px-5 py-3.5 border-t border-gray-200 bg-gray-50 flex items-center justify-between shrink-0 gap-3">
+        <footer className="px-5 py-3.5 border-t border-border bg-muted/40 flex items-center justify-between shrink-0 gap-3">
           <button
             type="button"
             onClick={onClose}

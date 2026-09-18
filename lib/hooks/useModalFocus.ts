@@ -28,6 +28,9 @@ export function useModalFocus(
         (element) => !element.hasAttribute('hidden') && element.getAttribute('aria-hidden') !== 'true'
       )
 
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
     const focusTimer = window.setTimeout(() => {
       const target = initialFocusRef?.current ?? focusables()[0] ?? container
       target?.focus()
@@ -44,17 +47,24 @@ export function useModalFocus(
 
       const first = items[0]
       const last = items[items.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
+      const activeEl = document.activeElement
+
+      if (event.shiftKey) {
+        if (activeEl === first || !container?.contains(activeEl)) {
+          event.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (activeEl === last || !container?.contains(activeEl)) {
+          event.preventDefault()
+          first.focus()
+        }
       }
     }
 
     container?.addEventListener('keydown', handleKeyDown)
     return () => {
+      document.body.style.overflow = originalOverflow
       window.clearTimeout(focusTimer)
       container?.removeEventListener('keydown', handleKeyDown)
       previouslyFocused?.focus()

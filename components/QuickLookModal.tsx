@@ -88,16 +88,19 @@ export function QuickLookModal({
 
   if (!open || !itemActual) return null
 
+  const urlStr = itemActual.url || ''
+  const nombreStr = itemActual.nombre || ''
+
   const esPdf =
     itemActual.tipo === 'pdf' ||
-    itemActual.url.toLowerCase().endsWith('.pdf') ||
-    itemActual.url.includes('.pdf?') ||
-    itemActual.nombre.toLowerCase().endsWith('.pdf')
+    urlStr.toLowerCase().endsWith('.pdf') ||
+    urlStr.includes('.pdf?') ||
+    nombreStr.toLowerCase().endsWith('.pdf')
 
   const esImagen =
     itemActual.tipo === 'imagen' ||
-    itemActual.url.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) ||
-    itemActual.nombre.match(/\.(jpeg|jpg|gif|png|webp)$/i)
+    Boolean(urlStr.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i)) ||
+    Boolean(nombreStr.match(/\.(jpeg|jpg|gif|png|webp)$/i))
 
   return (
     <div
@@ -110,11 +113,11 @@ export function QuickLookModal({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative flex flex-col w-full max-w-5xl h-[92vh] max-h-[900px] bg-white rounded-2xl shadow-2xl border border-gray-200/80 overflow-hidden"
+        className="relative flex flex-col w-full max-w-5xl h-[92vh] max-h-[900px] bg-card rounded-2xl shadow-2xl border border-border overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Barra superior de herramientas */}
-        <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50/90 shrink-0">
+        <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50 shrink-0">
           <div className="flex items-center gap-2 min-w-0 pr-2">
             <span
               className={`px-2 py-0.5 text-xs font-bold rounded ${
@@ -122,7 +125,7 @@ export function QuickLookModal({
                   ? 'bg-red-100 text-red-700'
                   : esImagen
                   ? 'bg-teal-100 text-teal-800'
-                  : 'bg-gray-200 text-gray-700'
+                  : 'bg-muted text-muted-foreground'
               }`}
             >
               {esPdf ? 'PDF' : esImagen ? 'FOTO' : 'ARCHIVO'}
@@ -130,13 +133,13 @@ export function QuickLookModal({
             <div className="min-w-0">
               <h2
                 id="quicklook-title"
-                className="text-sm font-bold text-ink truncate max-w-[280px] sm:max-w-md md:max-w-lg"
+                className="text-sm font-bold text-foreground truncate max-w-[280px] sm:max-w-md md:max-w-lg"
                 title={itemActual.nombre}
               >
                 {itemActual.nombre}
               </h2>
               {(itemActual.tamano || itemActual.fecha || itemActual.subidoPor) && (
-                <p className="text-[11px] text-gray-500 truncate">
+                <p className="text-[11px] text-muted-foreground truncate">
                   {[itemActual.tamano, itemActual.fecha, itemActual.subidoPor]
                     .filter(Boolean)
                     .join(' · ')}
@@ -148,23 +151,23 @@ export function QuickLookModal({
           <div className="flex items-center gap-1.5 shrink-0">
             {/* Controles para imagen: zoom */}
             {esImagen && (
-              <div className="hidden sm:flex items-center gap-1 mr-2 px-2 py-1 bg-gray-100 rounded-lg text-xs">
+              <div className="hidden sm:flex items-center gap-1 mr-2 px-2 py-1 bg-muted rounded-lg text-xs">
                 <button
                   type="button"
                   onClick={() => setZoomNivel((z) => Math.max(0.5, z - 0.25))}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded font-bold text-gray-700 hover:bg-gray-200"
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded font-bold text-foreground hover:bg-muted-foreground/20"
                   aria-label="Reducir zoom"
                   title="Reducir zoom"
                 >
                   −
                 </button>
-                <span className="tabular-nums font-medium text-gray-600 px-1">
+                <span className="tabular-nums font-medium text-foreground px-1">
                   {Math.round(zoomNivel * 100)}%
                 </span>
                 <button
                   type="button"
                   onClick={() => setZoomNivel((z) => Math.min(3, z + 0.25))}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded font-bold text-gray-700 hover:bg-gray-200"
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded font-bold text-foreground hover:bg-muted-foreground/20"
                   aria-label="Aumentar zoom"
                   title="Aumentar zoom"
                 >
@@ -197,7 +200,7 @@ export function QuickLookModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-ink rounded-lg hover:bg-gray-200/80 transition-colors ml-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors ml-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Cerrar vista previa (Esc)"
               title="Cerrar vista previa (Esc)"
             >
@@ -207,9 +210,9 @@ export function QuickLookModal({
         </header>
 
         {/* Contenedor central de visualización */}
-        <div className="relative flex-1 bg-slate-100/70 overflow-auto flex items-center justify-center p-2 sm:p-4">
+        <div className="relative flex-1 bg-muted/40 overflow-auto flex items-center justify-center p-2 sm:p-4">
           {esPdf ? (
-            <div className="w-full h-full rounded-lg overflow-hidden bg-white shadow-inner border border-gray-200">
+            <div className="w-full h-full rounded-lg overflow-hidden bg-card shadow-inner border border-border">
               <iframe
                 src={`${itemActual.url}#toolbar=1&navpanes=0`}
                 title={itemActual.nombre}
@@ -238,11 +241,11 @@ export function QuickLookModal({
               </div>
             </div>
           ) : (
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-200 max-w-md">
-              <p className="text-sm font-semibold text-ink mb-1">
+            <div className="text-center p-6 bg-card rounded-xl shadow-sm border border-border max-w-md">
+              <p className="text-sm font-semibold text-foreground mb-1">
                 Visualización previa no disponible directamente
               </p>
-              <p className="text-xs text-gray-500 mb-4">
+              <p className="text-xs text-muted-foreground mb-4">
                 El tipo de archivo no puede renderizarse en este navegador. Puedes descargarlo para inspeccionarlo en tu equipo.
               </p>
               <a
@@ -261,7 +264,7 @@ export function QuickLookModal({
               <button
                 type="button"
                 onClick={handlePrev}
-                className="absolute left-3 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center bg-white/90 hover:bg-white text-ink rounded-full shadow-lg border border-gray-200/80 transition-transform active:scale-95"
+                className="absolute left-3 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-lg border border-border transition-transform active:scale-95"
                 title="Elemento anterior (←)"
                 aria-label="Elemento anterior"
               >
@@ -271,7 +274,7 @@ export function QuickLookModal({
               <button
                 type="button"
                 onClick={handleNext}
-                className="absolute right-3 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center bg-white/90 hover:bg-white text-ink rounded-full shadow-lg border border-gray-200/80 transition-transform active:scale-95"
+                className="absolute right-3 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-lg border border-border transition-transform active:scale-95"
                 title="Elemento siguiente (→)"
                 aria-label="Elemento siguiente"
               >
@@ -283,13 +286,13 @@ export function QuickLookModal({
 
         {/* Pie de navegación de carrusel */}
         {items.length > 1 && (
-          <footer className="px-4 py-2 border-t border-gray-200 bg-white flex items-center justify-between text-xs text-gray-500 shrink-0">
+          <footer className="px-4 py-2 border-t border-border bg-card flex items-center justify-between text-xs text-muted-foreground shrink-0">
             <span className="tabular-nums">
               Documento {currentIndex + 1} de {items.length}
             </span>
-            <div className="flex items-center gap-1 text-[11px] text-gray-400">
-              <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">←</kbd>
-              <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">→</kbd>
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border font-mono">←</kbd>
+              <kbd className="px-1.5 py-0.5 bg-muted rounded border border-border font-mono">→</kbd>
               <span>para navegar</span>
             </div>
           </footer>

@@ -6,7 +6,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-gray-200 bg-white text-gray-950 shadow-sm transition-colors duration-150',
+        'rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-colors duration-150',
         className
       )}
       {...props}
@@ -20,7 +20,7 @@ const CardInteractive = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-gray-200 bg-white text-gray-950 shadow-sm transition-all duration-180 hover:border-gray-300 hover:shadow-md active:scale-[0.99] cursor-pointer',
+        'rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-180 hover:border-input hover:shadow-md active:scale-[0.99] cursor-pointer',
         className
       )}
       {...props}
@@ -58,7 +58,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-sm text-gray-500 leading-relaxed', className)}
+    className={cn('text-sm text-muted-foreground leading-relaxed', className)}
     {...props}
   />
 ))

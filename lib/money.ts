@@ -28,3 +28,18 @@ export function formatMoneyMx(value: number): string {
     currency: 'MXN',
   }).format(value)
 }
+
+/**
+ * Sanitiza valores numéricos garantizando que nunca retornen NaN ni Infinity.
+ */
+export function toFinite(val: unknown, fallback = 0): number {
+  if (typeof val === 'number') {
+    return Number.isFinite(val) ? val : fallback
+  }
+  if (typeof val === 'string') {
+    const num = Number(val.trim())
+    return Number.isFinite(num) ? num : fallback
+  }
+  return fallback
+}
+

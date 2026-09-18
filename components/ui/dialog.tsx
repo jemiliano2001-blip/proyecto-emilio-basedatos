@@ -127,7 +127,7 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
       <div
         ref={contentRef}
         tabIndex={-1}
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in transition-opacity"
+        className="fixed inset-0 bg-ink/60 backdrop-blur-sm animate-fade-in transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -135,7 +135,7 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
       {/* Modal Box */}
       <div
         className={cn(
-          'relative z-50 w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl animate-scale-in',
+          'relative z-50 w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl animate-scale-in',
           className
         )}
         {...props}
@@ -165,7 +165,7 @@ export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLD
 export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6 pt-4 border-t border-gray-100', className)}
+      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6 pt-4 border-t border-border/50', className)}
       {...props}
     />
   )

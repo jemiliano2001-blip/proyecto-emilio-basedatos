@@ -161,10 +161,10 @@ export function MaterialSearchCombobox({
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg py-1"
+          className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg py-1"
         >
           {filtered.length === 0 ? (
-            <li className="px-3 py-2 text-xs text-gray-500 text-center">
+            <li className="px-3 py-2 text-xs text-muted-foreground text-center">
               Sin materiales con saldo disponible
             </li>
           ) : (
@@ -176,16 +176,16 @@ export function MaterialSearchCombobox({
                   key={m.id}
                   role="option"
                   aria-selected={isSelected}
-                  className={index === activeIndex ? 'bg-teal-50/70 ring-1 ring-inset ring-accent' : ''}
+                  className={index === activeIndex ? 'bg-accent/10 ring-1 ring-inset ring-accent' : ''}
                 >
                   <button
                     type="button"
                     tabIndex={-1}
                     onMouseDown={(e) => e.preventDefault()}
-                    className={`min-h-[44px] w-full text-left px-3 py-2 text-xs sm:text-sm flex items-center justify-between gap-2 border-b border-gray-50 last:border-0 ${
+                    className={`min-h-[44px] w-full text-left px-3 py-2 text-xs sm:text-sm flex items-center justify-between gap-2 border-b border-border/40 last:border-0 ${
                       isSelected
-                        ? 'bg-teal-50 text-ink font-semibold hover:bg-teal-100/60'
-                        : 'text-gray-800 hover:bg-gray-50'
+                        ? 'bg-accent/15 text-foreground font-semibold hover:bg-accent/20'
+                        : 'text-foreground hover:bg-muted'
                     }`}
                     onClick={() => {
                       onChange(m.id)
@@ -195,12 +195,12 @@ export function MaterialSearchCombobox({
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-semibold text-ink">{m.nombre_base}</span>
-                        {m.variante && <span className="text-gray-500">· {m.variante}</span>}
-                        <span className="text-gray-400 font-medium">({m.unidad_medida})</span>
+                        <span className="font-semibold text-foreground">{m.nombre_base}</span>
+                        {m.variante && <span className="text-muted-foreground">· {m.variante}</span>}
+                        <span className="text-muted-foreground font-medium">({m.unidad_medida})</span>
                       </div>
                       {m.subcategoria && (
-                        <span className="block text-[11px] text-gray-400 mt-0.5">{m.subcategoria}</span>
+                        <span className="block text-[11px] text-muted-foreground mt-0.5">{m.subcategoria}</span>
                       )}
                     </div>
 

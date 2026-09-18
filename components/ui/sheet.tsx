@@ -71,14 +71,14 @@ export function SheetTrigger({
 }
 
 const sheetVariants = cva(
-  'fixed z-50 bg-white p-6 shadow-2xl transition-transform duration-200 ease-out flex flex-col',
+  'fixed z-50 bg-card p-6 shadow-2xl transition-transform duration-200 ease-out flex flex-col',
   {
     variants: {
       side: {
-        top: 'inset-x-0 top-0 border-b border-gray-200 animate-slide-in-top',
-        bottom: 'inset-x-0 bottom-0 border-t border-gray-200 rounded-t-2xl max-h-[85vh] animate-slide-in-bottom',
-        left: 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-gray-200',
-        right: 'inset-y-0 right-0 h-full w-full sm:max-w-md border-l border-gray-200 animate-slide-in-right',
+        top: 'inset-x-0 top-0 border-b border-border animate-slide-in-top',
+        bottom: 'inset-x-0 bottom-0 border-t border-border rounded-t-2xl max-h-[85vh] animate-slide-in-bottom',
+        left: 'inset-y-0 left-0 h-full w-3/4 max-w-sm border-r border-border',
+        right: 'inset-y-0 right-0 h-full w-full sm:max-w-md border-l border-border animate-slide-in-right',
       },
     },
     defaultVariants: {
@@ -143,7 +143,7 @@ export function SheetContent({
     <div className="fixed inset-0 z-50 flex print:hidden" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-ink/60 backdrop-blur-sm transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -175,7 +175,7 @@ export function SheetHeader({ className, ...props }: React.HTMLAttributes<HTMLDi
 export function SheetFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-auto pt-4 border-t border-gray-100', className)}
+      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-auto pt-4 border-t border-border/50', className)}
       {...props}
     />
   )

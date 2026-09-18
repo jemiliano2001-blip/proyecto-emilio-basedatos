@@ -77,13 +77,13 @@ export function MoreSheet({
   if (!open) return null
 
   const itemClass =
-    'flex min-h-[48px] items-center gap-3 rounded-lg px-3 text-base font-semibold text-ink hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
+    'flex min-h-[48px] items-center gap-3 rounded-lg px-3 text-base font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
 
   return (
     <div className="fixed inset-0 z-40">
       <button
         type="button"
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-ink/60 backdrop-blur-sm"
         aria-label="Cerrar menú"
         onClick={onClose}
       />
@@ -93,16 +93,16 @@ export function MoreSheet({
         aria-modal="true"
         aria-labelledby="mas-titulo"
         ref={panelRef}
-        className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-gray-200 bg-white px-4 pt-3 shadow-lg"
+        className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-card px-4 pt-3 shadow-lg animate-slide-in-bottom"
         style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
       >
         <div className="mb-2 flex items-center justify-between">
-          <h2 id="mas-titulo" className="text-base font-bold text-ink">
+          <h2 id="mas-titulo" className="text-base font-bold text-foreground">
             Más
           </h2>
           <button
             type="button"
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-ink hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Cerrar"
             onClick={onClose}
           >
@@ -175,17 +175,17 @@ export function MoreSheet({
           )}
 
           {vistaCampoLimitada && (
-            <p className="px-3 py-2 text-sm text-gray-500">
+            <p className="px-3 py-2 text-sm text-muted-foreground">
               En campo ves el estatus de tus requisiciones, la recepción y el
               inventario por instalar.
             </p>
           )}
         </nav>
 
-        <form action={logoutAction} className="mt-4 border-t border-gray-200 pt-3">
+        <form action={logoutAction} className="mt-4 border-t border-border pt-3">
           <button
             type="submit"
-            className="flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 text-left text-base font-semibold text-danger hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+            className="flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 text-left text-base font-semibold text-danger hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
           >
             <IconSalir className="h-5 w-5 shrink-0" />
             Salir

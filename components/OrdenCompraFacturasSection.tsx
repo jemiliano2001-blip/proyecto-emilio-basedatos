@@ -401,8 +401,8 @@ export function OrdenCompraFacturasSection({
         onClose={() => setQuickLookIndex(null)}
         items={facturas.map((f) => ({
           url: f.archivo_url,
-          nombre: f.folio_factura ? `Factura ${f.folio_factura}` : f.archivo_nombre,
-          tipo: f.archivo_nombre.toLowerCase().endsWith('.pdf') ? 'pdf' : 'imagen',
+          nombre: f.folio_factura ? `Factura ${f.folio_factura}` : (f.archivo_nombre || 'Documento'),
+          tipo: (f.archivo_nombre || '').toLowerCase().endsWith('.pdf') ? 'pdf' : 'imagen',
           tamano: formatBytes(f.tamano_bytes),
           subidoPor: f.subido_por_nombre,
           fecha: new Date(f.creado_en).toLocaleDateString('es-MX'),

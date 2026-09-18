@@ -574,7 +574,7 @@ export function SolicitudForm({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                  <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
                     Cantidad solicitada {selectedMat ? `(${selectedMat.unidad_medida})` : ''} *
                   </label>
                   <div className="relative">
@@ -590,11 +590,17 @@ export function SolicitudForm({
                       className="input-base pr-12"
                     />
                     {selectedMat && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-400 pointer-events-none">
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground pointer-events-none">
                         {selectedMat.unidad_medida}
                       </span>
                     )}
                   </div>
+                  {item.cantidad.trim() !== '' && (cantNum === null || cantNum <= 0) && (
+                    <p className="text-xs font-semibold text-danger mt-1 flex items-center gap-1">
+                      <IconAlerta className="w-3 h-3 shrink-0" />
+                      <span>Ingresa una cantidad mayor a cero.</span>
+                    </p>
+                  )}
                 </div>
 
                 <input
@@ -606,7 +612,7 @@ export function SolicitudForm({
                 />
                 </> : <>
                   <div>
-                    <label className="block text-[11px] font-semibold text-gray-500 mb-1">Descripción *</label>
+                    <label className="block text-[11px] font-semibold text-muted-foreground mb-1">Descripción *</label>
                     <input
                       type="text"
                       required
@@ -617,7 +623,7 @@ export function SolicitudForm({
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-semibold text-gray-500 mb-1">Monto MXN *</label>
+                    <label className="block text-[11px] font-semibold text-muted-foreground mb-1">Monto MXN *</label>
                     <input
                       type="text"
                       inputMode="decimal"
@@ -627,6 +633,12 @@ export function SolicitudForm({
                       className="input-base text-sm"
                       placeholder="0.00"
                     />
+                    {item.monto_mxn.trim() !== '' && (parseMoney(item.monto_mxn) === null || (parseMoney(item.monto_mxn) ?? 0) <= 0) && (
+                      <p className="text-xs font-semibold text-danger mt-1 flex items-center gap-1">
+                        <IconAlerta className="w-3 h-3 shrink-0" />
+                        <span>El monto debe ser mayor a cero.</span>
+                      </p>
+                    )}
                   </div>
                   <input
                     type="text"

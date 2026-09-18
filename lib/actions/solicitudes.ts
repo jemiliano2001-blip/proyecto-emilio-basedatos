@@ -623,3 +623,133 @@ export async function rechazarSolicitudAction(
   revalidatePath('/')
   return { error: null, ok: true }
 }
+
+export type BatchActionResult = {
+  exitosas: number
+  fallidas: number
+  errores: string[]
+  error?: string | null
+}
+
+export async function aprobarMultiplesSolicitudesAction(
+  solicitudIds: string[]
+): Promise<BatchActionResult> {
+  const session = await getSessionUsuario()
+  if (!session || (!puedeAprobarCompras(session.rol) && !puedeAprobarPago(session.rol))) {
+    return { exitosas: 0, fallidas: solicitudIds.length, errores: ['Sin permisos para aprobar.'], error: 'Sin permisos.' }
+  }
+
+  const supabase = await createClient()
+  let exitosas = 0
+  let fallidas = 0
+  const errores: string[] = []
+
+  for (const id of solicitudIds) {
+    try {
+      if (session.rol === 'finanzas') {
+        const { error } = await supabase.rpc('aprobar_pago_solicitud', { p_solicitud_id: id })
+        if (error) {
+          fallidas++
+          errores.push(`REQ-${id.slice(0, 8)}: ${mapRpcError(error, 'Error al procesar pago')}`)
+        } else {
+          exitosas++
+        }
+      } else {
+        // Compras
+        const { data: items } = await supabase
+          .from('solicitud_items')
+          .select('id, tipo_linea, cantidad_solicitada, monto_mxn, material:catalogo_materiales(precio_base)')
+          .eq('solicitud_id', id)
+
+        const precios: { item_id: string; precio_unitario: number }[] = []
+        let faltaPrecio = false
+
+        for (const item of (items ?? [])) {
+          if (item.tipo_linea === 'material') {
+            const cant = Number(item.cantidad_solicitada ?? 0)
+            const monto = item.monto_mxn != null ? Number(item.monto_mxn) : null
+            const precioBase = (item.material as { precio_base?: number | null } | null)?.precio_base != null
+              ? Number((item.material as { precio_base?: number | null }).precio_base)
+              : null
+
+            const unitario = monto != null && cant > 0
+              ? Math.round((monto / cant) * 100) / 100
+              : precioBase != null && precioBase > 0
+                ? precioBase
+                : null
+
+            if (unitario == null || unitario < 0) {
+              faltaPrecio = true
+              break
+            }
+            precios.push({ item_id: item.id, precio_unitario: unitario })
+          }
+        }
+
+        if (faltaPrecio) {
+          fallidas++
+          errores.push(`REQ-${id.slice(0, 8)}: Requiere cotizar precios manualmente en su detalle.`)
+          continue
+        }
+
+        const { error } = await supabase.rpc('aprobar_solicitud_compras', {
+          p_solicitud_id: id,
+          p_precios: precios,
+        })
+        if (error) {
+          fallidas++
+          errores.push(`REQ-${id.slice(0, 8)}: ${mapRpcError(error, 'Error al aprobar compras')}`)
+        } else {
+          exitosas++
+        }
+      }
+    } catch (err: unknown) {
+      fallidas++
+      errores.push(`REQ-${id.slice(0, 8)}: ${err instanceof Error ? err.message : 'Error inesperado'}`)
+    }
+  }
+
+  revalidatePath('/solicitudes')
+  revalidatePath('/')
+  if (session.rol === 'finanzas') revalidatePath('/ordenes')
+
+  return { exitosas, fallidas, errores, error: errores.length > 0 && exitosas === 0 ? errores[0] : null }
+}
+
+export async function rechazarMultiplesSolicitudesAction(
+  solicitudIds: string[],
+  motivo?: string
+): Promise<BatchActionResult> {
+  const session = await getSessionUsuario()
+  if (!session || (!puedeAprobarCompras(session.rol) && !puedeAprobarPago(session.rol))) {
+    return { exitosas: 0, fallidas: solicitudIds.length, errores: ['Sin permisos para rechazar.'], error: 'Sin permisos.' }
+  }
+
+  const supabase = await createClient()
+  let exitosas = 0
+  let fallidas = 0
+  const errores: string[] = []
+
+  for (const id of solicitudIds) {
+    try {
+      const { error } = await supabase.rpc('rechazar_solicitud', {
+        p_solicitud_id: id,
+        p_motivo: motivo?.trim() || null,
+      })
+      if (error) {
+        fallidas++
+        errores.push(`REQ-${id.slice(0, 8)}: ${mapRpcError(error, 'Error al rechazar')}`)
+      } else {
+        exitosas++
+      }
+    } catch (err: unknown) {
+      fallidas++
+      errores.push(`REQ-${id.slice(0, 8)}: ${err instanceof Error ? err.message : 'Error inesperado'}`)
+    }
+  }
+
+  revalidatePath('/solicitudes')
+  revalidatePath('/')
+  return { exitosas, fallidas, errores, error: errores.length > 0 && exitosas === 0 ? errores[0] : null }
+}
+

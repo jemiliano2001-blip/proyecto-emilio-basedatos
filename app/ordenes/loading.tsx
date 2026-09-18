@@ -1,16 +1,16 @@
 import React from 'react'
 import { PageHeader } from '@/components/PageHeader'
-import { ObrasListSkeleton } from '@/components/skeletons/ObrasListSkeleton'
+import { OrdenesListSkeleton } from '@/components/skeletons/OrdenesListSkeleton'
 
-export default function HomeLoading() {
+export default function OrdenesLoading() {
   return (
     <main className="page-shell">
       <PageHeader
-        title="Proyectos"
-        subtitle="Cargando tus proyectos…"
+        title="Órdenes de compra"
+        subtitle="Cargando órdenes…"
       />
       <div className="h-10 w-full rounded-xl bg-muted animate-pulse mb-4" />
-      <ObrasListSkeleton rows={5} />
+      <OrdenesListSkeleton rows={6} />
     </main>
   )
 }

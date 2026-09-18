@@ -4,6 +4,7 @@ import { validateObraInput } from '../lib/validations/obra.ts'
 import { listFilters, pageHref } from '../lib/list-filters.ts'
 import { sanitizeNextPath } from '../lib/auth/safe-next.ts'
 import { validateMaterialKitInput } from '../lib/validations/kit.ts'
+import { toFinite, formatMoneyMx } from '../lib/money.ts'
 
 test('edición normal no admite cierre y presupuesto inválido', () => {
   for (const raw of [{nombre:'Prueba',estado:'cerrada'}, {nombre:'Prueba',presupuesto_mxn:-1}, {nombre:'Prueba',presupuesto_mxn:Infinity}]) assert.equal(validateObraInput(raw).ok,false)
@@ -36,4 +37,16 @@ test('kit rechaza componentes repetidos y cantidades inválidas', () => {
     items: [{ material_id: material, cantidad: 'no-numero' }],
   })
   assert.equal(invalidQuantity.ok, false)
+})
+
+test('toFinite y formatMoneyMx previenen propagación de NaN', () => {
+  assert.equal(toFinite(NaN, 0), 0)
+  assert.equal(toFinite(Infinity, 10), 10)
+  assert.equal(toFinite(-Infinity, 0), 0)
+  assert.equal(toFinite(undefined, 5), 5)
+  assert.equal(toFinite('abc', 0), 0)
+  assert.equal(toFinite('123.45', 0), 123.45)
+  assert.equal(toFinite(42, 0), 42)
+  assert.equal(formatMoneyMx(NaN), '$0.00')
+  assert.equal(formatMoneyMx(Infinity), '$0.00')
 })

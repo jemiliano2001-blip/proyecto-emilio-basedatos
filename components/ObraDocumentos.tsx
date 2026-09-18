@@ -15,7 +15,12 @@ import {
 import type { ObraDocumento } from '@/lib/types'
 import { EmptyState } from '@/components/EmptyState'
 import { IconPlus, IconDocumento } from '@/components/icons'
-import { QuickLookModal } from '@/components/QuickLookModal'
+import dynamic from 'next/dynamic'
+
+const QuickLookModal = dynamic(
+  () => import('@/components/QuickLookModal').then((mod) => mod.QuickLookModal),
+  { ssr: false }
+)
 
 const initialState: DocumentoActionResult = { error: null }
 

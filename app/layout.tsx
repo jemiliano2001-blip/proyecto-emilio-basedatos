@@ -15,6 +15,7 @@ import { traspasosSchemaDisponible } from '@/lib/schema-disponible'
 import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator'
 import { GlobalClientTools } from '@/components/GlobalClientTools'
 import { OfflineUserProvider } from '@/components/OfflineUserProvider'
+import { ToastUndoContainer } from '@/components/ToastUndoContainer'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -42,26 +43,27 @@ export default async function RootLayout({
 
   return (
     <html lang="es">
-      <body className="min-h-dvh bg-paper text-gray-900">
+      <body className="min-h-dvh bg-paper text-foreground">
         <OfflineUserProvider key={session?.authUserId ?? 'anon'} userId={session?.authUserId ?? null}>
-        <NetworkStatusIndicator />
-        {showNav && <ServiceWorkerRegistration />}
-        {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} rol={rol} traspasosDisponibles={traspasosDisponibles} />}
-        {showNav && <GlobalClientTools rol={rol} userId={session?.authUserId ?? 'anon'} traspasosDisponibles={traspasosDisponibles} />}
-        {children}
-        {showNav && (
-          <AppNav
-            rol={rol}
-            puedeVerPrecios={puedeVerPrecios(rol)}
-            puedeVerRecepciones={puedeVerRecepciones(rol)}
-            puedeVerTraspasos={puedeVerTraspasos(rol)}
-            puedeGestionarProveedores={puedeGestionarProveedores(rol)}
-            puedeGestionarUsuarios={puedeGestionarUsuarios(rol)}
-            puedeVerBitacora={puedeVerBitacora(rol)}
-            traspasosDisponibles={traspasosDisponibles}
-          />
-        )}
-      </OfflineUserProvider>
+          <NetworkStatusIndicator />
+          {showNav && <ServiceWorkerRegistration />}
+          {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} rol={rol} traspasosDisponibles={traspasosDisponibles} />}
+          {showNav && <GlobalClientTools rol={rol} userId={session?.authUserId ?? 'anon'} traspasosDisponibles={traspasosDisponibles} />}
+          {children}
+          <ToastUndoContainer />
+          {showNav && (
+            <AppNav
+              rol={rol}
+              puedeVerPrecios={puedeVerPrecios(rol)}
+              puedeVerRecepciones={puedeVerRecepciones(rol)}
+              puedeVerTraspasos={puedeVerTraspasos(rol)}
+              puedeGestionarProveedores={puedeGestionarProveedores(rol)}
+              puedeGestionarUsuarios={puedeGestionarUsuarios(rol)}
+              puedeVerBitacora={puedeVerBitacora(rol)}
+              traspasosDisponibles={traspasosDisponibles}
+            />
+          )}
+        </OfflineUserProvider>
       </body>
     </html>
   )

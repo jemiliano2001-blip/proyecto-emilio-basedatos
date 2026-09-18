@@ -1,11 +1,16 @@
 'use client'
 
-import React, { useState, useRef, useTransition } from 'react'
+import React, { useState, useRef, useTransition, useEffect } from 'react'
 import Image from 'next/image'
 import { IconBasura } from '@/components/icons'
 import { comprimirImagenEnCliente } from '@/lib/image-compression'
 import { analizarCalidadArchivoImagen, DiagnosticoCalidadImagen } from '@/lib/image-quality'
-import { CameraCaptureModal } from '@/components/CameraCaptureModal'
+import dynamic from 'next/dynamic'
+
+const CameraCaptureModal = dynamic(
+  () => import('@/components/CameraCaptureModal').then((mod) => mod.CameraCaptureModal),
+  { ssr: false }
+)
 
 interface GpsMetadata {
   latitud: number | null
@@ -54,6 +59,17 @@ export function PhotoUploadInput({
   const [gps, setGps] = useState<GpsMetadata | null>(null)
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    return () => {
+      setPreviewUrl((prev) => {
+        if (prev && prev.startsWith('blob:')) {
+          URL.revokeObjectURL(prev)
+        }
+        return null
+      })
+    }
+  }, [])
 
   const processAndApplyFile = async (rawFile: File, gpsMeta?: GpsMetadata) => {
     startCompressTransition(async () => {
@@ -105,7 +121,12 @@ export function PhotoUploadInput({
       }
 
       const url = URL.createObjectURL(compressedFile)
-      setPreviewUrl(url)
+      setPreviewUrl((prev) => {
+        if (prev && prev.startsWith('blob:')) {
+          URL.revokeObjectURL(prev)
+        }
+        return url
+      })
       setRemoveExisting(false)
       onChangeFile?.(compressedFile)
     })
@@ -114,7 +135,12 @@ export function PhotoUploadInput({
   const handleNativeFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawFile = e.target.files?.[0]
     if (!rawFile) {
-      setPreviewUrl(removeExisting ? null : (existingUrl ?? null))
+      setPreviewUrl((prev) => {
+        if (prev && prev.startsWith('blob:')) {
+          URL.revokeObjectURL(prev)
+        }
+        return removeExisting ? null : (existingUrl ?? null)
+      })
       setCompressionInfo(null)
       setCalidadDiagnostico(null)
       onChangeFile?.(null)
@@ -145,7 +171,12 @@ export function PhotoUploadInput({
   const handleRemove = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setPreviewUrl(null)
+    setPreviewUrl((prev) => {
+      if (prev && prev.startsWith('blob:')) {
+        URL.revokeObjectURL(prev)
+      }
+      return null
+    })
     setCompressionInfo(null)
     setCalidadDiagnostico(null)
     setGps(null)

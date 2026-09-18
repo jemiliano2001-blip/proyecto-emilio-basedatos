@@ -118,8 +118,8 @@ export function HomeProjectsWorkbench({
             onClick={() => setSelectedTab('activa')}
             role="tab" aria-selected={selectedTab === 'activa'} className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedTab === 'activa'
-                ? 'bg-white text-navy font-bold shadow-sm'
-                : 'text-gray-600 hover:text-ink'
+                ? 'bg-card text-foreground font-bold shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Activos <span className="text-[11px] opacity-75">({counts.activa})</span>
@@ -129,8 +129,8 @@ export function HomeProjectsWorkbench({
             onClick={() => setSelectedTab('pausada')}
             role="tab" aria-selected={selectedTab === 'pausada'} className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedTab === 'pausada'
-                ? 'bg-white text-navy font-bold shadow-sm'
-                : 'text-gray-600 hover:text-ink'
+                ? 'bg-card text-foreground font-bold shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Pausados <span className="text-[11px] opacity-75">({counts.pausada})</span>
@@ -140,8 +140,8 @@ export function HomeProjectsWorkbench({
             onClick={() => setSelectedTab('cerrada')}
             role="tab" aria-selected={selectedTab === 'cerrada'} className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedTab === 'cerrada'
-                ? 'bg-white text-navy font-bold shadow-sm'
-                : 'text-gray-600 hover:text-ink'
+                ? 'bg-card text-foreground font-bold shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Cerrados <span className="text-[11px] opacity-75">({counts.cerrada})</span>
@@ -151,8 +151,8 @@ export function HomeProjectsWorkbench({
             onClick={() => setSelectedTab('todas')}
             role="tab" aria-selected={selectedTab === 'todas'} className={`min-h-[44px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               selectedTab === 'todas'
-                ? 'bg-white text-navy font-bold shadow-sm'
-                : 'text-gray-600 hover:text-ink'
+                ? 'bg-card text-foreground font-bold shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Todos <span className="text-[11px] opacity-75">({counts.todas})</span>
@@ -175,7 +175,7 @@ export function HomeProjectsWorkbench({
               className="card-interactive flex items-center gap-3.5 p-3 sm:p-4 group"
             >
               {/* Miniatura de foto de proyecto o ícono insignia */}
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-slate-100 border border-gray-200 shrink-0 flex items-center justify-center relative">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center relative">
                 {obra.foto_url ? (
                   <Image
                     src={obra.foto_url}
@@ -186,7 +186,7 @@ export function HomeProjectsWorkbench({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-200 text-slate-400 group-hover:text-teal-800 transition-colors">
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-muted text-muted-foreground group-hover:text-accent transition-colors">
                     <IconProyectos className="w-6 h-6 opacity-70" />
                   </div>
                 )}
@@ -195,7 +195,7 @@ export function HomeProjectsWorkbench({
               {/* Información textual */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-bold text-ink text-sm sm:text-base truncate group-hover:text-navy transition-colors">
+                  <h3 className="font-bold text-foreground text-sm sm:text-base truncate group-hover:text-accent transition-colors">
                     {obra.nombre}
                   </h3>
                   <Badge
@@ -216,13 +216,13 @@ export function HomeProjectsWorkbench({
                 </div>
 
                 {subtitulo && (
-                  <p className="text-xs sm:text-sm text-gray-500 truncate mt-0.5">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate mt-0.5">
                     {subtitulo}
                   </p>
                 )}
               </div>
 
-              <div className="shrink-0 flex items-center gap-1 text-gray-400 group-hover:text-teal-800 transition-colors">
+              <div className="shrink-0 flex items-center gap-1 text-muted-foreground group-hover:text-accent transition-colors">
                 <span className="hidden sm:inline text-xs font-semibold">Ver proyecto</span>
                 <IconChevron className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
               </div>

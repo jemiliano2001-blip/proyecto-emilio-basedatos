@@ -12,7 +12,10 @@ const config: Config = {
         navy: '#132A45',
         teal: '#1E7F7A',
         ink: '#132A45',
-        accent: '#1E7F7A',
+        accent: {
+          DEFAULT: '#1E7F7A',
+          foreground: '#FFFFFF',
+        },
         paper: '#F9FAFB',
         danger: '#DC2626',
         warn: '#D97706',
@@ -43,6 +46,10 @@ const config: Config = {
           DEFAULT: '#FFFFFF',
           foreground: '#111827',
         },
+        popover: {
+          DEFAULT: '#FFFFFF',
+          foreground: '#111827',
+        },
       },
       borderRadius: {
         lg: '0.75rem',
@@ -70,6 +77,14 @@ const config: Config = {
           from: { transform: 'translateX(0)' },
           to: { transform: 'translateX(100%)' },
         },
+        'slide-in-bottom': {
+          from: { opacity: '0', transform: 'translateY(100%)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slide-out-bottom': {
+          from: { opacity: '1', transform: 'translateY(0)' },
+          to: { opacity: '0', transform: 'translateY(100%)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 180ms cubic-bezier(0.16, 1, 0.3, 1)',
@@ -77,6 +92,8 @@ const config: Config = {
         'scale-in': 'scale-in 180ms cubic-bezier(0.16, 1, 0.3, 1)',
         'slide-in-right': 'slide-in-right 220ms cubic-bezier(0.16, 1, 0.3, 1)',
         'slide-out-right': 'slide-out-right 180ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'slide-in-bottom': 'slide-in-bottom 220ms cubic-bezier(0.16, 1, 0.3, 1)',
+        'slide-out-bottom': 'slide-out-bottom 180ms cubic-bezier(0.16, 1, 0.3, 1)',
       },
     },
   },

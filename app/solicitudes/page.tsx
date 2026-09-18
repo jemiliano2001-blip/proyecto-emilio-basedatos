@@ -13,10 +13,9 @@ const STATUSES = [
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
-import { Badge } from '@/components/Badge'
-import { EmptyState } from '@/components/EmptyState'
-import { IconPlus, IconDocumento } from '@/components/icons'
+import { IconPlus } from '@/components/icons'
 import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
+import { SolicitudesListClient } from '@/components/SolicitudesListClient'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
   puedeAprobarCompras,
@@ -35,51 +34,6 @@ interface SolicitudRow {
   solicitante: { nombre: string } | null
   items: { id: string; obra_id: string | null }[]
   ordenes: { id: string; folio: string }[] | null
-}
-
-function badgeVariant(estado: EstadoSolicitud): 'red' | 'teal' | 'navy' | 'amber' {
-  switch (estado) {
-    case 'cancelada':
-    case 'rechazada':
-      return 'red'
-    case 'finalizada':
-    case 'aprobada':
-      return 'teal'
-    case 'en_proceso':
-    case 'en_cotizacion':
-      return 'navy'
-    case 'recibida':
-    case 'pendiente':
-    default:
-      return 'amber'
-  }
-}
-
-function labelEstado(estado: EstadoSolicitud) {
-  switch (estado) {
-    case 'recibida':
-      return 'recibida'
-    case 'en_proceso':
-      return 'en proceso'
-    case 'finalizada':
-      return 'finalizada'
-    case 'en_cotizacion':
-      return 'en cotización'
-    case 'pendiente':
-      return 'recibida'
-    case 'aprobada':
-      return 'finalizada'
-    default:
-      return estado
-  }
-}
-
-function esMultiObra(s: SolicitudRow): boolean {
-  return (s.items ?? []).some((i) => i.obra_id !== null)
-}
-
-function labelMateriales(n: number): string {
-  return n === 1 ? '1 material' : `${n} materiales`
 }
 
 export default async function SolicitudesPage({
@@ -196,71 +150,13 @@ export default async function SolicitudesPage({
           )}
         </div>
       )}
-      <div className="space-y-2 md:space-y-0 md:rounded-xl md:border md:border-gray-200 md:bg-white md:divide-y md:divide-gray-100 md:overflow-hidden">
-        {lista.map((s) => {
-          const reqCode = `REQ-${s.id.slice(0, 8).toUpperCase()}`
-          const ordenes = (s.ordenes ?? []) as { id: string; folio: string }[]
-          return (
-            <Link
-              key={s.id}
-              href={`/solicitudes/${s.id}`}
-              className="card-interactive block min-h-[72px] md:rounded-none md:border-0 md:shadow-none md:hover:bg-slate-50"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-navy border border-slate-200/70">
-                      {reqCode}
-                    </span>
-                    {ordenes.map((oc) => (
-                      <span
-                        key={oc.id}
-                        className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200"
-                      >
-                        {oc.folio}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="font-semibold text-ink truncate">
-                    {s.obra?.nombre ?? 'Proyecto'}
-                  </p>
-                  <p className="mt-1 text-xs sm:text-sm text-gray-500 truncate">
-                    {labelMateriales(s.items.length)}
-                    {esMultiObra(s) ? ' · varios proyectos' : ''}
-                    {verTodas && s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
-                    {' · '}
-                    {new Date(s.creado_en).toLocaleString('es-MX', {
-                      dateStyle: 'short',
-                      timeStyle: 'short',
-                    })}
-                  </p>
-                </div>
-                <Badge variant={badgeVariant(s.estado)}>{labelEstado(s.estado)}</Badge>
-              </div>
-            </Link>
-          )
-        })}
-
-        {!error && lista.length === 0 && (
-          <EmptyState
-            icon={IconDocumento}
-            title="Sin resultados"
-            description={
-              verTodas
-                ? 'Todavía no hay requisiciones registradas en el sistema.'
-                : 'Todavía no has levantado ninguna requisición.'
-            }
-            action={
-              puedeCrear
-                ? {
-                    label: 'Nueva requisición',
-                    href: '/solicitudes/nueva',
-                  }
-                : undefined
-            }
-          />
-        )}
-      </div>
+      <SolicitudesListClient
+        solicitudes={lista}
+        puedeCrear={puedeCrear}
+        verTodas={verTodas}
+        esCompras={esCompras}
+        esFinanzas={esFinanzas}
+      />
       {!error && (
         <ListPagination path="/solicitudes" params={params} page={filters.page} total={count ?? 0} />
       )}

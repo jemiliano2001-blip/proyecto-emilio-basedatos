@@ -23,7 +23,7 @@ import {
 function linkClass(active: boolean): string {
   return cn(
     'relative flex min-h-[44px] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[11px] font-semibold sm:text-xs transition-colors',
-    active ? 'text-ink font-bold' : 'text-gray-500 hover:text-ink/80'
+    active ? 'text-ink font-bold' : 'text-muted-foreground hover:text-ink/80'
   )
 }
 
@@ -87,7 +87,7 @@ export function AppNav({
   return (
     <>
       <nav
-        className="fixed inset-x-0 bottom-0 z-20 md:hidden border-t border-gray-200/80 bg-white/95 backdrop-blur-md"
+        className="fixed inset-x-0 bottom-0 z-20 md:hidden border-t border-border/80 bg-card/95 backdrop-blur-md"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         aria-label="Principal"
       >

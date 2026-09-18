@@ -33,8 +33,8 @@ const SHORTCUTS: ShortcutRow[] = [
   },
   {
     keyLabel: 'Shift + clic',
-    description: 'Seleccionar un rango de materiales en el catálogo',
-    category: 'Selección',
+    description: 'Seleccionar un rango de requisiciones o materiales',
+    category: 'Selección en lote',
   },
 ]
 
@@ -78,27 +78,27 @@ export function KeyboardShortcutsModal() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="shortcuts-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-sm transition-opacity print:hidden"
       onClick={() => setOpen(false)}
     >
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
+        className="w-full max-w-md bg-card rounded-xl shadow-2xl border border-border overflow-hidden animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Encabezado */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/40">
           <div>
-            <h2 id="shortcuts-dialog-title" className="text-base font-bold text-ink">
+            <h2 id="shortcuts-dialog-title" className="text-base font-bold text-foreground">
               Atajos de Teclado
             </h2>
-            <p className="text-xs text-gray-500">Comandos rápidos para navegar con fluidez</p>
+            <p className="text-xs text-muted-foreground">Comandos rápidos para navegar con fluidez</p>
           </div>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
             aria-label="Cerrar ventana de atajos"
           >
             <IconCerrar className="w-5 h-5" />
@@ -110,12 +110,12 @@ export function KeyboardShortcutsModal() {
           {SHORTCUTS.map((item, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors"
+              className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-muted border border-transparent hover:border-border transition-colors"
             >
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 {item.description}
               </span>
-              <kbd className="shrink-0 px-2.5 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-300 rounded shadow-xs">
+              <kbd className="shrink-0 px-2.5 py-1 text-xs font-semibold text-foreground bg-muted border border-border rounded shadow-xs">
                 {item.keyLabel}
               </kbd>
             </div>
@@ -123,8 +123,8 @@ export function KeyboardShortcutsModal() {
         </div>
 
         {/* Pie */}
-        <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
-          <span>Pulsa <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded font-semibold text-gray-600">Esc</kbd> para salir</span>
+        <div className="px-5 py-3 bg-muted/40 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+          <span>Pulsa <kbd className="px-1.5 py-0.5 bg-card border border-border rounded font-semibold text-foreground">Esc</kbd> para salir</span>
           <span>ObraTrack SaaS</span>
         </div>
       </div>

@@ -20,7 +20,7 @@ export interface FilterTabsProps {
 export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTabsProps) {
   return (
     <div
-      className={cn('flex gap-2 p-1 bg-gray-100/80 rounded-xl border border-gray-200/80', className)}
+      className={cn('flex gap-2 p-1 bg-muted rounded-xl border border-border', className)}
       role="tablist"
       aria-label={ariaLabel}
     >
@@ -29,7 +29,7 @@ export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTab
           'min-h-[44px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-center text-sm font-semibold transition-colors select-none',
           tab.active
             ? 'bg-ink text-white shadow-xs'
-            : 'text-gray-600 hover:text-ink hover:bg-white/60'
+            : 'text-muted-foreground hover:text-foreground hover:bg-card/60'
         )
 
         if (tab.href) {
@@ -47,7 +47,7 @@ export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTab
                 <span
                   className={cn(
                     'text-xs px-1.5 py-0.2 rounded-full font-bold',
-                    tab.active ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-700'
+                    tab.active ? 'bg-white/20 text-white' : 'bg-muted-foreground/20 text-foreground'
                   )}
                 >
                   {tab.count}
@@ -71,7 +71,7 @@ export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTab
               <span
                 className={cn(
                   'text-xs px-1.5 py-0.2 rounded-full font-bold',
-                  tab.active ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-700'
+                  tab.active ? 'bg-white/20 text-white' : 'bg-muted-foreground/20 text-foreground'
                 )}
               >
                 {tab.count}

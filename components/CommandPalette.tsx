@@ -429,11 +429,11 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
         role="dialog"
         aria-modal="true"
         aria-label="Buscador global y comandos"
-        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[80vh] z-10 animate-fade-in"
+        className="relative w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[80vh] z-10 animate-fade-in"
       >
         {/* Header con Input */}
-        <div className="flex items-center px-4 py-3 border-b border-gray-200 gap-2.5 bg-gray-50/50">
-          <IconSearch className="w-5 h-5 text-gray-400 shrink-0" />
+        <div className="flex items-center px-4 py-3 border-b border-border gap-2.5 bg-muted/40">
+          <IconSearch className="w-5 h-5 text-muted-foreground shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -441,12 +441,12 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleInputKeyDown}
             placeholder="Escribe para buscar proyectos, materiales o comandos…"
-            className="w-full bg-transparent text-sm text-ink placeholder-gray-400 outline-none font-medium"
+            className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none font-medium"
             aria-controls="command-results"
             aria-activedescendant={filtered[selectedIndex] ? `command-${filtered[selectedIndex].id}` : undefined}
           />
           {isSearching && (
-            <span className="text-[10px] text-gray-400 font-mono animate-pulse">
+            <span className="text-[10px] text-muted-foreground font-mono animate-pulse">
               Buscando...
             </span>
           )}
@@ -454,13 +454,13 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-xs text-gray-400 hover:text-gray-600"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-xs text-muted-foreground hover:text-foreground"
               aria-label="Limpiar búsqueda"
             >
               <IconCerrar className="w-4 h-4" />
             </button>
           )}
-          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-gray-400 bg-gray-100 border border-gray-200 rounded">
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground bg-muted border border-border rounded">
             ESC
           </kbd>
         </div>
@@ -471,14 +471,14 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
           id="command-results"
           role="listbox"
           aria-label="Resultados de búsqueda"
-          className="overflow-y-auto p-2 divide-y divide-gray-100 flex-1"
+          className="overflow-y-auto p-2 divide-y divide-border/50 flex-1"
         >
           {searchError ? (
             <div className="py-8 text-center text-sm text-red-700" role="status">
               No se pudo completar la búsqueda en línea. Revisa tu conexión e intenta de nuevo.
             </div>
           ) : filtered.length === 0 ? (
-            <div className="py-8 text-center text-xs text-gray-400">
+            <div className="py-8 text-center text-xs text-muted-foreground">
               No se encontraron coincidencias para &quot;{query}&quot;.
             </div>
           ) : (
@@ -497,8 +497,8 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
                   className={cn(
                     'flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer text-xs transition-colors',
                     isActive
-                      ? 'bg-teal-50 text-teal-900 font-semibold'
-                      : 'text-gray-700 hover:bg-gray-50'
+                      ? 'bg-accent/15 text-accent font-semibold'
+                      : 'text-foreground hover:bg-muted/60'
                   )}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -508,10 +508,10 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
                         isActive
                           ? 'bg-accent text-white'
                           : item.category === 'Proyectos'
-                            ? 'bg-slate-100 text-ink'
+                            ? 'bg-muted text-ink'
                             : item.category === 'Materiales'
-                              ? 'bg-teal-50 text-teal-800'
-                              : 'bg-gray-100 text-gray-500'
+                              ? 'bg-accent/10 text-accent'
+                              : 'bg-muted text-muted-foreground'
                       )}
                     >
                       <Icon className="w-4 h-4" />
@@ -522,12 +522,12 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded font-medium shrink-0',
                       item.category === 'Proyectos'
-                        ? 'bg-slate-100 text-ink font-semibold'
+                        ? 'bg-muted text-ink font-semibold'
                         : item.category === 'Materiales'
-                          ? 'bg-teal-100 text-teal-800 font-semibold'
+                          ? 'bg-accent/15 text-accent font-semibold'
                           : item.category === 'Acciones Rápidas'
                             ? 'bg-amber-100 text-amber-800'
-                            : 'bg-gray-100 text-gray-500'
+                            : 'bg-muted text-muted-foreground'
                     )}
                   >
                     {item.category}
@@ -539,14 +539,14 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
         </div>
 
         {/* Footer con ayuda */}
-        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400">
+        <div className="px-4 py-2 bg-muted/40 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
           <div className="flex items-center gap-3">
             <span>
-              <kbd className="font-semibold text-gray-600">↑</kbd>{' '}
-              <kbd className="font-semibold text-gray-600">↓</kbd> navegar
+              <kbd className="font-semibold text-foreground">↑</kbd>{' '}
+              <kbd className="font-semibold text-foreground">↓</kbd> navegar
             </span>
             <span>
-              <kbd className="font-semibold text-gray-600">↵</kbd> seleccionar
+              <kbd className="font-semibold text-foreground">↵</kbd> seleccionar
             </span>
           </div>
           <span>Atajo global: <strong>Ctrl+K</strong> / <strong>⌘K</strong></span>

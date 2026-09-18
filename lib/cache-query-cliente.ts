@@ -6,12 +6,18 @@ interface CacheEntry<T> {
 
 const cacheStore = new Map<string, CacheEntry<unknown>>()
 const DEFAULT_TTL_MS = 3 * 60 * 1000 // 3 minutos
+const MAX_CACHE_ENTRIES = 100
 
 /**
- * Guarda un resultado en la caché en memoria del cliente.
+ * Guarda un resultado en la caché en memoria del cliente con límite LRU.
  */
 export function guardarCacheQuery<T>(clave: string, datos: T, ttlMs = DEFAULT_TTL_MS): void {
   const ahora = Date.now()
+  if (cacheStore.size >= MAX_CACHE_ENTRIES && !cacheStore.has(clave)) {
+    // Evict oldest entry
+    const oldestKey = cacheStore.keys().next().value
+    if (oldestKey) cacheStore.delete(oldestKey)
+  }
   cacheStore.set(clave, {
     datos,
     expiraEn: ahora + ttlMs,

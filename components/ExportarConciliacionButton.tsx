@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { IconDescargar } from '@/components/icons'
 import { exportToCsv } from '@/lib/export-excel'
 import { formatMoneyMx } from '@/lib/money'
@@ -17,6 +17,13 @@ export function ExportarConciliacionButton({
   materiales: ConciliacionMaterialObra[]
 }) {
   const [exportando, setExportando] = useState(false)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const handleExport = () => {
     try {
@@ -112,7 +119,7 @@ export function ExportarConciliacionButton({
         data: materiales ?? [],
       })
     } finally {
-      setTimeout(() => setExportando(false), 500)
+      timerRef.current = setTimeout(() => setExportando(false), 500)
     }
   }
 
