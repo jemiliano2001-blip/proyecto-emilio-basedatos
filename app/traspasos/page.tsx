@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
-import { IconPlus, IconPaquete } from '@/components/icons'
+import { IconChevron, IconPlus, IconPaquete, IconTraspasos } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeSolicitarTraspaso, puedeVerTraspasos } from '@/lib/roles'
 import { redirect } from 'next/navigation'
@@ -26,33 +26,34 @@ interface TraspasoRow {
   }[]
 }
 
-function badgeVariant(estado: EstadoTraspaso): 'teal' | 'navy' | 'amber' | 'gray' {
+function badgeVariant(estado: EstadoTraspaso): 'success' | 'info' | 'warning' | 'danger' | 'neutral' {
   switch (estado) {
     case 'completado':
-      return 'teal'
+      return 'success'
     case 'en_transito':
-      return 'navy'
+      return 'info'
     case 'solicitado':
-      return 'amber'
+      return 'warning'
     case 'rechazado':
+      return 'danger'
     case 'cancelado':
     default:
-      return 'gray'
+      return 'neutral'
   }
 }
 
 function labelEstado(estado: EstadoTraspaso) {
   switch (estado) {
     case 'solicitado':
-      return 'solicitado'
+      return 'Solicitado'
     case 'en_transito':
-      return 'en tránsito'
+      return 'En tránsito'
     case 'completado':
-      return 'completado'
+      return 'Completado'
     case 'rechazado':
-      return 'rechazado'
+      return 'Rechazado'
     case 'cancelado':
-      return 'cancelado'
+      return 'Cancelado'
     default:
       return estado
   }
@@ -137,7 +138,15 @@ export default async function TraspasosPage() {
       )}
 
       {!schemaAusente && lista.length > 0 && (
-        <div className="space-y-3">
+        <div className="list-stack">
+          <div className="list-header lg:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)_6rem_8rem_1.5rem]">
+            <span>Folio</span>
+            <span>Origen</span>
+            <span>Destino</span>
+            <span className="text-right">Partidas</span>
+            <span>Estatus</span>
+            <span />
+          </div>
           {lista.map((t) => {
             const fecha = new Date(t.creado_en).toLocaleDateString('es-MX', {
               day: '2-digit',
@@ -151,48 +160,46 @@ export default async function TraspasosPage() {
               <Link
                 key={t.id}
                 href={`/traspasos/${t.id}`}
-                className="card-interactive block"
+                className="list-row group flex-col items-stretch gap-2 lg:grid lg:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)_6rem_8rem_1.5rem] lg:items-center lg:gap-3"
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center justify-between gap-2 lg:block">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-foreground text-sm">{t.folio}</span>
-                      <Badge variant={badgeVariant(t.estado)}>
-                        {labelEstado(t.estado)}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{fecha}</p>
+                    <p className="text-sm font-semibold tabular-nums text-foreground group-hover:text-primary">
+                      {t.folio}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{fecha}</p>
                   </div>
-                  <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded border border-border">
-                    {numItems} {numItems === 1 ? 'material' : 'materiales'}
+                  <span className="lg:hidden">
+                    <Badge variant={badgeVariant(t.estado)}>{labelEstado(t.estado)}</Badge>
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs bg-muted/50 p-2.5 rounded-lg my-2 border border-border">
-                  <div>
-                    <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
+                <div className="flex items-center gap-2 text-sm lg:contents">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground lg:hidden">
                       Origen
-                    </span>
-                    <span className="font-medium text-foreground">
-                      {t.obra_origen?.nombre ?? 'Sin especificar'}
-                    </span>
+                    </p>
+                    <p className="truncate text-foreground">{t.obra_origen?.nombre ?? 'Sin especificar'}</p>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
+                  <IconTraspasos className="size-4 shrink-0 text-muted-foreground lg:hidden" aria-hidden />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground lg:hidden">
                       Destino
-                    </span>
-                    <span className="font-medium text-foreground">
-                      {t.obra_destino?.nombre ?? 'Sin especificar'}
-                    </span>
+                    </p>
+                    <p className="truncate text-foreground">{t.obra_destino?.nombre ?? 'Sin especificar'}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
-                  <span>Solicita: {t.solicitante?.nombre ?? 'Anónimo'}</span>
-                  <span className="text-primary font-semibold hover:underline">
-                    Ver detalle →
-                  </span>
+                <p className="text-xs text-muted-foreground tabular-nums lg:text-right lg:text-sm">
+                  {numItems} {numItems === 1 ? 'material' : 'materiales'}
+                  <span className="lg:hidden"> · solicita {t.solicitante?.nombre ?? 'Anónimo'}</span>
+                </p>
+                <div className="hidden lg:block">
+                  <Badge variant={badgeVariant(t.estado)} dot>
+                    {labelEstado(t.estado)}
+                  </Badge>
                 </div>
+                <IconChevron className="hidden size-4 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary lg:block" />
               </Link>
             )
           })}

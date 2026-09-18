@@ -87,34 +87,42 @@ export default async function InventarioPage() {
           description="Cuando se aprueben recepciones, aquí verás el material en cada proyecto."
         />
       ) : (
-        <div className="space-y-2">
+        <div className="list-stack">
+          <div className="list-header lg:grid-cols-[minmax(0,1fr)_8rem_8rem_1.5rem]">
+            <span>Proyecto</span>
+            <span className="text-right">Materiales</span>
+            <span className="text-right">Por instalar</span>
+            <span />
+          </div>
           {lista.map((o) => (
             <Link
               key={o.id}
               href={`/inventario/${o.id}`}
-              className="card-interactive flex items-center justify-between gap-3 min-h-[72px]"
+              className="list-row group items-center lg:grid lg:grid-cols-[minmax(0,1fr)_8rem_8rem_1.5rem] lg:gap-3"
             >
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-foreground">{o.nombre}</p>
-                {o.fraccionamiento && (
-                  <p className="text-xs text-muted-foreground">{o.fraccionamiento}</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">
-                  {o.materiales} material{o.materiales === 1 ? '' : 'es'}
+                <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary">{o.nombre}</p>
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  {[o.fraccionamiento, `${o.materiales} material${o.materiales === 1 ? '' : 'es'}`]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </p>
               </div>
-              <div className="shrink-0 text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-primary">
-                  Pendiente
-                </p>
-                <p className="text-2xl font-black tabular-nums text-primary leading-none">
+              <p className="hidden text-right text-sm tabular-nums text-muted-foreground lg:block">{o.materiales}</p>
+              <div className="flex shrink-0 items-center justify-end gap-2">
+                <span
+                  className={
+                    o.pendientes > 0
+                      ? 'inline-flex min-w-[2.5rem] items-center justify-center rounded-full bg-primary-soft px-2.5 py-1 text-sm font-semibold tabular-nums text-primary-soft-foreground'
+                      : 'inline-flex min-w-[2.5rem] items-center justify-center rounded-full bg-muted px-2.5 py-1 text-sm font-semibold tabular-nums text-muted-foreground'
+                  }
+                  aria-label={`${o.pendientes} por instalar`}
+                >
                   {o.pendientes}
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {o.pendientes === 1 ? 'material' : 'materiales'}
-                </p>
+                </span>
+                <span className="text-xs text-muted-foreground lg:hidden">por instalar</span>
               </div>
-              <IconChevron className="h-5 w-5 text-muted-foreground shrink-0" />
+              <IconChevron className="hidden size-4 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary lg:block" />
             </Link>
           ))}
         </div>

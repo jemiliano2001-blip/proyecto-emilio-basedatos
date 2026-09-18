@@ -76,7 +76,7 @@ export default async function KitsPage() {
   const kits = (kitsRaw as unknown as KitDbRow[]) ?? []
 
   return (
-    <main className="page-shell space-y-6">
+    <main className="page-shell-wide space-y-6">
       <PageHeader
         title="Kits y Ensambles"
         description="Plantillas para agrupar equipos principales con sus accesorios y componentes menores."
@@ -102,13 +102,13 @@ export default async function KitsPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-2">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-foreground">{kit.nombre}</h2>
+                  <h2 className="text-base font-semibold text-foreground">{kit.nombre}</h2>
                   {kit.configuracion && (
-                    <Badge variant="teal">
+                    <Badge variant="info">
                       {kit.configuracion}
                     </Badge>
                   )}
-                  {!kit.activo && <Badge variant="gray">Inactivo</Badge>}
+                  {!kit.activo && <Badge variant="neutral">Inactivo</Badge>}
                 </div>
                 {kit.material_principal && (
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -126,7 +126,7 @@ export default async function KitsPage() {
                 {puedeGestionar && (
                   <Link
                     href={`/kits/${kit.id}/editar`}
-                    className="btn-secondary text-sm px-2.5 py-2 min-h-[44px] inline-flex items-center"
+                    className="btn-secondary btn-xs"
                   >
                     Editar
                   </Link>
@@ -136,13 +136,13 @@ export default async function KitsPage() {
 
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Componentes menores (&quot;chiquitiaje&quot;):
+                Componentes menores («chiquitiaje»)
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2 xl:grid-cols-3">
                 {kit.material_kit_items?.map((it) => (
                   <div
                     key={it.id}
-                    className="flex items-center justify-between p-2 rounded bg-muted/50 text-xs border border-border"
+                    className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-2.5 py-2 text-xs"
                   >
                     <span className="font-medium text-foreground truncate pr-2">
                       {it.catalogo_materiales?.nombre_base}{' '}
@@ -151,7 +151,7 @@ export default async function KitsPage() {
                         : ''}
                     </span>
                     <div className="shrink-0 text-right">
-                      <span className="font-bold text-primary-soft-foreground tabular-nums">
+                      <span className="font-semibold text-foreground tabular-nums">
                         {it.cantidad} {it.catalogo_materiales?.unidad_medida}
                       </span>
                       {verPrecios &&

@@ -3,10 +3,12 @@ import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
 import { CopyButton } from '@/components/CopyButton'
-import { IconImprimir, IconPaquete } from '@/components/icons'
+import { EmptyState } from '@/components/EmptyState'
+import { IconChevron, IconImprimir, IconPaquete } from '@/components/icons'
 import { OrdenCompraFacturasSection } from '@/components/OrdenCompraFacturasSection'
 import { OrdenCompraProveedorModal } from '@/components/OrdenCompraProveedorModal'
 import { getSessionUsuario } from '@/lib/auth/session'
+import { formatMoneyMx } from '@/lib/money'
 import {
   puedeAsignarProveedorOC,
   puedeCapturarRecepcion,
@@ -209,182 +211,305 @@ export default async function OrdenDetallePage({
     unidad: it.material?.unidad_medida ?? 'PZA',
   }))
 
+  const estadoBadge = (estado: string): { variant: 'info' | 'success' | 'warning' | 'neutral'; label: string } => {
+    if (estado === 'emitida') return { variant: 'info', label: 'Emitida' }
+    if (estado === 'completada' || estado === 'recibida') return { variant: 'success', label: 'Recibida' }
+    if (estado === 'parcialmente_recibida') return { variant: 'warning', label: 'Parcialmente recibida' }
+    return { variant: 'neutral', label: estado.replaceAll('_', ' ') }
+  }
+  const badge = estadoBadge(detalle.estado)
+
+  const totalPedido = (detalle.items ?? []).reduce((acc, it) => acc + Number(it.cantidad), 0)
+  const totalRecibido = Array.from(saldoMap.values()).reduce(
+    (acc, s) => acc + Number(s.cantidad_recibida_buena),
+    0
+  )
+  const totalDanado = Array.from(saldoMap.values()).reduce(
+    (acc, s) => acc + Number(s.cantidad_danada_acum),
+    0
+  )
+  const pctRecibido = totalPedido > 0 ? Math.min(100, (totalRecibido / totalPedido) * 100) : 0
+  const fechaEmision = new Date(detalle.creado_en).toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+
   return (
-    <main className="page-shell">
+    <main className="page-shell-wide">
       <PageHeader
+        eyebrow={`Orden de compra · ${fechaEmision}`}
         title={
           <span className="inline-flex items-center gap-2">
-            <span>{detalle.folio}</span>
+            <span className="tabular-nums">{detalle.folio}</span>
             <CopyButton text={detalle.folio} label="Copiar folio" />
           </span>
         }
         badge={
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {detalle.folio_fisico && (
-              <span className="badge-amber inline-flex items-center gap-1">
-                <span>Talonario: {detalle.folio_fisico}</span>
-                <CopyButton text={detalle.folio_fisico} label="Copiar talonario" className="py-0.5 px-1.5 text-xs" />
-              </span>
-            )}
-            <Badge
-              variant={
-                detalle.estado === 'emitida'
-                  ? 'navy'
-                  : detalle.estado === 'completada' || detalle.estado === 'recibida'
-                  ? 'teal'
-                  : detalle.estado === 'parcialmente_recibida'
-                  ? 'amber'
-                  : 'gray'
-              }
-            >
-              {detalle.estado.replaceAll('_', ' ')}
-            </Badge>
-          </div>
+          <Badge variant={badge.variant} dot>
+            {badge.label}
+          </Badge>
         }
         description={
-          <div>
-            <p className="text-sm font-medium text-foreground">{detalle.obra?.nombre}</p>
-            {detalle.obra?.fraccionamiento && (
-              <p className="text-xs text-muted-foreground">{detalle.obra.fraccionamiento}</p>
-            )}
-          </div>
+          detalle.obra
+            ? [detalle.obra.nombre, detalle.obra.fraccionamiento].filter(Boolean).join(' · ')
+            : undefined
         }
         backHref="/ordenes"
         backLabel="Órdenes"
+        actions={
+          <>
+            <Link href={`/ordenes/${detalle.id}/formato`} className="btn-secondary btn-sm">
+              <IconImprimir className="size-4" />
+              Formato OC (PDF)
+            </Link>
+            {puedeRecibir && (
+              <Link href={`/ordenes/${detalle.id}/recibir`} className="btn-primary btn-sm">
+                <IconPaquete className="size-4" />
+                Registrar recepción
+              </Link>
+            )}
+          </>
+        }
       />
 
-      {/* Acciones principales: Imprimir Formato y Registrar Recepción */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-6 -mt-2">
-        <Link
-          href={`/ordenes/${detalle.id}/formato`}
-          className="flex-1 text-center rounded-xl bg-warning-soft hover:bg-warning-soft text-warning-soft-foreground border border-warning/40 font-bold py-3 text-sm flex items-center justify-center gap-2 shadow-xs transition-colors"
-        >
-          <IconImprimir className="w-4 h-4" />
-          <span>Ver e Imprimir Formato OC (PDF)</span>
-        </Link>
-
-        {puedeRecibir && (
-          <Link
-            href={`/ordenes/${detalle.id}/recibir`}
-            className="btn-primary flex-1 py-3 text-sm flex items-center justify-center gap-2"
-          >
-            <IconPaquete className="w-4 h-4" />
-            <span>Registrar recepción</span>
-          </Link>
-        )}
-      </div>
-
-      <div className="card mb-4">
-        <div className="flex justify-between items-start mb-1">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Proveedor
-          </p>
-          {puedeAsignar && (
-            <OrdenCompraProveedorModal
-              ordenId={detalle.id}
-              proveedorActualId={detalle.proveedor_id}
-              folioFisicoActual={detalle.folio_fisico}
-              proveedores={proveedores}
-            />
-          )}
-        </div>
-        <p className="font-semibold text-foreground">
-          {detalle.proveedor?.nombre || (
-            <span className="text-muted-foreground italic font-normal">Sin proveedor asignado</span>
-          )}
-        </p>
-        {detalle.proveedor?.contacto && (
-          <p className="text-sm text-muted-foreground">{detalle.proveedor.contacto}</p>
-        )}
-        {detalle.proveedor?.telefono && (
-          <p className="text-sm text-muted-foreground">{detalle.proveedor.telefono}</p>
-        )}
-        {detalle.folio_fisico && (
-          <p className="text-xs text-warning-soft-foreground bg-warning-soft px-2 py-0.5 rounded inline-block mt-2 border border-warning/30">
-            No. Folio físico: <strong>{detalle.folio_fisico}</strong>
-          </p>
-        )}
-      </div>
-
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-        Materiales
-      </h2>
-      <div className="space-y-2 mb-4">
-        {(detalle.items ?? []).map((item) => {
-          const saldo = saldoMap.get(item.id)
-          return (
-            <div key={item.id} className="card">
-              <div className="flex justify-between items-baseline gap-2">
-                <p className="font-medium text-sm">
-                  {item.material?.nombre_base}
-                  {item.material?.variante ? (
-                    <span className="text-muted-foreground"> · {item.material.variante}</span>
-                  ) : null}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+        {/* Columna principal */}
+        <div className="min-w-0 space-y-6">
+          <section className="space-y-3">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Materiales</h2>
+                <p className="text-sm text-muted-foreground">
+                  {detalle.items?.length ?? 0} partida{(detalle.items?.length ?? 0) === 1 ? '' : 's'} ·{' '}
+                  {detalle.moneda}
                 </p>
-                <span className="text-sm font-semibold shrink-0">
-                  {Number(item.subtotal).toFixed(2)}
+              </div>
+            </div>
+
+            <div className="list-stack">
+              <div className="list-header lg:grid-cols-[minmax(0,1fr)_8rem_8rem_7rem]">
+                <span>Material</span>
+                <span className="text-right">Cantidad</span>
+                <span className="text-right">P. unitario</span>
+                <span className="text-right">Subtotal</span>
+              </div>
+              {(detalle.items ?? []).map((item) => {
+                const saldo = saldoMap.get(item.id)
+                const pedido = Number(item.cantidad)
+                const bueno = Number(saldo?.cantidad_recibida_buena ?? 0)
+                const danado = Number(saldo?.cantidad_danada_acum ?? 0)
+                const pendiente = Number(saldo?.pendiente ?? pedido)
+                const pct = pedido > 0 ? Math.min(100, (bueno / pedido) * 100) : 0
+                return (
+                  <div
+                    key={item.id}
+                    className="px-4 py-3 lg:grid lg:grid-cols-[minmax(0,1fr)_8rem_8rem_7rem] lg:items-center lg:gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">
+                        {item.material?.nombre_base ?? 'Material'}
+                        {item.material?.variante ? (
+                          <span className="text-muted-foreground"> · {item.material.variante}</span>
+                        ) : null}
+                      </p>
+                      {saldo && (
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-muted" aria-hidden>
+                            <div className="h-full rounded-full bg-success" style={{ width: `${pct}%` }} />
+                          </div>
+                          <p className="text-xs text-muted-foreground tabular-nums">
+                            {bueno} recibido
+                            {danado > 0 ? ` · ${danado} dañado` : ''}
+                            {pendiente > 0 ? ` · ${pendiente} pendiente` : ''}
+                          </p>
+                        </div>
+                      )}
+                      <p className="mt-1 text-xs text-muted-foreground tabular-nums lg:hidden">
+                        {pedido} {item.material?.unidad_medida} × {formatMoneyMx(Number(item.precio_unitario))}
+                      </p>
+                    </div>
+                    <p className="hidden text-right text-sm tabular-nums text-foreground lg:block">
+                      {pedido} <span className="text-muted-foreground">{item.material?.unidad_medida}</span>
+                    </p>
+                    <p className="hidden text-right text-sm tabular-nums text-muted-foreground lg:block">
+                      {formatMoneyMx(Number(item.precio_unitario))}
+                    </p>
+                    <p className="mt-1 text-right text-sm font-semibold tabular-nums text-foreground lg:mt-0">
+                      {formatMoneyMx(Number(item.subtotal))}
+                    </p>
+                  </div>
+                )
+              })}
+              <div className="flex items-center justify-between bg-muted/40 px-4 py-3">
+                <span className="text-sm font-semibold text-foreground">Total</span>
+                <span className="text-base font-semibold tabular-nums text-foreground">
+                  {formatMoneyMx(Number(detalle.total))}{' '}
+                  <span className="text-xs font-medium text-muted-foreground">{detalle.moneda}</span>
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {item.cantidad} {item.material?.unidad_medida} ×{' '}
-                {Number(item.precio_unitario).toFixed(2)} {detalle.moneda}
-              </p>
-              {saldo && (
-                <p className="text-xs text-primary mt-2">
-                  Recibido bueno {Number(saldo.cantidad_recibida_buena)} · Dañado{' '}
-                  {Number(saldo.cantidad_danada_acum)} · Pendiente{' '}
-                  {Number(saldo.pendiente)}
-                </p>
+            </div>
+          </section>
+
+          {/* Facturas del proveedor (PDF e imágenes) */}
+          <OrdenCompraFacturasSection
+            ordenId={detalle.id}
+            obraId={detalle.obra_id}
+            totalOrden={Number(detalle.total)}
+            moneda={detalle.moneda}
+            facturas={facturas}
+            items={itemsParaFactura}
+            puedeGestionar={puedeGestionarFacturas}
+          />
+
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Historial de recepciones</h2>
+              <p className="text-sm text-muted-foreground">Checklists capturados en obra para esta orden.</p>
+            </div>
+            {recepciones.length === 0 ? (
+              <EmptyState
+                icon={IconPaquete}
+                title="Aún no hay checklists"
+                description={
+                  puedeRecibir
+                    ? 'Registra la primera recepción cuando llegue el material a obra.'
+                    : undefined
+                }
+                action={puedeRecibir ? { label: 'Registrar recepción', href: `/ordenes/${detalle.id}/recibir` } : undefined}
+              />
+            ) : (
+              <div className="list-stack">
+                {recepciones.map((r) => (
+                  <Link key={r.id} href={`/recepciones/${r.id}`} className="list-row items-center">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">{r.receptor?.nombre ?? 'Receptor'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(r.recibido_en).toLocaleString('es-MX')}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Badge
+                        variant={
+                          r.estado === 'aprobada'
+                            ? 'success'
+                            : r.estado === 'pendiente_revision'
+                              ? 'warning'
+                              : r.estado === 'rechazada'
+                                ? 'danger'
+                                : 'neutral'
+                        }
+                      >
+                        {(r.estado ?? '').replaceAll('_', ' ')}
+                      </Badge>
+                      <IconChevron className="size-4 text-muted-foreground/60" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Rail derecho */}
+        <aside className="space-y-4 lg:sticky lg:top-[calc(var(--topbar-height)+1.5rem)]">
+          <section className="card">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <h2 className="card-title">Proveedor</h2>
+              {puedeAsignar && (
+                <OrdenCompraProveedorModal
+                  ordenId={detalle.id}
+                  proveedorActualId={detalle.proveedor_id}
+                  folioFisicoActual={detalle.folio_fisico}
+                  proveedores={proveedores}
+                />
               )}
             </div>
-          )
-        })}
-      </div>
-
-      <div className="card flex justify-between items-center mb-6">
-        <span className="font-semibold">Total</span>
-        <span className="text-lg font-bold text-foreground">
-          {Number(detalle.total).toFixed(2)} {detalle.moneda}
-        </span>
-      </div>
-
-      {/* Sección de Facturas del Proveedor (PDF e Imágenes) */}
-      <OrdenCompraFacturasSection
-        ordenId={detalle.id}
-        obraId={detalle.obra_id}
-        totalOrden={Number(detalle.total)}
-        moneda={detalle.moneda}
-        facturas={facturas}
-        items={itemsParaFactura}
-        puedeGestionar={puedeGestionarFacturas}
-      />
-
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-        Historial de recepciones
-      </h2>
-      {recepciones.length === 0 ? (
-        <div className="card text-sm text-muted-foreground">Aún no hay checklists.</div>
-      ) : (
-        <div className="space-y-2">
-          {recepciones.map((r) => (
-            <Link
-              key={r.id}
-              href={`/recepciones/${r.id}`}
-              className="card block hover:bg-muted/50"
-            >
-              <div className="flex justify-between gap-2">
-                <p className="text-sm font-medium">{r.receptor?.nombre ?? 'Receptor'}</p>
-                <span className="text-xs text-muted-foreground capitalize">
-                  {(r.estado ?? '').replaceAll('_', ' ')}
+            <p className="text-sm font-semibold text-foreground">
+              {detalle.proveedor?.nombre || (
+                <span className="font-normal text-muted-foreground">Sin proveedor asignado</span>
+              )}
+            </p>
+            {detalle.proveedor?.contacto && (
+              <p className="text-sm text-muted-foreground">{detalle.proveedor.contacto}</p>
+            )}
+            {detalle.proveedor?.telefono && (
+              <p className="text-sm text-muted-foreground tabular-nums">{detalle.proveedor.telefono}</p>
+            )}
+            {detalle.folio_fisico && (
+              <div className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-warning/30 bg-warning-soft px-3 py-2 text-xs text-warning-soft-foreground">
+                <span>
+                  Talonario: <strong className="tabular-nums">{detalle.folio_fisico}</strong>
                 </span>
+                <CopyButton text={detalle.folio_fisico} label="Copiar" className="py-0.5 px-1.5 text-xs" />
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {new Date(r.recibido_en).toLocaleString('es-MX')}
-              </p>
-            </Link>
-          ))}
-        </div>
-      )}
+            )}
+          </section>
+
+          <section className="card">
+            <h2 className="card-title mb-3">Recepción</h2>
+            <div className="mb-2 flex items-baseline justify-between text-sm">
+              <span className="text-muted-foreground">Recibido</span>
+              <span className="font-semibold tabular-nums text-foreground">
+                {totalRecibido} / {totalPedido}
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted" aria-hidden>
+              <div className="h-full rounded-full bg-success" style={{ width: `${pctRecibido}%` }} />
+            </div>
+            <dl className="mt-3 space-y-1.5 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">Pendiente</dt>
+                <dd className="tabular-nums font-medium text-foreground">
+                  {Math.max(0, totalPedido - totalRecibido - totalDanado)}
+                </dd>
+              </div>
+              {totalDanado > 0 && (
+                <div className="flex justify-between gap-3">
+                  <dt className="text-muted-foreground">Dañado</dt>
+                  <dd className="tabular-nums font-medium text-danger">{totalDanado}</dd>
+                </div>
+              )}
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">Checklists</dt>
+                <dd className="tabular-nums font-medium text-foreground">{recepciones.length}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="card">
+            <h2 className="card-title mb-3">Resumen</h2>
+            <dl className="space-y-2.5 text-sm">
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-muted-foreground">Estatus</dt>
+                <dd className="font-medium text-foreground">{badge.label}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-muted-foreground">Emitida</dt>
+                <dd className="font-medium text-foreground">{fechaEmision}</dd>
+              </div>
+              {detalle.obra && (
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="text-muted-foreground">Proyecto</dt>
+                  <dd className="text-right font-medium text-foreground">
+                    <Link href={`/obras/${detalle.obra_id}`} className="text-primary hover:underline">
+                      {detalle.obra.nombre}
+                    </Link>
+                  </dd>
+                </div>
+              )}
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-muted-foreground">Facturas</dt>
+                <dd className="font-medium tabular-nums text-foreground">{facturas.length}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-3 border-t border-border pt-2.5">
+                <dt className="text-muted-foreground">Total</dt>
+                <dd className="font-semibold tabular-nums text-foreground">{formatMoneyMx(Number(detalle.total))}</dd>
+              </div>
+            </dl>
+          </section>
+        </aside>
+      </div>
     </main>
   )
 }

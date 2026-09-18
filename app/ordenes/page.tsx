@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { IconDocumento } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeVerPrecios } from '@/lib/roles'
+import { formatMoneyMx } from '@/lib/money'
 import { createClient } from '@/lib/supabase/server'
 
 interface OrdenRow {
@@ -83,39 +84,39 @@ export default async function OrdenesPage({
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
+      <div className="list-stack">
         {(ordenes as unknown as OrdenRow[] | null)?.map((o) => {
           const numFacturas = o.facturas?.length ?? 0
           const badgeVariantType =
             o.estado === 'emitida'
-              ? 'navy'
+              ? 'info'
               : o.estado === 'completada' || o.estado === 'recibida'
-                ? 'teal'
+                ? 'success'
                 : o.estado === 'parcialmente_recibida'
-                  ? 'amber'
-                  : 'gray'
+                  ? 'warning'
+                  : 'neutral'
 
           return (
             <Link
               key={o.id}
               href={`/ordenes/${o.id}`}
-              className="flex min-h-[64px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+              className="list-row group items-center"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-bold text-foreground tabular-nums">{o.folio}</p>
+                  <p className="text-sm font-semibold tabular-nums text-foreground group-hover:text-primary">{o.folio}</p>
                   {o.folio_fisico && (
                     <span className="text-[11px] font-semibold text-warning-soft-foreground bg-warning-soft px-1.5 py-0.5 rounded border border-warning/30">
                       Talonario: {o.folio_fisico}
                     </span>
                   )}
-                  <Badge variant={badgeVariantType}>
+                  <Badge variant={badgeVariantType} dot>
                     {o.estado.replaceAll('_', ' ')}
                   </Badge>
                   {numFacturas > 0 ? (
-                    <Badge variant="teal">Factura ({numFacturas})</Badge>
+                    <Badge variant="success">Factura ({numFacturas})</Badge>
                   ) : (
-                    <Badge variant="gray">Sin factura</Badge>
+                    <Badge variant="neutral">Sin factura</Badge>
                   )}
                 </div>
                 <p className="text-sm font-medium text-foreground mt-0.5 truncate">
@@ -128,11 +129,8 @@ export default async function OrdenesPage({
                 </p>
               </div>
               <div className="text-right shrink-0">
-                <p className="font-bold tabular-nums text-foreground text-sm sm:text-base">
-                  $
-                  {Number(o.total).toLocaleString('es-MX', {
-                    minimumFractionDigits: 2,
-                  })}{' '}
+                <p className="text-sm font-semibold tabular-nums text-foreground sm:text-base">
+                  {formatMoneyMx(Number(o.total))}{' '}
                   <span className="text-xs font-medium text-muted-foreground">{o.moneda}</span>
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">

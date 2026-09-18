@@ -193,7 +193,7 @@ export default async function BitacoraPage({
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
+      <div className="list-stack">
         {eventos.map((ev) => {
           const nombre =
             ev.usuario && typeof ev.usuario === 'object' && 'nombre' in ev.usuario
