@@ -164,7 +164,7 @@ export function OrdenCompraFormatoImpresion({
             {copiado ? (
               <>
                 <IconCheck className="w-3.5 h-3.5" />
-                <span>¡Copiado!</span>
+                <span>Copiado</span>
               </>
             ) : (
               <span>Copiar para WhatsApp</span>

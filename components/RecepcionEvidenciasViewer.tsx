@@ -1,5 +1,7 @@
 'use client'
 
+import { IconExterno, IconUbicacion } from '@/components/icons'
+
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { QuickLookModal, type QuickLookItem } from '@/components/QuickLookModal'
@@ -112,13 +114,14 @@ export function RecepcionEvidenciasViewer({
                       )}
                     </div>
                     {f.latitud != null && (
-                      <p className="text-[10px] text-muted-foreground font-mono mt-1 truncate">
-                        📍 {Number(f.latitud).toFixed(4)}, {Number(f.longitud).toFixed(4)}
+                      <p className="mt-1 flex items-center gap-1 truncate font-mono text-[10px] text-muted-foreground">
+                        <IconUbicacion className="size-3 shrink-0" />
+                        {Number(f.latitud).toFixed(4)}, {Number(f.longitud).toFixed(4)}
                         {f.precision_gps_m && ` (±${f.precision_gps_m}m)`}
                       </p>
                     )}
-                    <p className="text-[11px] text-primary group-hover:underline mt-0.5">
-                      Ver en grande ↗
+                    <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-primary group-hover:underline">
+                      Ver en grande <IconExterno className="size-3" />
                     </p>
                   </div>
                 </div>
@@ -147,8 +150,8 @@ export function RecepcionEvidenciasViewer({
                   <p className="text-xs font-semibold text-foreground mt-1 truncate">
                     {item.nombre}
                   </p>
-                  <p className="text-[11px] text-primary group-hover:underline mt-0.5">
-                    Ver en grande ↗
+                  <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-primary group-hover:underline">
+                    Ver en grande <IconExterno className="size-3" />
                   </p>
                 </div>
               </div>

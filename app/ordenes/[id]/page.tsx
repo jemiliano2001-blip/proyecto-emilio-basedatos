@@ -363,10 +363,7 @@ export default async function OrdenDetallePage({
           />
 
           <section className="space-y-3">
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Historial de recepciones</h2>
-              <p className="text-sm text-muted-foreground">Checklists capturados en obra para esta orden.</p>
-            </div>
+            <h2 className="text-base font-semibold text-foreground">Historial de recepciones</h2>
             {recepciones.length === 0 ? (
               <EmptyState
                 icon={IconPaquete}

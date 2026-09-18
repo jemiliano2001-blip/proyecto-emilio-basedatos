@@ -122,30 +122,30 @@ export default async function ConciliacionObraPage({
           </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div className="bg-muted/50 p-3 rounded-lg border border-border">
-            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-lg border border-border bg-card p-3">
+            <span className="stat-label block">
               Presupuesto Total
             </span>
-            <span className="text-sm font-bold text-foreground">
+            <span className="text-base font-semibold tabular-nums text-foreground">
               {formatMoneyMx(Number(pres.presupuesto_mxn))}
             </span>
           </div>
 
-          <div className="bg-muted/50 p-3 rounded-lg border border-border">
-            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+          <div className="rounded-lg border border-border bg-card p-3">
+            <span className="stat-label block">
               Gastado Órdenes Compra
             </span>
-            <span className="text-sm font-bold text-foreground">
+            <span className="text-base font-semibold tabular-nums text-foreground">
               {formatMoneyMx(Number(pres.gastado_ordenes_compra_mxn))}
             </span>
           </div>
 
-          <div className="bg-muted/50 p-3 rounded-lg border border-border">
-            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
+          <div className="rounded-lg border border-border bg-card p-3">
+            <span className="stat-label block">
               Fletes y Servicios
             </span>
-            <span className="text-sm font-bold text-foreground">
+            <span className="text-base font-semibold tabular-nums text-foreground">
               {formatMoneyMx(
                 Number(pres.fletes_camiones_mxn) + Number(pres.servicios_otros_mxn)
               )}
@@ -159,10 +159,10 @@ export default async function ConciliacionObraPage({
                 : 'bg-danger-soft text-danger-soft-foreground border-danger/30'
             }`}
           >
-            <span className="block text-[10px] uppercase font-bold opacity-75">
+            <span className="block text-xs font-medium">
               {esSuperavit ? 'Remanente / Ahorro' : 'Desviación / Sobrecosto'}
             </span>
-            <span className="text-sm font-bold">
+            <span className="text-base font-semibold tabular-nums">
               {formatMoneyMx(Math.abs(Number(pres.variacion_saldo_mxn)))}
             </span>
           </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useTransition, useEffect } from 'react'
 import Image from 'next/image'
-import { IconBasura } from '@/components/icons'
+import { IconBasura, IconCheck, IconUbicacion } from '@/components/icons'
 import { comprimirImagenEnCliente } from '@/lib/image-compression'
 import { analizarCalidadArchivoImagen, DiagnosticoCalidadImagen } from '@/lib/image-quality'
 import dynamic from 'next/dynamic'
@@ -293,7 +293,8 @@ export function PhotoUploadInput({
               {/* Distintivo GPS */}
               {gps?.latitud != null && (
                 <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1 font-mono">
-                  <span>📍 GPS: {gps.latitud.toFixed(4)}, {gps.longitud?.toFixed(4)}</span>
+                  <IconUbicacion className="size-3 shrink-0" />
+                  <span>GPS {gps.latitud.toFixed(4)}, {gps.longitud?.toFixed(4)}</span>
                   {gps.precision && <span>(±{gps.precision}m)</span>}
                 </p>
               )}
@@ -316,7 +317,8 @@ export function PhotoUploadInput({
               {calidadDiagnostico.esApta ? (
                 <div className="flex items-center justify-between text-[11px] text-primary-soft-foreground">
                   <span className="flex items-center gap-1 font-medium">
-                    ✓ Nitidez e iluminación aptas
+                    <IconCheck className="size-3.5" />
+                    Nitidez e iluminación aptas
                   </span>
                   <span className="font-mono text-[10px] bg-primary-soft/80 px-1.5 py-0.5 rounded">
                     Score: {Math.round(calidadDiagnostico.score * 100)}%

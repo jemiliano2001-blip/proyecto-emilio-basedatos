@@ -46,8 +46,8 @@ export function CopyButton({
     <button
       type="button"
       onClick={handleCopy}
-      title={copiado ? '¡Copiado!' : title}
-      aria-label={copiado ? '¡Copiado!' : title}
+      title={copiado ? 'Copiado' : title}
+      aria-label={copiado ? 'Copiado' : title}
       className={cn(
         'inline-flex items-center gap-1 text-xs font-medium rounded-md px-1.5 py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         copiado
@@ -59,7 +59,7 @@ export function CopyButton({
       {copiado ? (
         <>
           <IconCheck className="h-3.5 w-3.5 text-success" />
-          <span>¡Copiado!</span>
+          <span>Copiado</span>
         </>
       ) : (
         <>

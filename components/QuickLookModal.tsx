@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import Image from 'next/image'
-import { IconCerrar } from '@/components/icons'
+import { IconCerrar, IconExterno } from '@/components/icons'
 import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 export interface QuickLookItem {
@@ -193,7 +193,7 @@ export function QuickLookModal({
               title="Descargar o abrir en pestaña externa"
             >
               <span>Descargar</span>
-              <span aria-hidden="true" className="text-[11px]">↗</span>
+              <IconExterno className="size-3.5" />
             </a>
 
             {/* Botón de cierre */}

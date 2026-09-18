@@ -14,7 +14,7 @@ import {
 } from '@/lib/validations/documento'
 import type { ObraDocumento } from '@/lib/types'
 import { EmptyState } from '@/components/EmptyState'
-import { IconPlus, IconDocumento } from '@/components/icons'
+import { IconDocumento, IconExterno, IconPlus } from '@/components/icons'
 import dynamic from 'next/dynamic'
 
 const QuickLookModal = dynamic(
@@ -215,7 +215,7 @@ export function ObraDocumentos({
                 className="btn-secondary btn-sm min-h-[44px] text-primary border-primary/40 hover:bg-primary-soft cursor-pointer"
               >
                 <span>Vista previa</span>
-                <span aria-hidden="true">↗</span>
+                <IconExterno className="size-3.5" />
               </button>
 
               <a

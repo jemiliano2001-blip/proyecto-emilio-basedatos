@@ -381,18 +381,31 @@ export function IconTendencia(props: IconProps) {
   )
 }
 
-/** Marca ObraTrack: dos trazos que forman una "O" técnica con esquina abierta. */
+/** Marca ObraTrack: monograma "O" con la barra de la "T" cruzando — geométrico, sin metáfora de reloj. */
 export function IconLogo(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden {...props}>
-      <path
-        d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5"
-        stroke="currentColor"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-      />
-      <path d="M12 8v4l3 2" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="20.5" cy="6" r="2" fill="currentColor" />
+      <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="2.5" />
+      <path d="M4 12h16" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function IconExterno(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M14 4h6v6" />
+      <path d="M20 4 10 14" />
+      <path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" />
+    </svg>
+  )
+}
+
+export function IconUbicacion(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11Z" />
+      <circle cx="12" cy="10" r="2" />
     </svg>
   )
 }

@@ -1,14 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import {
-  IconChevron,
-  IconMateriales,
-  IconPlus,
-  IconProyectos,
-  IconRecepcion,
-  IconSolicitudes,
-  IconTendencia,
-} from '@/components/icons'
+import { IconMateriales, IconPlus, IconRecepcion, IconSolicitudes } from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
@@ -28,12 +20,6 @@ type ObraHome = Pick<
   Obra,
   'id' | 'nombre' | 'ciudad' | 'fraccionamiento' | 'cliente' | 'estado' | 'foto_url' | 'presupuesto_mxn'
 >
-
-function saludo(nombre: string | null | undefined): string {
-  const hora = new Date().getHours()
-  const base = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches'
-  return nombre ? `${base}, ${nombre.split(' ')[0]}` : base
-}
 
 export default async function HomePage({
   searchParams,
@@ -98,47 +84,39 @@ export default async function HomePage({
     value: string
     hint: string
     href?: string
-    icon: React.ComponentType<{ className?: string }>
-    tone?: 'primary' | 'warning'
+    alerta?: boolean
   }[] = [
     {
       label: 'Proyectos activos',
       value: String(activas.length),
       hint: `${obras.length} registrado${obras.length === 1 ? '' : 's'} en total`,
-      icon: IconProyectos,
     },
     {
-      label: 'Requisiciones',
+      label: 'Requisiciones pendientes',
       value: requisicionesPendientes === null ? '—' : String(requisicionesPendientes),
-      hint: 'Pendientes en Compras o Finanzas',
+      hint: 'En cola de Compras o Finanzas',
       href: '/solicitudes',
-      icon: IconSolicitudes,
-      tone: requisicionesPendientes ? 'warning' : undefined,
+      alerta: Boolean(requisicionesPendientes),
     },
     {
       label: 'Recepciones',
       value: totalRecepciones === null ? '—' : String(totalRecepciones),
-      hint: 'Registradas en obra',
+      hint: 'Checklists capturados en obra',
       href: '/recepciones',
-      icon: IconRecepcion,
     },
   ]
   if (verDinero) {
     kpis.push({
       label: 'Presupuesto activo',
       value: formatMoneyMx(presupuestoActivo),
-      hint: 'Suma de proyectos activos',
-      icon: IconTendencia,
-      tone: 'primary',
+      hint: 'Suma de topes de proyectos activos',
     })
   }
 
   return (
     <main className="page-shell-wide space-y-6">
       <PageHeader
-        eyebrow={saludo(session?.perfil?.nombre)}
         title="Panel operativo"
-        description="Trazabilidad de materiales, requisiciones y presupuesto por proyecto."
         actions={
           <>
             {puedeCrear && (
@@ -170,25 +148,12 @@ export default async function HomePage({
         )}
       >
         {kpis.map((kpi) => {
-          const Icon = kpi.icon
           const content = (
             <>
-              <div className="flex items-start justify-between gap-2">
-                <span className="stat-label">{kpi.label}</span>
-                <span
-                  className={cn(
-                    'flex size-8 shrink-0 items-center justify-center rounded-lg',
-                    kpi.tone === 'primary'
-                      ? 'bg-primary-soft text-primary'
-                      : kpi.tone === 'warning'
-                        ? 'bg-warning-soft text-warning'
-                        : 'bg-muted text-muted-foreground'
-                  )}
-                >
-                  <Icon className="size-4" />
-                </span>
-              </div>
-              <p className="stat-value mt-1 text-xl sm:text-2xl">{kpi.value}</p>
+              <span className="stat-label">{kpi.label}</span>
+              <p className={cn('stat-value mt-1 text-xl sm:text-2xl', kpi.alerta && 'text-warning-soft-foreground')}>
+                {kpi.value}
+              </p>
               <p className="text-xs text-muted-foreground">{kpi.hint}</p>
             </>
           )
@@ -219,38 +184,30 @@ export default async function HomePage({
         </p>
       )}
 
-      {/* Accesos rápidos */}
-      <section aria-label="Accesos rápidos" className="flex flex-wrap gap-2">
+      {/* Accesos rápidos: en desktop ya están en el sidebar */}
+      <section aria-label="Accesos rápidos" className="flex flex-wrap gap-2 lg:hidden">
         {puedeRecibir && (
           <Link href="/recepciones" className="btn-secondary btn-sm">
-            <IconRecepcion className="size-4 text-primary" />
+            <IconRecepcion className="size-4" />
             Recibir material
-            <IconChevron className="size-3.5 text-muted-foreground" />
           </Link>
         )}
         {rol !== 'personal' && (
           <Link href="/materiales" className="btn-secondary btn-sm">
-            <IconMateriales className="size-4 text-primary" />
+            <IconMateriales className="size-4" />
             Catálogo de materiales
-            <IconChevron className="size-3.5 text-muted-foreground" />
           </Link>
         )}
         {verDinero && (
           <Link href="/ordenes" className="btn-secondary btn-sm">
             Órdenes de compra
-            <IconChevron className="size-3.5 text-muted-foreground" />
           </Link>
         )}
       </section>
 
       {/* Proyectos */}
       <section className="space-y-3">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">Proyectos</h2>
-            <p className="text-sm text-muted-foreground">Busca, filtra por estatus y entra al detalle.</p>
-          </div>
-        </div>
+        <h2 className="text-base font-semibold text-foreground">Proyectos</h2>
         <HomeProjectsWorkbench
           obras={obras}
           puedeCrear={puedeCrear}
