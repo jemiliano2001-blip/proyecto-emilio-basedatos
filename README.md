@@ -5,6 +5,14 @@ En UI se dice **proyecto**; la tabla sigue siendo `obras`.
 
 ## Estado actual: Fase 7 — Cierre de obra y reportes de conciliación (hecha)
 
+### Rediseño SaaS (2026-09-18)
+- Paleta "Slate + Cobalto" como tokens semánticos (CSS variables HSL); dark mode preparado en `[data-theme=dark]`, sin exponer aún.
+- Tipografía Inter self-hosted vía `next/font` (funciona offline, la cachea el SW).
+- Shell de escritorio con sidebar colapsable (`Ctrl/⌘+B`, cookie `ot-sidebar`) y migas en la barra superior; en móvil sigue la bottom nav + hoja "Más". Navegación por rol centralizada en `lib/nav.ts`.
+- Home como dashboard (KPIs + tabla de proyectos), login a dos paneles, detalle de proyecto a dos columnas con resumen de presupuesto.
+- El Service Worker solo se registra en producción (en desarrollo servía chunks viejos).
+- Detalle completo del sistema en `design.md`.
+
 ### Mantenimiento y hardening (2026-09-08)
 - Next.js actualizado a `15.5.25`; `npm audit` sin vulnerabilidades.
 - TypeScript estricto, ESLint y 13 pruebas aisladas en `tests/`.

@@ -28,9 +28,14 @@ npm run build
 npx tsc --noEmit   # typecheck — pasa limpio hoy; es LA puerta de verificación real
 ```
 
-⚠️ **`npm run lint` no sirve tal cual**: no existe config de ESLint en el repo, así que
-`next lint` abre el asistente interactivo de configuración y no lint-ea nada. No lo uses
-como verificación hasta que se configure.
+`npm run lint` corre ESLint 9 (flat config en `eslint.config.mjs`) sobre `app`,
+`components`, `lib` y `middleware.ts`; hoy pasa limpio y sí cuenta como verificación.
+
+**Sistema visual:** `design.md` es la fuente de verdad (tokens semánticos en
+`globals.css`/`tailwind.config.ts`, Inter vía `next/font`, sidebar en desktop +
+bottom nav en móvil, navegación centralizada en `lib/nav.ts`). No uses colores crudos
+de Tailwind (`text-gray-500`, `bg-red-50`) ni importes constantes desde archivos
+`'use client'` hacia server components.
 
 **No hay framework de pruebas instalado** (ni Jest, ni Vitest, ni Playwright) y no se
 introduce uno sin pedirlo. No existe un comando para "correr un test suelto". La
