@@ -150,7 +150,7 @@ export function SolicitudesListClient({
             <button
               type="button"
               onClick={selectedCount === solicitudes.length ? clearSelection : selectAll}
-              className="font-semibold text-accent hover:underline py-1"
+              className="font-semibold text-primary hover:underline py-1"
             >
               {selectedCount === solicitudes.length
                 ? 'Deseleccionar todas'
@@ -168,10 +168,10 @@ export function SolicitudesListClient({
           className={cn(
             'p-3.5 rounded-xl text-xs sm:text-sm border transition-all animate-enter',
             feedback.fallidas === 0
-              ? 'bg-teal-50 border-teal-200 text-teal-900'
+              ? 'bg-primary-soft border-primary/30 text-primary-soft-foreground'
               : feedback.exitosas > 0
-                ? 'bg-amber-50 border-amber-200 text-amber-900'
-                : 'bg-red-50 border-red-200 text-red-900'
+                ? 'bg-warning-soft border-warning/30 text-warning-soft-foreground'
+                : 'bg-danger-soft border-danger/30 text-danger-soft-foreground'
           )}
         >
           <div className="flex items-start justify-between gap-2">
@@ -192,7 +192,7 @@ export function SolicitudesListClient({
             <button
               type="button"
               onClick={() => setFeedback(null)}
-              className="text-gray-500 hover:text-gray-900 p-1"
+              className="text-muted-foreground hover:text-foreground p-1"
               aria-label="Cerrar aviso"
             >
               <IconCerrar className="w-4 h-4" />
@@ -219,10 +219,10 @@ export function SolicitudesListClient({
               key={s.id}
               className={cn(
                 'card-interactive relative flex items-center gap-3 transition-colors',
-                selected ? 'bg-accent/10 border-accent/40' : 'bg-card',
+                selected ? 'bg-primary/10 border-primary/40' : 'bg-card',
                 density === 'comfortable' ? 'p-3.5 sm:p-4 min-h-[76px]' : 'p-2.5 sm:p-3 min-h-[58px]',
                 'md:rounded-none md:border-0 md:shadow-none',
-                selected ? 'md:bg-accent/10' : 'md:hover:bg-muted/50'
+                selected ? 'md:bg-primary/10' : 'md:hover:bg-muted/50'
               )}
             >
               {/* Checkbox táctil amigable de selección para Compras/Finanzas */}
@@ -241,14 +241,14 @@ export function SolicitudesListClient({
                     aria-label={`Seleccionar ${reqCode}`}
                     className={cn(
                       'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg transition-colors cursor-pointer',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                     )}
                   >
                     <span
                       className={cn(
                         'flex h-5 w-5 items-center justify-center rounded border transition-colors',
                         selected
-                          ? 'bg-accent border-accent text-white font-bold'
+                          ? 'bg-primary border-primary text-primary-foreground font-bold'
                           : 'border-border bg-card hover:border-input'
                       )}
                     >
@@ -277,7 +277,7 @@ export function SolicitudesListClient({
                     {ordenes.map((oc) => (
                       <span
                         key={oc.id}
-                        className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200"
+                        className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-primary-soft text-primary-soft-foreground border border-primary/30"
                       >
                         {oc.folio}
                       </span>
@@ -368,7 +368,7 @@ export function SolicitudesListClient({
           role="dialog"
           aria-modal="true"
           aria-labelledby="rechazo-lote-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm animate-fade-in"
         >
           <div className="w-full max-w-md bg-card rounded-2xl shadow-2xl border border-border p-5 space-y-4 animate-scale-in">
             <h3 id="rechazo-lote-title" className="text-base font-bold text-foreground">
@@ -382,20 +382,20 @@ export function SolicitudesListClient({
               onChange={(e) => setMotivoRechazo(e.target.value)}
               placeholder="Motivo del rechazo (opcional)…"
               rows={3}
-              className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-accent"
+              className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
             />
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setShowRechazoModal(false)}
-                className="btn-secondary text-sm px-3 py-2"
+                className="btn-secondary btn-sm"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirmarRechazo}
-                className="btn-danger text-sm px-4 py-2"
+                className="btn-danger btn-sm"
               >
                 Confirmar rechazo
               </button>

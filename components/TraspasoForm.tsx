@@ -166,20 +166,20 @@ export function TraspasoForm({
       <input type="hidden" name="items_json" value={itemsJson} />
 
       {(state.error || errorLocal) && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm">
+        <div className="bg-danger-soft border border-danger/30 text-danger-soft-foreground p-3 rounded-lg text-sm">
           {state.error || errorLocal}
         </div>
       )}
 
       {/* Obra Origen y Destino */}
       <div className="card space-y-4">
-        <h2 className="font-semibold text-ink text-sm border-b border-gray-100 pb-2">
+        <h2 className="font-semibold text-foreground text-sm border-b border-border pb-2">
           Selección de Proyectos
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-foreground mb-1">
               Proyecto origen (sale el material) *
             </label>
             <select
@@ -210,7 +210,7 @@ export function TraspasoForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-foreground mb-1">
               Proyecto destino (entra el material) *
             </label>
             <select
@@ -232,7 +232,7 @@ export function TraspasoForm({
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-foreground mb-1">
             Motivo / Observaciones del traspaso
           </label>
           <input
@@ -248,13 +248,13 @@ export function TraspasoForm({
 
       {/* Agregar Materiales */}
       <div className="card space-y-4">
-        <h2 className="font-semibold text-ink text-sm border-b border-gray-100 pb-2">
+        <h2 className="font-semibold text-foreground text-sm border-b border-border pb-2">
           Agregar Materiales al Traspaso
         </h2>
 
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-foreground mb-1">
               Buscar material
             </label>
             <input
@@ -283,7 +283,7 @@ export function TraspasoForm({
           </div>
 
           {materialActual && (
-            <div className="bg-teal-50 p-3 rounded-lg flex items-center justify-between text-xs text-teal-800 border border-teal-100">
+            <div className="bg-primary-soft p-3 rounded-lg flex items-center justify-between text-xs text-primary-soft-foreground border border-primary/20">
               <span>
                 Material seleccionado: <strong>{materialActual.nombre_base} {materialActual.variante || ''}</strong>
               </span>
@@ -295,7 +295,7 @@ export function TraspasoForm({
 
           <div className="flex gap-2 items-end">
             <div className="flex-1">
-              <label className="block text-xs font-semibold text-gray-700 mb-1">
+              <label className="block text-xs font-semibold text-foreground mb-1">
                 Cantidad a traspasar
               </label>
               <input
@@ -322,27 +322,27 @@ export function TraspasoForm({
 
       {/* Lista de Items Agregados */}
       <div className="card space-y-3">
-        <h2 className="font-semibold text-ink text-sm border-b border-gray-100 pb-2 flex items-center justify-between">
+        <h2 className="font-semibold text-foreground text-sm border-b border-border pb-2 flex items-center justify-between">
           <span>Materiales en el traspaso</span>
-          <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600 font-normal">
+          <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground font-normal">
             {items.length} {items.length === 1 ? 'item' : 'items'}
           </span>
         </h2>
 
         {items.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-4">
+          <p className="text-xs text-muted-foreground text-center py-4">
             No has agregado materiales aún.
           </p>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-border">
             {items.map((item) => (
               <div key={item.material_id} className="py-2.5 flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-semibold text-ink">
+                  <p className="text-sm font-semibold text-foreground">
                     {item.nombre_base} {item.variante ? `(${item.variante})` : ''}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Cantidad: <strong className="text-ink font-bold">{item.cantidad} {item.unidad_medida}</strong> (de {item.disponible} disponibles)
+                  <p className="text-xs text-muted-foreground">
+                    Cantidad: <strong className="text-foreground font-bold">{item.cantidad} {item.unidad_medida}</strong> (de {item.disponible} disponibles)
                   </p>
                 </div>
                 <button

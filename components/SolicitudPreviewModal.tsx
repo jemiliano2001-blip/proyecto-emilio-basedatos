@@ -82,7 +82,7 @@ export function SolicitudPreviewModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="solicitud-preview-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-sm transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-foreground/80 backdrop-blur-sm transition-opacity print:hidden"
       onClick={onClose}
     >
       <div
@@ -96,14 +96,14 @@ export function SolicitudPreviewModal({
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-100 text-teal-800">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-primary-soft text-primary-soft-foreground">
                   VISTA PREVIA
                 </span>
                 <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-muted text-foreground border border-border">
                   {folio ? `FOLIO: ${folio}` : 'FOLIO: REQ-NUEVA'}
                 </span>
                 {ordenCompraFolio && (
-                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-300">
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-primary-soft text-primary-soft-foreground border border-primary/40">
                     OC: {ordenCompraFolio}
                   </span>
                 )}
@@ -138,8 +138,8 @@ export function SolicitudPreviewModal({
 
         {/* Alerta si hay saldo insuficiente */}
         {tieneAlertas && (
-          <div className="mx-5 mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-start gap-2.5 text-xs">
-            <IconAlerta className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+          <div className="mx-5 mt-4 p-3 rounded-xl bg-warning-soft border border-warning/30 text-warning-soft-foreground flex items-start gap-2.5 text-xs">
+            <IconAlerta className="w-4 h-4 shrink-0 mt-0.5 text-warning" />
             <div>
               <p className="font-bold">Advertencia de saldo insuficiente:</p>
               <p className="mt-0.5">
@@ -178,7 +178,7 @@ export function SolicitudPreviewModal({
                 key={idx}
                 className={`p-3 rounded-xl border transition-colors ${
                   insuficiente
-                    ? 'border-red-200 bg-red-50/40'
+                    ? 'border-danger/30 bg-danger-soft/40'
                     : 'border-border bg-card hover:border-input'
                 }`}
               >
@@ -200,7 +200,7 @@ export function SolicitudPreviewModal({
                     </div>
 
                     {it.obraNombre && it.obraNombre !== obraNombrePrincipal && (
-                      <p className="text-xs font-semibold text-accent mt-1">
+                      <p className="text-xs font-semibold text-primary mt-1">
                         Proyecto destino: {it.obraNombre}
                       </p>
                     )}
@@ -219,7 +219,7 @@ export function SolicitudPreviewModal({
                       </p>
                     ) : (
                       it.monto_mxn != null && (
-                        <p className="text-sm font-bold text-accent tabular-nums">
+                        <p className="text-sm font-bold text-primary tabular-nums">
                           {formatMoneyMx(it.monto_mxn)}
                         </p>
                       )
@@ -258,7 +258,7 @@ export function SolicitudPreviewModal({
             type="button"
             onClick={onConfirm}
             disabled={isSubmitting || items.length === 0}
-            className="btn-primary text-sm px-4 py-2.5 min-h-[44px] inline-flex items-center gap-1.5"
+            className="btn-primary btn-sm min-h-[44px]"
           >
             <IconCheck className="w-4 h-4" />
             <span>{isSubmitting ? 'Creando requisición…' : 'Confirmar y levantar'}</span>

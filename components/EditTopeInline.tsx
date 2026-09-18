@@ -27,7 +27,7 @@ export function EditTopeInline({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-3 text-sm font-semibold text-accent hover:underline"
+        className="mt-3 text-sm font-semibold text-primary hover:underline"
       >
         Editar cantidad
       </button>
@@ -39,9 +39,9 @@ export function EditTopeInline({
       <input type="hidden" name="material_id" value={materialId} />
       <FormError message={state.error} />
       {state.ok && (
-        <p className="text-sm text-green-700">Cantidad actualizada.</p>
+        <p className="text-sm text-success-soft-foreground">Cantidad actualizada.</p>
       )}
-      <label className="block text-sm font-medium text-ink">
+      <label className="block text-sm font-medium text-foreground">
         Nueva cantidad contratada
         <input
           name="cantidad_contratada"

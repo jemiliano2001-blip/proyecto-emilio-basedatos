@@ -20,16 +20,16 @@ export interface FilterTabsProps {
 export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTabsProps) {
   return (
     <div
-      className={cn('flex gap-2 p-1 bg-muted rounded-xl border border-border', className)}
+      className={cn('flex gap-0.5 rounded-lg bg-muted p-0.5', className)}
       role="tablist"
       aria-label={ariaLabel}
     >
       {tabs.map((tab) => {
         const itemClasses = cn(
-          'min-h-[44px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-center text-sm font-semibold transition-colors select-none',
+          'min-h-[40px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-center text-sm font-medium transition-colors select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-[36px]',
           tab.active
-            ? 'bg-ink text-white shadow-xs'
-            : 'text-muted-foreground hover:text-foreground hover:bg-card/60'
+            ? 'bg-card text-foreground shadow-xs'
+            : 'text-muted-foreground hover:text-foreground'
         )
 
         if (tab.href) {
@@ -46,8 +46,8 @@ export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTab
               {typeof tab.count === 'number' && (
                 <span
                   className={cn(
-                    'text-xs px-1.5 py-0.2 rounded-full font-bold',
-                    tab.active ? 'bg-white/20 text-white' : 'bg-muted-foreground/20 text-foreground'
+                    'rounded-full px-1.5 text-[11px] font-medium tabular-nums',
+                    tab.active ? 'bg-primary-soft text-primary-soft-foreground' : 'bg-border/70 text-muted-foreground'
                   )}
                 >
                   {tab.count}
@@ -70,8 +70,8 @@ export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTab
             {typeof tab.count === 'number' && (
               <span
                 className={cn(
-                  'text-xs px-1.5 py-0.2 rounded-full font-bold',
-                  tab.active ? 'bg-white/20 text-white' : 'bg-muted-foreground/20 text-foreground'
+                  'rounded-full px-1.5 text-[11px] font-medium tabular-nums',
+                  tab.active ? 'bg-primary-soft text-primary-soft-foreground' : 'bg-border/70 text-muted-foreground'
                 )}
               >
                 {tab.count}

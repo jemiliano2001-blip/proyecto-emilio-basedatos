@@ -43,12 +43,12 @@ export function NotificacionCampanita() {
   return (
     <Link
       href="/notificaciones"
-      className="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-ink hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       aria-label={label}
     >
       <IconCampana className="h-6 w-6" />
       {noLeidas > 0 && (
-        <span className="absolute right-1 top-1 min-w-[1.125rem] rounded-full bg-danger px-1 text-center text-[10px] font-bold leading-4 text-white">
+        <span className="absolute right-1 top-1 min-w-[1.125rem] rounded-full bg-danger px-1 text-center text-[10px] font-bold leading-4 text-primary-foreground">
           {noLeidas > 99 ? '99+' : noLeidas}
         </span>
       )}

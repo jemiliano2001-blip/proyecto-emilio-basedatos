@@ -44,12 +44,12 @@ export function TopeForm({
       <input type="hidden" name="obra_id" value={obraId} />
       <FormError message={state.error} />
       {state.ok && (
-        <div className="card border-green-300 bg-green-50 text-green-800 mb-2">
+        <div className="card border-success/40 bg-success-soft text-success-soft-foreground mb-2">
           Tope guardado.
         </div>
       )}
       <div>
-        <label htmlFor="material_id" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="material_id" className="block text-sm font-medium text-foreground mb-1">
           Material
         </label>
         <select
@@ -77,7 +77,7 @@ export function TopeForm({
       <div>
         <label
           htmlFor="cantidad_contratada"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Cantidad contratada
         </label>

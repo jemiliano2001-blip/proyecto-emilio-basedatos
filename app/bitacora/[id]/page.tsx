@@ -32,8 +32,8 @@ function JsonBlock({
   if (!value) {
     return (
       <div>
-        <h3 className="text-sm font-bold text-ink mb-1">{title}</h3>
-        <p className="text-sm text-gray-500">—</p>
+        <h3 className="text-sm font-bold text-foreground mb-1">{title}</h3>
+        <p className="text-sm text-muted-foreground">—</p>
       </div>
     )
   }
@@ -41,12 +41,12 @@ function JsonBlock({
   const entries = Object.entries(value)
   return (
     <div>
-      <h3 className="text-sm font-bold text-ink mb-2">{title}</h3>
-      <dl className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+      <h3 className="text-sm font-bold text-foreground mb-2">{title}</h3>
+      <dl className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
         {entries.map(([key, val]) => (
           <div key={key} className="grid grid-cols-1 sm:grid-cols-3 gap-1 px-3.5 py-2.5">
-            <dt className="text-xs font-semibold text-gray-500 break-all">{key}</dt>
-            <dd className="sm:col-span-2 text-sm text-ink break-all font-mono">
+            <dt className="text-xs font-semibold text-muted-foreground break-all">{key}</dt>
+            <dd className="sm:col-span-2 text-sm text-foreground break-all font-mono">
               {val === null || val === undefined
                 ? 'null'
                 : typeof val === 'object'
@@ -114,17 +114,17 @@ export default async function BitacoraDetallePage({
 
       <div className="card space-y-2 text-sm">
         <p>
-          <span className="text-gray-500">Tabla:</span>{' '}
-          <span className="font-semibold text-ink">{etiquetaTablaAuditoria(ev.tabla)}</span>
-          <span className="text-gray-400"> ({ev.tabla})</span>
+          <span className="text-muted-foreground">Tabla:</span>{' '}
+          <span className="font-semibold text-foreground">{etiquetaTablaAuditoria(ev.tabla)}</span>
+          <span className="text-muted-foreground"> ({ev.tabla})</span>
         </p>
         <p>
-          <span className="text-gray-500">Registro:</span>{' '}
+          <span className="text-muted-foreground">Registro:</span>{' '}
           <code className="font-mono text-xs break-all">{ev.registro_id}</code>
         </p>
         <p>
-          <span className="text-gray-500">Quién:</span>{' '}
-          <span className="font-semibold text-ink">{nombre}</span>
+          <span className="text-muted-foreground">Quién:</span>{' '}
+          <span className="font-semibold text-foreground">{nombre}</span>
         </p>
       </div>
 
@@ -133,7 +133,7 @@ export default async function BitacoraDetallePage({
 
       <Link
         href="/bitacora"
-        className="inline-flex min-h-[44px] items-center text-sm font-semibold text-accent hover:underline"
+        className="inline-flex min-h-[44px] items-center text-sm font-semibold text-primary hover:underline"
       >
         Volver a la bitácora
       </Link>

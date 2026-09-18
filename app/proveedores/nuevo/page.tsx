@@ -12,7 +12,7 @@ export default async function NuevoProveedorPage() {
   }
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Nuevo proveedor"
         backHref="/proveedores"

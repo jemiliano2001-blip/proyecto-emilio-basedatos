@@ -26,7 +26,7 @@ export function ReportarInstalacionForm({
   const [offlineError, setOfflineError] = useState<string | null>(null)
 
   if (pendiente <= 0) {
-    return <p className="text-xs text-teal-800 font-medium">Todo instalado</p>
+    return <p className="text-xs text-primary-soft-foreground font-medium">Todo instalado</p>
   }
 
   return (
@@ -43,10 +43,10 @@ export function ReportarInstalacionForm({
     >
       <FormError message={state.error ?? offlineError} />
       {state.ok && (
-        <p className="text-xs text-teal-800 font-medium">Instalación registrada.</p>
+        <p className="text-xs text-primary-soft-foreground font-medium">Instalación registrada.</p>
       )}
       <div className="flex gap-2 items-end">
-        <label className="flex-1 text-xs font-semibold text-gray-600">
+        <label className="flex-1 text-xs font-semibold text-muted-foreground">
           Instalar ({unidad})
           <input
             name="cantidad"
@@ -68,7 +68,7 @@ export function ReportarInstalacionForm({
         className="input-base text-sm"
         placeholder="Nota (opcional)"
       />
-      <p className="text-[11px] text-gray-400">
+      <p className="text-[11px] text-muted-foreground">
         Pendiente: {pendiente} {unidad}
       </p>
     </form>

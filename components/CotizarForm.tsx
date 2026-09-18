@@ -72,7 +72,7 @@ export function CotizarForm({
 
   if (proveedores.length === 0) {
     return (
-      <div className="card border-amber-300 bg-amber-50 text-amber-800">
+      <div className="card border-warning/40 bg-warning-soft text-warning-soft-foreground">
         Primero crea un proveedor en la sección de Proveedores.
       </div>
     )
@@ -82,9 +82,9 @@ export function CotizarForm({
     return (
       <div className="space-y-4">
         <div className="card">
-          <p className="text-sm text-gray-500 mb-2">
+          <p className="text-sm text-muted-foreground mb-2">
             Cotización:{' '}
-            <span className="font-semibold capitalize text-gray-800">
+            <span className="font-semibold capitalize text-foreground">
               {cotizacionExistente.estado}
             </span>
           </p>
@@ -113,7 +113,7 @@ export function CotizarForm({
         )}
 
         {cotizacionExistente.estado === 'aprobada' && (
-          <p className="text-sm text-green-700 text-center">
+          <p className="text-sm text-success-soft-foreground text-center">
             Cotización aprobada. Revisa la orden en Órdenes.
           </p>
         )}
@@ -128,7 +128,7 @@ export function CotizarForm({
       <FormError message={state.error} />
 
       <div>
-        <label htmlFor="proveedor_id" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="proveedor_id" className="block text-sm font-medium text-foreground mb-1">
           Proveedor
         </label>
         <select
@@ -146,7 +146,7 @@ export function CotizarForm({
       </div>
 
       <div>
-        <label htmlFor="moneda" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="moneda" className="block text-sm font-medium text-foreground mb-1">
           Moneda
         </label>
         <select
@@ -167,10 +167,10 @@ export function CotizarForm({
               {item.material?.nombre_base}
               {item.material?.variante ? ` · ${item.material.variante}` : ''}
             </p>
-            <p className="text-xs text-gray-500 mb-2">
+            <p className="text-xs text-muted-foreground mb-2">
               Cantidad: {item.cantidad_solicitada} {item.material?.unidad_medida}
             </p>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Precio unitario ({moneda})
               <input
                 type="text"
@@ -189,7 +189,7 @@ export function CotizarForm({
       </div>
 
       <div>
-        <label htmlFor="nota" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="nota" className="block text-sm font-medium text-foreground mb-1">
           Nota (opcional)
         </label>
         <textarea id="nota" name="nota" rows={2} className="input-base" />

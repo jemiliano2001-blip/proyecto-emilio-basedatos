@@ -12,7 +12,7 @@ export default async function NuevoUsuarioPage() {
   }
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Nuevo usuario"
         description="Se crea la cuenta de login y el perfil con rol."

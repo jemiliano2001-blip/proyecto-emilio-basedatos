@@ -107,14 +107,14 @@ export default async function TraspasosPage() {
       />
 
       {schemaAusente && (
-        <div className="card border-amber-200 bg-amber-50 text-amber-900 mb-4">
+        <div className="card border-warning/30 bg-warning-soft text-warning-soft-foreground mb-4">
           Los traspasos todavía no están activos en la base. Cuando se aplique la
           migración, este listado va a funcionar.
         </div>
       )}
 
       {error && !schemaAusente && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg bg-danger-soft p-3 text-sm text-danger-soft-foreground">
           No se pudieron cargar los traspasos. Revisa tu conexión.
         </div>
       )}
@@ -156,40 +156,40 @@ export default async function TraspasosPage() {
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-ink text-sm">{t.folio}</span>
+                      <span className="font-bold text-foreground text-sm">{t.folio}</span>
                       <Badge variant={badgeVariant(t.estado)}>
                         {labelEstado(t.estado)}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">{fecha}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{fecha}</p>
                   </div>
-                  <span className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100">
+                  <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded border border-border">
                     {numItems} {numItems === 1 ? 'material' : 'materiales'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50 p-2.5 rounded-lg my-2 border border-gray-100">
+                <div className="grid grid-cols-2 gap-2 text-xs bg-muted/50 p-2.5 rounded-lg my-2 border border-border">
                   <div>
-                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">
+                    <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
                       Origen
                     </span>
-                    <span className="font-medium text-gray-800">
+                    <span className="font-medium text-foreground">
                       {t.obra_origen?.nombre ?? 'Sin especificar'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-400 block text-[10px] uppercase font-semibold">
+                    <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
                       Destino
                     </span>
-                    <span className="font-medium text-gray-800">
+                    <span className="font-medium text-foreground">
                       {t.obra_destino?.nombre ?? 'Sin especificar'}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
                   <span>Solicita: {t.solicitante?.nombre ?? 'Anónimo'}</span>
-                  <span className="text-accent font-semibold hover:underline">
+                  <span className="text-primary font-semibold hover:underline">
                     Ver detalle →
                   </span>
                 </div>

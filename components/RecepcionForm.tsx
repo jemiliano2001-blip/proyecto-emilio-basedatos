@@ -178,7 +178,7 @@ export function RecepcionForm({
   if (lines.length === 0) {
     return (
       <div className="card">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Esta orden ya no tiene cantidades pendientes por recibir.
         </p>
       </div>
@@ -194,13 +194,13 @@ export function RecepcionForm({
 
       <FormError message={state.error ?? offlineError} />
       {offlineMsg && (
-        <p className="rounded-lg bg-teal-50 text-teal-800 text-sm px-3 py-2">{offlineMsg}</p>
+        <p className="rounded-lg bg-primary-soft text-primary-soft-foreground text-sm px-3 py-2">{offlineMsg}</p>
       )}
 
       <div>
         <label
           htmlFor="referencia_entrega"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Referencia de entrega (opcional)
         </label>
@@ -213,8 +213,8 @@ export function RecepcionForm({
       </div>
 
       {/* Evidencia fotográfica de entrega en obra */}
-      <div className="card space-y-4 border-teal-200/80 bg-teal-50/20">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-900">
+      <div className="card space-y-4 border-primary/30 bg-primary-soft/20">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-primary-soft-foreground">
           Evidencia Fotográfica de Entrega
         </h3>
         <PhotoUploadInput
@@ -234,7 +234,7 @@ export function RecepcionForm({
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Checklist obligatorio: captura cada material pendiente (cantidad, faltante o
           daño). No se puede omitir ninguno.
         </p>
@@ -247,10 +247,10 @@ export function RecepcionForm({
                 <p className="font-medium text-sm">
                   {meta.nombre_base}
                   {meta.variante ? (
-                    <span className="text-gray-500"> · {meta.variante}</span>
+                    <span className="text-muted-foreground"> · {meta.variante}</span>
                   ) : null}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Pedido {Number(meta.cantidad_pedida)} {meta.unidad_medida} · Ya
                   recibido {Number(meta.cantidad_recibida_buena)} · Pendiente{' '}
                   {Number(meta.pendiente)}
@@ -259,7 +259,7 @@ export function RecepcionForm({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Cantidad buena
                   </label>
                   <input
@@ -276,7 +276,7 @@ export function RecepcionForm({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Cantidad dañada
                   </label>
                   <input
@@ -295,24 +295,24 @@ export function RecepcionForm({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
                   Estado del material
                 </label>
-                <p className="input-base bg-slate-50 text-sm capitalize" aria-live="polite">
+                <p className="input-base bg-muted/50 text-sm capitalize" aria-live="polite">
                   {line.estado}
                 </p>
-                <p className="mt-1 text-[11px] text-gray-500">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   Se calcula automáticamente según las cantidades buenas y dañadas.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
                   Observación
                   {(line.estado === 'faltante' ||
                     line.estado === 'danado' ||
                     (parseQuantity(line.cantidad_danada) ?? 0) > 0) && (
-                    <span className="text-red-600"> *</span>
+                    <span className="text-danger"> *</span>
                   )}
                 </label>
                 <textarea
@@ -326,7 +326,7 @@ export function RecepcionForm({
                 />
               </div>
 
-              <div className="pt-2 border-t border-gray-100">
+              <div className="pt-2 border-t border-border">
                 <PhotoUploadInput
                   id={`foto_item_${line.orden_item_id}`}
                   name={`foto_item_${line.orden_item_id}`}
@@ -341,14 +341,14 @@ export function RecepcionForm({
       </div>
 
       <div>
-        <label htmlFor="nota" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="nota" className="block text-sm font-medium text-foreground mb-1">
           Nota general (opcional)
         </label>
         <textarea id="nota" name="nota" rows={3} className="input-base" />
       </div>
 
       <SubmitButton>Enviar checklist a Compras</SubmitButton>
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-muted-foreground text-center">
         Sin señal: los checklists sin fotografías se guardan en este teléfono. Para adjuntar evidencia fotográfica necesitas conexión.
       </p>
     </form>

@@ -33,20 +33,20 @@ function PasswordBanner({
   return (
     <div
       role="status"
-      className="rounded-xl border border-amber-300 bg-amber-50 px-3.5 py-3 text-sm text-amber-950"
+      className="rounded-xl border border-warning/40 bg-warning-soft px-3.5 py-3 text-sm text-warning-soft-foreground"
     >
       <p className="font-bold">Contraseña temporal (solo esta vez)</p>
-      <p className="mt-1 text-amber-900/80">
+      <p className="mt-1 text-warning-soft-foreground/80">
         Cópiala y pásasela a la persona. No se vuelve a mostrar.
       </p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <code className="rounded-lg bg-white px-2.5 py-1.5 font-mono text-sm break-all border border-amber-200">
+        <code className="rounded-lg bg-card px-2.5 py-1.5 font-mono text-sm break-all border border-warning/30">
           {password}
         </code>
         <button
           type="button"
           onClick={() => void copiar()}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 text-sm font-semibold text-ink hover:bg-amber-100"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-warning/40 bg-card px-3 text-sm font-semibold text-foreground hover:bg-warning-soft"
         >
           <IconCopy className="h-4 w-4" />
           {copiado ? 'Copiada' : 'Copiar'}
@@ -54,7 +54,7 @@ function PasswordBanner({
         <button
           type="button"
           onClick={onDismiss}
-          className="min-h-[44px] px-3 text-sm font-semibold text-amber-900/70 hover:underline"
+          className="min-h-[44px] px-3 text-sm font-semibold text-warning-soft-foreground/70 hover:underline"
         >
           Entendido
         </button>
@@ -97,7 +97,7 @@ export function UsuarioCrearForm({
         <form action={formAction} className="space-y-4">
           <FormError message={state.error} />
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
               Correo
             </label>
             <input
@@ -111,7 +111,7 @@ export function UsuarioCrearForm({
             />
           </div>
           <div>
-            <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-1">
               Nombre
             </label>
             <input
@@ -123,7 +123,7 @@ export function UsuarioCrearForm({
             />
           </div>
           <div>
-            <label htmlFor="rol" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="rol" className="block text-sm font-medium text-foreground mb-1">
               Rol
             </label>
             <select id="rol" name="rol" required defaultValue="personal" className="input-base">
@@ -135,7 +135,7 @@ export function UsuarioCrearForm({
             </select>
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
               Contraseña (opcional)
             </label>
             <input
@@ -146,7 +146,7 @@ export function UsuarioCrearForm({
               className="input-base"
               placeholder="Déjala vacía para generar una temporal"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Si la dejas vacía, generamos una temporal y te la mostramos una sola vez.
             </p>
           </div>
@@ -156,7 +156,7 @@ export function UsuarioCrearForm({
       {bannerPwd && state.usuarioId && (
         <Link
           href={`/usuarios/${state.usuarioId}`}
-          className="inline-flex min-h-[44px] items-center text-sm font-semibold text-accent hover:underline"
+          className="inline-flex min-h-[44px] items-center text-sm font-semibold text-primary hover:underline"
         >
           Ver ficha del usuario
         </Link>
@@ -187,18 +187,18 @@ export function UsuarioEditarForm({
     <form action={formAction} className="space-y-4">
       <FormError message={state.error} />
       {state.ok && !state.error && (
-        <p className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+        <p className="rounded-lg border border-success/30 bg-success-soft px-3 py-2 text-sm text-success-soft-foreground">
           Cambios guardados.
         </p>
       )}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Correo</label>
-        <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-ink">
+        <label className="block text-sm font-medium text-foreground mb-1">Correo</label>
+        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2.5 text-sm text-foreground">
           {usuario.email ?? '—'}
         </p>
       </div>
       <div>
-        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-1">
           Nombre
         </label>
         <input
@@ -210,7 +210,7 @@ export function UsuarioEditarForm({
         />
       </div>
       <div>
-        <label htmlFor="rol" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="rol" className="block text-sm font-medium text-foreground mb-1">
           Rol
         </label>
         <select
@@ -228,7 +228,7 @@ export function UsuarioEditarForm({
         </select>
       </div>
       <div>
-        <label htmlFor="activo" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="activo" className="block text-sm font-medium text-foreground mb-1">
           Activo
         </label>
         <select
@@ -244,7 +244,7 @@ export function UsuarioEditarForm({
         {esYo && (
           <>
             <input type="hidden" name="activo" value="true" />
-            <p className="mt-1 text-xs text-gray-500">No puedes desactivar tu propia cuenta.</p>
+            <p className="mt-1 text-xs text-muted-foreground">No puedes desactivar tu propia cuenta.</p>
           </>
         )}
       </div>
@@ -275,7 +275,7 @@ export function UsuarioResetPasswordForm({
       <form action={formAction} className="space-y-4">
         <FormError message={state.error} />
         <div>
-          <label htmlFor="password-reset" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password-reset" className="block text-sm font-medium text-foreground mb-1">
             Nueva contraseña (opcional)
           </label>
           <input

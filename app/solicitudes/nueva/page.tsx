@@ -72,7 +72,7 @@ export default async function NuevaSolicitudPage({
   })
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Solicitud para requisición de materiales"
         description="Elige el proyecto y agrega las partidas de materiales. Solo se listan materiales con saldo presupuestal disponible en la obra."

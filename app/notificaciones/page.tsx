@@ -38,7 +38,7 @@ export default async function NotificacionesPage() {
       />
 
       {error && (
-        <div className="card mb-4 border-red-300 bg-red-50 text-red-700">
+        <div className="card mb-4 border-danger/40 bg-danger-soft text-danger-soft-foreground">
           No se pudieron cargar los avisos. Revisa tu conexión.
         </div>
       )}
@@ -49,13 +49,13 @@ export default async function NotificacionesPage() {
           return (
             <article
               key={n.id}
-              className={`card ${n.leida ? 'opacity-70' : 'border-accent/30'}`}
+              className={`card ${n.leida ? 'opacity-70' : 'border-primary/30'}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="font-semibold text-ink">{n.titulo}</p>
-                  <p className="mt-1 text-sm text-gray-600">{n.mensaje}</p>
-                  <p className="mt-2 text-xs text-gray-400">{fechaAviso(n.creado_en)}</p>
+                  <p className="font-semibold text-foreground">{n.titulo}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{n.mensaje}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{fechaAviso(n.creado_en)}</p>
                 </div>
                 {!n.leida && (
                   <Badge variant="teal">

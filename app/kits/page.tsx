@@ -93,16 +93,16 @@ export default async function KitsPage() {
 
       <div className="space-y-4">
         {error && (
-          <div role="alert" className="card border-red-200 bg-red-50 text-red-800">
+          <div role="alert" className="card border-danger/30 bg-danger-soft text-danger-soft-foreground">
             No se pudieron cargar los kits. Revisa tu conexión e intenta de nuevo.
           </div>
         )}
         {kits.map((kit) => (
           <div key={kit.id} className="card space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-2">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-ink">{kit.nombre}</h2>
+                  <h2 className="text-base font-bold text-foreground">{kit.nombre}</h2>
                   {kit.configuracion && (
                     <Badge variant="teal">
                       {kit.configuracion}
@@ -111,16 +111,16 @@ export default async function KitsPage() {
                   {!kit.activo && <Badge variant="gray">Inactivo</Badge>}
                 </div>
                 {kit.material_principal && (
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Equipo principal: <span className="font-semibold text-gray-700">{kit.material_principal.nombre_base} {kit.material_principal.variante ? `· ${kit.material_principal.variante}` : ''}</span>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Equipo principal: <span className="font-semibold text-foreground">{kit.material_principal.nombre_base} {kit.material_principal.variante ? `· ${kit.material_principal.variante}` : ''}</span>
                   </p>
                 )}
                 {kit.descripcion && (
-                  <p className="text-xs text-gray-400 mt-0.5">{kit.descripcion}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{kit.descripcion}</p>
                 )}
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-gray-400 font-medium">
+                <span className="text-xs text-muted-foreground font-medium">
                   {kit.material_kit_items?.length ?? 0} componentes
                 </span>
                 {puedeGestionar && (
@@ -135,30 +135,30 @@ export default async function KitsPage() {
             </div>
 
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Componentes menores (&quot;chiquitiaje&quot;):
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                 {kit.material_kit_items?.map((it) => (
                   <div
                     key={it.id}
-                    className="flex items-center justify-between p-2 rounded bg-gray-50 text-xs border border-gray-100"
+                    className="flex items-center justify-between p-2 rounded bg-muted/50 text-xs border border-border"
                   >
-                    <span className="font-medium text-gray-800 truncate pr-2">
+                    <span className="font-medium text-foreground truncate pr-2">
                       {it.catalogo_materiales?.nombre_base}{' '}
                       {it.catalogo_materiales?.variante
                         ? `· ${it.catalogo_materiales.variante}`
                         : ''}
                     </span>
                     <div className="shrink-0 text-right">
-                      <span className="font-bold text-teal-800 tabular-nums">
+                      <span className="font-bold text-primary-soft-foreground tabular-nums">
                         {it.cantidad} {it.catalogo_materiales?.unidad_medida}
                       </span>
                       {verPrecios &&
                         it.catalogo_materiales?.precio_base !== undefined &&
                         it.catalogo_materiales.precio_base !== null &&
                         it.catalogo_materiales.precio_base > 0 && (
-                          <span className="text-[11px] text-gray-400 ml-1">
+                          <span className="text-[11px] text-muted-foreground ml-1">
                             ({formatMoneyMx(it.catalogo_materiales.precio_base)})
                           </span>
                         )}

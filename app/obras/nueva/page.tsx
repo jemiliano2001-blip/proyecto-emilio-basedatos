@@ -106,7 +106,7 @@ export default async function NuevaObraPage() {
   }))
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Nuevo proyecto"
         description="Registra la información general y define el presupuesto de materiales asignados para el proyecto."
@@ -115,7 +115,7 @@ export default async function NuevaObraPage() {
       />
 
       {(materialesError || kitsError) && (
-        <div role="alert" className="card mb-4 border-red-300 bg-red-50 text-red-700">
+        <div role="alert" className="card mb-4 border-danger/40 bg-danger-soft text-danger-soft-foreground">
           No se pudo cargar el catálogo completo para crear el proyecto. Revisa la conexión e intenta de nuevo.
         </div>
       )}

@@ -39,7 +39,7 @@ export default async function ConciliacionObraPage({
             backHref={`/obras/${resolvedparams.id}`}
             backLabel="Volver al proyecto"
           />
-          <div className="card mt-4 border-amber-200 bg-amber-50 text-amber-900">
+          <div className="card mt-4 border-warning/30 bg-warning-soft text-warning-soft-foreground">
             El reporte de conciliación todavía no está activo en la base. Cuando se
             aplique la migración, esta pantalla va a funcionar.
           </div>
@@ -95,57 +95,57 @@ export default async function ConciliacionObraPage({
       />
 
       {/* Encabezado Imprimible */}
-      <div className="hidden print:block border-b border-gray-300 pb-4 mb-4">
-        <h1 className="text-xl font-bold text-ink">REPORTE DE CONCILIACIÓN Y CIERRE DE PROYECTO</h1>
+      <div className="hidden print:block border-b border-input pb-4 mb-4">
+        <h1 className="text-xl font-bold text-foreground">REPORTE DE CONCILIACIÓN Y CIERRE DE PROYECTO</h1>
         <p className="text-sm font-semibold">{pres.obra_nombre}</p>
         {pres.cliente && <p className="text-xs">Cliente: {pres.cliente}</p>}
-        <p className="text-xs text-gray-500">Fecha de reporte: {new Date().toLocaleDateString('es-MX')}</p>
+        <p className="text-xs text-muted-foreground">Fecha de reporte: {new Date().toLocaleDateString('es-MX')}</p>
       </div>
 
       {/* Tarjeta Resumen Financiero ($ MXN) */}
       <div className="card p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-rule pb-3">
-          <h2 className="font-bold text-ink text-base">
+          <h2 className="font-bold text-foreground text-base">
             Conciliación Financiera ($ MXN)
           </h2>
           {fechaCierre && (
-            <span className="text-xs text-gray-500 font-medium">
+            <span className="text-xs text-muted-foreground font-medium">
               Fecha de cierre: {fechaCierre}
             </span>
           )}
         </div>
 
         {pres.cierre_nota && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-700">
+          <div className="bg-muted/50 border border-border rounded-lg p-3 text-xs text-foreground">
             <span className="font-semibold block mb-0.5">Nota de cierre:</span>
             {pres.cierre_nota}
           </div>
         )}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-            <span className="text-gray-400 block text-[10px] uppercase font-bold">
+          <div className="bg-muted/50 p-3 rounded-lg border border-border">
+            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
               Presupuesto Total
             </span>
-            <span className="text-sm font-bold text-gray-900">
+            <span className="text-sm font-bold text-foreground">
               {formatMoneyMx(Number(pres.presupuesto_mxn))}
             </span>
           </div>
 
-          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-            <span className="text-gray-400 block text-[10px] uppercase font-bold">
+          <div className="bg-muted/50 p-3 rounded-lg border border-border">
+            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
               Gastado Órdenes Compra
             </span>
-            <span className="text-sm font-bold text-gray-900">
+            <span className="text-sm font-bold text-foreground">
               {formatMoneyMx(Number(pres.gastado_ordenes_compra_mxn))}
             </span>
           </div>
 
-          <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-            <span className="text-gray-400 block text-[10px] uppercase font-bold">
+          <div className="bg-muted/50 p-3 rounded-lg border border-border">
+            <span className="text-muted-foreground block text-[10px] uppercase font-bold">
               Fletes y Servicios
             </span>
-            <span className="text-sm font-bold text-gray-900">
+            <span className="text-sm font-bold text-foreground">
               {formatMoneyMx(
                 Number(pres.fletes_camiones_mxn) + Number(pres.servicios_otros_mxn)
               )}
@@ -155,8 +155,8 @@ export default async function ConciliacionObraPage({
           <div
             className={`p-3 rounded-lg border ${
               esSuperavit
-                ? 'bg-green-50 text-green-900 border-green-200'
-                : 'bg-red-50 text-red-900 border-red-200'
+                ? 'bg-success-soft text-success-soft-foreground border-success/30'
+                : 'bg-danger-soft text-danger-soft-foreground border-danger/30'
             }`}
           >
             <span className="block text-[10px] uppercase font-bold opacity-75">
@@ -170,7 +170,7 @@ export default async function ConciliacionObraPage({
 
         {(Number(pres.traspasos_credito_mxn) > 0 ||
           Number(pres.traspasos_cargo_mxn) > 0) && (
-          <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-900 flex flex-wrap gap-x-6 gap-y-1 justify-between">
+          <div className="bg-info-soft border border-info/30 rounded-lg p-3 text-xs text-info-soft-foreground flex flex-wrap gap-x-6 gap-y-1 justify-between">
             <span className="font-semibold w-full">Movimientos por traspaso de material</span>
             {Number(pres.traspasos_credito_mxn) > 0 && (
               <span>
@@ -187,7 +187,7 @@ export default async function ConciliacionObraPage({
           </div>
         )}
 
-        <div className="text-xs text-gray-500 pt-2 flex justify-between border-t border-gray-100">
+        <div className="text-xs text-muted-foreground pt-2 flex justify-between border-t border-border">
           <span>Total Ejecutado Acumulado: <strong>{formatMoneyMx(Number(pres.gastado_total_ejecutado_mxn))}</strong></span>
           {Number(pres.reservado_requisiciones_mxn) > 0 && (
             <span>En Reserva Pendiente: <strong>{formatMoneyMx(Number(pres.reservado_requisiciones_mxn))}</strong></span>
@@ -199,27 +199,27 @@ export default async function ConciliacionObraPage({
       <div className="card p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-rule pb-3">
           <div>
-            <h2 className="font-bold text-ink text-base">
+            <h2 className="font-bold text-foreground text-base">
               Conciliación Física de Materiales
             </h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Comparativo entre topes contratados, movimientos por traspaso, compromiso y recepciones en sitio
             </p>
           </div>
-          <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-semibold">
+          <span className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full font-semibold">
             {mats.length} renglones
           </span>
         </div>
 
         {mats.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-6">
+          <p className="text-xs text-muted-foreground text-center py-6">
             No se registraron materiales contratados ni movimientos en este proyecto.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-semibold text-[11px]">
+                <tr className="bg-muted/50 border-b border-border text-muted-foreground font-semibold text-[11px]">
                   <th className="py-2.5 px-3">Material / Unidad</th>
                   <th className="py-2.5 px-2 text-right">Contratado</th>
                   <th className="py-2.5 px-2 text-right">Traspasos (+/-)</th>
@@ -230,53 +230,53 @@ export default async function ConciliacionObraPage({
                   <th className="py-2.5 px-3 text-center">% Ejecución</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-border">
                 {mats.map((m) => {
                   const traspasoNeto = Number(m.traspasos_entrada) - Number(m.traspasos_salida)
                   const remanente = Number(m.cantidad_disponible)
 
                   return (
-                    <tr key={m.material_id} className="hover:bg-gray-50">
+                    <tr key={m.material_id} className="hover:bg-muted/50">
                       <td className="py-2.5 px-3">
-                        <span className="font-semibold text-gray-800 block">
+                        <span className="font-semibold text-foreground block">
                           {m.nombre_base} {m.variante ? `(${m.variante})` : ''}
                         </span>
-                        <span className="text-[10px] text-gray-400">
+                        <span className="text-[10px] text-muted-foreground">
                           {m.unidad_medida} {m.categoria ? `· ${m.categoria}` : ''}
                         </span>
                       </td>
 
-                      <td className="py-2.5 px-2 text-right font-medium text-gray-700">
+                      <td className="py-2.5 px-2 text-right font-medium text-foreground">
                         {m.cantidad_contratada}
                       </td>
 
                       <td className="py-2.5 px-2 text-right font-medium">
                         {traspasoNeto > 0 ? (
-                          <span className="text-green-700">+{traspasoNeto}</span>
+                          <span className="text-success-soft-foreground">+{traspasoNeto}</span>
                         ) : traspasoNeto < 0 ? (
-                          <span className="text-red-600">{traspasoNeto}</span>
+                          <span className="text-danger">{traspasoNeto}</span>
                         ) : (
-                          <span className="text-gray-400">0</span>
+                          <span className="text-muted-foreground">0</span>
                         )}
                       </td>
 
-                      <td className="py-2.5 px-2 text-right font-bold text-gray-900">
+                      <td className="py-2.5 px-2 text-right font-bold text-foreground">
                         {m.cantidad_tope_efectiva}
                       </td>
 
-                      <td className="py-2.5 px-2 text-right font-medium text-blue-700">
+                      <td className="py-2.5 px-2 text-right font-medium text-info-soft-foreground">
                         {Number(m.cantidad_usada) + Number(m.cantidad_comprometida)}
                       </td>
 
-                      <td className="py-2.5 px-2 text-right font-medium text-emerald-700">
+                      <td className="py-2.5 px-2 text-right font-medium text-success-soft-foreground">
                         {m.cantidad_recibida_buena_sitio}
                       </td>
 
                       <td className="py-2.5 px-2 text-right font-bold">
                         {remanente > 0 ? (
-                          <span className="text-accent">{remanente}</span>
+                          <span className="text-primary">{remanente}</span>
                         ) : (
-                          <span className="text-gray-400">0</span>
+                          <span className="text-muted-foreground">0</span>
                         )}
                       </td>
 
@@ -284,10 +284,10 @@ export default async function ConciliacionObraPage({
                         <span
                           className={`text-[11px] font-bold px-2 py-0.5 rounded ${
                             Number(m.porcentaje_ejecucion) >= 100
-                              ? 'bg-amber-100 text-amber-800'
+                              ? 'bg-warning-soft text-warning-soft-foreground'
                               : Number(m.porcentaje_ejecucion) > 50
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-600'
+                              ? 'bg-info-soft text-info-soft-foreground'
+                              : 'bg-muted text-muted-foreground'
                           }`}
                         >
                           {m.porcentaje_ejecucion}%
@@ -303,9 +303,9 @@ export default async function ConciliacionObraPage({
       </div>
 
       {/* Resumen de Sobrantes de Material Disponibles para Traspaso */}
-      <div className="bg-amber-50 rounded-xl border border-amber-200 p-4 space-y-2 text-xs text-amber-900">
+      <div className="bg-warning-soft rounded-xl border border-warning/30 p-4 space-y-2 text-xs text-warning-soft-foreground">
         <h3 className="font-bold text-sm flex items-center gap-2">
-          <IconPaquete className="w-4 h-4 text-amber-800" />
+          <IconPaquete className="w-4 h-4 text-warning-soft-foreground" />
           <span>Materiales Sobrantes Disponibles</span>
         </h3>
         <p>
@@ -322,7 +322,7 @@ export default async function ConciliacionObraPage({
             ))}
 
           {mats.filter((m) => Number(m.cantidad_disponible) > 0).length === 0 && (
-            <li className="list-none text-gray-500 italic">No hay materiales sobrantes en esta obra.</li>
+            <li className="list-none text-muted-foreground italic">No hay materiales sobrantes en esta obra.</li>
           )}
         </ul>
       </div>

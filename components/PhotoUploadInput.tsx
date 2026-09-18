@@ -191,8 +191,8 @@ export function PhotoUploadInput({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700">
-          {label} {required && <span className="text-red-500">*</span>}
+        <label htmlFor={id} className="block text-sm font-medium text-foreground">
+          {label} {required && <span className="text-danger">*</span>}
         </label>
 
         {/* Botón rápido de cámara en vivo para Personal de obra */}
@@ -200,9 +200,9 @@ export function PhotoUploadInput({
           <button
             type="button"
             onClick={() => setIsCameraModalOpen(true)}
-            className="text-xs font-semibold text-teal-700 hover:text-teal-800 bg-teal-50 hover:bg-teal-100 px-2.5 py-1 rounded-lg border border-teal-200 transition-colors flex items-center gap-1.5"
+            className="text-xs font-semibold text-primary hover:text-primary-soft-foreground bg-primary-soft hover:bg-primary-soft px-2.5 py-1 rounded-lg border border-primary/30 transition-colors flex items-center gap-1.5"
           >
-            <span className="w-2 h-2 rounded-full bg-teal-500 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
             Abrir cámara
           </button>
         )}
@@ -247,20 +247,20 @@ export function PhotoUploadInput({
         capture={captureCamera ? 'environment' : undefined}
         required={required && !previewUrl}
         onChange={handleNativeFileChange}
-        className="block w-full text-xs text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer"
+        className="block w-full text-xs text-muted-foreground file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-soft file:text-primary hover:file:bg-primary-soft cursor-pointer"
       />
 
       {isCompressing && (
-        <p className="text-xs text-teal-600 animate-pulse font-medium">
+        <p className="text-xs text-primary animate-pulse font-medium">
           Optimizando fotografía y analizando calidad…
         </p>
       )}
 
       {/* Vista previa miniatura y metadatos */}
       {previewUrl && (
-        <div className="mt-2 p-2.5 bg-gray-50 rounded-xl border border-gray-200 space-y-2">
+        <div className="mt-2 p-2.5 bg-muted/50 rounded-xl border border-border space-y-2">
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-lg overflow-hidden bg-white border border-gray-200 shrink-0 flex items-center justify-center relative shadow-xs">
+            <div className="w-16 h-16 rounded-lg overflow-hidden bg-card border border-border shrink-0 flex items-center justify-center relative shadow-xs">
               <Image
                 src={previewUrl}
                 alt="Vista previa de foto"
@@ -272,27 +272,27 @@ export function PhotoUploadInput({
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-ink">
+              <p className="text-xs font-semibold text-foreground">
                 {existingUrl && previewUrl === existingUrl
                   ? 'Fotografía actual'
                   : 'Nueva fotografía capturada'}
               </p>
               {compressionInfo ? (
-                <p className="text-[11px] text-teal-700 mt-0.5">
+                <p className="text-[11px] text-primary mt-0.5">
                   Optimizada: {formatSize(compressionInfo.optimizado)}{' '}
-                  <span className="text-gray-400 line-through">
+                  <span className="text-muted-foreground line-through">
                     ({formatSize(compressionInfo.original)})
                   </span>
                 </p>
               ) : (
-                <p className="text-[11px] text-gray-500 mt-0.5">
+                <p className="text-[11px] text-muted-foreground mt-0.5">
                   Lista para guardarse con el registro.
                 </p>
               )}
 
               {/* Distintivo GPS */}
               {gps?.latitud != null && (
-                <p className="text-[10px] text-gray-500 mt-0.5 flex items-center gap-1 font-mono">
+                <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1 font-mono">
                   <span>📍 GPS: {gps.latitud.toFixed(4)}, {gps.longitud?.toFixed(4)}</span>
                   {gps.precision && <span>(±{gps.precision}m)</span>}
                 </p>
@@ -302,7 +302,7 @@ export function PhotoUploadInput({
             <button
               type="button"
               onClick={handleRemove}
-              className="p-1.5 text-red-500 hover:text-red-700 rounded-lg hover:bg-red-50 transition-colors shrink-0"
+              className="p-1.5 text-danger hover:text-danger-soft-foreground rounded-lg hover:bg-danger-soft transition-colors shrink-0"
               title="Quitar fotografía"
               aria-label="Quitar fotografía"
             >
@@ -312,20 +312,20 @@ export function PhotoUploadInput({
 
           {/* Diagnóstico de Calidad */}
           {calidadDiagnostico && (
-            <div className="pt-1.5 border-t border-gray-200">
+            <div className="pt-1.5 border-t border-border">
               {calidadDiagnostico.esApta ? (
-                <div className="flex items-center justify-between text-[11px] text-teal-800">
+                <div className="flex items-center justify-between text-[11px] text-primary-soft-foreground">
                   <span className="flex items-center gap-1 font-medium">
                     ✓ Nitidez e iluminación aptas
                   </span>
-                  <span className="font-mono text-[10px] bg-teal-100/80 px-1.5 py-0.5 rounded">
+                  <span className="font-mono text-[10px] bg-primary-soft/80 px-1.5 py-0.5 rounded">
                     Score: {Math.round(calidadDiagnostico.score * 100)}%
                   </span>
                 </div>
               ) : (
-                <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
+                <div className="p-2 rounded-lg bg-warning-soft border border-warning/30 text-warning-soft-foreground text-xs space-y-1">
                   <p className="font-semibold text-[11px]">Recomendación de calidad:</p>
-                  <ul className="list-disc pl-4 text-[11px] space-y-0.5 text-amber-800">
+                  <ul className="list-disc pl-4 text-[11px] space-y-0.5 text-warning-soft-foreground">
                     {calidadDiagnostico.mensajes.map((m, idx) => (
                       <li key={idx}>{m}</li>
                     ))}
@@ -337,7 +337,7 @@ export function PhotoUploadInput({
         </div>
       )}
 
-      {helpText && <p className="text-xs text-gray-400">{helpText}</p>}
+      {helpText && <p className="text-xs text-muted-foreground">{helpText}</p>}
 
       {/* Modal de Cámara en vivo */}
       {isCameraModalOpen && (

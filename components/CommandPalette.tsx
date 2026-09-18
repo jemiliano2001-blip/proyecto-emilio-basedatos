@@ -413,7 +413,7 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 px-4 bg-black/50 backdrop-blur-sm print:hidden">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 px-4 bg-foreground/50 backdrop-blur-sm print:hidden">
       {/* Backdrop */}
       <button
         type="button"
@@ -474,7 +474,7 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
           className="overflow-y-auto p-2 divide-y divide-border/50 flex-1"
         >
           {searchError ? (
-            <div className="py-8 text-center text-sm text-red-700" role="status">
+            <div className="py-8 text-center text-sm text-danger-soft-foreground" role="status">
               No se pudo completar la búsqueda en línea. Revisa tu conexión e intenta de nuevo.
             </div>
           ) : filtered.length === 0 ? (
@@ -497,7 +497,7 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
                   className={cn(
                     'flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer text-xs transition-colors',
                     isActive
-                      ? 'bg-accent/15 text-accent font-semibold'
+                      ? 'bg-primary/15 text-primary font-semibold'
                       : 'text-foreground hover:bg-muted/60'
                   )}
                 >
@@ -506,11 +506,11 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
                       className={cn(
                         'p-1.5 rounded-lg shrink-0',
                         isActive
-                          ? 'bg-accent text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : item.category === 'Proyectos'
-                            ? 'bg-muted text-ink'
+                            ? 'bg-muted text-foreground'
                             : item.category === 'Materiales'
-                              ? 'bg-accent/10 text-accent'
+                              ? 'bg-primary/10 text-primary'
                               : 'bg-muted text-muted-foreground'
                       )}
                     >
@@ -522,11 +522,11 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
                     className={cn(
                       'text-[10px] px-2 py-0.5 rounded font-medium shrink-0',
                       item.category === 'Proyectos'
-                        ? 'bg-muted text-ink font-semibold'
+                        ? 'bg-muted text-foreground font-semibold'
                         : item.category === 'Materiales'
-                          ? 'bg-accent/15 text-accent font-semibold'
+                          ? 'bg-primary/15 text-primary font-semibold'
                           : item.category === 'Acciones Rápidas'
-                            ? 'bg-amber-100 text-amber-800'
+                            ? 'bg-warning-soft text-warning-soft-foreground'
                             : 'bg-muted text-muted-foreground'
                     )}
                   >

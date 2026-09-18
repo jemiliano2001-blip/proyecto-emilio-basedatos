@@ -65,7 +65,7 @@ export default async function MaterialesPage({
       />
 
       {(errMateriales || errCategorias) && (
-        <div className="card border-red-300 bg-red-50 text-red-700">
+        <div className="card border-danger/40 bg-danger-soft text-danger-soft-foreground">
           No se pudo cargar la información completa del catálogo. Revisa tu conexión.
         </div>
       )}

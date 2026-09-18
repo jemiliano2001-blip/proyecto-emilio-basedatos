@@ -50,7 +50,7 @@ export default async function EditarMaterialPage({
   const updateAction = updateMaterialAction.bind(null, resolvedparams.id)
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Editar material"
         subtitle={material.nombre_base}

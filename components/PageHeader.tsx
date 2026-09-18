@@ -13,11 +13,15 @@ export interface PageHeaderProps {
   title: React.ReactNode
   description?: React.ReactNode
   subtitle?: React.ReactNode
+  /** Texto pequeño arriba del título (contexto: "Proyecto · Fraccionamiento X"). */
+  eyebrow?: React.ReactNode
   backHref?: string
   backLabel?: string
   action?: PageHeaderAction
   actions?: React.ReactNode
   badge?: React.ReactNode
+  /** Contenido debajo del header (tabs, KPIs, meta) sin romper el layout. */
+  children?: React.ReactNode
   className?: string
 }
 
@@ -25,11 +29,13 @@ export function PageHeader({
   title,
   description,
   subtitle,
+  eyebrow,
   backHref,
   backLabel = 'Volver',
   action,
   actions,
   badge,
+  children,
   className,
 }: PageHeaderProps) {
   const desc = description ?? subtitle
@@ -44,12 +50,12 @@ export function PageHeader({
   }
 
   return (
-    <header className={cn('mb-4 sm:mb-6 pt-1 sm:pt-2', className)}>
+    <header className={cn('mb-5 sm:mb-6', className)}>
       {backHref && (
-        <div className="mb-2">
+        <div className="mb-3">
           <Link
             href={backHref}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
+            className="inline-flex min-h-[32px] items-center gap-1.5 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <IconFlechaAtras className="h-4 w-4" />
             <span>{backLabel}</span>
@@ -57,43 +63,45 @@ export function PageHeader({
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">{title}</h1>
+          {eyebrow && (
+            <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {eyebrow}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{title}</h1>
             {badge && <div className="shrink-0">{badge}</div>}
           </div>
-          {desc && (
-            <p className="mt-1 text-sm text-gray-500">{desc}</p>
-          )}
+          {desc &&
+            (typeof desc === 'string' ? (
+              <p className="mt-1 max-w-prose text-sm text-muted-foreground">{desc}</p>
+            ) : (
+              <div className="mt-1 max-w-prose text-sm text-muted-foreground">{desc}</div>
+            ))}
         </div>
 
         {(actions || action) && (
-          <div className="flex shrink-0 items-center gap-2">
-            {action && (
-              action.href ? (
-                <Link
-                  href={action.href}
-                  className="btn-primary text-sm px-4 py-2 inline-flex items-center gap-1.5"
-                >
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+            {actions}
+            {action &&
+              (action.href ? (
+                <Link href={action.href} className="btn-primary btn-sm">
                   {renderActionIcon(action.icon)}
                   <span>{action.label}</span>
                 </Link>
               ) : (
-                <button
-                  type="button"
-                  onClick={action.onClick}
-                  className="btn-primary text-sm px-4 py-2 inline-flex items-center gap-1.5"
-                >
+                <button type="button" onClick={action.onClick} className="btn-primary btn-sm">
                   {renderActionIcon(action.icon)}
                   <span>{action.label}</span>
                 </button>
-              )
-            )}
-            {actions}
+              ))}
           </div>
         )}
       </div>
+
+      {children && <div className="mt-4">{children}</div>}
     </header>
   )
 }

@@ -49,21 +49,21 @@ export function CopyButton({
       title={copiado ? '¡Copiado!' : title}
       aria-label={copiado ? '¡Copiado!' : title}
       className={cn(
-        'inline-flex items-center gap-1 text-xs font-medium rounded-md px-1.5 py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+        'inline-flex items-center gap-1 text-xs font-medium rounded-md px-1.5 py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         copiado
-          ? 'bg-emerald-50 text-emerald-700 font-semibold'
-          : 'text-gray-500 hover:text-ink hover:bg-gray-100',
+          ? 'bg-success-soft text-success-soft-foreground font-semibold'
+          : 'text-muted-foreground hover:text-foreground hover:bg-muted',
         className
       )}
     >
       {copiado ? (
         <>
-          <IconCheck className="h-3.5 w-3.5 text-emerald-600" />
+          <IconCheck className="h-3.5 w-3.5 text-success" />
           <span>¡Copiado!</span>
         </>
       ) : (
         <>
-          <IconCopy className="h-3.5 w-3.5 text-gray-400" />
+          <IconCopy className="h-3.5 w-3.5 text-muted-foreground" />
           {label && <span>{label}</span>}
         </>
       )}

@@ -36,28 +36,28 @@ export function AprobarComprasButton({
   return (
     <form action={formAction} className="space-y-3">
       {materiales.length > 0 && (
-        <div className="card space-y-3 p-3 border-teal-200 bg-teal-50/30">
-          <p className="text-sm font-semibold text-ink">
+        <div className="card space-y-3 p-3 border-primary/30 bg-primary-soft/30">
+          <p className="text-sm font-semibold text-foreground">
             Precio cotizado por material
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Captura el precio real unitario. Se muestra el precio base de referencia del
             catálogo.
           </p>
           {materiales.map((m) => (
-            <div key={m.id} className="space-y-1.5 border-t border-teal-100 pt-2 first:border-0 first:pt-0">
+            <div key={m.id} className="space-y-1.5 border-t border-primary/20 pt-2 first:border-0 first:pt-0">
               <div className="flex justify-between gap-2 text-sm">
-                <span className="font-medium text-ink">{m.nombre}</span>
-                <span className="text-gray-500 shrink-0 tabular-nums">
+                <span className="font-medium text-foreground">{m.nombre}</span>
+                <span className="text-muted-foreground shrink-0 tabular-nums">
                   {m.cantidad} {m.unidad}
                 </span>
               </div>
               {m.precioBase != null && m.precioBase > 0 && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Precio base ref.: {formatMoneyMx(m.precioBase)} / {m.unidad}
                 </p>
               )}
-              <label className="block text-xs font-semibold text-gray-600">
+              <label className="block text-xs font-semibold text-muted-foreground">
                 Precio cotizado (MXN / {m.unidad}) *
                 <input
                   type="text"

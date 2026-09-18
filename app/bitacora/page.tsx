@@ -98,10 +98,10 @@ export default async function BitacoraPage({
 
       <form
         method="get"
-        className="mb-4 space-y-3 rounded-xl border border-gray-200 bg-white p-3.5"
+        className="mb-4 space-y-3 rounded-xl border border-border bg-card p-3.5"
       >
         <div>
-          <label htmlFor="q" className="block text-xs font-semibold text-gray-500 mb-1">
+          <label htmlFor="q" className="block text-xs font-semibold text-muted-foreground mb-1">
             Buscar
           </label>
           <input
@@ -114,7 +114,7 @@ export default async function BitacoraPage({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label htmlFor="estatus" className="block text-xs font-semibold text-gray-500 mb-1">
+            <label htmlFor="estatus" className="block text-xs font-semibold text-muted-foreground mb-1">
               Acción
             </label>
             <select
@@ -132,7 +132,7 @@ export default async function BitacoraPage({
             </select>
           </div>
           <div>
-            <label htmlFor="proyecto" className="block text-xs font-semibold text-gray-500 mb-1">
+            <label htmlFor="proyecto" className="block text-xs font-semibold text-muted-foreground mb-1">
               Sección
             </label>
             <select
@@ -150,7 +150,7 @@ export default async function BitacoraPage({
             </select>
           </div>
           <div>
-            <label htmlFor="desde" className="block text-xs font-semibold text-gray-500 mb-1">
+            <label htmlFor="desde" className="block text-xs font-semibold text-muted-foreground mb-1">
               Desde
             </label>
             <input
@@ -162,7 +162,7 @@ export default async function BitacoraPage({
             />
           </div>
           <div>
-            <label htmlFor="hasta" className="block text-xs font-semibold text-gray-500 mb-1">
+            <label htmlFor="hasta" className="block text-xs font-semibold text-muted-foreground mb-1">
               Hasta
             </label>
             <input
@@ -175,12 +175,12 @@ export default async function BitacoraPage({
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="submit" className="btn-primary text-sm px-4 py-2 min-h-[44px]">
+          <button type="submit" className="btn-primary btn-sm min-h-[44px]">
             Filtrar
           </button>
           <Link
             href="/bitacora"
-            className="inline-flex min-h-[44px] items-center rounded-lg border border-gray-200 px-4 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 text-sm font-semibold text-muted-foreground hover:bg-muted/50"
           >
             Limpiar
           </Link>
@@ -188,12 +188,12 @@ export default async function BitacoraPage({
       </form>
 
       {error && (
-        <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
+        <div className="card border-danger/40 bg-danger-soft text-danger-soft-foreground mb-4">
           No se pudo cargar la bitácora.
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+      <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
         {eventos.map((ev) => {
           const nombre =
             ev.usuario && typeof ev.usuario === 'object' && 'nombre' in ev.usuario
@@ -203,13 +203,13 @@ export default async function BitacoraPage({
             <Link
               key={ev.id}
               href={`/bitacora/${ev.id}`}
-              className="flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-slate-50 transition-colors"
+              className="flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-muted/50 transition-colors"
             >
               <div className="min-w-0">
-                <p className="font-semibold text-ink">
+                <p className="font-semibold text-foreground">
                   {etiquetaAccionAuditoria(ev.accion)} · {etiquetaTablaAuditoria(ev.tabla)}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5 truncate">
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">
                   {nombre} · {formatearFecha(ev.creado_en)}
                 </p>
               </div>
@@ -243,14 +243,14 @@ export default async function BitacoraPage({
           className="mt-4 flex items-center justify-between gap-3 text-sm"
           aria-label="Paginación"
         >
-          <span className="text-gray-500">
+          <span className="text-muted-foreground">
             Página {filters.page} de {totalPages}
           </span>
           <div className="flex gap-2">
             {filters.page > 1 && (
               <Link
                 href={pageHref('/bitacora', params, filters.page - 1)}
-                className="min-h-[44px] inline-flex items-center rounded-lg border border-gray-200 px-3 font-semibold hover:bg-gray-50"
+                className="min-h-[44px] inline-flex items-center rounded-lg border border-border px-3 font-semibold hover:bg-muted/50"
               >
                 Anterior
               </Link>
@@ -258,7 +258,7 @@ export default async function BitacoraPage({
             {filters.page < totalPages && (
               <Link
                 href={pageHref('/bitacora', params, filters.page + 1)}
-                className="min-h-[44px] inline-flex items-center rounded-lg border border-gray-200 px-3 font-semibold hover:bg-gray-50"
+                className="min-h-[44px] inline-flex items-center rounded-lg border border-border px-3 font-semibold hover:bg-muted/50"
               >
                 Siguiente
               </Link>

@@ -23,7 +23,7 @@ export default async function NuevoKitPage() {
   const materiales = (materialesRaw as CatalogoMaterial[] | null) ?? []
 
   return (
-    <main className="page-shell space-y-6">
+    <main className="page-shell-narrow space-y-6">
       <PageHeader
         title="Nueva Plantilla de Kit"
         description="Define un equipo principal con su configuración y el conjunto de accesorios menores asociados."

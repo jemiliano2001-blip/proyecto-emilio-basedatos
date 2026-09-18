@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { IconSearch } from '@/components/icons'
 import { PAGE_SIZE, pageHref, type ListParams } from '@/lib/list-filters'
+import { cn } from '@/lib/utils'
 
 function filterHref(path: string, params: ListParams, patch: Partial<ListParams>): string {
   const next: ListParams = { ...params, ...patch, pagina: '1' }
@@ -17,13 +19,15 @@ function labelEstatusChip(estatus: string): string {
 }
 
 const chipClass = (active: boolean) =>
-  [
-    'shrink-0 inline-flex min-h-[44px] items-center rounded-full px-3.5 text-sm transition-colors',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
+  cn(
+    'shrink-0 inline-flex min-h-[40px] items-center rounded-full px-3.5 text-sm capitalize transition-colors',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
     active
-      ? 'font-bold bg-ink text-white'
-      : 'font-semibold bg-white text-gray-600 border border-gray-200 hover:border-gray-300',
-  ].join(' ')
+      ? 'bg-foreground font-semibold text-background'
+      : 'bg-card font-medium text-muted-foreground border border-border hover:border-input hover:text-foreground'
+  )
+
+const labelClass = 'block text-xs font-medium text-muted-foreground mb-1'
 
 export function ListFilters({
   path,
@@ -50,12 +54,13 @@ export function ListFilters({
   const currentEstatus = statuses.includes(params.estatus ?? '')
     ? (params.estatus as string)
     : ''
+  const hayFiltros = Boolean(params.q || params.desde || params.hasta || params.obra || params.proyecto)
 
   return (
-    <div className={compact ? 'mb-3 space-y-2' : 'mb-4 space-y-3'}>
+    <div className={compact ? 'mb-4 space-y-2.5' : 'mb-5 space-y-3'}>
       {showChipBar && (
         <nav
-          className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1"
+          className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           aria-label="Filtrar por estatus"
         >
           <Link
@@ -83,34 +88,40 @@ export function ListFilters({
 
       <form
         action={path}
-        className={
+        className={cn(
+          'rounded-xl border border-border bg-card shadow-xs',
           compact
-            ? 'rounded-xl border border-gray-200 bg-white p-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 lg:items-end'
-            : 'card grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4'
-        }
+            ? 'grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end'
+            : 'grid grid-cols-1 gap-4 p-4 sm:grid-cols-2'
+        )}
       >
         <label
-          className={`font-semibold text-ink ${
-            compact ? 'text-xs lg:col-span-2' : 'text-sm'
-          } ${showChipBar && !compact ? 'sm:col-span-2' : ''}`}
+          className={cn(
+            compact ? 'lg:col-span-4' : '',
+            showChipBar && !compact ? 'sm:col-span-2' : ''
+          )}
         >
-          <span className={compact ? 'text-[11px] uppercase tracking-wide text-gray-500' : undefined}>
-            {searchLabel}
+          <span className={labelClass}>{searchLabel}</span>
+          <span className="relative block">
+            <IconSearch className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              className={cn('input-base pl-9', compact && 'min-h-[40px] py-2 text-sm')}
+              name="q"
+              defaultValue={params.q}
+              maxLength={100}
+              type="search"
+              placeholder="Buscar…"
+            />
           </span>
-          <input
-            className="input-base mt-1"
-            name="q"
-            defaultValue={params.q}
-            maxLength={100}
-            type="search"
-          />
         </label>
         {!hideEstatus && !estatusAsChips && (
-          <label className={compact ? 'text-xs font-semibold text-ink' : 'text-sm font-semibold'}>
-            <span className={compact ? 'text-[11px] uppercase tracking-wide text-gray-500' : undefined}>
-              Estatus
-            </span>
-            <select className="input-base mt-1" name="estatus" defaultValue={params.estatus ?? ''}>
+          <label className={compact ? 'lg:col-span-2' : ''}>
+            <span className={labelClass}>Estatus</span>
+            <select
+              className={cn('input-base capitalize', compact && 'min-h-[40px] py-2 text-sm')}
+              name="estatus"
+              defaultValue={params.estatus ?? ''}
+            >
               <option value="">Todos</option>
               {statuses.map((s) => (
                 <option key={s} value={s}>
@@ -125,14 +136,17 @@ export function ListFilters({
         ) : null}
         {obras && obras.length > 0 && (
           <label
-            className={`${compact ? 'text-xs font-semibold text-ink' : 'text-sm font-semibold'} ${
+            className={cn(
+              compact ? 'lg:col-span-3' : '',
               hideEstatus || estatusAsChips || compact ? '' : 'sm:col-span-2'
-            }`}
+            )}
           >
-            <span className={compact ? 'text-[11px] uppercase tracking-wide text-gray-500' : undefined}>
-              Proyecto
-            </span>
-            <select className="input-base mt-1" name="obra" defaultValue={params.obra ?? ''}>
+            <span className={labelClass}>Proyecto</span>
+            <select
+              className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
+              name="obra"
+              defaultValue={params.obra ?? ''}
+            >
               <option value="">Todos los proyectos</option>
               {obras.map((o) => (
                 <option key={o.id} value={o.id}>
@@ -142,27 +156,29 @@ export function ListFilters({
             </select>
           </label>
         )}
-        <label className={compact ? 'text-xs font-semibold text-ink' : 'text-sm font-semibold'}>
-          <span className={compact ? 'text-[11px] uppercase tracking-wide text-gray-500' : undefined}>
-            Desde
-          </span>
-          <input className="input-base mt-1" type="date" name="desde" defaultValue={params.desde} />
+        <label className={compact ? 'lg:col-span-2' : ''}>
+          <span className={labelClass}>Desde</span>
+          <input
+            className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
+            type="date"
+            name="desde"
+            defaultValue={params.desde}
+          />
         </label>
-        <label className={compact ? 'text-xs font-semibold text-ink' : 'text-sm font-semibold'}>
-          <span className={compact ? 'text-[11px] uppercase tracking-wide text-gray-500' : undefined}>
-            Hasta
-          </span>
-          <input className="input-base mt-1" type="date" name="hasta" defaultValue={params.hasta} />
+        <label className={compact ? 'lg:col-span-2' : ''}>
+          <span className={labelClass}>Hasta</span>
+          <input
+            className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
+            type="date"
+            name="hasta"
+            defaultValue={params.hasta}
+          />
         </label>
         {path === '/ordenes' && (
-          <label
-            className={`${compact ? 'text-xs font-semibold text-ink lg:col-span-2' : 'text-sm font-semibold sm:col-span-2'}`}
-          >
-            <span className={compact ? 'text-[11px] uppercase tracking-wide text-gray-500' : undefined}>
-              Proyecto
-            </span>
+          <label className={compact ? 'lg:col-span-4' : 'sm:col-span-2'}>
+            <span className={labelClass}>Proyecto</span>
             <input
-              className="input-base mt-1"
+              className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
               name="proyecto"
               defaultValue={params.proyecto}
               type="search"
@@ -171,16 +187,19 @@ export function ListFilters({
           </label>
         )}
         <div
-          className={`flex flex-wrap gap-2 ${
-            compact ? 'lg:col-span-4 pt-0.5' : 'sm:col-span-2'
-          }`}
+          className={cn(
+            'flex flex-wrap items-center gap-2',
+            compact ? 'lg:col-span-12 lg:justify-end' : 'sm:col-span-2'
+          )}
         >
-          <button className={compact ? 'btn-primary text-sm px-4 py-2' : 'btn-secondary'} type="submit">
-            Filtrar
+          {hayFiltros && (
+            <Link className={compact ? 'btn-ghost btn-sm' : 'btn-ghost'} href={path}>
+              Limpiar
+            </Link>
+          )}
+          <button className={compact ? 'btn-secondary btn-sm' : 'btn-secondary'} type="submit">
+            Aplicar filtros
           </button>
-          <Link className={compact ? 'btn-secondary text-sm px-4 py-2' : 'btn-secondary'} href={path}>
-            Limpiar filtros
-          </Link>
         </div>
       </form>
     </div>
@@ -198,21 +217,35 @@ export function ListPagination({
   page: number
   total: number
 }) {
+  const desde = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
+  const hasta = Math.min(page * PAGE_SIZE, total)
   return (
-    <nav aria-label="Paginación" className="my-4 flex flex-wrap items-center justify-between gap-4">
-      {page > 1 && (
-        <Link className="btn-secondary" href={pageHref(path, params, page - 1)}>
-          Anterior
-        </Link>
-      )}
-      <p className="text-sm text-gray-600">
-        Página {page} · {total} resultado{total === 1 ? '' : 's'}
+    <nav aria-label="Paginación" className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-sm text-muted-foreground tabular-nums">
+        {total === 0
+          ? 'Sin resultados'
+          : `${desde}–${hasta} de ${total} resultado${total === 1 ? '' : 's'}`}
       </p>
-      {page * PAGE_SIZE < total && (
-        <Link className="btn-secondary" href={pageHref(path, params, page + 1)}>
-          Siguiente
-        </Link>
-      )}
+      <div className="flex items-center gap-2">
+        {page > 1 ? (
+          <Link className="btn-secondary btn-sm" href={pageHref(path, params, page - 1)}>
+            Anterior
+          </Link>
+        ) : (
+          <span className="btn-secondary btn-sm pointer-events-none opacity-50" aria-disabled>
+            Anterior
+          </span>
+        )}
+        {page * PAGE_SIZE < total ? (
+          <Link className="btn-secondary btn-sm" href={pageHref(path, params, page + 1)}>
+            Siguiente
+          </Link>
+        ) : (
+          <span className="btn-secondary btn-sm pointer-events-none opacity-50" aria-disabled>
+            Siguiente
+          </span>
+        )}
+      </div>
     </nav>
   )
 }

@@ -15,17 +15,17 @@ interface RecepcionEvidenciasViewerProps {
 function formatearTipoFoto(tipo: string): { label: string; bg: string; text: string } {
   switch (tipo) {
     case 'remision_documento':
-      return { label: 'REMISIÓN / GUÍA', bg: 'bg-amber-100', text: 'text-amber-800' }
+      return { label: 'REMISIÓN / GUÍA', bg: 'bg-warning-soft', text: 'text-warning-soft-foreground' }
     case 'dano_evidencia':
-      return { label: 'DAÑO REPORTADO', bg: 'bg-red-100', text: 'text-red-800' }
+      return { label: 'DAÑO REPORTADO', bg: 'bg-danger-soft', text: 'text-danger-soft-foreground' }
     case 'etiqueta_placa':
-      return { label: 'PLACA / SERIE', bg: 'bg-purple-100', text: 'text-purple-800' }
+      return { label: 'PLACA / SERIE', bg: 'bg-info-soft', text: 'text-info-soft-foreground' }
     case 'firma_chofer':
-      return { label: 'FIRMA CHOFER', bg: 'bg-blue-100', text: 'text-blue-800' }
+      return { label: 'FIRMA CHOFER', bg: 'bg-info-soft', text: 'text-info-soft-foreground' }
     case 'selfie_entrega':
-      return { label: 'SELFIE ENTREGA', bg: 'bg-emerald-100', text: 'text-emerald-800' }
+      return { label: 'SELFIE ENTREGA', bg: 'bg-success-soft', text: 'text-success-soft-foreground' }
     default:
-      return { label: 'MATERIAL EN OBRA', bg: 'bg-teal-100', text: 'text-teal-800' }
+      return { label: 'MATERIAL EN OBRA', bg: 'bg-primary-soft', text: 'text-primary-soft-foreground' }
   }
 }
 
@@ -76,7 +76,7 @@ export function RecepcionEvidenciasViewer({
 
   return (
     <section className="mb-4">
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
         Evidencias Fotográficas Adjuntas ({items.length})
       </h2>
 
@@ -88,9 +88,9 @@ export function RecepcionEvidenciasViewer({
                 <div
                   key={f.id || idx}
                   onClick={() => handleOpen(idx)}
-                  className="card p-3 flex items-center gap-3 cursor-pointer hover:border-teal-300 hover:bg-teal-50/20 transition-all group"
+                  className="card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/40 hover:bg-primary-soft/20 transition-all group"
                 >
-                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0 relative">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted border border-border shrink-0 relative">
                     <Image
                       src={f.foto_url}
                       alt="Evidencia fotográfica"
@@ -106,18 +106,18 @@ export function RecepcionEvidenciasViewer({
                         {badge.label}
                       </span>
                       {f.calidad_score != null && (
-                        <span className="text-[10px] text-gray-500 font-mono">
+                        <span className="text-[10px] text-muted-foreground font-mono">
                           {Math.round(Number(f.calidad_score) * 100)}% calidad
                         </span>
                       )}
                     </div>
                     {f.latitud != null && (
-                      <p className="text-[10px] text-gray-500 font-mono mt-1 truncate">
+                      <p className="text-[10px] text-muted-foreground font-mono mt-1 truncate">
                         📍 {Number(f.latitud).toFixed(4)}, {Number(f.longitud).toFixed(4)}
                         {f.precision_gps_m && ` (±${f.precision_gps_m}m)`}
                       </p>
                     )}
-                    <p className="text-[11px] text-accent group-hover:underline mt-0.5">
+                    <p className="text-[11px] text-primary group-hover:underline mt-0.5">
                       Ver en grande ↗
                     </p>
                   </div>
@@ -128,9 +128,9 @@ export function RecepcionEvidenciasViewer({
               <div
                 key={idx}
                 onClick={() => handleOpen(idx)}
-                className="card p-3 flex items-center gap-3 cursor-pointer hover:border-teal-300 hover:bg-teal-50/20 transition-all group"
+                className="card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/40 hover:bg-primary-soft/20 transition-all group"
               >
-                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0 relative">
+                <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted border border-border shrink-0 relative">
                   <Image
                     src={item.url}
                     alt={item.nombre}
@@ -141,13 +141,13 @@ export function RecepcionEvidenciasViewer({
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-100 text-teal-800">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary-soft text-primary-soft-foreground">
                     EVIDENCIA ADJUNTA
                   </span>
-                  <p className="text-xs font-semibold text-ink mt-1 truncate">
+                  <p className="text-xs font-semibold text-foreground mt-1 truncate">
                     {item.nombre}
                   </p>
-                  <p className="text-[11px] text-accent group-hover:underline mt-0.5">
+                  <p className="text-[11px] text-primary group-hover:underline mt-0.5">
                     Ver en grande ↗
                   </p>
                 </div>

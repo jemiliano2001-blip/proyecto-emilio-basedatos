@@ -59,7 +59,7 @@ export function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivEl
   return (
     <div
       className={cn(
-        'inline-flex min-h-[44px] items-center justify-start rounded-xl bg-muted p-1 text-muted-foreground gap-1 overflow-x-auto max-w-full',
+        'inline-flex min-h-[44px] max-w-full items-center justify-start gap-0.5 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground [scrollbar-width:none] lg:min-h-[40px]',
         className
       )}
       {...props}
@@ -83,10 +83,10 @@ export function TabsTrigger({ value, className, children, ...props }: TabsTrigge
       data-state={isActive ? 'active' : 'inactive'}
       onClick={() => onValueChange(value)}
       className={cn(
-        'inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition-all select-none cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex min-h-[40px] cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 lg:min-h-[32px]',
         isActive
-          ? 'bg-card text-navy shadow-sm'
-          : 'text-muted-foreground hover:text-navy hover:bg-muted/80',
+          ? 'bg-card text-foreground shadow-xs'
+          : 'text-muted-foreground hover:text-foreground',
         className
       )}
       {...props}
@@ -107,7 +107,7 @@ export function TabsContent({ value, className, children, ...props }: TabsConten
   return (
     <div
       role="tabpanel"
-      className={cn('mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent', className)}
+      className={cn('mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', className)}
       {...props}
     >
       {children}

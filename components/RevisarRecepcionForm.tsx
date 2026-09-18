@@ -18,13 +18,13 @@ export function RevisarRecepcionForm({ recepcionId }: { recepcionId: string }) {
     <div className="space-y-4">
       <FormError message={aprobarState.error ?? rechazarState.error} />
       {(aprobarState.ok || rechazarState.ok) && (
-        <p className="rounded-lg bg-teal-50 text-teal-800 text-sm px-3 py-2">
+        <p className="rounded-lg bg-primary-soft text-primary-soft-foreground text-sm px-3 py-2">
           Revisión guardada.
         </p>
       )}
 
       <form action={aprobarAction} className="space-y-3">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-foreground">
           Nota de revisión (opcional al aprobar)
           <textarea name="nota_revision" rows={2} className="input-base mt-1" />
         </label>
@@ -32,7 +32,7 @@ export function RevisarRecepcionForm({ recepcionId }: { recepcionId: string }) {
       </form>
 
       <form action={rechazarAction} className="space-y-3">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-foreground">
           Motivo del rechazo
           <textarea
             name="nota_revision"

@@ -49,9 +49,9 @@ function MaterialCard({
           onSelect(m)
         }
       }}
-      className={`card-interactive relative text-left group cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-700/50 ${compact ? 'p-2' : ''} ${showImage ? '' : 'pt-14'}`}
+      className={`card-interactive relative text-left group cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring/50 ${compact ? 'p-2' : ''} ${showImage ? '' : 'pt-14'}`}
     >
-      <label className="absolute left-2 top-2 z-10 flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg bg-white/95 shadow-sm border border-gray-200" onClick={(event) => event.stopPropagation()}>
+      <label className="absolute left-2 top-2 z-10 flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg bg-card/95 shadow-sm border border-border" onClick={(event) => event.stopPropagation()}>
         <span className="sr-only">Seleccionar {m.nombre_base}</span>
         <input
           type="checkbox"
@@ -65,7 +65,7 @@ function MaterialCard({
         <Link
           href={`/materiales/${m.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="absolute top-2 right-2 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-white/90 shadow-sm border border-gray-200 text-gray-400 hover:text-ink hover:bg-white transition-colors opacity-80 group-hover:opacity-100"
+          className="absolute top-2 right-2 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-card/90 shadow-sm border border-border text-muted-foreground hover:text-foreground hover:bg-card transition-colors opacity-80 group-hover:opacity-100"
           title="Editar material"
           aria-label={`Editar ${m.nombre_base}`}
         >
@@ -73,7 +73,7 @@ function MaterialCard({
         </Link>
       )}
 
-      {showImage && <div className="aspect-square bg-gray-100 rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-gray-200">
+      {showImage && <div className="aspect-square bg-muted rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-border">
         {m.foto_url ? (
           // Imagen de catálogo servida por Storage
           <Image
@@ -85,23 +85,23 @@ function MaterialCard({
             className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
           />
         ) : (
-          <span className="text-gray-400 text-xs font-medium">Sin foto</span>
+          <span className="text-muted-foreground text-xs font-medium">Sin foto</span>
         )}
       </div>}
-      <p className="font-bold text-sm text-ink line-clamp-2 group-hover:text-navy transition-colors">
+      <p className="font-bold text-sm text-foreground line-clamp-2 group-hover:text-foreground transition-colors">
         {m.nombre_base}
       </p>
       {!m.activo && (
-        <p className="mt-1 text-[11px] font-semibold text-amber-800">Inactivo: no se puede seleccionar en requisiciones.</p>
+        <p className="mt-1 text-[11px] font-semibold text-warning-soft-foreground">Inactivo: no se puede seleccionar en requisiciones.</p>
       )}
-      {m.variante && <p className="text-xs text-gray-500 truncate">{m.variante}</p>}
+      {m.variante && <p className="text-xs text-muted-foreground truncate">{m.variante}</p>}
       {m.subcategoria && (
-        <p className="text-xs text-gray-400 mt-0.5">{m.subcategoria}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{m.subcategoria}</p>
       )}
-      <div className="mt-2 flex items-center justify-between pt-1 border-t border-gray-100">
-        <span className="text-xs text-gray-400 font-medium">{m.unidad_medida}</span>
+      <div className="mt-2 flex items-center justify-between pt-1 border-t border-border">
+        <span className="text-xs text-muted-foreground font-medium">{m.unidad_medida}</span>
         {verPrecios && m.precio_base !== undefined && m.precio_base > 0 && (
-          <span className="text-xs font-semibold tabular-nums text-accent">
+          <span className="text-xs font-semibold tabular-nums text-primary">
             {formatMoneyMx(m.precio_base)}
           </span>
         )}
@@ -354,12 +354,12 @@ export function CatalogoMaterialesView({
     <div className="space-y-6">
       {/* 1. SELECTOR DE CATEGORÍA SUPERIOR */}
       <div className="card p-3 sm:p-4 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
           <div>
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Categoría
             </span>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Elige una categoría para desplegar sus subcategorías y materiales asociados.
             </p>
           </div>
@@ -367,7 +367,7 @@ export function CatalogoMaterialesView({
             <button
               type="button"
               onClick={abrirNuevaCategoria}
-              className="btn-secondary text-xs px-3 py-1.5 inline-flex items-center gap-1.5 self-start sm:self-auto shrink-0"
+              className="btn-secondary btn-xs self-start sm:self-auto shrink-0"
             >
               <IconPlus className="w-3.5 h-3.5" />
               <span>Nueva categoría</span>
@@ -378,7 +378,7 @@ export function CatalogoMaterialesView({
         <div className="flex flex-wrap items-center gap-2" aria-label="Preferencias del catálogo">
           <button
             type="button"
-            className="btn-secondary px-3 py-2 text-sm"
+            className="btn-ghost btn-xs aria-pressed:bg-muted aria-pressed:text-foreground"
             onClick={() => {
               const next = density === 'comfortable' ? 'compact' : 'comfortable'
               setDensity(next)
@@ -388,12 +388,12 @@ export function CatalogoMaterialesView({
           >
             Densidad: {density === 'compact' ? 'compacta' : 'cómoda'}
           </button>
-          <button type="button" className="btn-secondary px-3 py-2 text-sm" onClick={toggleSavedView} aria-pressed={savedViews.includes(selectedCat)}>
+          <button type="button" className="btn-ghost btn-xs aria-pressed:bg-muted aria-pressed:text-foreground" onClick={toggleSavedView} aria-pressed={savedViews.includes(selectedCat)}>
             {savedViews.includes(selectedCat) ? 'Quitar vista guardada' : 'Guardar esta vista'}
           </button>
           <button
             type="button"
-            className="btn-secondary px-3 py-2 text-sm"
+            className="btn-ghost btn-xs aria-pressed:bg-muted aria-pressed:text-foreground"
             onClick={() => {
               const next = !showImages
               setShowImages(next)
@@ -404,7 +404,7 @@ export function CatalogoMaterialesView({
             {showImages ? 'Ocultar fotos' : 'Mostrar fotos'}
           </button>
           {savedViews.length > 0 && (
-            <label className="text-sm font-semibold text-ink">
+            <label className="text-sm font-semibold text-foreground">
               <span className="sr-only">Abrir vista guardada</span>
               <select className="input-base min-w-48 py-2" value="" onChange={(event) => event.target.value && setSelectedCat(event.target.value)}>
                 <option value="">Vistas guardadas</option>
@@ -426,8 +426,8 @@ export function CatalogoMaterialesView({
                 onClick={() => setSelectedCat(cat.nombre)}
                 className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
                   isSelected
-                    ? 'bg-navy text-white shadow-sm'
-                    : 'bg-slate-100 text-gray-700 hover:bg-slate-200'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'bg-muted text-foreground hover:bg-border'
                 }`}
               >
                 {cat.nombre} <span className="opacity-75 tabular-nums">({count})</span>
@@ -441,8 +441,8 @@ export function CatalogoMaterialesView({
               onClick={() => setSelectedCat('sin_categoria')}
               className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
                 selectedCat === 'sin_categoria'
-                  ? 'bg-navy text-white shadow-sm'
-                  : 'bg-slate-100 text-gray-700 hover:bg-slate-200'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted text-foreground hover:bg-border'
               }`}
             >
               Sin categoría <span className="opacity-75 tabular-nums">({sinCategoria.length})</span>
@@ -454,8 +454,8 @@ export function CatalogoMaterialesView({
             onClick={() => setSelectedCat('todas')}
             className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
               selectedCat === 'todas'
-                ? 'bg-navy text-white shadow-sm'
-                : 'bg-slate-100 text-gray-700 hover:bg-slate-200'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-muted text-foreground hover:bg-border'
             }`}
           >
             Todas <span className="opacity-75 tabular-nums">({materiales.length})</span>
@@ -468,10 +468,10 @@ export function CatalogoMaterialesView({
         {/* Caso A: Se seleccionó una categoría específica */}
         {categoriaActual && (
           <section className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-muted/50 border border-border rounded-xl">
               <div>
-                <h2 className="text-lg font-bold text-ink">{categoriaActual.nombre}</h2>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <h2 className="text-lg font-bold text-foreground">{categoriaActual.nombre}</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {(categoriaActual.material_subcategorias?.length ?? 0)} subcategorías configuradas
                 </p>
               </div>
@@ -479,7 +479,7 @@ export function CatalogoMaterialesView({
                 {/* Botón Nuevo material prellenando la categoría */}
                 <Link
                   href={`/materiales/nuevo?categoria=${encodeURIComponent(categoriaActual.nombre)}`}
-                  className="btn-primary text-xs px-3 py-1.5 inline-flex items-center gap-1.5"
+                  className="btn-secondary btn-xs"
                 >
                   <IconPlus className="w-3.5 h-3.5" />
                   <span>Nuevo material</span>
@@ -490,7 +490,7 @@ export function CatalogoMaterialesView({
                     <button
                       type="button"
                       onClick={() => abrirNuevaSubcategoria(categoriaActual)}
-                      className="btn-secondary text-xs px-2.5 py-1.5 inline-flex items-center gap-1"
+                      className="btn-secondary btn-xs"
                     >
                       <IconPlus className="w-3 h-3" />
                       <span>Subcategoría</span>
@@ -498,7 +498,7 @@ export function CatalogoMaterialesView({
                     <button
                       type="button"
                       onClick={() => abrirEditarCategoria(categoriaActual)}
-                      className="btn-secondary text-xs px-2.5 py-1.5 inline-flex items-center gap-1"
+                      className="btn-secondary btn-xs"
                     >
                       <IconEditar className="w-3 h-3" />
                       <span>Renombrar</span>
@@ -506,7 +506,7 @@ export function CatalogoMaterialesView({
                     <button
                       type="button"
                       onClick={() => abrirEliminarCategoria(categoriaActual)}
-                      className="btn-secondary text-xs px-2.5 py-1.5 inline-flex items-center gap-1 text-red-600 hover:text-red-700"
+                      className="btn-secondary btn-xs text-danger hover:text-danger-soft-foreground"
                     >
                       <IconBasura className="w-3 h-3" />
                       <span>Quitar</span>
@@ -524,12 +524,12 @@ export function CatalogoMaterialesView({
 
               return (
                 <div key={sub.id} className="card space-y-3">
-                  <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                  <div className="flex items-center justify-between border-b border-border pb-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-ink uppercase tracking-wide">
+                      <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">
                         {sub.nombre}
                       </h3>
-                      <span className="text-xs text-gray-400 tabular-nums">({items.length})</span>
+                      <span className="text-xs text-muted-foreground tabular-nums">({items.length})</span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -538,7 +538,7 @@ export function CatalogoMaterialesView({
                         href={`/materiales/nuevo?categoria=${encodeURIComponent(
                           categoriaActual.nombre
                         )}&subcategoria=${encodeURIComponent(sub.nombre)}`}
-                        className="btn-secondary text-xs px-2.5 py-1 inline-flex items-center gap-1 text-teal-800"
+                        className="btn-secondary btn-xs text-primary-soft-foreground"
                       >
                         <IconPlus className="w-3 h-3" />
                         <span>Nuevo material</span>
@@ -549,7 +549,7 @@ export function CatalogoMaterialesView({
                           <button
                             type="button"
                             onClick={() => abrirEditarSubcategoria(categoriaActual.id, sub)}
-                            className="text-gray-400 hover:text-gray-700 p-1"
+                            className="text-muted-foreground hover:text-foreground p-1"
                             title="Renombrar subcategoría"
                           >
                             <IconEditar className="w-3.5 h-3.5" />
@@ -557,7 +557,7 @@ export function CatalogoMaterialesView({
                           <button
                             type="button"
                             onClick={() => abrirEliminarSubcategoria(categoriaActual.id, sub)}
-                            className="text-gray-400 hover:text-red-600 p-1"
+                            className="text-muted-foreground hover:text-danger p-1"
                             title="Eliminar subcategoría"
                           >
                             <IconBasura className="w-3.5 h-3.5" />
@@ -584,7 +584,7 @@ export function CatalogoMaterialesView({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-400 italic py-2">
+                    <p className="text-xs text-muted-foreground italic py-2">
                       No hay materiales registrados en esta subcategoría.
                     </p>
                   )}
@@ -607,13 +607,13 @@ export function CatalogoMaterialesView({
 
               return (
                 <div className="card space-y-3">
-                  <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-                    <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wide">
+                  <div className="flex items-center justify-between border-b border-border pb-2">
+                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide">
                       Otras / Sin subcategoría
                     </h3>
                     <Link
                       href={`/materiales/nuevo?categoria=${encodeURIComponent(categoriaActual.nombre)}`}
-                      className="btn-secondary text-xs px-2.5 py-1 inline-flex items-center gap-1 text-teal-800"
+                      className="btn-secondary btn-xs text-primary-soft-foreground"
                     >
                       <IconPlus className="w-3 h-3" />
                       <span>Nuevo material</span>
@@ -643,14 +643,14 @@ export function CatalogoMaterialesView({
         {/* Caso B: "Sin categoría" seleccionado */}
         {selectedCat === 'sin_categoria' && (
           <section className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-muted/50 border border-border rounded-xl">
               <div>
-                <h2 className="text-lg font-bold text-ink">Sin categoría</h2>
-                <p className="text-xs text-gray-500">Materiales que aún no tienen un rubro asignado.</p>
+                <h2 className="text-lg font-bold text-foreground">Sin categoría</h2>
+                <p className="text-xs text-muted-foreground">Materiales que aún no tienen un rubro asignado.</p>
               </div>
               <Link
                 href="/materiales/nuevo"
-                className="btn-primary text-xs px-3 py-1.5 inline-flex items-center gap-1.5"
+                className="btn-secondary btn-xs"
               >
                 <IconPlus className="w-3.5 h-3.5" />
                 <span>Nuevo material</span>
@@ -681,11 +681,11 @@ export function CatalogoMaterialesView({
               const itemsCat = materiales.filter((m) => m.categoria === cat.nombre)
               return (
                 <div key={cat.id} className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-                    <h2 className="text-base font-bold text-ink">{cat.nombre}</h2>
+                  <div className="flex items-center justify-between border-b border-border pb-2">
+                    <h2 className="text-base font-bold text-foreground">{cat.nombre}</h2>
                     <Link
                       href={`/materiales/nuevo?categoria=${encodeURIComponent(cat.nombre)}`}
-                      className="btn-secondary text-xs px-2.5 py-1 inline-flex items-center gap-1 text-teal-800"
+                      className="btn-secondary btn-xs text-primary-soft-foreground"
                     >
                       <IconPlus className="w-3 h-3" />
                       <span>Nuevo material</span>
@@ -712,11 +712,11 @@ export function CatalogoMaterialesView({
 
             {sinCategoria.length > 0 && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-                  <h2 className="text-base font-bold text-ink">Sin categoría</h2>
+                <div className="flex items-center justify-between border-b border-border pb-2">
+                  <h2 className="text-base font-bold text-foreground">Sin categoría</h2>
                   <Link
                     href="/materiales/nuevo"
-                    className="btn-secondary text-xs px-2.5 py-1 inline-flex items-center gap-1 text-teal-800"
+                    className="btn-secondary btn-xs text-primary-soft-foreground"
                   >
                     <IconPlus className="w-3 h-3" />
                     <span>Nuevo material</span>
@@ -744,11 +744,11 @@ export function CatalogoMaterialesView({
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="fixed inset-x-3 bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom,0px)+0.75rem)] z-40 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-2xl backdrop-blur-md md:bottom-6 print:hidden" role="region" aria-label="Acciones de materiales seleccionados">
-          <p className="text-sm font-semibold text-ink"><span className="tabular-nums">{selectedIds.size}</span> seleccionados</p>
+        <div className="fixed inset-x-3 bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom,0px)+0.75rem)] z-40 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-md lg:bottom-6 lg:left-[calc(var(--sidebar-current)+0.75rem)] print:hidden" role="region" aria-label="Acciones de materiales seleccionados">
+          <p className="text-sm font-semibold text-foreground"><span className="tabular-nums">{selectedIds.size}</span> seleccionados</p>
           <div className="flex items-center gap-2">
-            <button type="button" className="btn-primary px-3 py-2 text-sm" onClick={() => void exportSelected()}>Exportar CSV</button>
-            <button type="button" className="btn-secondary px-3 py-2 text-sm" onClick={() => setSelectedIds(new Set())}>Limpiar</button>
+            <button type="button" className="btn-primary btn-sm" onClick={() => void exportSelected()}>Exportar CSV</button>
+            <button type="button" className="btn-secondary btn-sm" onClick={() => setSelectedIds(new Set())}>Limpiar</button>
           </div>
         </div>
       )}
@@ -772,9 +772,9 @@ export function CatalogoMaterialesView({
 
       {/* 3. MODALES DE GESTIÓN DE CATEGORÍAS Y SUBCATEGORÍAS */}
       {modalType && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 print:hidden" onMouseDown={(event) => event.target === event.currentTarget && cerrarModal()}>
-          <div ref={categoryDialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="category-dialog-title" className="bg-white rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl border border-gray-200">
-            <h3 id="category-dialog-title" className="text-base font-bold text-ink">
+        <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4 print:hidden" onMouseDown={(event) => event.target === event.currentTarget && cerrarModal()}>
+          <div ref={categoryDialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="category-dialog-title" className="bg-card rounded-xl max-w-md w-full p-5 space-y-4 shadow-xl border border-border">
+            <h3 id="category-dialog-title" className="text-base font-bold text-foreground">
               {modalType === 'nueva_cat' && 'Nueva categoría'}
               {modalType === 'editar_cat' && `Renombrar categoría: ${targetCat?.nombre}`}
               {modalType === 'eliminar_cat' && `Eliminar categoría: ${targetCat?.nombre}`}
@@ -784,25 +784,25 @@ export function CatalogoMaterialesView({
             </h3>
 
             {formError && (
-              <div className="p-2.5 rounded bg-red-50 text-red-700 text-xs border border-red-200">
+              <div className="p-2.5 rounded bg-danger-soft text-danger-soft-foreground text-xs border border-danger/30">
                 {formError}
               </div>
             )}
 
             {modalType === 'eliminar_cat' ? (
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   ¿Estás seguro de que deseas eliminar la categoría{' '}
-                  <span className="font-semibold text-ink">{targetCat?.nombre}</span>?
+                  <span className="font-semibold text-foreground">{targetCat?.nombre}</span>?
                 </p>
-                <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded border border-amber-200">
+                <p className="text-xs text-warning-soft-foreground bg-warning-soft p-2.5 rounded border border-warning/30">
                   Los materiales que estén en esta categoría pasarán a &quot;Sin categoría&quot; para que no se pierdan.
                 </p>
                 <div className="flex items-center justify-end gap-2 pt-2">
                   <button
                     type="button"
                     onClick={cerrarModal}
-                    className="btn-secondary text-xs px-3 py-2"
+                    className="btn-secondary btn-xs"
                     disabled={isPending}
                   >
                     Cancelar
@@ -810,7 +810,7 @@ export function CatalogoMaterialesView({
                   <button
                     type="button"
                     onClick={handleGuardarModal}
-                    className="btn-primary bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-2"
+                    className="btn-danger btn-xs"
                     disabled={isPending}
                   >
                     {isPending ? 'Eliminando...' : 'Sí, eliminar categoría'}
@@ -819,18 +819,18 @@ export function CatalogoMaterialesView({
               </div>
             ) : modalType === 'eliminar_sub' ? (
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   ¿Estás seguro de que deseas eliminar la subcategoría{' '}
-                  <span className="font-semibold text-ink">{targetSub?.nombre}</span>?
+                  <span className="font-semibold text-foreground">{targetSub?.nombre}</span>?
                 </p>
-                <p className="text-xs text-amber-700 bg-amber-50 p-2.5 rounded border border-amber-200">
+                <p className="text-xs text-warning-soft-foreground bg-warning-soft p-2.5 rounded border border-warning/30">
                   Los materiales asignados conservarán su categoría y su subcategoría quedará vacía.
                 </p>
                 <div className="flex items-center justify-end gap-2 pt-2">
                   <button
                     type="button"
                     onClick={cerrarModal}
-                    className="btn-secondary text-xs px-3 py-2"
+                    className="btn-secondary btn-xs"
                     disabled={isPending}
                   >
                     Cancelar
@@ -838,7 +838,7 @@ export function CatalogoMaterialesView({
                   <button
                     type="button"
                     onClick={handleGuardarModal}
-                    className="btn-primary bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-2"
+                    className="btn-danger btn-xs"
                     disabled={isPending}
                   >
                     {isPending ? 'Eliminando...' : 'Sí, eliminar subcategoría'}
@@ -848,7 +848,7 @@ export function CatalogoMaterialesView({
             ) : (
               <form onSubmit={handleGuardarModal} className="space-y-4">
                 <div>
-                  <label htmlFor="modal_nombre" className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label htmlFor="modal_nombre" className="block text-xs font-semibold text-foreground mb-1">
                     Nombre *
                   </label>
                   <input
@@ -867,14 +867,14 @@ export function CatalogoMaterialesView({
                   <button
                     type="button"
                     onClick={cerrarModal}
-                    className="btn-secondary text-xs px-3 py-2"
+                    className="btn-secondary btn-xs"
                     disabled={isPending}
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="btn-primary text-xs px-3 py-2"
+                    className="btn-primary btn-xs"
                     disabled={isPending || !inputNombre.trim()}
                   >
                     {isPending ? 'Guardando...' : 'Guardar'}

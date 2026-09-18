@@ -13,7 +13,7 @@ export function CancelarSolicitudButton({ solicitudId }: { solicitudId: string }
   const [state, formAction] = useActionState(bound, initialState)
 
   if (state.ok) {
-    return <p className="text-sm text-gray-500">Solicitud cancelada.</p>
+    return <p className="text-sm text-muted-foreground">Solicitud cancelada.</p>
   }
 
   if (!confirmando) {
@@ -21,7 +21,7 @@ export function CancelarSolicitudButton({ solicitudId }: { solicitudId: string }
       <button
         type="button"
         onClick={() => setConfirmando(true)}
-        className="text-sm font-semibold text-red-600"
+        className="text-sm font-semibold text-danger"
       >
         Cancelar solicitud
       </button>
@@ -29,9 +29,9 @@ export function CancelarSolicitudButton({ solicitudId }: { solicitudId: string }
   }
 
   return (
-    <form action={formAction} className="space-y-3 border-t border-gray-100 pt-3">
+    <form action={formAction} className="space-y-3 border-t border-border pt-3">
       <FormError message={state.error} />
-      <p className="text-sm text-gray-700">¿Seguro que quieres cancelar esta solicitud?</p>
+      <p className="text-sm text-foreground">¿Seguro que quieres cancelar esta solicitud?</p>
       <div className="flex gap-2">
         <SubmitButton className="btn-danger flex-1">
           Sí, cancelar

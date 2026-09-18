@@ -99,14 +99,14 @@ export default async function RecepcionDetallePage({
           {detalle.referencia_entrega && (
             <div className="flex items-center justify-between gap-2 text-sm">
               <p>
-                <span className="text-gray-500">Referencia:</span> {detalle.referencia_entrega}
+                <span className="text-muted-foreground">Referencia:</span> {detalle.referencia_entrega}
               </p>
               <CopyButton text={detalle.referencia_entrega} label="Copiar ref." className="text-[11px]" />
             </div>
           )}
           {detalle.nota && (
             <p className="text-sm">
-              <span className="text-gray-500">Nota:</span> {detalle.nota}
+              <span className="text-muted-foreground">Nota:</span> {detalle.nota}
             </p>
           )}
         </div>
@@ -120,14 +120,14 @@ export default async function RecepcionDetallePage({
         folioOrden={detalle.orden?.folio ?? ''}
       />
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
         Renglones
       </h2>
       <div className="space-y-2 mb-4">
         {(detalle.items ?? []).map((item) => (
           <div key={item.id} className="card flex items-start gap-3">
             {item.foto_url && (
-              <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 shrink-0 relative shadow-xs">
+              <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted border border-border shrink-0 relative shadow-xs">
                 <Image
                   src={item.foto_url}
                   alt="Foto del material"
@@ -145,14 +145,14 @@ export default async function RecepcionDetallePage({
                   ? ` · ${item.orden_item.material.variante}`
                   : ''}
               </p>
-              <p className="text-xs text-gray-500 mt-1 capitalize">
+              <p className="text-xs text-muted-foreground mt-1 capitalize">
                 {item.estado} · Buena {Number(item.cantidad_recibida)} · Dañada{' '}
                 {Number(item.cantidad_danada)} / Pedido{' '}
                 {Number(item.orden_item?.cantidad ?? 0)}{' '}
                 {item.orden_item?.material?.unidad_medida}
               </p>
               {item.observacion && (
-                <p className="text-xs text-amber-800 mt-2">{item.observacion}</p>
+                <p className="text-xs text-warning-soft-foreground mt-2">{item.observacion}</p>
               )}
             </div>
           </div>
@@ -166,7 +166,7 @@ export default async function RecepcionDetallePage({
             {new Date(detalle.revisado_en).toLocaleString('es-MX')}
           </p>
           {detalle.nota_revision && (
-            <p className="text-gray-600 mt-1">{detalle.nota_revision}</p>
+            <p className="text-muted-foreground mt-1">{detalle.nota_revision}</p>
           )}
         </div>
       )}

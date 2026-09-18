@@ -33,9 +33,9 @@ export function ToastUndoContainer() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-ink text-white px-4 py-2.5 rounded-xl shadow-2xl border border-white/10 text-xs sm:text-sm animate-slide-in-bottom print:hidden"
+      className="fixed bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom,0px)+0.75rem)] lg:bottom-6 left-1/2 lg:left-[calc(50%+var(--sidebar-current)/2)] -translate-x-1/2 z-50 flex items-center gap-3 bg-foreground text-background px-4 py-2.5 rounded-xl shadow-lg border border-background/10 text-xs sm:text-sm animate-slide-in-bottom print:hidden"
     >
-      <span className="font-medium text-white">{currentToast.message}</span>
+      <span className="font-medium text-background">{currentToast.message}</span>
       <button
         type="button"
         onClick={async () => {
@@ -46,7 +46,7 @@ export function ToastUndoContainer() {
             setCurrentToast(null)
           }
         }}
-        className="font-bold text-accent-foreground bg-accent hover:bg-teal-600 px-2.5 py-1 rounded-lg transition-colors active:scale-95"
+        className="font-semibold text-primary-foreground bg-primary hover:bg-primary-hover px-2.5 py-1 rounded-lg transition-colors active:scale-95"
       >
         Deshacer
       </button>
@@ -56,7 +56,7 @@ export function ToastUndoContainer() {
           if (timerRef.current) clearTimeout(timerRef.current)
           setCurrentToast(null)
         }}
-        className="text-gray-300 hover:text-white p-1 rounded transition-colors"
+        className="text-background/60 hover:text-background p-1 rounded transition-colors"
         aria-label="Cerrar notificación"
       >
         <IconCerrar className="w-3.5 h-3.5" />

@@ -106,19 +106,19 @@ export function OrdenCompraFormatoImpresion({
   const folioMostrado = orden.folio_fisico || orden.folio
 
   return (
-    <div className="min-h-screen bg-paper py-6 px-4 print:p-0 print:bg-white">
+    <div className="min-h-screen bg-background py-6 px-4 print:p-0 print:bg-card">
       {/* Barra de Controles superior (Oculta al imprimir) */}
       <div className="card max-w-4xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-3 p-4 shadow-xs border border-rule print:hidden">
         <div className="flex items-center gap-2">
           <Link
             href={hrefVolver}
-            className="text-sm font-semibold text-accent hover:underline inline-flex items-center gap-1"
+            className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
             <IconFlechaAtras className="w-4 h-4" />
             <span>{labelVolver}</span>
           </Link>
-          <span className="text-muted">|</span>
-          <span className="text-xs font-bold px-2.5 py-1 rounded bg-ink text-white">
+          <span className="text-muted-foreground">|</span>
+          <span className="text-xs font-bold px-2.5 py-1 rounded bg-primary text-primary-foreground">
             {orden.folio}
           </span>
           {orden.folio_fisico && (
@@ -130,14 +130,14 @@ export function OrdenCompraFormatoImpresion({
 
         <div className="flex items-center flex-wrap gap-2">
           {/* Toggle Papel */}
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl text-xs font-medium border border-rule">
+          <div className="flex items-center bg-muted p-1 rounded-xl text-xs font-medium border border-rule">
             <button
               type="button"
               onClick={() => setEstiloPapel('amarillo')}
               className={`px-2.5 py-1 rounded-lg ${
                 estiloPapel === 'amarillo'
-                  ? 'bg-amber-100 text-amber-900 font-bold shadow-xs'
-                  : 'text-muted hover:text-ink'
+                  ? 'bg-warning-soft text-warning-soft-foreground font-bold shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Papel Amarillo
@@ -147,8 +147,8 @@ export function OrdenCompraFormatoImpresion({
               onClick={() => setEstiloPapel('blanco')}
               className={`px-2.5 py-1 rounded-lg ${
                 estiloPapel === 'blanco'
-                  ? 'bg-white text-ink font-bold shadow-xs'
-                  : 'text-muted hover:text-ink'
+                  ? 'bg-card text-foreground font-bold shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Blanco / Impresión
@@ -159,7 +159,7 @@ export function OrdenCompraFormatoImpresion({
           <button
             type="button"
             onClick={handleCopiarWhatsApp}
-            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+            className="px-3 py-1.5 rounded-xl bg-success hover:bg-success text-primary-foreground text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
           >
             {copiado ? (
               <>
@@ -175,7 +175,7 @@ export function OrdenCompraFormatoImpresion({
           <button
             type="button"
             onClick={handlePrint}
-            className="btn-primary text-xs inline-flex items-center gap-1.5"
+            className="btn-primary text-xs"
           >
             <IconImprimir className="w-3.5 h-3.5" />
             <span>Imprimir / Guardar PDF</span>
@@ -187,45 +187,45 @@ export function OrdenCompraFormatoImpresion({
       <div
         className={`max-w-[215mm] min-h-[279mm] mx-auto p-8 sm:p-10 shadow-lg border print:shadow-none print:border-none print:m-0 print:p-8 print:w-full transition-colors duration-200 ${
           estiloPapel === 'amarillo'
-            ? 'bg-[#FEFCE8] text-slate-900 border-amber-200/80'
-            : 'bg-white text-slate-900 border-slate-300'
+            ? 'bg-[#FEFCE8] text-foreground border-warning/30'
+            : 'bg-card text-foreground border-input'
         }`}
         style={{
           fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif",
         }}
       >
         {/* Encabezado Superior */}
-        <div className="flex justify-between items-start gap-4 pb-4 border-b-2 border-slate-900">
+        <div className="flex justify-between items-start gap-4 pb-4 border-b-2 border-foreground">
           {/* Logo y Datos de la Empresa */}
           <div className="flex items-start gap-3 flex-1">
             {/* Logotipo GE estilizado */}
-            <div className="shrink-0 w-16 h-16 border-2 border-slate-900 rounded flex flex-col items-center justify-center p-1 bg-white/40">
-              <span className="font-serif font-black text-2xl tracking-tighter text-slate-900 leading-none">
+            <div className="shrink-0 w-16 h-16 border-2 border-foreground rounded flex flex-col items-center justify-center p-1 bg-card/40">
+              <span className="font-serif font-black text-2xl tracking-tighter text-foreground leading-none">
                 GE
               </span>
-              <span className="text-[7px] font-bold uppercase tracking-widest text-slate-800 mt-1">
+              <span className="text-[7px] font-bold uppercase tracking-widest text-foreground mt-1">
                 GARZA-ESCOBEDO
               </span>
             </div>
 
             {/* Texto membretado */}
             <div>
-              <h1 className="font-extrabold text-base tracking-wide uppercase text-slate-900 leading-snug">
+              <h1 className="font-extrabold text-base tracking-wide uppercase text-foreground leading-snug">
                 GRUPO GARZA-ESCOBEDO, S.A. DE C.V.
               </h1>
-              <p className="text-xs font-bold tracking-widest uppercase text-slate-800">
+              <p className="text-xs font-bold tracking-widest uppercase text-foreground">
                 CONSTRUCTORES ELÉCTRICOS
               </p>
-              <p className="text-[10px] text-slate-700 leading-tight mt-0.5">
+              <p className="text-[10px] text-foreground leading-tight mt-0.5">
                 AVE. DEL MAESTRO No.4 ENTRE JUAN J. SOLERNAU Y PRIV. LAREDO
               </p>
-              <p className="text-[10px] text-slate-700 leading-tight">
+              <p className="text-[10px] text-foreground leading-tight">
                 COL. BERTHA DEL AVELLANO H. MATAMOROS, TAM. C.P. 87438
               </p>
-              <p className="text-[10px] font-medium text-slate-800 leading-tight mt-0.5">
+              <p className="text-[10px] font-medium text-foreground leading-tight mt-0.5">
                 TEL: (868) 817-1406 &nbsp;·&nbsp; TEL./FAX: (868) 817-2958
               </p>
-              <p className="text-[10.5px] font-bold text-slate-900 mt-0.5">
+              <p className="text-[10.5px] font-bold text-foreground mt-0.5">
                 RFC: GGA070518QZ7
               </p>
             </div>
@@ -233,15 +233,15 @@ export function OrdenCompraFormatoImpresion({
 
           {/* Bloque Superior Derecho: Orden de Compra y Fecha */}
           <div className="text-right shrink-0">
-            <div className="border-2 border-slate-900 px-3 py-1.5 rounded bg-white/60 text-center min-w-[170px]">
-              <span className="block text-[11px] font-extrabold tracking-wider uppercase text-slate-900">
+            <div className="border-2 border-foreground px-3 py-1.5 rounded bg-card/60 text-center min-w-[170px]">
+              <span className="block text-[11px] font-extrabold tracking-wider uppercase text-foreground">
                 ORDEN DE COMPRA
               </span>
-              <span className="block text-lg font-black tracking-tight text-red-700">
+              <span className="block text-lg font-black tracking-tight text-danger-soft-foreground">
                 No &nbsp;{folioMostrado}
               </span>
             </div>
-            <p className="text-[11px] font-medium text-slate-800 mt-2">
+            <p className="text-[11px] font-medium text-foreground mt-2">
               <strong className="font-bold">FECHA:</strong> {fechaFormateada}
             </p>
           </div>
@@ -250,28 +250,28 @@ export function OrdenCompraFormatoImpresion({
         {/* Metadatos de la Orden: Solicitante, Proveedor, Obra */}
         <div className="mt-4 space-y-1.5 text-xs">
           <div className="flex items-baseline gap-2">
-            <span className="font-bold uppercase tracking-wide text-slate-900 min-w-[170px]">
+            <span className="font-bold uppercase tracking-wide text-foreground min-w-[170px]">
               NOMBRE DEL SOLICITANTE:
             </span>
-            <span className="font-medium text-slate-800 uppercase flex-1 border-b border-slate-400 pb-0.5">
+            <span className="font-medium text-foreground uppercase flex-1 border-b border-input pb-0.5">
               {orden.solicitante_nombre || '—'}
             </span>
           </div>
 
           <div className="flex items-baseline gap-2">
-            <span className="font-bold uppercase tracking-wide text-slate-900 min-w-[170px]">
+            <span className="font-bold uppercase tracking-wide text-foreground min-w-[170px]">
               NOMBRE DEL PROVEEDOR:
             </span>
-            <span className="font-medium text-slate-800 uppercase flex-1 border-b border-slate-400 pb-0.5">
+            <span className="font-medium text-foreground uppercase flex-1 border-b border-input pb-0.5">
               {orden.proveedor_nombre || 'A DETERMINAR'}
             </span>
           </div>
 
           <div className="flex items-baseline gap-2">
-            <span className="font-bold uppercase tracking-wide text-slate-900 min-w-[170px]">
+            <span className="font-bold uppercase tracking-wide text-foreground min-w-[170px]">
               OBRA:
             </span>
-            <span className="font-medium text-slate-800 uppercase flex-1 border-b border-slate-400 pb-0.5">
+            <span className="font-medium text-foreground uppercase flex-1 border-b border-input pb-0.5">
               {orden.obra_nombre}
               {orden.obra_fraccionamiento ? ` · ${orden.obra_fraccionamiento}` : ''}
             </span>
@@ -280,7 +280,7 @@ export function OrdenCompraFormatoImpresion({
 
         {/* Listado de Materiales (Grilla de 20 líneas numeradas) */}
         <div className="mt-6">
-          <h2 className="font-bold text-xs uppercase tracking-wider text-slate-900 mb-2">
+          <h2 className="font-bold text-xs uppercase tracking-wider text-foreground mb-2">
             LISTADO DE MATERIALES:
           </h2>
 
@@ -288,11 +288,11 @@ export function OrdenCompraFormatoImpresion({
             {/* Columna 1 (1 al 10 o mitad) */}
             <div className="space-y-1">
               {columna1.map((c) => (
-                <div key={c.num} className="flex items-baseline gap-1.5 border-b border-slate-300/80 pb-0.5 min-h-[22px]">
-                  <span className="font-bold text-slate-900 w-8 shrink-0 tabular-nums">
+                <div key={c.num} className="flex items-baseline gap-1.5 border-b border-input/80 pb-0.5 min-h-[22px]">
+                  <span className="font-bold text-foreground w-8 shrink-0 tabular-nums">
                     {c.num}.-
                   </span>
-                  <span className="text-slate-800 font-medium truncate flex-1">
+                  <span className="text-foreground font-medium truncate flex-1">
                     {c.texto}
                   </span>
                 </div>
@@ -302,11 +302,11 @@ export function OrdenCompraFormatoImpresion({
             {/* Columna 2 (11 al 20 o segunda mitad) */}
             <div className="space-y-1">
               {columna2.map((c) => (
-                <div key={c.num} className="flex items-baseline gap-1.5 border-b border-slate-300/80 pb-0.5 min-h-[22px]">
-                  <span className="font-bold text-slate-900 w-8 shrink-0 tabular-nums">
+                <div key={c.num} className="flex items-baseline gap-1.5 border-b border-input/80 pb-0.5 min-h-[22px]">
+                  <span className="font-bold text-foreground w-8 shrink-0 tabular-nums">
                     {c.num}.-
                   </span>
-                  <span className="text-slate-800 font-medium truncate flex-1">
+                  <span className="text-foreground font-medium truncate flex-1">
                     {c.texto}
                   </span>
                 </div>
@@ -321,17 +321,17 @@ export function OrdenCompraFormatoImpresion({
             {/* Espacio para firma / sello */}
             <div className="h-14 flex items-end justify-center pb-1">
               <span
-                className="text-xl text-blue-900 font-serif italic font-bold select-none tracking-wide"
+                className="text-xl text-info-soft-foreground font-serif italic font-bold select-none tracking-wide"
                 style={{ fontFamily: "'Brush Script MT', 'Segoe Script', cursive, sans-serif" }}
               >
                 {orden.autorizado_por || 'Thalía'}
               </span>
             </div>
-            <div className="border-t-2 border-slate-900 pt-1">
-              <span className="font-extrabold text-xs uppercase tracking-widest text-slate-900">
+            <div className="border-t-2 border-foreground pt-1">
+              <span className="font-extrabold text-xs uppercase tracking-widest text-foreground">
                 AUTORIZÓ:
               </span>
-              <p className="text-[11px] font-semibold text-slate-700 capitalize mt-0.5">
+              <p className="text-[11px] font-semibold text-foreground capitalize mt-0.5">
                 {orden.autorizado_por || 'Compras'}
               </p>
             </div>
@@ -339,7 +339,7 @@ export function OrdenCompraFormatoImpresion({
         </div>
 
         {/* Pie de página institucional discreto */}
-        <div className="mt-8 pt-3 border-t border-slate-300 flex justify-between items-center text-[9px] text-slate-500">
+        <div className="mt-8 pt-3 border-t border-input flex justify-between items-center text-[9px] text-muted-foreground">
           <span>Sistema de Control de Obras y Materiales · Grupo Garza-Escobedo</span>
           <span>Folio Interno: {orden.folio}</span>
         </div>

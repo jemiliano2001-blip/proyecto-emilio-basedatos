@@ -143,7 +143,7 @@ export function SheetContent({
     <div className="fixed inset-0 z-50 flex print:hidden" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-ink/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-foreground/50 backdrop-blur-sm transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -153,7 +153,7 @@ export function SheetContent({
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-accent"
+          className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           aria-label="Cerrar panel"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -183,7 +183,7 @@ export function SheetFooter({ className, ...props }: React.HTMLAttributes<HTMLDi
 
 export function SheetTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   const { titleId } = useSheet()
-  return <h2 id={titleId} className={cn('text-xl font-bold tracking-tight text-navy', className)} {...props} />
+  return <h2 id={titleId} className={cn('text-lg font-semibold tracking-tight text-foreground sm:text-xl', className)} {...props} />
 }
 
 export function SheetDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {

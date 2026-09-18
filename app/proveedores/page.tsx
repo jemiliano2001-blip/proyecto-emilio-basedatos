@@ -42,26 +42,26 @@ export default async function ProveedoresPage() {
       />
 
       {error && (
-        <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
+        <div className="card border-danger/40 bg-danger-soft text-danger-soft-foreground mb-4">
           No se pudieron cargar los proveedores.
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+      <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
         {lista.map((p) => (
           <Link
             key={p.id}
             href={puedeGestionar ? `/proveedores/${p.id}` : '#'}
             className={
               puedeGestionar
-                ? 'flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-slate-50 transition-colors'
+                ? 'flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-muted/50 transition-colors'
                 : 'flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3'
             }
           >
             <div className="min-w-0">
-              <p className="font-semibold text-ink">{p.nombre}</p>
+              <p className="font-semibold text-foreground">{p.nombre}</p>
               {(p.contacto || p.telefono) && (
-                <p className="text-xs text-gray-500 mt-0.5 truncate">
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">
                   {[p.contacto, p.telefono].filter(Boolean).join(' · ')}
                 </p>
               )}

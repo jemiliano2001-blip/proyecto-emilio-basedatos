@@ -42,26 +42,26 @@ export function BulkBar({
       aria-label="Acciones en lote"
       className={cn(
         'fixed left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-xl',
-        'bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] md:bottom-6',
-        'bg-ink text-white rounded-2xl p-3 sm:px-4 sm:py-3 shadow-2xl border border-white/10',
+        'bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom,0px)+0.75rem)] lg:bottom-6 lg:left-[calc(50%+var(--sidebar-current)/2)]',
+        'bg-foreground text-background rounded-2xl p-3 sm:px-4 sm:py-3 shadow-lg border border-background/10',
         'flex items-center justify-between gap-3 animate-slide-in-bottom print:hidden',
         className
       )}
     >
       {/* Información de selección */}
       <div className="flex items-center gap-2.5 min-w-0">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-white tabular-nums">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground tabular-nums">
           {selectedCount}
         </span>
         <div className="min-w-0 text-xs sm:text-sm">
-          <p className="font-semibold text-white truncate">
+          <p className="font-semibold text-background truncate">
             {selectedCount} {entityName} seleccionad{selectedCount === 1 ? 'o' : 'os'}
           </p>
           {onSelectAll && totalCount && selectedCount < totalCount && (
             <button
               type="button"
               onClick={onSelectAll}
-              className="text-[11px] text-teal-300 hover:text-teal-200 underline font-medium"
+              className="text-[11px] text-background/70 hover:text-background underline font-medium"
             >
               Seleccionar todos ({totalCount})
             </button>
@@ -75,10 +75,10 @@ export function BulkBar({
           actions.map((act, index) => {
             const variantClass =
               act.variant === 'danger'
-                ? 'bg-danger text-white hover:bg-danger/90'
+                ? 'bg-danger text-primary-foreground hover:bg-danger/90'
                 : act.variant === 'secondary'
-                  ? 'bg-white/10 text-white hover:bg-white/20'
-                  : 'bg-accent text-white hover:bg-teal-600'
+                  ? 'bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20'
+                  : 'bg-primary text-primary-foreground hover:bg-primary'
 
             return (
               <button
@@ -104,7 +104,7 @@ export function BulkBar({
         <button
           type="button"
           onClick={onClear}
-          className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+          className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl text-muted-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10 transition-colors"
           title="Deseleccionar todo (Esc)"
           aria-label="Deseleccionar todo"
         >

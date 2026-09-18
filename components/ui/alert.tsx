@@ -3,15 +3,15 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const alertVariants = cva(
-  'relative w-full rounded-xl border p-4 text-sm [&>svg~*]:pl-8 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-current',
+  'relative w-full rounded-xl border p-4 text-sm [&>svg~*]:pl-8 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:size-5',
   {
     variants: {
       variant: {
-        default: 'bg-card text-foreground border-border',
-        info: 'bg-sky-50 text-sky-900 border-sky-200 [&>svg]:text-sky-600',
-        success: 'bg-emerald-50 text-emerald-900 border-emerald-200 [&>svg]:text-emerald-600',
-        warning: 'bg-amber-50 text-amber-900 border-amber-200 [&>svg]:text-amber-600',
-        destructive: 'bg-red-50 text-red-900 border-red-200 [&>svg]:text-danger',
+        default: 'bg-card text-foreground border-border [&>svg]:text-muted-foreground',
+        info: 'bg-info-soft text-info-soft-foreground border-info/25 [&>svg]:text-info',
+        success: 'bg-success-soft text-success-soft-foreground border-success/25 [&>svg]:text-success',
+        warning: 'bg-warning-soft text-warning-soft-foreground border-warning/30 [&>svg]:text-warning',
+        destructive: 'bg-danger-soft text-danger-soft-foreground border-danger/25 [&>svg]:text-danger',
       },
     },
     defaultVariants: {
@@ -39,7 +39,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn('mb-1 font-bold leading-none tracking-tight text-navy', className)}
+    className={cn('mb-1 font-semibold leading-none tracking-tight', className)}
     {...props}
   />
 ))
@@ -51,7 +51,7 @@ const AlertDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('text-sm [&_p]:leading-relaxed text-muted-foreground', className)}
+    className={cn('text-sm [&_p]:leading-relaxed', className)}
     {...props}
   />
 ))

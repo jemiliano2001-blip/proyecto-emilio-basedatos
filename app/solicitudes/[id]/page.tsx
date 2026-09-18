@@ -196,11 +196,11 @@ export default async function SolicitudDetallePage({
         description={
           <div>
             {detalle.obra?.fraccionamiento && (
-              <p className="text-gray-500 text-sm">{detalle.obra.fraccionamiento}</p>
+              <p className="text-muted-foreground text-sm">{detalle.obra.fraccionamiento}</p>
             )}
-            <p className="text-sm font-semibold text-ink mt-2">{fechaVisible}</p>
+            <p className="text-sm font-semibold text-foreground mt-2">{fechaVisible}</p>
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-xs text-muted">
+              <p className="text-xs text-muted-foreground">
                 {detalle.solicitante?.nombre ? `${detalle.solicitante.nombre}` : 'Solicitante'}
               </p>
               <CopyButton text={detalle.id} label="Copiar ID" className="text-[11px]" />
@@ -218,26 +218,26 @@ export default async function SolicitudDetallePage({
 
       {detalle.nota && (
         <div className="card mb-4">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
             Nota
           </p>
-          <p className="text-sm text-gray-700">{detalle.nota}</p>
+          <p className="text-sm text-foreground">{detalle.nota}</p>
         </div>
       )}
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
         Materiales
       </h2>
-      <div className="card mb-6 divide-y divide-gray-100 p-0 overflow-hidden">
+      <div className="card mb-6 divide-y divide-border p-0 overflow-hidden">
         {(detalle.items ?? []).map((item) => {
           const tipo = item.tipo_linea ?? 'material'
           return (
             <div key={item.id} className="p-3 sm:p-4 space-y-1">
-              <p className="text-xs font-semibold text-gray-400 uppercase mb-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
                 {labelTipoLinea(tipo)}
               </p>
               {esMultiObra && item.item_obra && (
-                <p className="text-xs font-semibold text-teal-700 mb-1">
+                <p className="text-xs font-semibold text-primary mb-1">
                   Proyecto: {item.item_obra.nombre}
                 </p>
               )}
@@ -246,10 +246,10 @@ export default async function SolicitudDetallePage({
                   <p className="font-medium">
                     {item.material?.nombre_base}
                     {item.material?.variante && (
-                      <span className="text-gray-500"> · {item.material.variante}</span>
+                      <span className="text-muted-foreground"> · {item.material.variante}</span>
                     )}
                   </p>
-                  <span className="text-sm text-gray-500 shrink-0">
+                  <span className="text-sm text-muted-foreground shrink-0">
                     {item.cantidad_solicitada} {item.material?.unidad_medida}
                   </span>
                 </div>
@@ -257,14 +257,14 @@ export default async function SolicitudDetallePage({
                 <div className="flex justify-between items-baseline gap-3">
                   <p className="font-medium">{item.descripcion}</p>
                   {verPrecios && item.monto_mxn != null && (
-                    <span className="text-sm text-gray-500 shrink-0">
+                    <span className="text-sm text-muted-foreground shrink-0">
                       {formatMoneyMx(Number(item.monto_mxn))}
                     </span>
                   )}
                 </div>
               )}
               {verPrecios && tipo === 'material' && (
-                <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
                   {item.material?.precio_base != null &&
                     Number(item.material.precio_base) > 0 && (
                       <p>
@@ -287,7 +287,7 @@ export default async function SolicitudDetallePage({
                   )}
                 </div>
               )}
-              {item.nota && <p className="text-xs text-gray-400 mt-1">{item.nota}</p>}
+              {item.nota && <p className="text-xs text-muted-foreground mt-1">{item.nota}</p>}
             </div>
           )
         })}
@@ -295,7 +295,7 @@ export default async function SolicitudDetallePage({
 
       {ordenesRelacionadas.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             Órdenes de compra generadas
           </h2>
           <div className="space-y-2">
@@ -303,16 +303,16 @@ export default async function SolicitudDetallePage({
               <Link key={oc.id} href={`/ordenes/${oc.id}`} className="card block">
                 <div className="flex justify-between">
                   <span className="font-medium">{oc.folio}</span>
-                  <span className="text-sm text-gray-500">{oc.obra?.nombre}</span>
+                  <span className="text-sm text-muted-foreground">{oc.obra?.nombre}</span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{formatMoneyMx(Number(oc.total))}</p>
+                <p className="text-sm text-muted-foreground mt-1">{formatMoneyMx(Number(oc.total))}</p>
               </Link>
             ))}
           </div>
         </div>
       )}
 
-      <div className="space-y-3 mt-2 lg:sticky lg:bottom-4 lg:z-10 lg:rounded-xl lg:border lg:border-gray-200 lg:bg-white/95 lg:backdrop-blur-sm lg:p-3 lg:shadow-sm">
+      <div className="space-y-3 mt-2 lg:sticky lg:bottom-4 lg:z-10 lg:rounded-xl lg:border lg:border-border lg:bg-card/95 lg:backdrop-blur-sm lg:p-3 lg:shadow-sm">
         {(puedeCompras || puedeFinanzas || verPrecios) && (
           <Link
             href={`/solicitudes/${detalle.id}/formato`}
@@ -333,7 +333,7 @@ export default async function SolicitudDetallePage({
       </div>
 
       {estadoProceso && (
-        <p className="text-xs text-gray-400 text-center mt-4">
+        <p className="text-xs text-muted-foreground text-center mt-4">
           Aprobada por Compras — pendiente de pago en Finanzas.
         </p>
       )}

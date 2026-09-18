@@ -311,26 +311,26 @@ export function ObraForm({
 
       <FormError message={state.error} />
       {draftRecovered && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900" role="status">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary-soft px-3 py-2 text-sm text-primary-soft-foreground" role="status">
           <span>Recuperamos el borrador de este nuevo proyecto.</span>
           <button type="button" className="min-h-[44px] px-3 font-semibold underline" onClick={clearDraft}>Descartar borrador</button>
         </div>
       )}
       {lastRemoved && (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm" role="status">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-sm" role="status">
           <span>Partida eliminada.</span>
-          <button type="button" className="min-h-[44px] px-3 font-semibold text-accent underline" onClick={undoRemove}>Deshacer</button>
+          <button type="button" className="min-h-[44px] px-3 font-semibold text-primary underline" onClick={undoRemove}>Deshacer</button>
         </div>
       )}
 
       {/* SECCIÓN 1: DATOS GENERALES DEL PROYECTO */}
       <div className="card space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
           Datos del Proyecto
         </h2>
 
         <div>
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-1">
             Nombre del proyecto *
           </label>
           <input
@@ -345,7 +345,7 @@ export function ObraForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label htmlFor="cliente" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="cliente" className="block text-sm font-medium text-foreground mb-1">
               Cliente
             </label>
             <input
@@ -358,7 +358,7 @@ export function ObraForm({
           </div>
 
           <div>
-            <label htmlFor="ciudad" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="ciudad" className="block text-sm font-medium text-foreground mb-1">
               Ciudad / Municipio
             </label>
             <input
@@ -373,7 +373,7 @@ export function ObraForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label htmlFor="fraccionamiento" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="fraccionamiento" className="block text-sm font-medium text-foreground mb-1">
               Fraccionamiento / Colonia
             </label>
             <input
@@ -386,7 +386,7 @@ export function ObraForm({
           </div>
 
           <div>
-            <label htmlFor="estado" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="estado" className="block text-sm font-medium text-foreground mb-1">
               Estatus
             </label>
             <select
@@ -403,7 +403,7 @@ export function ObraForm({
         </div>
 
         <div>
-          <label htmlFor="ubicacion" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="ubicacion" className="block text-sm font-medium text-foreground mb-1">
             Ubicación detallada (Dirección o referencias)
           </label>
           <input
@@ -428,13 +428,13 @@ export function ObraForm({
 
       {/* SECCIÓN 2: PRESUPUESTO DE MATERIALES Y KITS CON CÁLCULO AUTOMÁTICO */}
       {allowTopesOnCreate && (
-        <div className="card space-y-4 border-teal-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+        <div className="card space-y-4 border-primary/30">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
             <div>
-              <h2 className="text-base font-bold text-ink">
+              <h2 className="text-base font-bold text-foreground">
                 Presupuesto de Materiales Asignados
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 El presupuesto global se calcula automáticamente: Cantidad Asignada × Precio Base.
               </p>
             </div>
@@ -444,16 +444,16 @@ export function ObraForm({
                 <button
                   type="button"
                   onClick={() => setMostrarModalKit(true)}
-                  className="btn-secondary text-sm px-3 py-2 min-h-[44px] text-teal-800 border-teal-300 hover:bg-teal-50 flex items-center gap-1.5"
+                  className="btn-secondary btn-sm min-h-[44px] text-primary-soft-foreground border-primary/40 hover:bg-primary-soft"
                 >
-                  <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+                  <IconRayo className="w-3.5 h-3.5 text-warning" />
                   <span>Cargar Kit / Ensamble</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={agregarMaterialIndividual}
-                className="btn-primary text-sm px-3 py-2 min-h-[44px] flex items-center gap-1.5"
+                className="btn-primary btn-sm min-h-[44px]"
                 disabled={materiales.length === 0}
               >
                 <IconPlus className="w-3.5 h-3.5" />
@@ -463,48 +463,48 @@ export function ObraForm({
           </div>
 
           {/* BANNER DE TOTAL CALCULADO */}
-          <div className="rounded-xl bg-slate-900 text-white p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="rounded-xl bg-foreground text-background p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wider text-slate-300 font-medium">
+              <p className="text-xs uppercase tracking-wider text-background/60 font-medium">
                 Presupuesto Estimado del Proyecto
               </p>
-              <p className="text-2xl font-bold tabular-nums text-teal-300">
+              <p className="text-2xl font-bold tabular-nums text-background">
                 {formatMoneyMx(totalPresupuestoCalculado)}
               </p>
             </div>
-            <div className="text-right text-xs text-slate-300">
-              <span className="font-semibold text-white">{partidas.length}</span> partidas asignadas
+            <div className="text-right text-xs text-background/60">
+              <span className="font-semibold text-background">{partidas.length}</span> partidas asignadas
             </div>
           </div>
 
           {/* MODAL / SECCIÓN DE CARGA DE KIT */}
           {mostrarModalKit && (
-            <div className="p-4 rounded-lg bg-teal-50/70 border border-teal-200 space-y-3">
+            <div className="p-4 rounded-lg bg-primary-soft/70 border border-primary/30 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-teal-900">
+                <h3 className="text-sm font-semibold text-primary-soft-foreground">
                   Seleccionar Kit / Ensamble Compuesto
                 </h3>
                 <button
                   type="button"
                   onClick={() => setMostrarModalKit(false)}
-                  className="text-xs text-gray-500 hover:text-gray-800 font-semibold"
+                  className="text-xs text-muted-foreground hover:text-foreground font-semibold"
                 >
                   Cerrar
                 </button>
               </div>
-              <p className="text-xs text-teal-700">
+              <p className="text-xs text-primary">
                 Al seleccionar una plantilla (ej. Transformador de paso o remate), se añadirán automáticamente sus accesorios, conectores, cableado y herrajes asociados.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Plantilla / Kit
                   </label>
                   <select
                     value={selectedKitId}
                     onChange={(e) => setSelectedKitId(e.target.value)}
-                    className="input-base text-sm bg-white"
+                    className="input-base text-sm bg-card"
                   >
                     <option value="">-- Elige un kit o ensamble --</option>
                     {kits.map((k) => (
@@ -516,7 +516,7 @@ export function ObraForm({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Cantidad de Kits
                   </label>
                   <input
@@ -525,22 +525,22 @@ export function ObraForm({
                     step="1"
                     value={kitMultiplicador}
                     onChange={(e) => setKitMultiplicador(e.target.value)}
-                    className="input-base text-sm bg-white"
+                    className="input-base text-sm bg-card"
                     placeholder="1"
                   />
                 </div>
               </div>
 
               {selectedKitObj && selectedKitObj.items && selectedKitObj.items.length > 0 && (
-                <div className="bg-white rounded-lg p-3 border border-teal-100 space-y-2">
-                  <p className="text-xs font-semibold text-gray-600">
+                <div className="bg-card rounded-lg p-3 border border-primary/20 space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground">
                     Componentes incluidos en este ensamble:
                   </p>
                   <div className="max-h-36 overflow-y-auto space-y-1 pr-1 text-xs">
                     {selectedKitObj.items.map((it) => (
                       <div
                         key={it.id}
-                        className="flex items-center justify-between text-gray-700 py-1 border-b border-gray-50 last:border-none"
+                        className="flex items-center justify-between text-foreground py-1 border-b border-border last:border-none"
                       >
                         <span>
                           {it.nombre_base ?? it.material?.nombre_base}
@@ -548,7 +548,7 @@ export function ObraForm({
                             ? ` · ${it.variante ?? it.material?.variante}`
                             : ''}
                         </span>
-                        <span className="font-semibold tabular-nums text-teal-800">
+                        <span className="font-semibold tabular-nums text-primary-soft-foreground">
                           {(it.cantidad * (parseQuantity(kitMultiplicador) ?? 1)).toFixed(2)}{' '}
                           {it.unidad_medida ?? it.material?.unidad_medida}
                         </span>
@@ -562,7 +562,7 @@ export function ObraForm({
                 <button
                   type="button"
                   onClick={() => setMostrarModalKit(false)}
-                  className="btn-secondary text-sm px-3 py-2 min-h-[44px]"
+                  className="btn-secondary btn-sm min-h-[44px]"
                 >
                   Cancelar
                 </button>
@@ -570,7 +570,7 @@ export function ObraForm({
                   type="button"
                   onClick={aplicarKit}
                   disabled={!selectedKitId}
-                  className="btn-primary text-sm px-4 py-2 min-h-[44px] bg-teal-800"
+                  className="btn-primary btn-sm min-h-[44px] bg-primary-hover"
                 >
                   Insertar partidas del Kit
                 </button>
@@ -583,15 +583,15 @@ export function ObraForm({
             {itemsConCalculo.map((item, index) => (
               <div
                 key={item.key}
-                className="card border-gray-200 bg-white p-3 sm:p-4 space-y-2 hover:border-gray-300 transition-colors"
+                className="card border-border bg-card p-3 sm:p-4 space-y-2 hover:border-input transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-gray-400">
+                    <span className="text-xs font-bold text-muted-foreground">
                       #{index + 1}
                     </span>
                     {item.origenKitNombre && (
-                      <span className="text-[11px] px-2 py-0.5 rounded bg-teal-50 text-teal-700 font-medium">
+                      <span className="text-[11px] px-2 py-0.5 rounded bg-primary-soft text-primary font-medium">
                         Kit: {item.origenKitNombre}
                       </span>
                     )}
@@ -599,7 +599,7 @@ export function ObraForm({
                   <button
                     type="button"
                     onClick={() => quitarPartida(item.key)}
-                    className="text-xs text-red-600 font-semibold hover:text-red-800 py-1 inline-flex items-center gap-1"
+                    className="text-xs text-danger font-semibold hover:text-danger-soft-foreground py-1 inline-flex items-center gap-1"
                   >
                     <IconBasura className="w-3.5 h-3.5" />
                     <span>Quitar</span>
@@ -628,7 +628,7 @@ export function ObraForm({
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-semibold text-gray-500 mb-0.5 sm:hidden">
+                    <label className="block text-[11px] font-semibold text-muted-foreground mb-0.5 sm:hidden">
                       Cantidad asignada
                     </label>
                     <input
@@ -645,22 +645,22 @@ export function ObraForm({
                   </div>
 
                   <div className="sm:col-span-2 text-right sm:text-left">
-                    <span className="text-[11px] text-gray-400 block sm:hidden">
+                    <span className="text-[11px] text-muted-foreground block sm:hidden">
                       Precio Base:
                     </span>
-                    <span className="text-xs text-gray-600 tabular-nums">
+                    <span className="text-xs text-muted-foreground tabular-nums">
                       {formatMoneyMx(item.precioUnitario)}
                     </span>
-                    <span className="text-[11px] text-gray-400 ml-1">
+                    <span className="text-[11px] text-muted-foreground ml-1">
                       /{item.material?.unidad_medida ?? 'u'}
                     </span>
                   </div>
 
                   <div className="sm:col-span-2 text-right">
-                    <span className="text-[11px] text-gray-400 block sm:hidden">
+                    <span className="text-[11px] text-muted-foreground block sm:hidden">
                       Subtotal:
                     </span>
-                    <span className="text-sm font-bold text-ink tabular-nums">
+                    <span className="text-sm font-bold text-foreground tabular-nums">
                       {formatMoneyMx(item.subtotal)}
                     </span>
                   </div>
@@ -673,9 +673,9 @@ export function ObraForm({
                     : []
                   if (kitsRelacionados.length === 0) return null
                   return (
-                    <div className="mt-2 pt-2 border-t border-teal-100 flex flex-wrap items-center gap-2 text-xs bg-teal-50/60 p-2 rounded">
-                      <span className="text-teal-900 font-medium inline-flex items-center gap-1">
-                        <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+                    <div className="mt-2 pt-2 border-t border-primary/20 flex flex-wrap items-center gap-2 text-xs bg-primary-soft/60 p-2 rounded">
+                      <span className="text-primary-soft-foreground font-medium inline-flex items-center gap-1">
+                        <IconRayo className="w-3.5 h-3.5 text-warning" />
                         <span>Equipo con ensamble ({kitsRelacionados[0].nombre}):</span>
                       </span>
                       {kitsRelacionados.map((k) => (
@@ -683,7 +683,7 @@ export function ObraForm({
                           key={k.id}
                           type="button"
                           onClick={() => aplicarKitConcreto(k.id, item.cantNum || 1, false)}
-                          className="px-2 py-1 rounded bg-white border border-teal-300 text-teal-800 font-semibold hover:bg-teal-100 shadow-sm"
+                          className="px-2 py-1 rounded bg-card border border-primary/40 text-primary-soft-foreground font-semibold hover:bg-primary-soft shadow-sm"
                         >
                           + {k.configuracion || k.nombre}
                         </button>
@@ -695,11 +695,11 @@ export function ObraForm({
             ))}
 
             {partidas.length === 0 && (
-              <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl space-y-2">
-                <p className="text-sm font-medium text-gray-600">
+              <div className="text-center py-8 border border-dashed border-input rounded-xl space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">
                   No has agregado materiales a este presupuesto.
                 </p>
-                <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                   Agrega materiales individuales o utiliza una plantilla/kit compuesto para cargar automáticamente los accesorios y calcular el presupuesto.
                 </p>
                 <div className="pt-2 flex justify-center gap-2">
@@ -707,16 +707,16 @@ export function ObraForm({
                     <button
                       type="button"
                       onClick={() => setMostrarModalKit(true)}
-                      className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1"
+                      className="btn-secondary btn-xs"
                     >
-                      <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+                      <IconRayo className="w-3.5 h-3.5 text-warning" />
                       <span>Usar Kit</span>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={agregarMaterialIndividual}
-                    className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1"
+                    className="btn-primary btn-xs"
                   >
                     <IconPlus className="w-3.5 h-3.5" />
                     <span>Agregar material</span>
@@ -731,7 +731,7 @@ export function ObraForm({
       {/* EN MODO EDICIÓN SIN TOPES EN CREACIÓN, SE PUEDE VISUALIZAR EL PRESUPUESTO */}
       {isEdit && !allowTopesOnCreate && obra?.presupuesto_mxn !== undefined && (
         <div className="card space-y-2">
-          <label htmlFor="presupuesto_mxn_edit" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="presupuesto_mxn_edit" className="block text-sm font-medium text-foreground">
             Presupuesto (MXN)
           </label>
           <input

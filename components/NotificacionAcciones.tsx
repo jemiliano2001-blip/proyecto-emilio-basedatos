@@ -28,8 +28,8 @@ export function NotificacionAcciones({
     <div className="mt-3 space-y-2">
       <FormError message={abrirState.error ?? leerState.error} />
       <div className="flex flex-wrap gap-2">
-        {href && <form action={abrirAction}><SubmitButton className="btn-primary text-sm py-2 px-4">Ver</SubmitButton></form>}
-        {!leida && <form action={leerAction}><SubmitButton className="btn-secondary text-sm py-2 px-4">Marcar leído</SubmitButton></form>}
+        {href && <form action={abrirAction}><SubmitButton className="btn-primary btn-sm">Ver</SubmitButton></form>}
+        {!leida && <form action={leerAction}><SubmitButton className="btn-secondary btn-sm">Marcar leído</SubmitButton></form>}
       </div>
     </div>
   )

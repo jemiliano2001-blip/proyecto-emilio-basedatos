@@ -30,7 +30,7 @@ export default async function EditarProveedorPage({
   const updateAction = updateProveedorAction.bind(null, resolvedparams.id)
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Editar proveedor"
         subtitle={proveedor.nombre}

@@ -35,16 +35,16 @@ export default async function RecibirOrdenPage({
   const cabecera = items[0]
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title={`Checklist · ${cabecera.folio}`}
         description={
           <div>
-            <p className="text-sm font-medium text-gray-700">{cabecera.obra_nombre}</p>
+            <p className="text-sm font-medium text-foreground">{cabecera.obra_nombre}</p>
             {cabecera.proveedor_nombre && (
-              <p className="text-xs text-gray-500">{cabecera.proveedor_nombre}</p>
+              <p className="text-xs text-muted-foreground">{cabecera.proveedor_nombre}</p>
             )}
-            <p className="text-xs text-muted mt-0.5 capitalize">
+            <p className="text-xs text-muted-foreground mt-0.5 capitalize">
               Estado OC: {String(cabecera.orden_estado).replaceAll('_', ' ')}
             </p>
           </div>

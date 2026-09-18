@@ -75,7 +75,7 @@ export default async function InventarioPage() {
       />
 
       {invError && (
-        <div role="alert" className="card mb-4 border-red-300 bg-red-50 text-red-700">
+        <div role="alert" className="card mb-4 border-danger/40 bg-danger-soft text-danger-soft-foreground">
           No se pudo cargar el inventario. Revisa la conexión e intenta de nuevo.
         </div>
       )}
@@ -95,26 +95,26 @@ export default async function InventarioPage() {
               className="card-interactive flex items-center justify-between gap-3 min-h-[72px]"
             >
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-ink">{o.nombre}</p>
+                <p className="font-semibold text-foreground">{o.nombre}</p>
                 {o.fraccionamiento && (
-                  <p className="text-xs text-gray-500">{o.fraccionamiento}</p>
+                  <p className="text-xs text-muted-foreground">{o.fraccionamiento}</p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {o.materiales} material{o.materiales === 1 ? '' : 'es'}
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-accent">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-primary">
                   Pendiente
                 </p>
-                <p className="text-2xl font-black tabular-nums text-accent leading-none">
+                <p className="text-2xl font-black tabular-nums text-primary leading-none">
                   {o.pendientes}
                 </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">
+                <p className="text-[11px] text-muted-foreground mt-0.5">
                   {o.pendientes === 1 ? 'material' : 'materiales'}
                 </p>
               </div>
-              <IconChevron className="h-5 w-5 text-gray-400 shrink-0" />
+              <IconChevron className="h-5 w-5 text-muted-foreground shrink-0" />
             </Link>
           ))}
         </div>

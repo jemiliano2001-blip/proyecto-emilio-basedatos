@@ -40,7 +40,7 @@ export default async function UsuarioDetallePage({
   const boundReset = resetPasswordUsuarioAction.bind(null, usuario.id)
 
   return (
-    <main className="page-shell space-y-6">
+    <main className="page-shell-narrow space-y-6">
       <PageHeader
         title={usuario.nombre}
         description={usuario.email ?? undefined}
@@ -49,7 +49,7 @@ export default async function UsuarioDetallePage({
       />
 
       <section className="card space-y-3">
-        <h2 className="text-base font-bold text-ink">Datos y rol</h2>
+        <h2 className="text-base font-bold text-foreground">Datos y rol</h2>
         <UsuarioEditarForm
           usuario={usuario}
           action={boundUpdate}
@@ -58,8 +58,8 @@ export default async function UsuarioDetallePage({
       </section>
 
       <section className="card space-y-3">
-        <h2 className="text-base font-bold text-ink">Contraseña</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className="text-base font-bold text-foreground">Contraseña</h2>
+        <p className="text-sm text-muted-foreground">
           Genera una temporal o escribe una nueva. Se muestra una sola vez en
           pantalla.
         </p>

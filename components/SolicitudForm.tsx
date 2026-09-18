@@ -432,23 +432,23 @@ export function SolicitudForm({
       <input type="hidden" name="items_json" value={itemsJson} />
       <FormError message={state.error ?? offlineError ?? clientValidationError} />
       {draftRecovered && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-900" role="status">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary-soft px-3 py-2 text-sm text-primary-soft-foreground" role="status">
           <span>Recuperamos el borrador guardado en este dispositivo.</span>
-          <button type="button" className="min-h-[44px] px-3 font-semibold text-teal-900 underline" onClick={clearDraft}>Descartar borrador</button>
+          <button type="button" className="min-h-[44px] px-3 font-semibold text-primary-soft-foreground underline" onClick={clearDraft}>Descartar borrador</button>
         </div>
       )}
       {lastRemoved && (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm" role="status">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-sm" role="status">
           <span>Partida eliminada.</span>
-          <button type="button" className="min-h-[44px] px-3 font-semibold text-accent underline" onClick={undoRemove}>Deshacer</button>
+          <button type="button" className="min-h-[44px] px-3 font-semibold text-primary underline" onClick={undoRemove}>Deshacer</button>
         </div>
       )}
       {offlineMsg && (
-        <p className="rounded-lg bg-teal-50 text-teal-800 text-sm px-3 py-2">{offlineMsg}</p>
+        <p className="rounded-lg bg-primary-soft text-primary-soft-foreground text-sm px-3 py-2">{offlineMsg}</p>
       )}
 
       {permiteMultiObra && (
-        <label className="flex items-center gap-2 text-sm text-gray-700">
+        <label className="flex items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
             checked={multiObra}
@@ -462,7 +462,7 @@ export function SolicitudForm({
         <input type="hidden" name="obra_id" value={items[0]?.obra_id ?? ''} />
       ) : (
         <div>
-          <label htmlFor="obra_id" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="obra_id" className="block text-sm font-medium text-foreground mb-1">
             Proyecto *
           </label>
           <select
@@ -487,11 +487,11 @@ export function SolicitudForm({
       )}
 
       <div className="space-y-3">
-        <label className="block text-sm font-semibold text-ink">
+        <label className="block text-sm font-semibold text-foreground">
           Renglones de la requisición
         </label>
 
-        <div className="card space-y-0 divide-y divide-gray-100 p-0 overflow-hidden">
+        <div className="card space-y-0 divide-y divide-border p-0 overflow-hidden">
           {items.map((item, idx) => {
             const effectiveObraId = multiObra ? item.obra_id : selectedObraId
             const info = item.material_id ? getSaldoInfo(effectiveObraId, item.material_id) : { disponible: null, comprometido: null }
@@ -506,18 +506,18 @@ export function SolicitudForm({
               <div
                 key={item.key}
                 className={`relative space-y-3 p-4 transition-colors ${
-                  sinSaldo || saldoInsuficiente ? 'bg-red-50/40' : ''
+                  sinSaldo || saldoInsuficiente ? 'bg-danger-soft/40' : ''
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-500 font-mono">
+                  <span className="text-xs font-bold text-muted-foreground font-mono">
                     {item.tipo_linea === 'material' ? 'Material' : item.tipo_linea} #{idx + 1}
                   </span>
                   {items.length > 1 && (
                     <button
                       type="button"
                       onClick={() => quitarFila(item.key)}
-                      className="text-xs text-red-600 hover:text-red-700 font-medium py-1 px-2 -mr-2 rounded hover:bg-red-50 transition-colors"
+                      className="text-xs text-danger hover:text-danger-soft-foreground font-medium py-1 px-2 -mr-2 rounded hover:bg-danger-soft transition-colors"
                     >
                       Quitar
                     </button>
@@ -549,7 +549,7 @@ export function SolicitudForm({
 
                 {item.tipo_linea === 'material' ? <>
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">
+                  <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
                     Material *
                   </label>
                   <MaterialSearchCombobox
@@ -560,13 +560,13 @@ export function SolicitudForm({
                     }
                   />
                   {sinSaldo && (
-                    <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5">
+                    <p className="text-xs font-semibold text-danger mt-1.5 flex items-center gap-1.5">
                       <IconAlerta className="w-3.5 h-3.5 shrink-0" />
                       <span>Este material no tiene presupuesto asignado o se encuentra agotado en el proyecto.</span>
                     </p>
                   )}
                   {saldoInsuficiente && (
-                    <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5">
+                    <p className="text-xs font-semibold text-danger mt-1.5 flex items-center gap-1.5">
                       <IconAlerta className="w-3.5 h-3.5 shrink-0" />
                       <span>La cantidad solicitada ({cantNum}) supera el saldo disponible ({disp}). Ajusta la cantidad.</span>
                     </p>
@@ -654,10 +654,10 @@ export function SolicitudForm({
         </div>
 
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <button type="button" onClick={() => agregarFila('material')} className="rounded-xl border border-dashed border-rule py-3 text-sm font-semibold text-accent hover:bg-teal-50/50 inline-flex items-center justify-center gap-1.5">
+          <button type="button" onClick={() => agregarFila('material')} className="rounded-xl border border-dashed border-rule py-3 text-sm font-semibold text-primary hover:bg-primary-soft/50 inline-flex items-center justify-center gap-1.5">
             <IconPlus className="w-4 h-4" /><span>Agregar material</span>
           </button>
-          <label className="rounded-xl border border-dashed border-rule px-3 py-2 text-sm font-semibold text-accent hover:bg-teal-50/50 inline-flex items-center justify-center gap-1.5">
+          <label className="rounded-xl border border-dashed border-rule px-3 py-2 text-sm font-semibold text-primary hover:bg-primary-soft/50 inline-flex items-center justify-center gap-1.5">
             <span className="sr-only">Agregar servicio o gasto</span>
             <IconPlus className="w-4 h-4" />
             <select className="bg-transparent text-sm outline-none" defaultValue="" onChange={(event) => {
@@ -675,7 +675,7 @@ export function SolicitudForm({
       </div>
 
       <div>
-        <label htmlFor="nota" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="nota" className="block text-sm font-medium text-foreground mb-1">
           Nota general (opcional)
         </label>
         <textarea
@@ -690,16 +690,16 @@ export function SolicitudForm({
       </div>
 
       {/* Botones de acción principales reubicados al final de la página */}
-      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 border-t border-gray-100">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 border-t border-border">
         <button
           type="button"
           onClick={() => {
             setClientValidationError(null)
             setShowPreview(true)
           }}
-          className="btn-secondary text-sm py-2.5 px-4 inline-flex items-center justify-center gap-2"
+          className="btn-secondary btn-sm"
         >
-          <IconOjo className="w-4 h-4 text-teal-800" />
+          <IconOjo className="w-4 h-4 text-primary-soft-foreground" />
           <span>Vista previa</span>
         </button>
         <div className="flex-1">
@@ -708,7 +708,7 @@ export function SolicitudForm({
           </SubmitButton>
         </div>
       </div>
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-muted-foreground text-center">
         Sin señal: se guarda en este teléfono y se envía al recuperar conexión.
       </p>
 

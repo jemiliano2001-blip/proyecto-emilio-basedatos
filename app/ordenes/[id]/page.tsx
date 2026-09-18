@@ -243,9 +243,9 @@ export default async function OrdenDetallePage({
         }
         description={
           <div>
-            <p className="text-sm font-medium text-gray-700">{detalle.obra?.nombre}</p>
+            <p className="text-sm font-medium text-foreground">{detalle.obra?.nombre}</p>
             {detalle.obra?.fraccionamiento && (
-              <p className="text-xs text-gray-400">{detalle.obra.fraccionamiento}</p>
+              <p className="text-xs text-muted-foreground">{detalle.obra.fraccionamiento}</p>
             )}
           </div>
         }
@@ -257,7 +257,7 @@ export default async function OrdenDetallePage({
       <div className="flex flex-col sm:flex-row gap-2 mb-6 -mt-2">
         <Link
           href={`/ordenes/${detalle.id}/formato`}
-          className="flex-1 text-center rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-bold py-3 text-sm flex items-center justify-center gap-2 shadow-xs transition-colors"
+          className="flex-1 text-center rounded-xl bg-warning-soft hover:bg-warning-soft text-warning-soft-foreground border border-warning/40 font-bold py-3 text-sm flex items-center justify-center gap-2 shadow-xs transition-colors"
         >
           <IconImprimir className="w-4 h-4" />
           <span>Ver e Imprimir Formato OC (PDF)</span>
@@ -276,7 +276,7 @@ export default async function OrdenDetallePage({
 
       <div className="card mb-4">
         <div className="flex justify-between items-start mb-1">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
             Proveedor
           </p>
           {puedeAsignar && (
@@ -288,25 +288,25 @@ export default async function OrdenDetallePage({
             />
           )}
         </div>
-        <p className="font-semibold text-ink">
+        <p className="font-semibold text-foreground">
           {detalle.proveedor?.nombre || (
-            <span className="text-gray-400 italic font-normal">Sin proveedor asignado</span>
+            <span className="text-muted-foreground italic font-normal">Sin proveedor asignado</span>
           )}
         </p>
         {detalle.proveedor?.contacto && (
-          <p className="text-sm text-gray-500">{detalle.proveedor.contacto}</p>
+          <p className="text-sm text-muted-foreground">{detalle.proveedor.contacto}</p>
         )}
         {detalle.proveedor?.telefono && (
-          <p className="text-sm text-gray-500">{detalle.proveedor.telefono}</p>
+          <p className="text-sm text-muted-foreground">{detalle.proveedor.telefono}</p>
         )}
         {detalle.folio_fisico && (
-          <p className="text-xs text-amber-800 bg-amber-50 px-2 py-0.5 rounded inline-block mt-2 border border-amber-200">
+          <p className="text-xs text-warning-soft-foreground bg-warning-soft px-2 py-0.5 rounded inline-block mt-2 border border-warning/30">
             No. Folio físico: <strong>{detalle.folio_fisico}</strong>
           </p>
         )}
       </div>
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
         Materiales
       </h2>
       <div className="space-y-2 mb-4">
@@ -318,19 +318,19 @@ export default async function OrdenDetallePage({
                 <p className="font-medium text-sm">
                   {item.material?.nombre_base}
                   {item.material?.variante ? (
-                    <span className="text-gray-500"> · {item.material.variante}</span>
+                    <span className="text-muted-foreground"> · {item.material.variante}</span>
                   ) : null}
                 </p>
                 <span className="text-sm font-semibold shrink-0">
                   {Number(item.subtotal).toFixed(2)}
                 </span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {item.cantidad} {item.material?.unidad_medida} ×{' '}
                 {Number(item.precio_unitario).toFixed(2)} {detalle.moneda}
               </p>
               {saldo && (
-                <p className="text-xs text-accent mt-2">
+                <p className="text-xs text-primary mt-2">
                   Recibido bueno {Number(saldo.cantidad_recibida_buena)} · Dañado{' '}
                   {Number(saldo.cantidad_danada_acum)} · Pendiente{' '}
                   {Number(saldo.pendiente)}
@@ -343,7 +343,7 @@ export default async function OrdenDetallePage({
 
       <div className="card flex justify-between items-center mb-6">
         <span className="font-semibold">Total</span>
-        <span className="text-lg font-bold text-ink">
+        <span className="text-lg font-bold text-foreground">
           {Number(detalle.total).toFixed(2)} {detalle.moneda}
         </span>
       </div>
@@ -359,26 +359,26 @@ export default async function OrdenDetallePage({
         puedeGestionar={puedeGestionarFacturas}
       />
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
         Historial de recepciones
       </h2>
       {recepciones.length === 0 ? (
-        <div className="card text-sm text-gray-600">Aún no hay checklists.</div>
+        <div className="card text-sm text-muted-foreground">Aún no hay checklists.</div>
       ) : (
         <div className="space-y-2">
           {recepciones.map((r) => (
             <Link
               key={r.id}
               href={`/recepciones/${r.id}`}
-              className="card block hover:bg-gray-50"
+              className="card block hover:bg-muted/50"
             >
               <div className="flex justify-between gap-2">
                 <p className="text-sm font-medium">{r.receptor?.nombre ?? 'Receptor'}</p>
-                <span className="text-xs text-gray-500 capitalize">
+                <span className="text-xs text-muted-foreground capitalize">
                   {(r.estado ?? '').replaceAll('_', ' ')}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {new Date(r.recibido_en).toLocaleString('es-MX')}
               </p>
             </Link>

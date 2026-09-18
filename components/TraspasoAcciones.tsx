@@ -71,7 +71,7 @@ export function TraspasoAcciones({
   return (
     <div className="space-y-3">
       {errorMsg && (
-        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg text-sm" role="alert">
+        <div className="bg-danger-soft border border-danger/30 text-danger-soft-foreground p-3 rounded-lg text-sm" role="alert">
           {errorMsg}
         </div>
       )}
@@ -83,7 +83,7 @@ export function TraspasoAcciones({
               onClick={handleAprobar}
               disabled={isPending}
               aria-busy={isPending}
-              className="btn-primary text-sm px-4 py-2.5 inline-flex items-center gap-1.5"
+              className="btn-primary btn-sm"
             >
               <IconCheck className="h-4 w-4" />
               <span>{isPending ? 'Aprobando…' : 'Aprobar traspaso'}</span>
@@ -94,7 +94,7 @@ export function TraspasoAcciones({
             <button
               onClick={() => setMostrandoRechazo(true)}
               disabled={isPending}
-              className="btn-danger text-sm px-4 py-2.5"
+              className="btn-danger btn-sm"
             >
               Rechazar
             </button>
@@ -104,7 +104,7 @@ export function TraspasoAcciones({
             <button
               onClick={handleCancelar}
               disabled={isPending}
-              className="btn-secondary text-sm px-4 py-2.5"
+              className="btn-secondary btn-sm"
             >
               Cancelar
             </button>
@@ -119,7 +119,7 @@ export function TraspasoAcciones({
               onClick={handleConfirmarRecepcion}
               disabled={isPending}
               aria-busy={isPending}
-              className="btn-primary text-sm px-4 py-2.5 inline-flex items-center gap-1.5"
+              className="btn-primary btn-sm"
             >
               <IconPaquete className="h-4 w-4" />
               <span>{isPending ? 'Confirmando…' : 'Confirmar recepción (completar)'}</span>
@@ -130,7 +130,7 @@ export function TraspasoAcciones({
             <button
               onClick={() => setMostrandoRechazo(true)}
               disabled={isPending}
-              className="btn-danger text-sm px-4 py-2.5"
+              className="btn-danger btn-sm"
             >
               Rechazar traspaso
             </button>
@@ -139,8 +139,8 @@ export function TraspasoAcciones({
       )}
 
       {mostrandoRechazo && (
-        <div className="card border-red-200 bg-red-50/50 p-4 space-y-3">
-          <label className="block text-xs font-semibold text-red-800">
+        <div className="card border-danger/30 bg-danger-soft/50 p-4 space-y-3">
+          <label className="block text-xs font-semibold text-danger-soft-foreground">
             Motivo del rechazo
           </label>
           <input
@@ -154,13 +154,13 @@ export function TraspasoAcciones({
             <button
               onClick={handleRechazar}
               disabled={isPending}
-              className="btn-danger text-xs px-3 py-2"
+              className="btn-danger btn-xs"
             >
               {isPending ? 'Rechazando…' : 'Confirmar rechazo'}
             </button>
             <button
               onClick={() => setMostrandoRechazo(false)}
-              className="btn-secondary text-xs px-3 py-2"
+              className="btn-secondary btn-xs"
             >
               Cancelar
             </button>

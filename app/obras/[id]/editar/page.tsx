@@ -33,7 +33,7 @@ export default async function EditarObraPage({
   const updateAction = updateObraAction.bind(null, resolvedparams.id)
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Editar proyecto"
         description={obra.nombre}

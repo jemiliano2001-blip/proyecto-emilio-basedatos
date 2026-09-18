@@ -36,32 +36,28 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'card text-center py-12 px-4 border-dashed border-gray-300 flex flex-col items-center justify-center space-y-2',
+        'flex flex-col items-center justify-center rounded-xl border border-dashed border-input bg-card/60 px-4 py-12 text-center animate-fade-in',
         className
       )}
     >
       {icon && (
-        <div className="mb-1 rounded-full bg-gray-100 p-3 text-gray-400">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
           {renderIcon(icon, 'h-6 w-6')}
         </div>
       )}
-      <p className="font-semibold text-ink text-base">{title}</p>
+      <p className="text-base font-semibold text-foreground">{title}</p>
       {description && (
-        <p className="text-sm text-gray-500 max-w-md mx-auto">{description}</p>
+        <p className="mx-auto mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">{description}</p>
       )}
       {action && (
-        <div className="pt-3">
+        <div className="mt-6">
           {action.href ? (
-            <Link href={action.href} className="btn-primary text-sm px-4 py-2 inline-flex items-center gap-1.5">
+            <Link href={action.href} className="btn-primary btn-sm">
               {renderIcon(action.icon, 'h-4 w-4')}
               <span>{action.label}</span>
             </Link>
           ) : (
-            <button
-              type="button"
-              onClick={action.onClick}
-              className="btn-primary text-sm px-4 py-2 inline-flex items-center gap-1.5"
-            >
+            <button type="button" onClick={action.onClick} className="btn-primary btn-sm">
               {renderIcon(action.icon, 'h-4 w-4')}
               <span>{action.label}</span>
             </button>

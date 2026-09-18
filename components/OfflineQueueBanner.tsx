@@ -53,11 +53,11 @@ export function OfflineQueueBanner() {
   if (total === 0) return null
 
   return (
-    <div className="card mb-4 border border-amber-200 bg-amber-50">
-      <p className="font-semibold text-sm text-amber-900 mb-2">
+    <div className="card mb-4 border border-warning/30 bg-warning-soft">
+      <p className="font-semibold text-sm text-warning-soft-foreground mb-2">
         Pendientes en este teléfono ({total})
       </p>
-      <ul className="space-y-1 text-xs text-amber-900 mb-3">
+      <ul className="space-y-1 text-xs text-warning-soft-foreground mb-3">
         {ownedRecepciones.map((r) => (
           <li key={r.id}>
             Recepción {(r.id ?? '').slice(0, 8)}… — {labelStatus(r.status)}
@@ -86,10 +86,10 @@ export function OfflineQueueBanner() {
         ))}
       </ul>
       {editing && editing.usuario_id === userId && <OfflineRecordEditor key={editing.id} record={editing} onCancel={() => setEditing(null)} onSaved={async () => { setEditing(null); await refresh(); setMsg('Corrección guardada. Pulsa Reintentar envío para enviarla.') }} />}
-      {msg && <p className="text-xs text-amber-800 mb-2">{msg}</p>}
+      {msg && <p className="text-xs text-warning-soft-foreground mb-2">{msg}</p>}
       <button
         type="button"
-        className="w-full rounded-lg bg-amber-700 text-white font-semibold py-2 text-sm"
+        className="w-full rounded-lg bg-warning text-primary-foreground font-semibold py-2 text-sm"
         disabled={busy || Boolean(editing)}
         aria-busy={busy}
         onClick={() => {

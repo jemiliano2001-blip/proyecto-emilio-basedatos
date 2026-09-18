@@ -128,10 +128,10 @@ export function ExportarConciliacionButton({
       type="button"
       onClick={handleExport}
       disabled={exportando}
-      className="btn-secondary text-sm px-3.5 py-2 inline-flex items-center gap-1.5 hover:bg-gray-50"
+      className="btn-secondary text-sm px-3.5 py-2 hover:bg-muted/50"
       title="Descargar reporte en formato Excel (.csv compatible con BOM)"
     >
-      <IconDescargar className="h-4 w-4 text-accent" />
+      <IconDescargar className="h-4 w-4 text-primary" />
       <span>{exportando ? 'Generando…' : 'Exportar Excel'}</span>
     </button>
   )

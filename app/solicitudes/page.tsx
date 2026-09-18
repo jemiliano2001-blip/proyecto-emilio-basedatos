@@ -100,7 +100,7 @@ export default async function SolicitudesPage({
         action={
           puedeCrear
             ? {
-                label: 'Nueva',
+                label: 'Nueva requisición',
                 href: '/solicitudes/nueva',
                 icon: <IconPlus className="w-4 h-4" />,
               }
@@ -121,18 +121,19 @@ export default async function SolicitudesPage({
         compact
       />
       {error && (
-        <div className="card mb-4 border-red-300 bg-red-50 text-red-700">
+        <div className="card mb-4 border-danger/40 bg-danger-soft text-danger-soft-foreground">
           No se pudieron cargar las solicitudes. Revisa tu conexión.
         </div>
       )}
 
       {(esCompras || esFinanzas) && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Colas</span>
           {esCompras && (
             <Link
               href="/solicitudes?estatus=recibida"
               className={
-                filters.estatus === 'recibida' ? 'btn-primary text-sm' : 'btn-secondary text-sm'
+                filters.estatus === 'recibida' ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'
               }
             >
               Pendientes de Compras
@@ -142,7 +143,7 @@ export default async function SolicitudesPage({
             <Link
               href="/solicitudes?estatus=en_proceso"
               className={
-                filters.estatus === 'en_proceso' ? 'btn-primary text-sm' : 'btn-secondary text-sm'
+                filters.estatus === 'en_proceso' ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'
               }
             >
               Pendientes de Finanzas

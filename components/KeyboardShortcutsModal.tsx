@@ -17,6 +17,11 @@ const SHORTCUTS: ShortcutRow[] = [
     category: 'Navegación y Búsqueda',
   },
   {
+    keyLabel: 'Ctrl + B  /  ⌘ + B',
+    description: 'Contraer o expandir el menú lateral (escritorio)',
+    category: 'Navegación y Búsqueda',
+  },
+  {
     keyLabel: '?',
     description: 'Mostrar u ocultar esta guía de atajos',
     category: 'General',
@@ -78,7 +83,7 @@ export function KeyboardShortcutsModal() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="shortcuts-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-sm transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm transition-opacity print:hidden"
       onClick={() => setOpen(false)}
     >
       <div

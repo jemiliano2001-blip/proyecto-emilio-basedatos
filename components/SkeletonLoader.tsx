@@ -32,7 +32,7 @@ export function SkeletonMaterialCard() {
           <Skeleton className="h-3 w-1/2" />
         </div>
       </div>
-      <div className="grid grid-cols-5 gap-2 pt-2 border-t border-gray-100">
+      <div className="grid grid-cols-5 gap-2 pt-2 border-t border-border">
         <Skeleton className="h-10 rounded" />
         <Skeleton className="h-10 rounded" />
         <Skeleton className="h-10 rounded" />

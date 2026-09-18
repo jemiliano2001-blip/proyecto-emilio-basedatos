@@ -37,7 +37,7 @@ export default async function UsuariosPage() {
       />
 
       {error && (
-        <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
+        <div className="card border-danger/40 bg-danger-soft text-danger-soft-foreground mb-4">
           No se pudieron cargar los usuarios.
           {error.message.includes('email') || error.code === '42703'
             ? ' ¿Ya aplicaste la migración 0024?'
@@ -45,16 +45,16 @@ export default async function UsuariosPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+      <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
         {lista.map((u) => (
           <Link
             key={u.id}
             href={`/usuarios/${u.id}`}
-            className="flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-slate-50 transition-colors"
+            className="flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-muted/50 transition-colors"
           >
             <div className="min-w-0">
-              <p className="font-semibold text-ink">{u.nombre}</p>
-              <p className="text-xs text-gray-500 mt-0.5 truncate">
+              <p className="font-semibold text-foreground">{u.nombre}</p>
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">
                 {[u.email, etiquetaRol(u.rol)].filter(Boolean).join(' · ')}
               </p>
             </div>

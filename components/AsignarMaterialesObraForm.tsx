@@ -326,13 +326,13 @@ export function AsignarMaterialesObraForm({
       <input type="hidden" name="partidas_json" value={partidasJson} />
       <FormError message={state.error} />
 
-      <div className="card space-y-5 border-teal-200">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
+      <div className="card space-y-5 border-primary/30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
           <div>
-            <h2 className="text-base font-bold text-ink">
+            <h2 className="text-base font-bold text-foreground">
               Asignar Materiales a: {obraNombre}
             </h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Agrega ensambles/kits completos o partidas individuales. Los componentes son editables individualmente.
             </p>
           </div>
@@ -342,16 +342,16 @@ export function AsignarMaterialesObraForm({
               <button
                 type="button"
                 onClick={() => abrirModalKitPara()}
-                className="btn-secondary text-sm px-3 py-2 min-h-[44px] text-teal-800 border-teal-300 hover:bg-teal-50 flex items-center gap-1.5"
+                className="btn-secondary btn-sm min-h-[44px] text-primary-soft-foreground border-primary/40 hover:bg-primary-soft"
               >
-                <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+                <IconRayo className="w-3.5 h-3.5 text-warning" />
                 <span>Cargar Kit / Ensamble</span>
               </button>
             )}
             <button
               type="button"
               onClick={agregarMaterialIndividual}
-              className="btn-primary text-sm px-3 py-2 min-h-[44px] flex items-center gap-1.5"
+              className="btn-primary btn-sm min-h-[44px]"
               disabled={materiales.length === 0}
             >
               <IconPlus className="w-3.5 h-3.5" />
@@ -361,17 +361,17 @@ export function AsignarMaterialesObraForm({
         </div>
 
         {/* BANNER DE TOTAL CALCULADO */}
-        <div className="rounded-xl bg-slate-900 text-white p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+        <div className="rounded-xl bg-foreground text-background p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
           <div>
-            <p className="text-xs uppercase tracking-wider text-slate-300 font-medium">
+            <p className="text-xs uppercase tracking-wider text-background/60 font-medium">
               Costo Adicional a Sumar al Presupuesto
             </p>
-            <p className="text-2xl font-bold tabular-nums text-teal-300">
+            <p className="text-2xl font-bold tabular-nums text-background">
               +{formatMoneyMx(totalCostoAdicional)}
             </p>
           </div>
-          <div className="text-right text-xs text-slate-300">
-            <span className="font-semibold text-white">
+          <div className="text-right text-xs text-background/60">
+            <span className="font-semibold text-background">
               {materialesConsolidados.length}
             </span>{' '}
             {materialesConsolidados.length === 1 ? 'material único' : 'materiales únicos'}{' '}
@@ -381,38 +381,38 @@ export function AsignarMaterialesObraForm({
 
         {/* MODAL DE CARGA DE KIT / ENSAMBLE */}
         {mostrarModalKit && (
-          <div className="p-4 rounded-xl bg-teal-50/80 border border-teal-200 space-y-3 animate-fade-in shadow-sm">
+          <div className="p-4 rounded-xl bg-primary-soft/80 border border-primary/30 space-y-3 animate-fade-in shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-1 rounded bg-teal-600 text-white">
+                <span className="p-1 rounded bg-primary text-primary-foreground">
                   <IconRayo className="w-4 h-4" />
                 </span>
-                <h3 className="text-sm font-bold text-teal-900">
+                <h3 className="text-sm font-bold text-primary-soft-foreground">
                   Seleccionar Kit / Ensamble Compuesto
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setMostrarModalKit(false)}
-                className="text-gray-400 hover:text-gray-700 p-1"
+                className="text-muted-foreground hover:text-foreground p-1"
                 aria-label="Cerrar modal"
               >
                 <IconCerrar className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-teal-700">
+            <p className="text-xs text-primary">
               Al cargar el kit se creará un grupo jerárquico donde podrás modificar las cantidades de cada accesorio o quitar los que no utilices.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Plantilla de Ensamble
                 </label>
                 <select
                   value={selectedKitId}
                   onChange={(e) => setSelectedKitId(e.target.value)}
-                  className="input-base text-sm bg-white"
+                  className="input-base text-sm bg-card"
                 >
                   <option value="">-- Elige un kit o ensamble --</option>
                   {kits.map((k) => (
@@ -424,7 +424,7 @@ export function AsignarMaterialesObraForm({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Cantidad de Kits
                 </label>
                 <input
@@ -433,19 +433,19 @@ export function AsignarMaterialesObraForm({
                   step="1"
                   value={kitMultiplicador}
                   onChange={(e) => setKitMultiplicador(e.target.value)}
-                  className="input-base text-sm bg-white text-center font-medium"
+                  className="input-base text-sm bg-card text-center font-medium"
                   placeholder="1"
                 />
               </div>
             </div>
 
             {selectedKitObj && selectedKitObj.material_principal_id && (
-              <label className="flex items-center gap-2 text-xs text-teal-900 font-medium cursor-pointer pt-1">
+              <label className="flex items-center gap-2 text-xs text-primary-soft-foreground font-medium cursor-pointer pt-1">
                 <input
                   type="checkbox"
                   checked={incluirEquipoPrincipal}
                   onChange={(e) => setIncluirEquipoPrincipal(e.target.checked)}
-                  className="rounded border-teal-300 text-teal-700 focus:ring-teal-600"
+                  className="rounded border-primary/40 text-primary focus:ring-ring"
                 />
                 <span>
                   Incluir equipo principal ({selectedKitObj.nombre}) en las partidas contratadas
@@ -454,15 +454,15 @@ export function AsignarMaterialesObraForm({
             )}
 
             {selectedKitObj && selectedKitObj.items && selectedKitObj.items.length > 0 && (
-              <div className="bg-white rounded-lg p-3 border border-teal-100 space-y-2">
-                <p className="text-xs font-semibold text-gray-600">
+              <div className="bg-card rounded-lg p-3 border border-primary/20 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground">
                   Componentes incluidos ({selectedKitObj.items.length}):
                 </p>
                 <div className="max-h-36 overflow-y-auto space-y-1 pr-1 text-xs">
                   {selectedKitObj.items.map((it) => (
                     <div
                       key={it.id}
-                      className="flex items-center justify-between text-gray-700 py-1 border-b border-gray-50 last:border-none"
+                      className="flex items-center justify-between text-foreground py-1 border-b border-border last:border-none"
                     >
                       <span>
                         {it.nombre_base ?? it.material?.nombre_base}
@@ -470,7 +470,7 @@ export function AsignarMaterialesObraForm({
                           ? ` · ${it.variante ?? it.material?.variante}`
                           : ''}
                       </span>
-                      <span className="font-semibold tabular-nums text-teal-800">
+                      <span className="font-semibold tabular-nums text-primary-soft-foreground">
                         {(it.cantidad * (parseQuantity(kitMultiplicador) ?? 1)).toFixed(2)}{' '}
                         {it.unidad_medida ?? it.material?.unidad_medida}
                       </span>
@@ -484,7 +484,7 @@ export function AsignarMaterialesObraForm({
               <button
                 type="button"
                 onClick={() => setMostrarModalKit(false)}
-                className="btn-secondary text-sm px-3 py-2 min-h-[44px]"
+                className="btn-secondary btn-sm min-h-[44px]"
               >
                 Cancelar
               </button>
@@ -492,7 +492,7 @@ export function AsignarMaterialesObraForm({
                 type="button"
                 onClick={handleInsertarKit}
                 disabled={!selectedKitId}
-                className="btn-primary text-sm px-4 py-2 min-h-[44px] bg-teal-800"
+                className="btn-primary btn-sm min-h-[44px] bg-primary-hover"
               >
                 Cargar Kit al Proyecto
               </button>
@@ -503,12 +503,12 @@ export function AsignarMaterialesObraForm({
         {/* 1. SECCIÓN DE KITS / ENSAMBLES ASIGNADOS (JERÁRQUICOS Y COLAPSIBLES) */}
         {kitsAsignados.length > 0 && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-gray-200 pb-1">
-              <h3 className="text-xs font-bold text-teal-900 uppercase tracking-wider flex items-center gap-1.5">
-                <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+            <div className="flex items-center justify-between border-b border-border pb-1">
+              <h3 className="text-xs font-bold text-primary-soft-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <IconRayo className="w-3.5 h-3.5 text-warning" />
                 <span>Kits y Ensambles ({kitsAsignados.length})</span>
               </h3>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-muted-foreground">
                 Componentes editables por ensamble
               </span>
             </div>
@@ -523,31 +523,31 @@ export function AsignarMaterialesObraForm({
                 return (
                   <div
                     key={kit.instanceId}
-                    className="border-2 border-teal-600/30 bg-teal-50/15 rounded-xl overflow-hidden shadow-sm transition-all"
+                    className="border-2 border-primary/30 bg-primary-soft/15 rounded-xl overflow-hidden shadow-sm transition-all"
                   >
                     {/* Header del Kit Asignado */}
-                    <div className="bg-slate-50 border-b border-gray-200 p-3 flex items-center justify-between gap-3">
+                    <div className="bg-muted/50 border-b border-border p-3 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <button
                           type="button"
                           onClick={() => toggleExpandKit(kit.instanceId)}
-                          className="p-1 rounded text-gray-500 hover:text-navy hover:bg-gray-200 transition-colors"
+                          className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-border transition-colors"
                           title={kit.isExpanded ? 'Colapsar componentes' : 'Expandir componentes'}
                         >
                           <IconChevron
                             className={`w-4 h-4 transition-transform duration-200 ${
-                              kit.isExpanded ? 'rotate-90 text-teal-800' : ''
+                              kit.isExpanded ? 'rotate-90 text-primary-soft-foreground' : ''
                             }`}
                           />
                         </button>
 
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-sm text-navy">
+                            <span className="font-bold text-sm text-foreground">
                               {kit.nombre}
                             </span>
                             {kit.configuracion && (
-                              <span className="text-xs font-normal text-gray-500">
+                              <span className="text-xs font-normal text-muted-foreground">
                                 ({kit.configuracion})
                               </span>
                             )}
@@ -555,9 +555,9 @@ export function AsignarMaterialesObraForm({
                               x{kit.multiplicador} {kit.multiplicador === 1 ? 'kit' : 'kits'}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             {kit.componentes.length} componentes · Costo ensamble:{' '}
-                            <strong className="text-gray-800">
+                            <strong className="text-foreground">
                               {formatMoneyMx(subtotalKit)}
                             </strong>
                           </p>
@@ -568,7 +568,7 @@ export function AsignarMaterialesObraForm({
                       <button
                         type="button"
                         onClick={() => eliminarKitCompleto(kit.instanceId)}
-                        className="text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2.5 py-1.5 rounded border border-red-200 transition-colors inline-flex items-center gap-1 shrink-0 font-medium"
+                        className="text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-2.5 py-1.5 rounded border border-danger/30 transition-colors inline-flex items-center gap-1 shrink-0 font-medium"
                         title="Eliminar este kit completo y todos sus componentes"
                       >
                         <IconBasura className="w-3.5 h-3.5" />
@@ -578,8 +578,8 @@ export function AsignarMaterialesObraForm({
 
                     {/* Lista Expandible de Componentes del Kit */}
                     {kit.isExpanded && (
-                      <div className="p-3 space-y-2 bg-white animate-fade-in">
-                        <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider px-2 grid grid-cols-12 gap-2">
+                      <div className="p-3 space-y-2 bg-card animate-fade-in">
+                        <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 grid grid-cols-12 gap-2">
                           <span className="col-span-6 sm:col-span-6">Componente</span>
                           <span className="col-span-3 sm:col-span-2 text-center">Cantidad</span>
                           <span className="hidden sm:block sm:col-span-2 text-right">Precio unit.</span>
@@ -593,13 +593,13 @@ export function AsignarMaterialesObraForm({
                           return (
                             <div
                               key={comp.id}
-                              className="p-2 rounded-lg border border-gray-100 hover:border-gray-200 bg-slate-50/50 grid grid-cols-12 gap-2 items-center text-xs"
+                              className="p-2 rounded-lg border border-border hover:border-border bg-muted/50 grid grid-cols-12 gap-2 items-center text-xs"
                             >
                               <div className="col-span-6 sm:col-span-6 min-w-0">
-                                <p className="font-semibold text-gray-900 truncate">
+                                <p className="font-semibold text-foreground truncate">
                                   {comp.nombre_base}
                                 </p>
-                                <div className="text-[11px] text-gray-500 truncate">
+                                <div className="text-[11px] text-muted-foreground truncate">
                                   {comp.variante && <span>{comp.variante} · </span>}
                                   <span>{comp.unidad_medida}</span>
                                 </div>
@@ -617,17 +617,17 @@ export function AsignarMaterialesObraForm({
                                       e.target.value
                                     )
                                   }
-                                  className="input-base text-xs text-center font-semibold py-1 bg-white"
+                                  className="input-base text-xs text-center font-semibold py-1 bg-card"
                                   title="Editar cantidad para este kit"
                                 />
                               </div>
 
-                              <div className="hidden sm:block sm:col-span-2 text-right text-gray-600 tabular-nums">
+                              <div className="hidden sm:block sm:col-span-2 text-right text-muted-foreground tabular-nums">
                                 {formatMoneyMx(comp.precioUnitario)}
                               </div>
 
                               <div className="col-span-3 sm:col-span-2 flex items-center justify-end gap-1.5">
-                                <span className="font-bold text-gray-900 tabular-nums">
+                                <span className="font-bold text-foreground tabular-nums">
                                   {formatMoneyMx(subtotalComp)}
                                 </span>
                                 <button
@@ -635,7 +635,7 @@ export function AsignarMaterialesObraForm({
                                   onClick={() =>
                                     eliminarComponenteDeKit(kit.instanceId, comp.id)
                                   }
-                                  className="text-gray-400 hover:text-red-600 p-0.5 rounded"
+                                  className="text-muted-foreground hover:text-danger p-0.5 rounded"
                                   title="Quitar este componente del kit"
                                 >
                                   <IconCerrar className="w-3.5 h-3.5" />
@@ -646,7 +646,7 @@ export function AsignarMaterialesObraForm({
                         })}
 
                         {kit.componentes.length === 0 && (
-                          <p className="text-center text-xs text-gray-400 py-3">
+                          <p className="text-center text-xs text-muted-foreground py-3">
                             Este kit no tiene componentes asignados.
                           </p>
                         )}
@@ -661,15 +661,15 @@ export function AsignarMaterialesObraForm({
 
         {/* 2. SECCIÓN DE MATERIALES INDIVIDUALES */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-1">
-            <h3 className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
-              <IconPaquete className="w-3.5 h-3.5 text-gray-500" />
+          <div className="flex items-center justify-between border-b border-border pb-1">
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <IconPaquete className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Partidas Individuales ({partidasSueltas.length})</span>
             </h3>
             <button
               type="button"
               onClick={agregarMaterialIndividual}
-              className="text-xs text-teal-800 hover:underline font-semibold inline-flex items-center gap-1"
+              className="text-xs text-primary-soft-foreground hover:underline font-semibold inline-flex items-center gap-1"
             >
               <IconPlus className="w-3 h-3" />
               <span>Añadir partida suelta</span>
@@ -686,16 +686,16 @@ export function AsignarMaterialesObraForm({
               return (
                 <div
                   key={item.key}
-                  className="card border-gray-200 bg-white p-3 space-y-2 hover:border-gray-300 transition-colors"
+                  className="card border-border bg-card p-3 space-y-2 hover:border-input transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-gray-400">
+                    <span className="text-xs font-bold text-muted-foreground">
                       Partida #{index + 1}
                     </span>
                     <button
                       type="button"
                       onClick={() => quitarPartidaSuela(item.key)}
-                      className="text-xs text-red-600 font-semibold hover:text-red-800 py-0.5 inline-flex items-center gap-1"
+                      className="text-xs text-danger font-semibold hover:text-danger-soft-foreground py-0.5 inline-flex items-center gap-1"
                     >
                       <IconBasura className="w-3.5 h-3.5" />
                       <span>Quitar</span>
@@ -739,14 +739,14 @@ export function AsignarMaterialesObraForm({
                       />
                     </div>
 
-                    <div className="sm:col-span-2 text-right sm:text-left text-xs text-gray-600 tabular-nums">
+                    <div className="sm:col-span-2 text-right sm:text-left text-xs text-muted-foreground tabular-nums">
                       {formatMoneyMx(precioUnit)}
-                      <span className="text-[11px] text-gray-400 ml-1">
+                      <span className="text-[11px] text-muted-foreground ml-1">
                         /{mat?.unidad_medida ?? 'u'}
                       </span>
                     </div>
 
-                    <div className="sm:col-span-2 text-right text-sm font-bold text-ink tabular-nums">
+                    <div className="sm:col-span-2 text-right text-sm font-bold text-foreground tabular-nums">
                       {formatMoneyMx(subtotal)}
                     </div>
                   </div>
@@ -758,9 +758,9 @@ export function AsignarMaterialesObraForm({
                       : []
                     if (kitsRel.length === 0) return null
                     return (
-                      <div className="mt-1 pt-1.5 border-t border-teal-100 flex flex-wrap items-center gap-2 text-xs bg-teal-50/60 p-2 rounded">
-                        <span className="text-teal-900 font-medium inline-flex items-center gap-1">
-                          <IconRayo className="w-3.5 h-3.5 text-amber-500" />
+                      <div className="mt-1 pt-1.5 border-t border-primary/20 flex flex-wrap items-center gap-2 text-xs bg-primary-soft/60 p-2 rounded">
+                        <span className="text-primary-soft-foreground font-medium inline-flex items-center gap-1">
+                          <IconRayo className="w-3.5 h-3.5 text-warning" />
                           <span>Ensambles recomendados para este equipo:</span>
                         </span>
                         {kitsRel.map((k) => (
@@ -768,7 +768,7 @@ export function AsignarMaterialesObraForm({
                             key={k.id}
                             type="button"
                             onClick={() => abrirModalKitPara(k.id)}
-                            className="px-2 py-0.5 rounded bg-white border border-teal-300 text-teal-800 font-semibold hover:bg-teal-100 shadow-sm"
+                            className="px-2 py-0.5 rounded bg-card border border-primary/40 text-primary-soft-foreground font-semibold hover:bg-primary-soft shadow-sm"
                           >
                             + {k.configuracion || k.nombre}
                           </button>
@@ -781,14 +781,14 @@ export function AsignarMaterialesObraForm({
             })}
 
             {partidasSueltas.length === 0 && kitsAsignados.length === 0 && (
-              <div className="text-center py-6 border border-dashed border-gray-300 rounded-xl space-y-2">
-                <p className="text-xs font-medium text-gray-500">
+              <div className="text-center py-6 border border-dashed border-input rounded-xl space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">
                   No hay partidas individuales ni kits seleccionados.
                 </p>
                 <button
                   type="button"
                   onClick={agregarMaterialIndividual}
-                  className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1 mx-auto"
+                  className="btn-secondary btn-xs mx-auto"
                 >
                   <IconPlus className="w-3.5 h-3.5" />
                   <span>Agregar primera partida</span>
@@ -800,57 +800,57 @@ export function AsignarMaterialesObraForm({
 
         {/* 3. RESUMEN CONSOLIDADO DE CANTIDADES TOTALES */}
         {materialesConsolidados.length > 0 && (
-          <div className="mt-6 pt-4 border-t-2 border-dashed border-gray-200 space-y-3">
+          <div className="mt-6 pt-4 border-t-2 border-dashed border-border space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-ink flex items-center gap-1.5">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
                   <span>Resumen Consolidado de Asignación</span>
                   <span className="badge-teal text-xs">
                     {materialesConsolidados.length} partidas finales
                   </span>
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Cantidades totales que se registrarán en el presupuesto contratado del proyecto.
                 </p>
               </div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
-              <div className="max-h-60 overflow-y-auto divide-y divide-gray-200">
+            <div className="bg-muted/50 border border-border rounded-xl overflow-hidden">
+              <div className="max-h-60 overflow-y-auto divide-y divide-border">
                 {materialesConsolidados.map((item) => (
                   <div
                     key={item.material_id}
-                    className="p-2.5 sm:px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:bg-white transition-colors"
+                    className="p-2.5 sm:px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:bg-card transition-colors"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-foreground">
                           {item.nombre_base}
                         </span>
                         {item.variante && (
-                          <span className="text-gray-500">· {item.variante}</span>
+                          <span className="text-muted-foreground">· {item.variante}</span>
                         )}
                       </div>
-                      <p className="text-[11px] text-gray-400 mt-0.5 truncate">
+                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                         Origen: {item.origenes.join(' + ')}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
                       <div className="text-right">
-                        <span className="text-[11px] text-gray-400 block sm:hidden">
+                        <span className="text-[11px] text-muted-foreground block sm:hidden">
                           Cantidad:
                         </span>
-                        <span className="font-bold text-teal-800 text-sm tabular-nums">
+                        <span className="font-bold text-primary-soft-foreground text-sm tabular-nums">
                           {item.cantidadTotal} {item.unidad_medida}
                         </span>
                       </div>
 
                       <div className="text-right sm:w-28">
-                        <span className="text-[11px] text-gray-400 block sm:hidden">
+                        <span className="text-[11px] text-muted-foreground block sm:hidden">
                           Costo:
                         </span>
-                        <span className="font-semibold text-gray-800 tabular-nums">
+                        <span className="font-semibold text-foreground tabular-nums">
                           {formatMoneyMx(item.subtotal)}
                         </span>
                       </div>
@@ -859,9 +859,9 @@ export function AsignarMaterialesObraForm({
                 ))}
               </div>
 
-              <div className="bg-slate-100 p-3 flex items-center justify-between border-t border-slate-200 font-semibold text-xs text-slate-800">
+              <div className="bg-muted p-3 flex items-center justify-between border-t border-border font-semibold text-xs text-foreground">
                 <span>Total consolidado a incorporar</span>
-                <span className="text-sm font-bold text-teal-900 tabular-nums">
+                <span className="text-sm font-bold text-primary-soft-foreground tabular-nums">
                   {formatMoneyMx(totalCostoAdicional)}
                 </span>
               </div>

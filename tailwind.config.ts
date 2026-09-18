@@ -1,60 +1,128 @@
 import type { Config } from 'tailwindcss'
+import defaultTheme from 'tailwindcss/defaultTheme'
+
+/**
+ * Tokens semánticos. Los valores viven en `app/globals.css` (:root) como HSL
+ * sin `hsl()` para que Tailwind pueda aplicar opacidad (`bg-primary/10`).
+ * Cambiar de paleta o activar dark mode = tocar solo globals.css.
+ */
+const token = (name: string) => `hsl(var(--${name}) / <alpha-value>)`
 
 const config: Config = {
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     './app/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', ...defaultTheme.fontFamily.sans],
+      },
       colors: {
-        // Colores de marca Proyecto Emilio (locked en design.md y AGENTS.md)
-        navy: '#132A45',
-        teal: '#1E7F7A',
-        ink: '#132A45',
-        accent: {
-          DEFAULT: '#1E7F7A',
-          foreground: '#FFFFFF',
-        },
-        paper: '#F9FAFB',
-        danger: '#DC2626',
-        warn: '#D97706',
-
-        // Mapeo semántico para compatibilidad con el ecosistema shadcn/ui
-        border: '#E5E7EB',
-        input: '#D1D5DB',
-        ring: '#1E7F7A',
-        background: '#F9FAFB',
-        foreground: '#111827',
-        primary: {
-          DEFAULT: '#132A45',
-          foreground: '#FFFFFF',
-        },
-        secondary: {
-          DEFAULT: '#F3F4F6',
-          foreground: '#132A45',
-        },
-        destructive: {
-          DEFAULT: '#DC2626',
-          foreground: '#FFFFFF',
-        },
-        muted: {
-          DEFAULT: '#F3F4F6',
-          foreground: '#6B7280',
-        },
+        background: token('background'),
+        foreground: token('foreground'),
         card: {
-          DEFAULT: '#FFFFFF',
-          foreground: '#111827',
+          DEFAULT: token('card'),
+          foreground: token('card-foreground'),
         },
         popover: {
-          DEFAULT: '#FFFFFF',
-          foreground: '#111827',
+          DEFAULT: token('popover'),
+          foreground: token('popover-foreground'),
         },
+        muted: {
+          DEFAULT: token('muted'),
+          foreground: token('muted-foreground'),
+        },
+        border: token('border'),
+        input: token('input'),
+        ring: token('ring'),
+
+        primary: {
+          DEFAULT: token('primary'),
+          foreground: token('primary-foreground'),
+          hover: token('primary-hover'),
+          soft: token('primary-soft'),
+          'soft-foreground': token('primary-soft-foreground'),
+        },
+        secondary: {
+          DEFAULT: token('secondary'),
+          foreground: token('secondary-foreground'),
+        },
+
+        // Estatus: sólido (fill) + suave (tinte con texto oscuro del mismo tono)
+        success: {
+          DEFAULT: token('success'),
+          foreground: token('success-foreground'),
+          soft: token('success-soft'),
+          'soft-foreground': token('success-soft-foreground'),
+        },
+        warning: {
+          DEFAULT: token('warning'),
+          foreground: token('warning-foreground'),
+          soft: token('warning-soft'),
+          'soft-foreground': token('warning-soft-foreground'),
+        },
+        danger: {
+          DEFAULT: token('danger'),
+          foreground: token('danger-foreground'),
+          soft: token('danger-soft'),
+          'soft-foreground': token('danger-soft-foreground'),
+        },
+        destructive: {
+          DEFAULT: token('danger'),
+          foreground: token('danger-foreground'),
+        },
+        info: {
+          DEFAULT: token('info'),
+          foreground: token('info-foreground'),
+          soft: token('info-soft'),
+          'soft-foreground': token('info-soft-foreground'),
+        },
+
+        // Sidebar (desktop ≥ lg)
+        sidebar: {
+          DEFAULT: token('sidebar'),
+          foreground: token('sidebar-foreground'),
+          muted: token('sidebar-muted'),
+          border: token('sidebar-border'),
+          accent: token('sidebar-accent'),
+          'accent-foreground': token('sidebar-accent-foreground'),
+        },
+
+        // Alias legacy — mapean al token nuevo para no romper nada mientras se
+        // barre el código. No usar en código nuevo.
+        ink: token('foreground'),
+        navy: token('foreground'),
+        teal: token('primary'),
+        accent: {
+          DEFAULT: token('primary'),
+          foreground: token('primary-foreground'),
+        },
+        paper: token('background'),
+        warn: token('warning'),
       },
       borderRadius: {
-        lg: '0.75rem',
-        md: '0.5rem',
-        sm: '0.375rem',
+        xl: 'calc(var(--radius) + 4px)',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      boxShadow: {
+        xs: '0 1px 2px 0 rgb(15 23 42 / 0.04)',
+        sm: '0 1px 2px 0 rgb(15 23 42 / 0.05), 0 1px 3px 0 rgb(15 23 42 / 0.04)',
+        md: '0 2px 4px -1px rgb(15 23 42 / 0.05), 0 4px 12px -2px rgb(15 23 42 / 0.08)',
+        lg: '0 8px 24px -4px rgb(15 23 42 / 0.10), 0 2px 6px -1px rgb(15 23 42 / 0.06)',
+        popover: '0 8px 24px rgb(15 23 42 / 0.12), 0 2px 6px rgb(15 23 42 / 0.08)',
+      },
+      spacing: {
+        sidebar: 'var(--sidebar-width)',
+        'sidebar-collapsed': 'var(--sidebar-width-collapsed)',
+        topbar: 'var(--topbar-height)',
+        bottomnav: 'var(--nav-height)',
+      },
+      transitionTimingFunction: {
+        out: 'var(--ease-out)',
       },
       keyframes: {
         'fade-in': {
@@ -66,7 +134,7 @@ const config: Config = {
           to: { opacity: '0' },
         },
         'scale-in': {
-          from: { opacity: '0', transform: 'scale(0.95)' },
+          from: { opacity: '0', transform: 'scale(0.96)' },
           to: { opacity: '1', transform: 'scale(1)' },
         },
         'slide-in-right': {

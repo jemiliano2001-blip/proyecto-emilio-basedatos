@@ -9,7 +9,7 @@ export function FormError({ message }: { message: string | null | undefined }) {
   }, [message])
   if (!message) return null
   return (
-    <div ref={errorRef} tabIndex={-1} className="card border-red-300 bg-red-50 text-red-700 mb-4 focus:outline-none focus:ring-2 focus:ring-danger" role="alert" aria-live="assertive">
+    <div ref={errorRef} tabIndex={-1} className="card border-danger/40 bg-danger-soft text-danger-soft-foreground mb-4 focus:outline-none focus:ring-2 focus:ring-danger" role="alert" aria-live="assertive">
       {message}
     </div>
   )

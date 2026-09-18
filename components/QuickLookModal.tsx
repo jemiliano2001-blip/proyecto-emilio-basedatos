@@ -107,7 +107,7 @@ export function QuickLookModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="quicklook-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-foreground/80 backdrop-blur-md transition-opacity print:hidden"
       onClick={onClose}
     >
       <div
@@ -122,9 +122,9 @@ export function QuickLookModal({
             <span
               className={`px-2 py-0.5 text-xs font-bold rounded ${
                 esPdf
-                  ? 'bg-red-100 text-red-700'
+                  ? 'bg-danger-soft text-danger-soft-foreground'
                   : esImagen
-                  ? 'bg-teal-100 text-teal-800'
+                  ? 'bg-primary-soft text-primary-soft-foreground'
                   : 'bg-muted text-muted-foreground'
               }`}
             >
@@ -176,7 +176,7 @@ export function QuickLookModal({
                 <button
                   type="button"
                   onClick={() => setZoomNivel(1)}
-                  className="ml-1 min-h-[44px] px-2 text-xs font-semibold text-accent hover:underline"
+                  className="ml-1 min-h-[44px] px-2 text-xs font-semibold text-primary hover:underline"
                 >
                   Reiniciar
                 </button>
@@ -189,7 +189,7 @@ export function QuickLookModal({
               download={itemActual.nombre}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary px-3 py-2 text-sm font-semibold inline-flex items-center gap-1 min-h-[44px]"
+              className="btn-secondary btn-sm font-semibold min-h-[44px]"
               title="Descargar o abrir en pestaña externa"
             >
               <span>Descargar</span>
@@ -251,7 +251,7 @@ export function QuickLookModal({
               <a
                 href={itemActual.url}
                 download={itemActual.nombre}
-                className="btn-primary inline-flex items-center gap-1 text-xs"
+                className="btn-primary text-xs"
               >
                 Descargar archivo
               </a>

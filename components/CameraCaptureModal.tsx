@@ -231,12 +231,12 @@ export function CameraCaptureModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-2 sm:p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-navy rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[96vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/90 p-2 sm:p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-primary rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[96vh]">
         {/* Barra superior de cámara */}
-        <div className="flex items-center justify-between px-4 py-3 bg-navy-dark text-white border-b border-white/10 z-10">
+        <div className="flex items-center justify-between px-4 py-3 bg-foreground text-primary-foreground border-b border-primary-foreground/10 z-10">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
             <h3 className="text-sm font-semibold tracking-wide">{title}</h3>
           </div>
 
@@ -247,8 +247,8 @@ export function CameraCaptureModal({
                 onClick={toggleTorch}
                 className={`p-2 rounded-lg text-xs font-semibold border transition-colors ${
                   isTorchOn
-                    ? 'bg-amber-400 text-slate-900 border-amber-300'
-                    : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                    ? 'bg-warning text-foreground border-warning/40'
+                    : 'bg-primary-foreground/10 text-primary-foreground border-primary-foreground/20 hover:bg-primary-foreground/20'
                 }`}
                 title="Linterna / Flash"
               >
@@ -259,7 +259,7 @@ export function CameraCaptureModal({
             <button
               type="button"
               onClick={switchCamera}
-              className="p-2 rounded-lg text-xs font-semibold bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors"
+              className="p-2 rounded-lg text-xs font-semibold bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 hover:bg-primary-foreground/20 transition-colors"
               title="Girar cámara"
             >
               {facingMode === 'environment' ? 'Frontal' : 'Trasera'}
@@ -268,7 +268,7 @@ export function CameraCaptureModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors ml-1"
+              className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10 transition-colors ml-1"
               aria-label="Cerrar visor"
             >
               <IconCerrar className="w-5 h-5" />
@@ -279,16 +279,16 @@ export function CameraCaptureModal({
         {/* Visor de Video */}
         <div className="relative flex-1 bg-black min-h-[360px] flex items-center justify-center overflow-hidden">
           {cameraError ? (
-            <div className="p-6 text-center text-white space-y-3">
-              <p className="text-red-400 font-semibold text-sm">No se pudo abrir la cámara</p>
-              <p className="text-xs text-gray-300 max-w-xs mx-auto">{cameraError}</p>
-              <p className="text-xs text-gray-400">
+            <div className="p-6 text-center text-primary-foreground space-y-3">
+              <p className="text-danger font-semibold text-sm">No se pudo abrir la cámara</p>
+              <p className="text-xs text-muted-foreground/60 max-w-xs mx-auto">{cameraError}</p>
+              <p className="text-xs text-muted-foreground">
                 Puedes usar el botón estándar de subir archivo con la cámara nativa del sistema.
               </p>
               <button
                 type="button"
                 onClick={onClose}
-                className="btn-secondary text-xs px-4 py-2 mt-2"
+                className="btn-secondary btn-xs mt-2"
               >
                 Cerrar y usar selector nativo
               </button>
@@ -304,18 +304,18 @@ export function CameraCaptureModal({
               />
 
               {/* Guía visual para enfocar etiqueta o remisión */}
-              <div className="absolute inset-8 sm:inset-12 border-2 border-dashed border-teal-400/60 rounded-xl pointer-events-none flex flex-col justify-between p-3">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-teal-300 bg-black/60 px-2 py-0.5 rounded self-start">
+              <div className="absolute inset-8 sm:inset-12 border-2 border-dashed border-primary/50 rounded-xl pointer-events-none flex flex-col justify-between p-3">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-primary-foreground/80 bg-foreground/60 px-2 py-0.5 rounded self-start">
                   Enfoca el material o etiqueta
                 </span>
-                <span className="text-[10px] font-mono text-gray-300 bg-black/60 px-2 py-0.5 rounded self-end">
+                <span className="text-[10px] font-mono text-muted-foreground/60 bg-foreground/60 px-2 py-0.5 rounded self-end">
                   {facingMode === 'environment' ? 'Trasera (Obra)' : 'Frontal'}
                 </span>
               </div>
 
               {/* Diagnóstico si se detecta advertencia */}
               {liveQuality && !liveQuality.esApta && (
-                <div className="absolute top-3 inset-x-3 bg-amber-900/90 text-amber-100 text-xs px-3 py-1.5 rounded-lg border border-amber-500/50 backdrop-blur-xs">
+                <div className="absolute top-3 inset-x-3 bg-warning-soft-foreground/90 text-warning-soft text-xs px-3 py-1.5 rounded-lg border border-warning/50 backdrop-blur-xs">
                   {liveQuality.mensajes[0]}
                 </div>
               )}
@@ -325,15 +325,15 @@ export function CameraCaptureModal({
 
         {/* Barra inferior de Disparo */}
         {!cameraError && (
-          <div className="p-4 bg-navy-dark border-t border-white/10 flex items-center justify-center gap-4">
+          <div className="p-4 bg-foreground border-t border-primary-foreground/10 flex items-center justify-center gap-4">
             <button
               type="button"
               disabled={isCapturing}
               onClick={handleShutter}
-              className="w-16 h-16 rounded-full border-4 border-white bg-teal-500 hover:bg-teal-400 active:scale-95 transition-all shadow-lg flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-teal-400/50 disabled:opacity-50"
+              className="w-16 h-16 rounded-full border-4 border-primary-foreground bg-primary hover:bg-primary active:scale-95 transition-all shadow-lg flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-ring/50 disabled:opacity-50"
               aria-label="Tomar fotografía"
             >
-              <div className="w-11 h-11 rounded-full bg-white/90" />
+              <div className="w-11 h-11 rounded-full bg-card/90" />
             </button>
           </div>
         )}

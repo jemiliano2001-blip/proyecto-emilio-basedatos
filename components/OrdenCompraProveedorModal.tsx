@@ -56,31 +56,31 @@ export function OrdenCompraProveedorModal({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1"
+        className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
       >
         <IconEditar className="w-3.5 h-3.5" />
         <span>{proveedorActualId ? 'Cambiar proveedor / folio' : 'Asignar proveedor'}</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-xs">
           <div className="card w-full max-w-md shadow-xl border border-rule">
-            <h3 className="text-lg font-bold text-ink mb-1">
+            <h3 className="text-lg font-bold text-foreground mb-1">
               Proveedor y Folio Físico
             </h3>
-            <p className="text-xs text-muted mb-4">
+            <p className="text-xs text-muted-foreground mb-4">
               Asigna el proveedor que surtirá esta orden y opcionalmente el número de folio de la hoja membretada.
             </p>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-700 text-xs border border-red-200">
+              <div className="mb-4 p-3 rounded-xl bg-danger-soft text-danger-soft-foreground text-xs border border-danger/30">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleGuardar} className="space-y-4">
               <div>
-                <label htmlFor="proveedor_id" className="block text-xs font-semibold text-ink mb-1">
+                <label htmlFor="proveedor_id" className="block text-xs font-semibold text-foreground mb-1">
                   Proveedor *
                 </label>
                 <select
@@ -100,7 +100,7 @@ export function OrdenCompraProveedorModal({
               </div>
 
               <div>
-                <label htmlFor="folio_fisico" className="block text-xs font-semibold text-ink mb-1">
+                <label htmlFor="folio_fisico" className="block text-xs font-semibold text-foreground mb-1">
                   Folio físico / No. de talonario (Opcional)
                 </label>
                 <input
@@ -111,7 +111,7 @@ export function OrdenCompraProveedorModal({
                   onChange={(e) => setFolioFisico(e.target.value)}
                   className="input-base"
                 />
-                <p className="text-[11px] text-muted mt-1">
+                <p className="text-[11px] text-muted-foreground mt-1">
                   Si dejas este campo vacío, en el formato se mostrará el folio automático del sistema.
                 </p>
               </div>

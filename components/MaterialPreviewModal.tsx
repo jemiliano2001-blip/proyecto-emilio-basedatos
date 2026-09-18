@@ -48,7 +48,7 @@ export function MaterialPreviewModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="material-preview-title"
-      className="fixed inset-0 z-50 flex items-stretch justify-end bg-slate-950/75 backdrop-blur-sm transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-stretch justify-end bg-foreground/75 backdrop-blur-sm transition-opacity print:hidden"
       onClick={onClose}
     >
       <div
@@ -116,7 +116,7 @@ export function MaterialPreviewModal({
                 Unidad: {material.unidad_medida}
               </span>
               {verPrecios && material.precio_base !== undefined && material.precio_base > 0 && (
-                <span className="font-semibold text-accent text-sm tabular-nums">
+                <span className="font-semibold text-primary text-sm tabular-nums">
                   Precio base ref.: {formatMoneyMx(material.precio_base)}
                 </span>
               )}
@@ -145,14 +145,14 @@ export function MaterialPreviewModal({
           <button
             type="button"
             onClick={onClose}
-            className="btn-secondary text-sm px-3 py-2"
+            className="btn-secondary btn-sm"
           >
             Cerrar
           </button>
           {puedeEditar && (
             <Link
               href={`/materiales/${material.id}`}
-              className="btn-primary text-sm px-3.5 py-2 inline-flex items-center gap-1.5"
+              className="btn-primary text-sm px-3.5 py-2"
             >
               <IconEditar className="w-3.5 h-3.5" />
               <span>Editar material</span>

@@ -174,34 +174,34 @@ export default async function TraspasoDetallePage({
 
       {/* Tarjeta de Origen y Destino */}
       <div className="card grid grid-cols-2 gap-4">
-        <div className="border-r border-gray-100 pr-2">
-          <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">
+        <div className="border-r border-border pr-2">
+          <span className="text-[10px] uppercase font-bold text-muted-foreground block tracking-wider">
             Proyecto origen (salida)
           </span>
-          <p className="text-sm font-bold text-ink mt-1">
+          <p className="text-sm font-bold text-foreground mt-1">
             {data.obra_origen?.nombre ?? 'N/A'}
           </p>
           {data.obra_origen?.fraccionamiento && (
-            <p className="text-xs text-gray-500">{data.obra_origen.fraccionamiento}</p>
+            <p className="text-xs text-muted-foreground">{data.obra_origen.fraccionamiento}</p>
           )}
         </div>
 
         <div>
-          <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">
+          <span className="text-[10px] uppercase font-bold text-muted-foreground block tracking-wider">
             Proyecto destino (entrada)
           </span>
-          <p className="text-sm font-bold text-ink mt-1">
+          <p className="text-sm font-bold text-foreground mt-1">
             {data.obra_destino?.nombre ?? 'N/A'}
           </p>
           {data.obra_destino?.fraccionamiento && (
-            <p className="text-xs text-gray-500">{data.obra_destino.fraccionamiento}</p>
+            <p className="text-xs text-muted-foreground">{data.obra_destino.fraccionamiento}</p>
           )}
         </div>
       </div>
 
       {/* Observaciones */}
       {data.motivo && (
-        <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-900">
+        <div className="bg-warning-soft border border-warning/30 p-3 rounded-xl text-xs text-warning-soft-foreground">
           <span className="font-semibold block mb-0.5">Motivo / Observaciones:</span>
           {data.motivo}
         </div>
@@ -209,27 +209,27 @@ export default async function TraspasoDetallePage({
 
       {/* Lista de Materiales */}
       <div className="card space-y-3">
-        <h2 className="font-bold text-ink text-sm border-b pb-2">
+        <h2 className="font-bold text-foreground text-sm border-b pb-2">
           Materiales a Traspasar
         </h2>
 
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-border">
           {data.items?.map((item) => (
             <div key={item.id} className="py-2.5 flex items-center justify-between text-xs">
               <div>
-                <p className="font-semibold text-gray-800 text-sm">
+                <p className="font-semibold text-foreground text-sm">
                   {item.material?.nombre_base}{' '}
                   {item.material?.variante ? `(${item.material.variante})` : ''}
                 </p>
-                <p className="text-gray-400 text-[11px]">Unidad: {item.material?.unidad_medida}</p>
+                <p className="text-muted-foreground text-[11px]">Unidad: {item.material?.unidad_medida}</p>
               </div>
               <div className="text-right">
-                <span className="text-base font-bold text-ink">
+                <span className="text-base font-bold text-foreground">
                   {item.cantidad}
                 </span>{' '}
-                <span className="text-gray-500 text-xs">{item.material?.unidad_medida}</span>
+                <span className="text-muted-foreground text-xs">{item.material?.unidad_medida}</span>
                 {verPrecios && item.precio_unitario_mxn ? (
-                  <p className="text-[11px] text-gray-500 mt-0.5">
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
                     {formatMoneyMx(item.precio_unitario_mxn)} c/u ={' '}
                     <strong>{formatMoneyMx(item.cantidad * item.precio_unitario_mxn)}</strong>
                   </p>
@@ -242,23 +242,23 @@ export default async function TraspasoDetallePage({
         {verPrecios && (
           <div className="border-t pt-3 mt-1 space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold text-gray-700">
+              <span className="font-semibold text-foreground">
                 Valor del traspaso
                 {data.estado === 'solicitado' && (
-                  <span className="font-normal text-gray-400 text-xs">
+                  <span className="font-normal text-muted-foreground text-xs">
                     {' '}(se calcula al aprobar)
                   </span>
                 )}
               </span>
-              <span className="font-bold text-ink">{formatMoneyMx(montoTotal)}</span>
+              <span className="font-bold text-foreground">{formatMoneyMx(montoTotal)}</span>
             </div>
-            <p className="text-[11px] text-gray-500">
+            <p className="text-[11px] text-muted-foreground">
               Al completarse, este monto se le abona a{' '}
               <strong>{data.obra_origen?.nombre ?? 'el proyecto origen'}</strong> y se le carga a{' '}
               <strong>{data.obra_destino?.nombre ?? 'el proyecto destino'}</strong>.
             </p>
             {haySinPrecio && (
-              <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+              <p className="text-[11px] text-warning-soft-foreground bg-warning-soft border border-warning/30 rounded p-2">
                 Algún material no tiene precio de compra registrado en el sistema, así que
                 entra valuado en $0 y no mueve presupuesto.
               </p>
@@ -269,24 +269,24 @@ export default async function TraspasoDetallePage({
 
       {/* Historial / Trazabilidad */}
       <div className="card space-y-2 text-xs">
-        <h2 className="font-bold text-ink text-sm border-b pb-2 mb-3">
+        <h2 className="font-bold text-foreground text-sm border-b pb-2 mb-3">
           Historial de Trazabilidad
         </h2>
 
-        <div className="flex items-start gap-3 text-gray-600">
-          <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+        <div className="flex items-start gap-3 text-muted-foreground">
+          <div className="w-2 h-2 rounded-full bg-warning mt-1.5 shrink-0" />
           <div>
-            <p className="font-semibold text-gray-800">Solicitado</p>
-            <p className="text-gray-500">Por {data.solicitante?.nombre ?? 'Anónimo'} el {fechaCreacion}</p>
+            <p className="font-semibold text-foreground">Solicitado</p>
+            <p className="text-muted-foreground">Por {data.solicitante?.nombre ?? 'Anónimo'} el {fechaCreacion}</p>
           </div>
         </div>
 
         {fechaAprobacion && (
-          <div className="flex items-start gap-3 text-gray-600 pt-2 border-t border-gray-50">
-            <div className="w-2 h-2 rounded-full bg-navy mt-1.5 shrink-0" />
+          <div className="flex items-start gap-3 text-muted-foreground pt-2 border-t border-border">
+            <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
             <div>
-              <p className="font-semibold text-gray-800">Aprobado (En tránsito)</p>
-              <p className="text-gray-500">
+              <p className="font-semibold text-foreground">Aprobado (En tránsito)</p>
+              <p className="text-muted-foreground">
                 Por {data.aprobador?.nombre ?? 'Sistema'} el {fechaAprobacion}
               </p>
             </div>
@@ -294,11 +294,11 @@ export default async function TraspasoDetallePage({
         )}
 
         {fechaRecepcion && (
-          <div className="flex items-start gap-3 text-gray-600 pt-2 border-t border-gray-50">
-            <div className="w-2 h-2 rounded-full bg-teal-600 mt-1.5 shrink-0" />
+          <div className="flex items-start gap-3 text-muted-foreground pt-2 border-t border-border">
+            <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
             <div>
-              <p className="font-semibold text-gray-800">Completado (Recibido)</p>
-              <p className="text-gray-500">
+              <p className="font-semibold text-foreground">Completado (Recibido)</p>
+              <p className="text-muted-foreground">
                 Por {data.receptor?.nombre ?? 'Sistema'} el {fechaRecepcion}
               </p>
             </div>

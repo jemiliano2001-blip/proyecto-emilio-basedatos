@@ -83,8 +83,8 @@ export function ObraDocumentos({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-bold text-ink">Información Adicional y Documentación</h2>
-          <p className="text-xs text-gray-500">
+          <h2 className="text-base font-bold text-foreground">Información Adicional y Documentación</h2>
+          <p className="text-xs text-muted-foreground">
             Presupuestos formales, planos, minutas y conciliaciones en PDF.
           </p>
         </div>
@@ -92,7 +92,7 @@ export function ObraDocumentos({
           <button
             type="button"
             onClick={() => setMostrandoSubida((prev) => !prev)}
-            className="text-xs font-semibold text-accent hover:underline py-1 px-2 inline-flex items-center gap-1"
+            className="text-xs font-semibold text-primary hover:underline py-1 px-2 inline-flex items-center gap-1"
           >
             {mostrandoSubida ? (
               <span>Cerrar subida</span>
@@ -114,14 +114,14 @@ export function ObraDocumentos({
             formAction(formData)
             // Si no hay error tras enviar, podemos cerrar el formulario
           }}
-          className="card border-teal-200 bg-teal-50/40 space-y-3 p-4"
+          className="card border-primary/30 bg-primary-soft/40 space-y-3 p-4"
         >
           <input type="hidden" name="obra_id" value={obraId} />
 
-          <h3 className="text-sm font-semibold text-ink">Subir nuevo archivo PDF</h3>
+          <h3 className="text-sm font-semibold text-foreground">Subir nuevo archivo PDF</h3>
 
           <div>
-            <label htmlFor="nombre_doc" className="block text-xs font-semibold text-gray-700 mb-1">
+            <label htmlFor="nombre_doc" className="block text-xs font-semibold text-foreground mb-1">
               Nombre o descripción del documento *
             </label>
             <input
@@ -129,19 +129,19 @@ export function ObraDocumentos({
               name="nombre"
               required
               placeholder="ej. Presupuesto formal CFE lote 1"
-              className="input-base text-sm bg-white"
+              className="input-base text-sm bg-card"
             />
           </div>
 
           <div>
-            <label htmlFor="tipo_documento" className="block text-xs font-semibold text-gray-700 mb-1">
+            <label htmlFor="tipo_documento" className="block text-xs font-semibold text-foreground mb-1">
               Tipo de documento
             </label>
             <select
               id="tipo_documento"
               name="tipo_documento"
               defaultValue="general"
-              className="input-base text-sm bg-white"
+              className="input-base text-sm bg-card"
             >
               {TIPOS_DOCUMENTO_OBRA.map((tipo) => (
                 <option key={tipo} value={tipo}>
@@ -152,7 +152,7 @@ export function ObraDocumentos({
           </div>
 
           <div>
-            <label htmlFor="archivo" className="block text-xs font-semibold text-gray-700 mb-1">
+            <label htmlFor="archivo" className="block text-xs font-semibold text-foreground mb-1">
               Archivo PDF (máx. 30 MB) *
             </label>
             <input
@@ -161,7 +161,7 @@ export function ObraDocumentos({
               type="file"
               accept=".pdf,application/pdf"
               required
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-ink file:text-white hover:file:bg-ink/90 cursor-pointer"
+              className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary-hover cursor-pointer"
             />
           </div>
 
@@ -169,7 +169,7 @@ export function ObraDocumentos({
             <button
               type="button"
               onClick={() => setMostrandoSubida(false)}
-              className="btn-secondary px-3 py-2 text-sm"
+              className="btn-secondary btn-sm"
             >
               Cancelar
             </button>
@@ -182,16 +182,16 @@ export function ObraDocumentos({
         {documentos.map((doc) => (
           <div
             key={doc.id}
-            className="card flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 hover:border-gray-300 transition-colors"
+            className="card flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 hover:border-input transition-colors"
           >
             <div className="flex items-start gap-3 min-w-0">
-              <div className="shrink-0 w-10 h-10 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs">
+              <div className="shrink-0 w-10 h-10 rounded-lg bg-danger-soft text-danger-soft-foreground flex items-center justify-center font-bold text-xs">
                 PDF
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-ink text-sm truncate">{doc.nombre}</p>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs text-gray-500">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-700 font-medium">
+                <p className="font-semibold text-foreground text-sm truncate">{doc.nombre}</p>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-muted text-foreground font-medium">
                     {labelTipoDocumento(doc.tipo_documento)}
                   </span>
                   <span>•</span>
@@ -212,7 +212,7 @@ export function ObraDocumentos({
               <button
                 type="button"
                 onClick={() => setQuickLookIndex(documentos.findIndex((d) => d.id === doc.id))}
-                className="btn-secondary text-sm px-3 py-2 min-h-[44px] flex items-center gap-1 text-accent border-teal-300 hover:bg-teal-50 cursor-pointer"
+                className="btn-secondary btn-sm min-h-[44px] text-primary border-primary/40 hover:bg-primary-soft cursor-pointer"
               >
                 <span>Vista previa</span>
                 <span aria-hidden="true">↗</span>
@@ -221,7 +221,7 @@ export function ObraDocumentos({
               <a
                 href={doc.archivo_url}
                 download={doc.nombre.endsWith('.pdf') ? doc.nombre : `${doc.nombre}.pdf`}
-                className="btn-secondary text-sm px-3 py-2 min-h-[44px]"
+                className="btn-secondary btn-sm min-h-[44px]"
               >
                 Descargar
               </a>
@@ -231,7 +231,7 @@ export function ObraDocumentos({
                   type="button"
                   onClick={() => handleDelete(doc.id, doc.nombre)}
                   disabled={isDeleting && deletingId === doc.id}
-                  className="text-sm text-red-600 hover:text-red-800 font-medium px-3 py-2 min-h-[44px]"
+                  className="text-sm text-danger hover:text-danger-soft-foreground font-medium px-3 py-2 min-h-[44px]"
                   title="Eliminar documento"
                 >
                   {isDeleting && deletingId === doc.id ? 'Borrando…' : 'Eliminar'}

@@ -67,7 +67,7 @@ export default async function EditarKitPage({
   }
 
   return (
-    <main className="page-shell space-y-6">
+    <main className="page-shell-narrow space-y-6">
       <PageHeader
         title="Editar Plantilla de Kit"
         subtitle={kit.nombre}

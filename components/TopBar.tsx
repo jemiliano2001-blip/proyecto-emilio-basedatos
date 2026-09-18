@@ -2,145 +2,86 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Fragment } from 'react'
 import { NotificacionCampanita } from '@/components/NotificacionCampanita'
-import { IconSearch } from '@/components/icons'
-import { tituloDeRuta } from '@/lib/nav'
-import type { RolUsuario } from '@/lib/types'
-import {
-  puedeGestionarUsuarios,
-  puedeVerBitacora,
-  puedeVerInventarioCampo,
-  puedeVerNavProyectos,
-  puedeVerPrecios,
-  puedeVerRecepciones,
-  puedeVerTraspasos,
-} from '@/lib/roles'
+import { IconChevron, IconLogo, IconSearch } from '@/components/icons'
+import { migasDeRuta, tituloDeRuta } from '@/lib/nav'
 
-export function TopBar({
-  nombre,
-  rol,
-  traspasosDisponibles,
-}: {
-  nombre: string | null
-  rol?: RolUsuario | null
-  traspasosDisponibles: boolean
-}) {
+export function TopBar({ nombre }: { nombre: string | null }) {
   const pathname = usePathname()
   const titulo = tituloDeRuta(pathname)
-
-  const enProyectos = pathname === '/' || pathname.startsWith('/obras')
-  const enSolicitudes = pathname.startsWith('/solicitudes')
-  const enRecepciones = pathname.startsWith('/recepciones')
-  const enInventario = pathname.startsWith('/inventario')
-  const enMateriales = pathname.startsWith('/materiales')
-  const enOrdenes = pathname.startsWith('/ordenes')
-  const enTraspasos = pathname.startsWith('/traspasos')
-  const enUsuarios = pathname.startsWith('/usuarios')
-  const enBitacora = pathname.startsWith('/bitacora')
-
-  const desktopLinkClass = (active: boolean) =>
-    `inline-flex min-h-[44px] items-center px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-      active
-        ? 'bg-ink text-white font-bold shadow-sm'
-        : 'text-gray-500 hover:text-ink hover:bg-slate-50'
-    }`
+  const migas = migasDeRuta(pathname)
 
   return (
     <header className="glass-header">
       <div
-        className="mx-auto flex max-w-2xl md:max-w-5xl lg:max-w-6xl items-center justify-between gap-4 px-4"
+        className="flex h-topbar items-center justify-between gap-3 px-4 sm:px-6 lg:px-8"
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
-        {/* Izquierda: Título en móvil / Logo + Título en Desktop */}
-        <div className="min-w-0 py-2.5 flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <span className="w-8 h-8 rounded-lg bg-navy text-teal-300 font-black text-sm flex items-center justify-center shadow-xs">
-              OT
-            </span>
-            <div className="hidden lg:block leading-none">
-              <span className="text-xs font-black tracking-wider text-ink uppercase">
-                ObraTrack
-              </span>
-              <p className="text-[10px] text-teal-800 font-medium tracking-tight">
-                Emilio SaaS
-              </p>
-            </div>
+        {/* Izquierda · móvil: marca + título · desktop: migas */}
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm lg:hidden"
+            aria-label="Inicio"
+          >
+            <IconLogo className="size-5" />
           </Link>
+          <div className="min-w-0 lg:hidden">
+            <p className="truncate text-base font-semibold text-foreground">{titulo}</p>
+          </div>
 
-          <div className="border-l border-gray-200 pl-3 hidden sm:block min-w-0">
-            <p className="truncate text-sm font-bold text-ink">{titulo}</p>
-            {nombre && (
-              <p className="truncate text-[11px] text-gray-500">{nombre}</p>
-            )}
-          </div>
-          <div className="sm:hidden min-w-0">
-            <p className="truncate text-base font-bold text-ink">{titulo}</p>
-          </div>
+          <nav aria-label="Ubicación" className="hidden min-w-0 lg:block">
+            <ol className="flex min-w-0 items-center gap-1.5 text-sm">
+              {migas.length === 0 && (
+                <li className="font-medium text-foreground">{titulo}</li>
+              )}
+              {migas.map((miga, index) => {
+                const last = index === migas.length - 1
+                return (
+                  <Fragment key={`${miga.href}-${index}`}>
+                    {index > 0 && (
+                      <li aria-hidden className="text-muted-foreground/60">
+                        <IconChevron className="size-3.5" />
+                      </li>
+                    )}
+                    <li className="min-w-0">
+                      {last ? (
+                        <span aria-current="page" className="block truncate font-medium text-foreground">
+                          {miga.label}
+                        </span>
+                      ) : (
+                        <Link
+                          href={miga.href}
+                          className="block truncate text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          {miga.label}
+                        </Link>
+                      )}
+                    </li>
+                  </Fragment>
+                )
+              })}
+            </ol>
+          </nav>
         </div>
 
-        {/* Centro: Enlaces de navegación en Desktop (>= md) */}
-        <nav className="hidden md:flex items-center gap-1">
-          {puedeVerNavProyectos(rol ?? null) && (
-            <Link href="/" className={desktopLinkClass(enProyectos)}>
-              Proyectos
-            </Link>
+        {/* Derecha · buscador, avisos */}
+        <div className="flex shrink-0 items-center gap-1">
+          {nombre && (
+            <span className="mr-2 hidden max-w-[14rem] truncate text-sm text-muted-foreground xl:inline">
+              {nombre}
+            </span>
           )}
-          <Link href="/solicitudes" className={desktopLinkClass(enSolicitudes)}>
-            Solicitudes
-          </Link>
-          {puedeVerRecepciones(rol ?? null) && (
-            <Link href="/recepciones" className={desktopLinkClass(enRecepciones)}>
-              Recepción
-            </Link>
-          )}
-          {puedeVerInventarioCampo(rol ?? null) && (
-            <Link href="/inventario" className={desktopLinkClass(enInventario)}>
-              Inventario
-            </Link>
-          )}
-          {rol !== 'personal' && (
-            <Link href="/materiales" className={desktopLinkClass(enMateriales)}>
-              Catálogo
-            </Link>
-          )}
-          {puedeVerPrecios(rol ?? null) ? (
-            <Link href="/ordenes" className={desktopLinkClass(enOrdenes)}>
-              Órdenes
-            </Link>
-          ) : null}
-          {traspasosDisponibles &&
-          puedeVerTraspasos(rol ?? null) &&
-          rol !== 'personal' ? (
-            <Link href="/traspasos" className={desktopLinkClass(enTraspasos)}>
-              Traspasos
-            </Link>
-          ) : null}
-          {puedeGestionarUsuarios(rol ?? null) ? (
-            <Link href="/usuarios" className={desktopLinkClass(enUsuarios)}>
-              Usuarios
-            </Link>
-          ) : null}
-          {puedeVerBitacora(rol ?? null) ? (
-            <Link href="/bitacora" className={desktopLinkClass(enBitacora)}>
-              Bitácora
-            </Link>
-          ) : null}
-        </nav>
-
-        {/* Derecha: Buscador, Notificaciones y Atajo */}
-        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
-            className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 px-2.5 py-2 rounded-lg text-gray-500 hover:text-ink hover:bg-gray-100 border border-transparent sm:border-gray-200 transition-colors text-sm"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-[40px] lg:min-w-[40px]"
             title="Buscador y comandos (Ctrl+K)"
             aria-label="Abrir buscador y comandos"
           >
-            <IconSearch className="w-4 h-4" />
-            <span className="hidden lg:inline text-gray-400">Buscar...</span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-gray-100 text-gray-500 rounded border border-gray-200">
-              ⌘K
-            </kbd>
+            <IconSearch className="size-5 lg:size-[18px]" />
+            <kbd className="kbd hidden sm:inline-flex">⌘K</kbd>
           </button>
           <NotificacionCampanita />
         </div>

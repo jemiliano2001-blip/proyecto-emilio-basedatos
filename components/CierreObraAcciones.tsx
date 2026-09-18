@@ -40,7 +40,7 @@ export function CierreObraAcciones({
   return (
     <div className="space-y-2">
       {errorMsg && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <div className="rounded-lg border border-danger/30 bg-danger-soft p-3 text-sm text-danger-soft-foreground" role="alert">
           {errorMsg}
         </div>
       )}
@@ -49,7 +49,7 @@ export function CierreObraAcciones({
         <button
           type="button"
           onClick={() => setMostrandoConfirmacion(true)}
-          className="btn-danger px-4 py-2 text-sm"
+          className="btn-danger btn-sm"
         >
           Cerrar proyecto
         </button>
@@ -61,7 +61,7 @@ export function CierreObraAcciones({
           onClick={handleReabrir}
           disabled={isPending}
           aria-busy={isPending}
-          className="btn-secondary px-4 py-2 text-sm"
+          className="btn-secondary btn-sm"
         >
           {isPending ? 'Reabriendo…' : 'Reabrir proyecto'}
         </button>
@@ -69,13 +69,13 @@ export function CierreObraAcciones({
 
       {mostrandoConfirmacion && (
         <div className="card space-y-3 border-danger/30">
-          <h3 className="text-sm font-bold text-ink">¿Cerrar este proyecto?</h3>
-          <p className="text-sm text-gray-600">
+          <h3 className="text-sm font-bold text-foreground">¿Cerrar este proyecto?</h3>
+          <p className="text-sm text-muted-foreground">
             Al cerrar no se podrán crear nuevas requisiciones ni traspasos.
           </p>
 
           <div>
-            <label htmlFor="cierre-nota" className="mb-1 block text-sm font-semibold text-gray-700">
+            <label htmlFor="cierre-nota" className="mb-1 block text-sm font-semibold text-foreground">
               Nota o motivo de cierre (opcional)
             </label>
             <input
@@ -94,14 +94,14 @@ export function CierreObraAcciones({
               onClick={handleCerrar}
               disabled={isPending}
               aria-busy={isPending}
-              className="btn-danger px-4 py-2 text-sm"
+              className="btn-danger btn-sm"
             >
               {isPending ? 'Cerrando…' : 'Sí, cerrar proyecto'}
             </button>
             <button
               type="button"
               onClick={() => setMostrandoConfirmacion(false)}
-              className="btn-secondary px-4 py-2 text-sm"
+              className="btn-secondary btn-sm"
             >
               Cancelar
             </button>

@@ -127,7 +127,7 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
       <div
         ref={contentRef}
         tabIndex={-1}
-        className="fixed inset-0 bg-ink/60 backdrop-blur-sm animate-fade-in transition-opacity"
+        className="fixed inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -135,7 +135,7 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
       {/* Modal Box */}
       <div
         className={cn(
-          'relative z-50 w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl animate-scale-in',
+          'relative z-50 w-full max-w-lg rounded-2xl border border-border bg-card p-5 shadow-lg animate-scale-in sm:p-6',
           className
         )}
         {...props}
@@ -143,7 +143,7 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-accent"
+          className="absolute right-3 top-3 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
           aria-label="Cerrar modal"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -165,7 +165,7 @@ export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLD
 export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6 pt-4 border-t border-border/50', className)}
+      className={cn('mt-6 flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end', className)}
       {...props}
     />
   )
@@ -173,7 +173,7 @@ export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLD
 
 export function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   const { titleId } = useDialog()
-  return <h2 id={titleId} className={cn('text-xl font-bold tracking-tight text-navy', className)} {...props} />
+  return <h2 id={titleId} className={cn('text-lg font-semibold tracking-tight text-foreground sm:text-xl', className)} {...props} />
 }
 
 export function DialogDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {

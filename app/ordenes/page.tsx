@@ -62,10 +62,11 @@ export default async function OrdenesPage({
       <PageHeader
         title="Órdenes de compra"
         description="Emitidas desde cotizaciones o requisiciones pagadas"
-        action={{
-          label: 'Proveedores',
-          href: '/proveedores',
-        }}
+        actions={
+          <Link href="/proveedores" className="btn-secondary btn-sm">
+            Proveedores
+          </Link>
+        }
       />
 
       <ListFilters
@@ -77,12 +78,12 @@ export default async function OrdenesPage({
         compact
       />
       {error && (
-        <div className="card border-red-300 bg-red-50 text-red-700 mb-4">
+        <div className="card border-danger/40 bg-danger-soft text-danger-soft-foreground mb-4">
           No se pudieron cargar las órdenes.
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+      <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
         {(ordenes as unknown as OrdenRow[] | null)?.map((o) => {
           const numFacturas = o.facturas?.length ?? 0
           const badgeVariantType =
@@ -98,13 +99,13 @@ export default async function OrdenesPage({
             <Link
               key={o.id}
               href={`/ordenes/${o.id}`}
-              className="flex min-h-[64px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-slate-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+              className="flex min-h-[64px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-bold text-ink tabular-nums">{o.folio}</p>
+                  <p className="font-bold text-foreground tabular-nums">{o.folio}</p>
                   {o.folio_fisico && (
-                    <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                    <span className="text-[11px] font-semibold text-warning-soft-foreground bg-warning-soft px-1.5 py-0.5 rounded border border-warning/30">
                       Talonario: {o.folio_fisico}
                     </span>
                   )}
@@ -117,24 +118,24 @@ export default async function OrdenesPage({
                     <Badge variant="gray">Sin factura</Badge>
                   )}
                 </div>
-                <p className="text-sm font-medium text-gray-700 mt-0.5 truncate">
+                <p className="text-sm font-medium text-foreground mt-0.5 truncate">
                   {o.obra?.nombre}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {o.proveedor?.nombre || (
-                    <span className="italic text-gray-400">Sin proveedor</span>
+                    <span className="italic text-muted-foreground">Sin proveedor</span>
                   )}
                 </p>
               </div>
               <div className="text-right shrink-0">
-                <p className="font-bold tabular-nums text-ink text-sm sm:text-base">
+                <p className="font-bold tabular-nums text-foreground text-sm sm:text-base">
                   $
                   {Number(o.total).toLocaleString('es-MX', {
                     minimumFractionDigits: 2,
                   })}{' '}
-                  <span className="text-xs font-medium text-gray-500">{o.moneda}</span>
+                  <span className="text-xs font-medium text-muted-foreground">{o.moneda}</span>
                 </p>
-                <p className="text-[11px] text-gray-500 mt-0.5 tabular-nums">
+                <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">
                   {new Date(o.creado_en).toLocaleDateString('es-MX')}
                 </p>
               </div>

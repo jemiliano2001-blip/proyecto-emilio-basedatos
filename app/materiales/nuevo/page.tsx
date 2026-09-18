@@ -39,7 +39,7 @@ export default async function NuevoMaterialPage({
   const categorias = (categoriasRaw as MaterialCategoria[] | null) ?? []
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Nuevo material"
         backHref="/materiales"

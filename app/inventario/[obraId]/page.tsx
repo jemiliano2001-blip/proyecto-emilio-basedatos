@@ -79,27 +79,27 @@ export default async function InventarioObraPage({
       />
 
       {invError && (
-        <div role="alert" className="card mb-4 border-red-300 bg-red-50 text-red-700">
+        <div role="alert" className="card mb-4 border-danger/40 bg-danger-soft text-danger-soft-foreground">
           No se pudo cargar el inventario de este proyecto. Revisa la conexión e intenta de nuevo.
         </div>
       )}
 
       {lista.length > 0 && (
-        <section className="card mb-4 bg-gradient-to-br from-white to-teal-50/40 border-teal-100">
-          <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+        <section className="card mb-4 bg-gradient-to-br from-card to-primary-soft/40 border-primary/20">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
             Pendiente de instalar
           </p>
-          <p className="mt-1 text-3xl font-black tabular-nums text-ink leading-none">
+          <p className="mt-1 text-3xl font-black tabular-nums text-foreground leading-none">
             {materialesConPendiente}
           </p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             {materialesConPendiente === 1
               ? '1 material con saldo por instalar'
               : `${materialesConPendiente} materiales con saldo por instalar`}
           </p>
-          <div className="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden">
+          <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
             <div
-              className="h-full rounded-full bg-accent transition-[width]"
+              className="h-full rounded-full bg-primary transition-[width]"
               style={{ width: `${progresoPct}%` }}
               role="progressbar"
               aria-valuenow={progresoPct}
@@ -108,7 +108,7 @@ export default async function InventarioObraPage({
               aria-label="Materiales sin pendiente de instalar"
             />
           </div>
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             {materialesTotales - materialesConPendiente} de {materialesTotales} materiales
             sin pendiente ({progresoPct}%)
           </p>
@@ -122,48 +122,48 @@ export default async function InventarioObraPage({
           description="Todavía no hay recepciones aprobadas para este proyecto."
         />
       ) : (
-        <div className="card divide-y divide-gray-100 p-0 overflow-hidden">
+        <div className="card divide-y divide-border p-0 overflow-hidden">
           {lista.map((m) => {
             const pendiente = Number(m.cantidad_pendiente_instalar)
             return (
               <div key={m.material_id} className="p-4 space-y-2">
                 <div className="flex justify-between gap-3 items-start">
                   <div className="min-w-0">
-                    <p className="font-semibold text-ink">
+                    <p className="font-semibold text-foreground">
                       {m.nombre_base}
                       {m.variante ? (
-                        <span className="text-gray-500 font-normal">
+                        <span className="text-muted-foreground font-normal">
                           {' '}
                           · {m.variante}
                         </span>
                       ) : null}
                     </p>
                     {m.categoria && (
-                      <p className="text-[11px] text-gray-400 uppercase tracking-wide">
+                      <p className="text-[11px] text-muted-foreground uppercase tracking-wide">
                         {m.categoria}
                       </p>
                     )}
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-[10px] font-semibold uppercase text-amber-800">
+                    <p className="text-[10px] font-semibold uppercase text-warning-soft-foreground">
                       Pendiente
                     </p>
-                    <p className="text-xl font-black tabular-nums text-amber-950 leading-none">
+                    <p className="text-xl font-black tabular-nums text-warning-soft-foreground leading-none">
                       {pendiente}
                     </p>
-                    <p className="text-[11px] text-gray-500">{m.unidad_medida}</p>
+                    <p className="text-[11px] text-muted-foreground">{m.unidad_medida}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                  <div className="rounded-lg bg-slate-50 py-2 px-1">
-                    <p className="text-gray-500">Recibido</p>
-                    <p className="font-bold text-ink tabular-nums">
+                  <div className="rounded-lg bg-muted/50 py-2 px-1">
+                    <p className="text-muted-foreground">Recibido</p>
+                    <p className="font-bold text-foreground tabular-nums">
                       {Number(m.cantidad_recibida)} {m.unidad_medida}
                     </p>
                   </div>
-                  <div className="rounded-lg bg-teal-50 py-2 px-1">
-                    <p className="text-teal-800">Instalado</p>
-                    <p className="font-bold text-teal-900 tabular-nums">
+                  <div className="rounded-lg bg-primary-soft py-2 px-1">
+                    <p className="text-primary-soft-foreground">Instalado</p>
+                    <p className="font-bold text-primary-soft-foreground tabular-nums">
                       {Number(m.cantidad_instalada)} {m.unidad_medida}
                     </p>
                   </div>

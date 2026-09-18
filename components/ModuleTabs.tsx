@@ -98,7 +98,7 @@ export function ModuleTabs({
                 className={cn(
                   'text-xs px-1.5 py-0.2 rounded-full font-bold tabular-nums',
                   isActive
-                    ? 'bg-ink text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-muted-foreground/20 text-foreground'
                 )}
               >

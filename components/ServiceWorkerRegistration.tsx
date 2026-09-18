@@ -14,11 +14,15 @@ export function ServiceWorkerRegistration() {
 
     let cancelled = false
 
-    navigator.serviceWorker
-      .register('/sw.js')
-      .catch(() => {
-        // Silencioso: la app sigue funcionando online sin SW.
-      })
+    // En desarrollo el SW cachea chunks de /_next/static con nombre estable y
+    // sirve JS viejo tras cada cambio (rompe HMR e hidratación). Solo en prod.
+    if (process.env.NODE_ENV === 'production') {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .catch(() => {
+          // Silencioso: la app sigue funcionando online sin SW.
+        })
+    }
 
     async function runSync() {
       if (!userId) return
@@ -58,7 +62,7 @@ export function ServiceWorkerRegistration() {
   if (!mensaje) return null
 
   return (
-    <div className="fixed top-0 inset-x-0 z-30 bg-accent text-white text-sm px-4 py-2 text-center shadow-md">
+    <div className="fixed top-0 inset-x-0 z-30 bg-primary text-primary-foreground text-sm px-4 py-2 text-center shadow-md">
       <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
         <p>{mensaje}</p>
         <button

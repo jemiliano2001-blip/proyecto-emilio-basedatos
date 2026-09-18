@@ -31,7 +31,7 @@ export default async function NuevoTraspasoPage() {
     .select('obra_id, material_id, cantidad_disponible')
 
   return (
-    <main className="page-shell">
+    <main className="page-shell-narrow">
       <PageHeader
         title="Nuevo traspaso de materiales"
         description="Transfiere materiales disponibles de un proyecto origen a un proyecto destino"
@@ -40,11 +40,11 @@ export default async function NuevoTraspasoPage() {
       />
 
       {(obrasError || materialesError || saldosError) ? (
-        <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <div role="alert" className="rounded-xl border border-danger/30 bg-danger-soft p-4 text-sm text-danger-soft-foreground">
           No se pudieron cargar los datos necesarios para el traspaso. Revisa la conexión e intenta de nuevo.
         </div>
       ) : !obras || obras.length < 2 ? (
-        <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+        <div className="rounded-xl border border-warning/30 bg-warning-soft p-4 text-sm text-warning-soft-foreground">
           Se requieren al menos 2 proyectos activos para realizar un traspaso.
         </div>
       ) : (

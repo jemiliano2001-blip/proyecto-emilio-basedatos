@@ -1,7 +1,18 @@
 import React from 'react'
 import { Badge as UiBadge, type BadgeProps as UiBadgeProps } from '@/components/ui/badge'
 
-export type BadgeVariant = 'teal' | 'amber' | 'red' | 'navy' | 'gray'
+export type BadgeVariant =
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'info'
+  | 'neutral'
+  // legacy
+  | 'teal'
+  | 'amber'
+  | 'red'
+  | 'navy'
+  | 'gray'
 
 export interface BadgeProps extends Omit<UiBadgeProps, 'variant'> {
   variant?: BadgeVariant
@@ -9,15 +20,11 @@ export interface BadgeProps extends Omit<UiBadgeProps, 'variant'> {
 }
 
 /**
- * Componente Badge conectado a la primitiva oficial components/ui/badge.tsx
- * Mantiene 100% de retrocompatibilidad con las variantes de negocio del proyecto.
+ * Badge de negocio sobre la primitiva components/ui/badge.tsx.
+ * Las variantes legacy (teal/amber/red/navy/gray) siguen aceptándose y mapean
+ * a success/warning/danger/info/neutral.
  */
-export function Badge({
-  variant = 'gray',
-  children,
-  className,
-  ...props
-}: BadgeProps) {
+export function Badge({ variant = 'neutral', children, className, ...props }: BadgeProps) {
   return (
     <UiBadge variant={variant} className={className} {...props}>
       {children}

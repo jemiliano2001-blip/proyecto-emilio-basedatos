@@ -9,13 +9,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, error, ...props }, ref) => {
     return (
       <textarea
-        className={cn(
-          'flex min-h-[88px] w-full rounded-lg border bg-card px-3.5 py-2.5 text-base text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors',
-          error
-            ? 'border-danger focus-visible:ring-danger'
-            : 'border-input hover:border-muted-foreground',
-          className
-        )}
+        aria-invalid={error ? true : props['aria-invalid']}
+        className={cn('input-base min-h-[88px] resize-y leading-relaxed', className)}
         ref={ref}
         {...props}
       />

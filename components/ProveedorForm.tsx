@@ -23,7 +23,7 @@ export function ProveedorForm({
     <form action={formAction} className="space-y-4">
       <FormError message={state.error} />
       <div>
-        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-1">
           Nombre
         </label>
         <input
@@ -36,7 +36,7 @@ export function ProveedorForm({
         />
       </div>
       <div>
-        <label htmlFor="contacto" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="contacto" className="block text-sm font-medium text-foreground mb-1">
           Contacto
         </label>
         <input
@@ -47,7 +47,7 @@ export function ProveedorForm({
         />
       </div>
       <div>
-        <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="telefono" className="block text-sm font-medium text-foreground mb-1">
           Teléfono
         </label>
         <input
@@ -59,7 +59,7 @@ export function ProveedorForm({
       </div>
       {proveedor && (
         <div>
-          <label htmlFor="activo" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="activo" className="block text-sm font-medium text-foreground mb-1">
             Activo
           </label>
           <select

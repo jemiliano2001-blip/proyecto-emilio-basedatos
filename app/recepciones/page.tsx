@@ -75,29 +75,29 @@ export default async function RecepcionesPage() {
 
       {puedeCapturar && (
         <section className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             Órdenes por recibir
           </h2>
           {ordenesChecklist.length === 0 ? (
-            <div className="card text-sm text-gray-500 py-4 text-center">
+            <div className="card text-sm text-muted-foreground py-4 text-center">
               No hay órdenes pendientes de recepción.
             </div>
           ) : (
-            <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+            <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
               {ordenesChecklist.map((orden) => (
                 <Link
                   key={orden.id}
                   href={`/ordenes/${orden.id}/recibir`}
-                  className="block px-3.5 py-3 hover:bg-slate-50 transition-colors"
+                  className="block px-3.5 py-3 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex justify-between gap-2 items-baseline">
-                    <p className="font-semibold text-ink">{orden.folio}</p>
+                    <p className="font-semibold text-foreground">{orden.folio}</p>
                     <Badge variant="amber">
                       {orden.estado.replaceAll('_', ' ')}
                     </Badge>
                   </div>
-                  <p className="text-sm text-gray-600 mt-0.5 truncate">{orden.obra_nombre}</p>
-                  <p className="text-xs text-gray-500 truncate">{orden.proveedor_nombre}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5 truncate">{orden.obra_nombre}</p>
+                  <p className="text-xs text-muted-foreground truncate">{orden.proveedor_nombre}</p>
                 </Link>
               ))}
             </div>
@@ -107,28 +107,28 @@ export default async function RecepcionesPage() {
 
       {puedeRevisar && (
         <section className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             Pendientes de revisión ({pendientes.length})
           </h2>
           {pendientes.length === 0 ? (
-            <div className="card text-sm text-gray-500 py-4 text-center">Nada por revisar.</div>
+            <div className="card text-sm text-muted-foreground py-4 text-center">Nada por revisar.</div>
           ) : (
-            <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+            <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
               {pendientes.map((r) => (
                 <Link
                   key={r.id}
                   href={`/recepciones/${r.id}/revisar`}
-                  className="block px-3.5 py-3 hover:bg-slate-50 transition-colors border-l-4 border-l-amber-500"
+                  className="block px-3.5 py-3 hover:bg-muted/50 transition-colors border-l-4 border-l-warning"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="font-semibold text-ink">{r.orden_folio}</p>
+                    <p className="font-semibold text-foreground">{r.orden_folio}</p>
                     <Badge variant="amber">Por revisar</Badge>
                   </div>
-                  <p className="text-sm text-gray-600 mt-0.5">
+                  <p className="text-sm text-muted-foreground mt-0.5">
                     {r.receptor_nombre} ·{' '}
                     {new Date(r.recibido_en).toLocaleString('es-MX')}
                   </p>
-                  <p className="text-xs text-accent font-medium mt-0.5">Revisar checklist</p>
+                  <p className="text-xs text-primary font-medium mt-0.5">Revisar checklist</p>
                 </Link>
               ))}
             </div>
@@ -137,7 +137,7 @@ export default async function RecepcionesPage() {
       )}
 
       <section>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
           Historial
         </h2>
         {(puedeRevisar ? otras : rows).length === 0 ? (
@@ -147,15 +147,15 @@ export default async function RecepcionesPage() {
             description="Aún no hay recepciones de material en el historial."
           />
         ) : (
-          <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+          <div className="rounded-xl border border-border bg-card divide-y divide-border overflow-hidden">
             {(puedeRevisar ? otras : rows).map((r) => (
               <Link
                 key={r.id}
                 href={`/recepciones/${r.id}`}
-                className="block px-3.5 py-3 hover:bg-slate-50 transition-colors"
+                className="block px-3.5 py-3 hover:bg-muted/50 transition-colors"
               >
                 <div className="flex justify-between items-center gap-2">
-                  <p className="font-semibold text-ink">{r.orden_folio}</p>
+                  <p className="font-semibold text-foreground">{r.orden_folio}</p>
                   <Badge
                     variant={
                       r.estado === 'aprobada'
@@ -168,7 +168,7 @@ export default async function RecepcionesPage() {
                     {etiquetaEstado(r.estado)}
                   </Badge>
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5 tabular-nums">
+                <p className="text-xs text-muted-foreground mt-0.5 tabular-nums">
                   {new Date(r.recibido_en).toLocaleString('es-MX')}
                 </p>
               </Link>

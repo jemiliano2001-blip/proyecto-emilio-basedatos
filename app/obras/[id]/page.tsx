@@ -121,177 +121,237 @@ export default async function ObraDetallePage({
   }))
 
   const presupuesto = saldoMx as SaldoPresupuestoObra | null
+  const totalMx = Number(presupuesto?.presupuesto_mxn ?? obra.presupuesto_mxn ?? 0)
+  const comprometidoMx = Number(presupuesto?.comprometido_mxn ?? 0)
+  const gastadoMx = Number(presupuesto?.gastado_mxn ?? 0)
+  const disponibleMx = Number(presupuesto?.disponible_mxn ?? obra.presupuesto_mxn ?? 0)
+  const pct = (v: number) => (totalMx > 0 ? Math.min(100, Math.max(0, (v / totalMx) * 100)) : 0)
+  const meta = [obra.ciudad, obra.fraccionamiento].filter(Boolean).join(' · ')
+  const eyebrow = [obra.cliente ? `Cliente: ${obra.cliente}` : null, meta || null]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
-    <main className="page-shell space-y-6">
+    <main className="page-shell-wide">
       <PageHeader
         title={obra.nombre}
         backHref="/"
         backLabel="Proyectos"
+        eyebrow={eyebrow || undefined}
         badge={
           <Badge
             variant={
-              obra.estado === 'activa'
-                ? 'teal'
-                : obra.estado === 'pausada'
-                ? 'amber'
-                : 'gray'
+              obra.estado === 'activa' ? 'success' : obra.estado === 'pausada' ? 'warning' : 'neutral'
             }
+            dot
           >
             {labelEstatus(obra.estado)}
           </Badge>
         }
-        description={
-          <div>
-            {obra.cliente && <p className="text-sm font-medium text-gray-700">Cliente: {obra.cliente}</p>}
-            {(obra.ciudad || obra.fraccionamiento) && (
-              <p className="text-sm text-gray-500">
-                {[obra.ciudad, obra.fraccionamiento].filter(Boolean).join(' · ')}
-              </p>
-            )}
-            {obra.ubicacion && (
-              <p className="text-xs text-gray-500 mt-0.5">Ubicación: {obra.ubicacion}</p>
-            )}
-          </div>
-        }
+        description={obra.ubicacion ? `Ubicación: ${obra.ubicacion}` : undefined}
         actions={
-          puedeEditarObra ? (
-            <Link href={`/obras/${resolvedparams.id}/editar`} className="btn-secondary px-4 py-2 text-sm">
-              Editar
-            </Link>
-          ) : undefined
+          <>
+            {puedeEditarObra && (
+              <Link href={`/obras/${resolvedparams.id}/editar`} className="btn-secondary btn-sm">
+                Editar
+              </Link>
+            )}
+            {verConciliacion && (
+              <Link href={`/obras/${resolvedparams.id}/conciliacion`} className="btn-secondary btn-sm">
+                Conciliación
+              </Link>
+            )}
+            {puedeSolicitar && obra.estado === 'activa' && (
+              <Link href={`/solicitudes/nueva?obra=${resolvedparams.id}`} className="btn-primary btn-sm">
+                <IconPlus className="size-4" />
+                Solicitar material
+              </Link>
+            )}
+          </>
         }
       />
-      {/* FOTOGRAFÍA / PORTADA DEL PROYECTO */}
+
       {obra.foto_url && (
-        <div className="card p-0 overflow-hidden border border-gray-200 shadow-sm relative group">
-          <div className="w-full h-44 sm:h-56 bg-slate-900 relative">
-            <Image
-              src={obra.foto_url}
-              alt={obra.nombre}
-              fill
-              unoptimized
-              className="object-cover group-hover:scale-[1.01] transition-transform duration-300"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent flex items-end p-4">
-              <span className="text-white text-xs font-semibold px-2.5 py-1 rounded bg-black/50 backdrop-blur-sm">
-                Fotografía del Proyecto
-              </span>
-            </div>
-          </div>
+        <div className="relative mb-6 h-40 overflow-hidden rounded-xl border border-border bg-muted sm:h-52">
+          <Image src={obra.foto_url} alt={obra.nombre} fill unoptimized className="object-cover" />
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2 -mt-2">
-        {verConciliacion && (
-          <Link href={`/obras/${resolvedparams.id}/conciliacion`} className="btn-secondary px-4 py-2 text-sm">
-            Conciliación
-          </Link>
-        )}
-        <a
-          href="#documentos"
-          className="btn-secondary px-3 py-2 text-sm inline-flex items-center gap-1.5 text-accent"
-        >
-          <IconDocumento className="w-4 h-4" />
-          <span>Documentos / PDFs</span>
-          <span className="badge-teal">
-            {documentos.length}
-          </span>
-        </a>
-        <CierreObraAcciones
-          obraId={obra.id}
-          estado={obra.estado}
-          puedeCerrar={puedeCerrar}
-          puedeReabrir={puedeReabrir}
-        />
-      </div>
-
-      {puedeSolicitar && obra.estado === 'activa' && (
-        <Link
-          href={`/solicitudes/nueva?obra=${resolvedparams.id}`}
-          className="btn-primary flex items-center justify-center gap-2 w-full text-center"
-        >
-          <IconPlus className="w-4 h-4" />
-          <span>Solicitar material</span>
-        </Link>
-      )}
-
-      {/* PRESUPUESTO FINANCIERO (Solo roles con acceso a dinero) */}
-      {verPrecios && (
-        <div className="card">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Presupuesto (MXN)
-          </h2>
-          <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-            <div>
-              <p className="text-gray-500">Total</p>
-              <p className="tabular-nums font-semibold text-gray-900">
-                {formatMoneyMx(Number(presupuesto?.presupuesto_mxn ?? obra.presupuesto_mxn ?? 0))}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Comprometido</p>
-              <p className="tabular-nums font-semibold text-gray-900">
-                {formatMoneyMx(Number(presupuesto?.comprometido_mxn ?? 0))}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Gastado</p>
-              <p className="tabular-nums font-semibold text-gray-900">
-                {formatMoneyMx(Number(presupuesto?.gastado_mxn ?? 0))}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500">Disponible</p>
-              <p className="tabular-nums font-semibold text-accent">
-                {formatMoneyMx(Number(presupuesto?.disponible_mxn ?? obra.presupuesto_mxn ?? 0))}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SECCIÓN DOCUMENTACIÓN ADICIONAL Y ARCHIVOS PDF */}
-      <section id="documentos" className="card border-slate-200">
-        <ObraDocumentos
-          obraId={resolvedparams.id}
-          documentos={documentos}
-          puedeGestionar={puedeGestionarDocs}
-          puedeEliminar={puedeEliminarDocs}
-        />
-      </section>
-
-      {/* SECCIÓN SALDO Y ESTATUS DE MATERIALES */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-              Saldo y Estatus de Materiales
-            </h2>
-            <p className="text-xs text-gray-400">
-              Flujo: Asignado → En proceso de compra → Comprado → Entregado en obra.
-            </p>
-          </div>
-          {puedeTopes && (
-            <Link
-              href={`/obras/${resolvedparams.id}/asignar-materiales`}
-              className="btn-primary shrink-0 text-sm px-3 py-2 min-h-[44px] inline-flex items-center gap-1.5"
-            >
-              <IconPlus className="w-3.5 h-3.5" />
-              <span>Asignar materiales</span>
-            </Link>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+        {/* Columna principal */}
+        <div className="min-w-0 space-y-6">
+          {/* Presupuesto en móvil/tablet (en desktop vive en el rail) */}
+          {verPrecios && (
+            <section className="card lg:hidden">
+              <PresupuestoResumen
+                total={totalMx}
+                comprometido={comprometidoMx}
+                gastado={gastadoMx}
+                disponible={disponibleMx}
+                pct={pct}
+              />
+            </section>
           )}
+
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Materiales y saldo</h2>
+                <p className="text-sm text-muted-foreground">
+                  Asignado → En proceso de compra → Comprado → Entregado en obra.
+                </p>
+              </div>
+              {puedeTopes && (
+                <Link
+                  href={`/obras/${resolvedparams.id}/asignar-materiales`}
+                  className="btn-secondary btn-sm"
+                >
+                  <IconPlus className="size-4" />
+                  Asignar materiales
+                </Link>
+              )}
+            </div>
+
+            <ObraMaterialesList
+              obraId={resolvedparams.id}
+              saldos={(saldos as SaldoMaterialObra[] | null) ?? []}
+              topes={topes ?? []}
+              puedeTopes={puedeTopes}
+              verPrecios={verPrecios}
+              puedeEditarCatalogo={puedeEditarCatalogo}
+            />
+          </section>
+
+          <section id="documentos" className="card">
+            <ObraDocumentos
+              obraId={resolvedparams.id}
+              documentos={documentos}
+              puedeGestionar={puedeGestionarDocs}
+              puedeEliminar={puedeEliminarDocs}
+            />
+          </section>
         </div>
 
-        <ObraMaterialesList
-          obraId={resolvedparams.id}
-          saldos={(saldos as SaldoMaterialObra[] | null) ?? []}
-          topes={topes ?? []}
-          puedeTopes={puedeTopes}
-          verPrecios={verPrecios}
-          puedeEditarCatalogo={puedeEditarCatalogo}
-        />
+        {/* Rail derecho */}
+        <aside className="space-y-4 lg:sticky lg:top-[calc(var(--topbar-height)+1.5rem)]">
+          {verPrecios && (
+            <section className="card hidden lg:block">
+              <PresupuestoResumen
+                total={totalMx}
+                comprometido={comprometidoMx}
+                gastado={gastadoMx}
+                disponible={disponibleMx}
+                pct={pct}
+              />
+            </section>
+          )}
+
+          <section className="card">
+            <h2 className="card-title mb-3">Resumen</h2>
+            <dl className="space-y-2.5 text-sm">
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-muted-foreground">Estatus</dt>
+                <dd className="font-medium text-foreground">{labelEstatus(obra.estado)}</dd>
+              </div>
+              {obra.cliente && (
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="text-muted-foreground">Cliente</dt>
+                  <dd className="text-right font-medium text-foreground">{obra.cliente}</dd>
+                </div>
+              )}
+              {meta && (
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="text-muted-foreground">Ubicación</dt>
+                  <dd className="text-right font-medium text-foreground">{meta}</dd>
+                </div>
+              )}
+              {obra.paquete && (
+                <div className="flex items-start justify-between gap-3">
+                  <dt className="text-muted-foreground">Paquete</dt>
+                  <dd className="text-right font-medium text-foreground">{obra.paquete}</dd>
+                </div>
+              )}
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-muted-foreground">Materiales</dt>
+                <dd className="font-medium text-foreground tabular-nums">{(saldos ?? []).length}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-muted-foreground">Documentos</dt>
+                <dd className="font-medium tabular-nums">
+                  <a href="#documentos" className="inline-flex items-center gap-1 text-primary hover:underline">
+                    <IconDocumento className="size-3.5" />
+                    {documentos.length}
+                  </a>
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          {(puedeCerrar || puedeReabrir) && (
+            <section className="card border-dashed">
+              <h2 className="card-title mb-1">Ciclo de vida</h2>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Cerrar el proyecto congela saldos y genera la conciliación final.
+              </p>
+              <CierreObraAcciones
+                obraId={obra.id}
+                estado={obra.estado}
+                puedeCerrar={puedeCerrar}
+                puedeReabrir={puedeReabrir}
+              />
+            </section>
+          )}
+        </aside>
       </div>
     </main>
+  )
+}
+
+function PresupuestoResumen({
+  total,
+  comprometido,
+  gastado,
+  disponible,
+  pct,
+}: {
+  total: number
+  comprometido: number
+  gastado: number
+  disponible: number
+  pct: (v: number) => number
+}) {
+  const filas = [
+    { label: 'Gastado', value: gastado, bar: 'bg-foreground', highlight: false },
+    { label: 'Comprometido', value: comprometido, bar: 'bg-warning', highlight: false },
+    { label: 'Disponible', value: disponible, bar: 'bg-primary', highlight: true },
+  ]
+  return (
+    <>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="card-title">Presupuesto</h2>
+          <p className="text-xs text-muted-foreground">MXN · tope contratado</p>
+        </div>
+        <p className="text-right text-lg font-semibold tabular-nums text-foreground">{formatMoneyMx(total)}</p>
+      </div>
+      {/* Barra apilada: gastado + comprometido sobre el total */}
+      <div className="mb-4 flex h-2 w-full overflow-hidden rounded-full bg-muted" aria-hidden>
+        <span className="h-full bg-foreground" style={{ width: `${pct(gastado)}%` }} />
+        <span className="h-full bg-warning" style={{ width: `${pct(comprometido)}%` }} />
+      </div>
+      <dl className="space-y-2">
+        {filas.map((f) => (
+          <div key={f.label} className="flex items-center justify-between gap-3 text-sm">
+            <dt className="flex items-center gap-2 text-muted-foreground">
+              <span className={`size-2 rounded-full ${f.bar}`} aria-hidden />
+              {f.label}
+            </dt>
+            <dd className={`tabular-nums font-semibold ${f.highlight ? 'text-primary' : 'text-foreground'}`}>
+              {formatMoneyMx(f.value)}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </>
   )
 }

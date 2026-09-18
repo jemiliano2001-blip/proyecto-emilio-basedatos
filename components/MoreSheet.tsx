@@ -1,51 +1,26 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { logoutAction } from '@/lib/actions/auth'
-import {
-  IconBitacora,
-  IconCerrar,
-  IconMateriales,
-  IconOrdenes,
-  IconPaquete,
-  IconProveedores,
-  IconRayo,
-  IconRecepcion,
-  IconSalir,
-  IconTraspasos,
-  IconUsuarios,
-} from '@/components/icons'
+import { IconCampana, IconCerrar, IconSalir } from '@/components/icons'
+import { NavIcon } from '@/components/NavIcon'
+import type { NavItem } from '@/lib/nav'
+import { cn } from '@/lib/utils'
 
 export function MoreSheet({
   open,
   onClose,
-  puedeVerPrecios,
-  puedeVerTraspasos,
-  puedeGestionarProveedores,
-  puedeVerRecepciones,
-  mostrarOrdenesEnMas,
-  mostrarRecepcionEnMas,
-  traspasosDisponibles,
+  items,
   vistaCampoLimitada = false,
-  puedeVerInventario = false,
-  puedeGestionarUsuarios = false,
-  puedeVerBitacora = false,
 }: {
   open: boolean
   onClose: () => void
-  puedeVerPrecios: boolean
-  puedeVerTraspasos: boolean
-  puedeGestionarProveedores: boolean
-  puedeVerRecepciones: boolean
-  mostrarOrdenesEnMas: boolean
-  mostrarRecepcionEnMas: boolean
-  traspasosDisponibles: boolean
+  items: NavItem[]
   vistaCampoLimitada?: boolean
-  puedeVerInventario?: boolean
-  puedeGestionarUsuarios?: boolean
-  puedeVerBitacora?: boolean
 }) {
+  const pathname = usePathname()
   const panelRef = useRef<HTMLDivElement>(null)
   const previousFocus = useRef<HTMLElement | null>(null)
 
@@ -76,14 +51,18 @@ export function MoreSheet({
 
   if (!open) return null
 
-  const itemClass =
-    'flex min-h-[48px] items-center gap-3 rounded-lg px-3 text-base font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent'
+  const itemClass = (active: boolean) =>
+    cn(
+      'flex min-h-[48px] items-center gap-3 rounded-lg px-3 text-base font-medium transition-colors',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+      active ? 'bg-primary-soft text-primary-soft-foreground' : 'text-foreground hover:bg-muted'
+    )
 
   return (
-    <div className="fixed inset-0 z-40">
+    <div className="fixed inset-0 z-40 lg:hidden">
       <button
         type="button"
-        className="absolute inset-0 bg-ink/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in"
         aria-label="Cerrar menú"
         onClick={onClose}
       />
@@ -93,86 +72,52 @@ export function MoreSheet({
         aria-modal="true"
         aria-labelledby="mas-titulo"
         ref={panelRef}
-        className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-card px-4 pt-3 shadow-lg animate-slide-in-bottom"
+        className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-border bg-card px-4 pt-2 shadow-lg animate-slide-in-bottom"
         style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
       >
+        <div aria-hidden className="mx-auto mb-2 h-1 w-10 rounded-full bg-border" />
         <div className="mb-2 flex items-center justify-between">
-          <h2 id="mas-titulo" className="text-base font-bold text-foreground">
+          <h2 id="mas-titulo" className="text-base font-semibold text-foreground">
             Más
           </h2>
           <button
             type="button"
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Cerrar"
             onClick={onClose}
           >
-            <IconCerrar className="h-5 w-5" />
+            <IconCerrar className="size-5" />
           </button>
         </div>
 
-        <nav className="flex flex-col gap-1">
-          {!vistaCampoLimitada && (
-            <Link href="/materiales" className={itemClass} onClick={onClose}>
-              <IconMateriales className="h-5 w-5 shrink-0" />
-              Materiales
-            </Link>
-          )}
+        <nav className="flex flex-col gap-0.5">
+          {items.map((item) => {
+            const active = item.isActive(pathname)
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={itemClass(active)}
+                onClick={onClose}
+                aria-current={active ? 'page' : undefined}
+              >
+                <NavIcon
+                  id={item.icon}
+                  className={cn('size-5 shrink-0', active ? 'text-primary' : 'text-muted-foreground')}
+                />
+                {item.label}
+              </Link>
+            )
+          })}
 
-          {!vistaCampoLimitada && (
-            <Link href="/kits" className={itemClass} onClick={onClose}>
-              <IconRayo className="h-5 w-5 shrink-0 text-amber-500" />
-              Kits y Ensambles
-            </Link>
-          )}
-
-          {mostrarRecepcionEnMas && puedeVerRecepciones && (
-            <Link href="/recepciones" className={itemClass} onClick={onClose}>
-              <IconRecepcion className="h-5 w-5 shrink-0" />
-              Recepción
-            </Link>
-          )}
-
-          {puedeVerInventario && (
-            <Link href="/inventario" className={itemClass} onClick={onClose}>
-              <IconPaquete className="h-5 w-5 shrink-0" />
-              Inventario en obra
-            </Link>
-          )}
-
-          {puedeVerTraspasos && traspasosDisponibles && (
-            <Link href="/traspasos" className={itemClass} onClick={onClose}>
-              <IconTraspasos className="h-5 w-5 shrink-0" />
-              Traspasos
-            </Link>
-          )}
-
-          {mostrarOrdenesEnMas && puedeVerPrecios && (
-            <Link href="/ordenes" className={itemClass} onClick={onClose}>
-              <IconOrdenes className="h-5 w-5 shrink-0" />
-              Órdenes
-            </Link>
-          )}
-
-          {puedeGestionarProveedores && (
-            <Link href="/proveedores" className={itemClass} onClick={onClose}>
-              <IconProveedores className="h-5 w-5 shrink-0" />
-              Proveedores
-            </Link>
-          )}
-
-          {puedeGestionarUsuarios && (
-            <Link href="/usuarios" className={itemClass} onClick={onClose}>
-              <IconUsuarios className="h-5 w-5 shrink-0" />
-              Usuarios
-            </Link>
-          )}
-
-          {puedeVerBitacora && (
-            <Link href="/bitacora" className={itemClass} onClick={onClose}>
-              <IconBitacora className="h-5 w-5 shrink-0" />
-              Bitácora
-            </Link>
-          )}
+          <Link
+            href="/notificaciones"
+            className={itemClass(pathname.startsWith('/notificaciones'))}
+            onClick={onClose}
+          >
+            <IconCampana className="size-5 shrink-0 text-muted-foreground" />
+            Avisos
+          </Link>
 
           {vistaCampoLimitada && (
             <p className="px-3 py-2 text-sm text-muted-foreground">
@@ -182,13 +127,13 @@ export function MoreSheet({
           )}
         </nav>
 
-        <form action={logoutAction} className="mt-4 border-t border-border pt-3">
+        <form action={logoutAction} className="mt-3 border-t border-border pt-3">
           <button
             type="submit"
-            className="flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 text-left text-base font-semibold text-danger hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+            className="flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 text-left text-base font-medium text-danger hover:bg-danger-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
           >
-            <IconSalir className="h-5 w-5 shrink-0" />
-            Salir
+            <IconSalir className="size-5 shrink-0" />
+            Cerrar sesión
           </button>
         </form>
       </div>

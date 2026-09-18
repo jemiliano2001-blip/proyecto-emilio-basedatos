@@ -89,12 +89,12 @@ export function KitForm({
       <FormError message={state.error} />
 
       <div className="card space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
           Datos de la Plantilla / Kit
         </h2>
 
         <div>
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-1">
             Nombre de la plantilla *
           </label>
           <input
@@ -109,7 +109,7 @@ export function KitForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label htmlFor="material_principal_id" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="material_principal_id" className="block text-sm font-medium text-foreground mb-1">
               Equipo principal asociado (Opcional)
             </label>
             <select
@@ -125,13 +125,13 @@ export function KitForm({
                 </option>
               ))}
             </select>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Al elegir este material en una obra, se sugerirá este kit automáticamente.
             </p>
           </div>
 
           <div>
-            <label htmlFor="configuracion" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="configuracion" className="block text-sm font-medium text-foreground mb-1">
               Configuración / Tipo
             </label>
             <input
@@ -145,7 +145,7 @@ export function KitForm({
         </div>
 
         <div>
-          <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="descripcion" className="block text-sm font-medium text-foreground mb-1">
             Descripción o notas de ensamble
           </label>
           <textarea
@@ -160,19 +160,19 @@ export function KitForm({
       </div>
 
       <div className="card space-y-4">
-        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
-            <h2 className="text-sm font-bold text-ink uppercase tracking-wide">
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-wide">
               Componentes Menores Incluidos (&quot;Chiquitiaje&quot;)
             </h2>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Materiales que se inyectarán por cada unidad de kit que se cargue a la obra.
             </p>
           </div>
           <button
             type="button"
             onClick={agregarFila}
-            className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
+            className="btn-primary text-xs py-1.5 px-3"
           >
             <IconPlus className="w-3.5 h-3.5" />
             <span>Componente</span>
@@ -188,13 +188,13 @@ export function KitForm({
           {items.map((it) => (
             <div
               key={it.key}
-              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border"
             >
               <div className="flex-1 min-w-0">
                 <select
                   value={it.material_id}
                   onChange={(e) => actualizarFila(it.key, { material_id: e.target.value })}
-                  className="input-base text-sm bg-white"
+                  className="input-base text-sm bg-card"
                   required
                 >
                   <option value="">-- Selecciona material accesorio --</option>
@@ -213,7 +213,7 @@ export function KitForm({
                   placeholder="Cant. por kit"
                   value={it.cantidad}
                   onChange={(e) => actualizarFila(it.key, { cantidad: e.target.value })}
-                  className="input-base text-sm bg-white text-center font-medium"
+                  className="input-base text-sm bg-card text-center font-medium"
                   required
                 />
               </div>
@@ -223,7 +223,7 @@ export function KitForm({
                   type="button"
                   onClick={() => quitarFila(it.key)}
                   aria-label="Quitar componente"
-                  className="btn-ghost text-red-600 hover:text-red-800 p-2 self-center"
+                  className="btn-ghost text-danger hover:text-danger-soft-foreground p-2 self-center"
                 >
                   <IconBasura className="w-4 h-4" />
                 </button>

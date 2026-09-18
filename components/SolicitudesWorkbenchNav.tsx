@@ -55,7 +55,7 @@ export function SolicitudesWorkbenchNav({
           <p className="text-xs font-bold uppercase tracking-wide text-foreground">Cola</p>
           <Link
             href="/solicitudes"
-            className="text-xs font-semibold text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+            className="text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
           >
             Ver todas
           </Link>
@@ -77,13 +77,13 @@ export function SolicitudesWorkbenchNav({
                   aria-current={active ? 'page' : undefined}
                   className={
                     active
-                      ? 'block px-3 py-3 bg-muted/80 border-l-2 border-l-accent'
+                      ? 'block px-3 py-3 bg-muted/80 border-l-2 border-l-primary'
                       : 'block px-3 py-3 hover:bg-muted/50 border-l-2 border-l-transparent'
                   }
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="font-mono text-[11px] font-bold text-navy truncate">
+                      <p className="font-mono text-[11px] font-bold text-foreground truncate">
                         {reqCode}
                       </p>
                       <p className="text-sm font-semibold text-foreground truncate mt-0.5">
