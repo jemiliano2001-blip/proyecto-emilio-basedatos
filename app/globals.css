@@ -347,6 +347,13 @@
     html[data-sidebar='collapsed'] .app-content {
       padding-left: var(--sidebar-width-collapsed);
     }
+    /* Transición suave solo cuando el usuario alterna el sidebar activamente (evita CLS en carga) */
+    html.sidebar-transitioning .app-content {
+      transition: padding-left 200ms var(--ease-out);
+    }
+    html.sidebar-transitioning aside[data-sidebar-aside] {
+      transition: width 200ms var(--ease-out);
+    }
   }
 
   /* ---------- Listas densas ---------- */
@@ -378,10 +385,10 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Atajo de teclado */
+  /* Atajo de teclado (alto contraste WCAG AA/AAA) */
   .kbd {
     @apply inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded border border-border bg-muted px-1
-           font-mono text-[10px] font-medium text-muted-foreground;
+           font-mono text-[10px] font-semibold text-foreground;
   }
 
   /* ---------- Entradas animadas ---------- */

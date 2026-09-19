@@ -15,6 +15,7 @@ export interface EmptyStateProps {
   description?: string
   action?: EmptyStateAction
   className?: string
+  headingLevel?: 'h2' | 'h3' | 'h4' | 'p'
 }
 
 export function EmptyState({
@@ -23,7 +24,9 @@ export function EmptyState({
   description,
   action,
   className,
+  headingLevel = 'h2',
 }: EmptyStateProps) {
+  const HeadingTag = headingLevel
   const renderIcon = (iconInput?: React.ComponentType<{ className?: string }> | React.ReactNode, defaultClass = 'h-6 w-6') => {
     if (!iconInput) return null
     if (typeof iconInput === 'function') {
@@ -45,7 +48,7 @@ export function EmptyState({
           {renderIcon(icon, 'h-6 w-6')}
         </div>
       )}
-      <h3 className="text-sm font-semibold text-foreground tracking-tight">{title}</h3>
+      <HeadingTag className="text-sm font-semibold text-foreground tracking-tight">{title}</HeadingTag>
       {description && (
         <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-relaxed">{description}</p>
       )}

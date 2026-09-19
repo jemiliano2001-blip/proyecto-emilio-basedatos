@@ -43,11 +43,19 @@ export function AppSidebar({
   }, [collapsed])
 
   const toggle = useCallback(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.add('sidebar-transitioning')
+    }
     setCollapsed((prev) => {
       const next = !prev
       document.cookie = `${SIDEBAR_COOKIE}=${next ? '1' : '0'}; path=/; max-age=31536000; samesite=lax`
       return next
     })
+    setTimeout(() => {
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.remove('sidebar-transitioning')
+      }
+    }, 250)
   }, [])
 
   // Atajo: Ctrl/Cmd + B alterna el sidebar (convención de editores/SaaS)
@@ -67,10 +75,10 @@ export function AppSidebar({
   return (
     <aside
       data-collapsed={collapsed}
+      data-sidebar-aside
       aria-label="Navegación principal"
       className={cn(
         'fixed inset-y-0 left-0 z-40 hidden lg:flex flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground print:hidden',
-        'transition-[width] duration-200 ease-out',
         collapsed ? 'w-sidebar-collapsed' : 'w-sidebar'
       )}
     >
@@ -118,14 +126,14 @@ export function AppSidebar({
             'hover:border-input hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             collapsed ? 'size-10 justify-center border-transparent bg-transparent shadow-none' : 'h-10 w-full px-3'
           )}
-          aria-label="Abrir buscador y comandos"
+          aria-label={collapsed ? 'Buscar (Ctrl+K)' : 'Buscar… (⌘K)'}
           title="Buscar (Ctrl+K)"
         >
-          <IconSearch className="size-4 shrink-0" />
+          <IconSearch className="size-4 shrink-0" aria-hidden="true" />
           {!collapsed && (
             <>
               <span className="flex-1 text-left">Buscar…</span>
-              <kbd className="kbd">⌘K</kbd>
+              <kbd className="kbd" aria-hidden="true">⌘K</kbd>
             </>
           )}
         </button>

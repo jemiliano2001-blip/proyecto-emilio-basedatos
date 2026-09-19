@@ -460,7 +460,7 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
               <IconCerrar className="w-4 h-4" />
             </button>
           )}
-          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground bg-muted border border-border rounded">
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-foreground bg-muted border border-border rounded">
             ESC
           </kbd>
         </div>

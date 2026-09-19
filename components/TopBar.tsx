@@ -78,10 +78,10 @@ export function TopBar({ nombre }: { nombre: string | null }) {
             onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
             className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-[40px] lg:min-w-[40px]"
             title="Buscador y comandos (Ctrl+K)"
-            aria-label="Abrir buscador y comandos"
+            aria-label="Buscar (⌘K)"
           >
-            <IconSearch className="size-5 lg:size-[18px]" />
-            <kbd className="kbd hidden sm:inline-flex">⌘K</kbd>
+            <IconSearch className="size-5 lg:size-[18px]" aria-hidden="true" />
+            <kbd className="kbd hidden sm:inline-flex" aria-hidden="true">⌘K</kbd>
           </button>
           <button
             type="button"

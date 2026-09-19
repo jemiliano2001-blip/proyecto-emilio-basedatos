@@ -82,7 +82,7 @@ export default async function RootLayout({
           <div
             className={cn(
               'app-content flex min-h-dvh flex-col',
-              showNav && 'lg:pl-sidebar lg:transition-[padding] lg:duration-200 lg:ease-out'
+              showNav && 'lg:pl-sidebar'
             )}
           >
             {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} />}
