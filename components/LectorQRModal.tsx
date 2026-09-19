@@ -93,6 +93,8 @@ export function LectorQRModal({
     router.push(`/ordenes/${texto}/recibir`)
   }, [detenerCamara, onClose, router])
 
+  const [retryCount, setRetryCount] = useState(0)
+
   useEffect(() => {
     if (!isOpen) {
       detenerCamara()
@@ -177,7 +179,19 @@ export function LectorQRModal({
       } catch (err: unknown) {
         if (!activo) return
         vibrarAlerta()
-        const mensaje = err instanceof Error ? err.message : 'No se pudo acceder a la cámara'
+        let mensaje = 'No se pudo acceder a la cámara.'
+        if (err instanceof Error) {
+          const lower = err.message.toLowerCase()
+          if (err.name === 'NotAllowedError' || lower.includes('permission') || lower.includes('denied') || lower.includes('policy')) {
+            mensaje = 'Permiso de cámara bloqueado o denegado. Haz clic en el ícono del candado o configuración del sitio (junto a la dirección web) y permite el acceso a la cámara.'
+          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            mensaje = 'No se encontró ninguna cámara disponible en este dispositivo.'
+          } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+            mensaje = 'La cámara está siendo utilizada por otra aplicación o pestaña.'
+          } else {
+            mensaje = err.message
+          }
+        }
         setErrorCamara(mensaje)
         setIniciando(false)
       }
@@ -189,7 +203,7 @@ export function LectorQRModal({
       activo = false
       detenerCamara()
     }
-  }, [isOpen, detenerCamara, handleCodigoDetectado])
+  }, [isOpen, retryCount, detenerCamara, handleCodigoDetectado])
 
   if (!isOpen) return null
 
@@ -246,14 +260,27 @@ export function LectorQRModal({
 
           {errorCamara && (
             <div className="absolute inset-0 p-6 flex flex-col items-center justify-center text-center gap-3 bg-black/90 text-white">
-              <p className="text-xs text-rose-300 leading-relaxed">{errorCamara}</p>
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn-secondary text-xs px-4 py-1.5"
-              >
-                Cerrar
-              </button>
+              <p className="text-xs text-rose-300 leading-relaxed max-w-xs">{errorCamara}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErrorCamara(null)
+                    setIniciando(true)
+                    setRetryCount((c) => c + 1)
+                  }}
+                  className="btn-primary text-xs px-4 py-1.5"
+                >
+                  Reintentar
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-secondary text-xs px-4 py-1.5"
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           )}
         </div>

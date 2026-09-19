@@ -23,11 +23,12 @@ const nextConfig = {
   async headers() {
     const cspHeader = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' blob: data: https://*.supabase.co https://*.supabase.in",
-      "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live",
+      "style-src 'self' 'unsafe-inline' https://vercel.live",
+      "img-src 'self' blob: data: https://*.supabase.co https://*.supabase.in https://vercel.live https://vercel.com",
+      "font-src 'self' data: https://vercel.live https://assets.vercel.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://vercel.live https://*.pusher.com wss://*.pusher.com",
+      "frame-src 'self' https://vercel.live",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -63,7 +64,7 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+            value: 'camera=(self), microphone=(), geolocation=(self), browsing-topics=()',
           },
         ],
       },

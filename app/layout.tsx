@@ -27,6 +27,11 @@ export const metadata: Metadata = {
   title: 'ObraTrack — Control de Proyectos y Materiales',
   description: 'Sistema de control, presupuestos y trazabilidad de materiales y proyectos de obra',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/icon-192.png',
+  },
 }
 
 export const viewport: Viewport = {

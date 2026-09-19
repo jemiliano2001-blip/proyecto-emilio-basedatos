@@ -36,6 +36,7 @@ export function CameraCaptureModal({
   const [hasTorch, setHasTorch] = useState(false)
   const [isTorchOn, setIsTorchOn] = useState(false)
   const [cameraError, setCameraError] = useState<string | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
   const [isCapturing, setIsCapturing] = useState(false)
   const [liveQuality, setLiveQuality] = useState<DiagnosticoCalidadImagen | null>(null)
 
@@ -93,10 +94,19 @@ export function CameraCaptureModal({
         setHasTorch(Boolean(capabilities.torch))
       } catch (err) {
         if (isMounted) {
-          const msg =
-            err instanceof Error
-              ? err.message
-              : 'No se pudo acceder a la cámara. Revisa los permisos de tu navegador.'
+          let msg = 'No se pudo acceder a la cámara. Revisa los permisos de tu navegador.'
+          if (err instanceof Error) {
+            const lower = err.message.toLowerCase()
+            if (err.name === 'NotAllowedError' || lower.includes('permission') || lower.includes('denied') || lower.includes('policy')) {
+              msg = 'Permiso de cámara bloqueado o denegado. Permite el acceso a la cámara en el navegador (haz clic en el ícono del candado o configuración del sitio junto a la URL).'
+            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+              msg = 'No se encontró ninguna cámara disponible en este dispositivo.'
+            } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+              msg = 'La cámara ya está siendo utilizada por otra aplicación o pestaña.'
+            } else {
+              msg = err.message
+            }
+          }
           setCameraError(msg)
         }
       }
@@ -111,7 +121,7 @@ export function CameraCaptureModal({
         streamRef.current = null
       }
     }
-  }, [isOpen, facingMode])
+  }, [isOpen, facingMode, retryCount])
 
   // Encender / apagar linterna si el hardware lo soporta
   const toggleTorch = async () => {
@@ -285,13 +295,25 @@ export function CameraCaptureModal({
               <p className="text-xs text-muted-foreground">
                 Puedes usar el botón estándar de subir archivo con la cámara nativa del sistema.
               </p>
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn-secondary btn-xs mt-2"
-              >
-                Cerrar y usar selector nativo
-              </button>
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCameraError(null)
+                    setRetryCount((c) => c + 1)
+                  }}
+                  className="btn-primary btn-xs"
+                >
+                  Reintentar
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-secondary btn-xs"
+                >
+                  Cerrar y usar selector nativo
+                </button>
+              </div>
             </div>
           ) : (
             <>
