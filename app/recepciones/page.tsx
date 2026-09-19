@@ -5,6 +5,7 @@ import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
 import { IconCheckCircle, IconChevron, IconPaquete } from '@/components/icons'
 import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
+import { BotonEscanearQROrden } from '@/components/BotonEscanearQROrden'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
   puedeCapturarRecepcion,
@@ -73,6 +74,9 @@ export default async function RecepcionesPage() {
       <PageHeader
         title="Recepción"
         description="Checklist de lo recibido contra lo pedido en cada orden de compra."
+        actions={
+          <BotonEscanearQROrden label="Escanear orden" size="sm" />
+        }
       />
 
       <OfflineQueueBanner />

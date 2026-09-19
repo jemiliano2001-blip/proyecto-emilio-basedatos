@@ -74,7 +74,7 @@ export default async function OrdenFormatoPage({ params }: PageProps) {
   }))
 
   const obraObj = orden.obra as unknown as { nombre: string; fraccionamiento: string | null } | null
-  const proveedorObj = orden.proveedor as unknown as { nombre: string } | null
+  const proveedorObj = orden.proveedor as unknown as { nombre: string; telefono?: string | null } | null
 
   const formatoData = {
     id: orden.id,
@@ -85,6 +85,7 @@ export default async function OrdenFormatoPage({ params }: PageProps) {
     total: Number(orden.total),
     solicitante_nombre: solicitanteNombre,
     proveedor_nombre: proveedorObj?.nombre || '',
+    proveedor_telefono: proveedorObj?.telefono || null,
     obra_nombre: obraObj?.nombre || 'Obra',
     obra_fraccionamiento: obraObj?.fraccionamiento,
     autorizado_por: autorizadoPor,

@@ -5,6 +5,12 @@ import type { OrdenCompraFactura, OrdenItemParaFactura } from '@/lib/types'
 import { eliminarFacturaOrdenAction, subirFacturaOrdenAction } from '@/lib/actions/ordenes'
 import { IconClip, IconOjo, IconBasura, IconChevron } from '@/components/icons'
 import { QuickLookModal } from '@/components/QuickLookModal'
+import {
+  parsearCfdiXml,
+  extraerDatosDesdeNombreArchivo,
+  cotejarPartidasConOC,
+} from '@/lib/extractor-facturas-nativo'
+import { vibrarExito, vibrarTap } from '@/lib/haptics'
 
 interface Props {
   ordenId: string
@@ -43,6 +49,7 @@ export function OrdenCompraFacturasSection({
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set())
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
+  const [extraccionMsg, setExtraccionMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -65,10 +72,58 @@ export function OrdenCompraFacturasSection({
     })
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setArchivo(e.target.files[0])
-      setError(null)
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    setArchivo(f)
+    setError(null)
+    setExtraccionMsg(null)
+    vibrarTap()
+
+    try {
+      // 1. Si es archivo XML (CFDI 3.3 o 4.0 oficial del SAT)
+      if (f.name.toLowerCase().endsWith('.xml') || f.type.includes('xml')) {
+        const texto = await f.text()
+        const cfdi = parsearCfdiXml(texto)
+        if (cfdi) {
+          if (cfdi.folioCompleto) {
+            setFolioFactura(cfdi.folioCompleto)
+          }
+          if (cfdi.total != null && cfdi.total > 0) {
+            setMontoFactura(String(cfdi.total))
+          }
+          let ligadas = 0
+          if (cfdi.conceptos.length > 0 && items.length > 0) {
+            const cotejo = cotejarPartidasConOC(
+              cfdi.conceptos,
+              items.map((it) => ({ id: it.id, nombre: it.nombre, cantidad: it.cantidad }))
+            )
+            if (cotejo.itemsCoincidentesIds.length > 0) {
+              setSelectedItemIds(new Set(cotejo.itemsCoincidentesIds))
+              ligadas = cotejo.itemsCoincidentesIds.length
+            }
+          }
+          const partes = [
+            `CFDI SAT válido: Folio ${cfdi.folioCompleto || cfdi.uuidFiscal?.slice(0, 8) || 'Detectado'}`,
+            cfdi.emisorNombre ? `· ${cfdi.emisorNombre}` : null,
+            cfdi.total ? `· $${cfdi.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })} ${cfdi.moneda || 'MXN'}` : null,
+            ligadas > 0 ? `· ${ligadas} material(es) cotejado(s) automáticamente` : null,
+          ].filter(Boolean)
+          setExtraccionMsg(partes.join(' '))
+          vibrarExito()
+          return
+        }
+      }
+
+      // 2. Si es PDF o Imagen, analizar heurística del nombre
+      const heuristica = extraerDatosDesdeNombreArchivo(f.name)
+      if (heuristica.folioSugerido) {
+        setFolioFactura(heuristica.folioSugerido)
+        setExtraccionMsg(`Folio detectado en archivo: ${heuristica.folioSugerido}`)
+        vibrarExito()
+      }
+    } catch (err) {
+      console.warn('Extracción inteligente no concluyente:', err)
     }
   }
 
@@ -101,9 +156,11 @@ export function OrdenCompraFacturasSection({
       } else {
         setModalOpen(false)
         setArchivo(null)
+        setExtraccionMsg(null)
         setFolioFactura('')
         setMontoFactura(totalOrden > 0 ? String(totalOrden) : '')
         setSelectedItemIds(new Set())
+        vibrarExito()
       }
     })
   }
@@ -307,6 +364,12 @@ export function OrdenCompraFacturasSection({
                   <p className="text-[11px] text-primary mt-1 font-medium">
                     Archivo seleccionado: {archivo.name} ({formatBytes(archivo.size)})
                   </p>
+                )}
+                {extraccionMsg && (
+                  <div className="mt-2 p-2.5 rounded-lg bg-teal-50 border border-teal-200 text-teal-900 text-xs flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-teal-600 shrink-0" />
+                    <span className="font-medium leading-snug">{extraccionMsg}</span>
+                  </div>
                 )}
               </div>
 

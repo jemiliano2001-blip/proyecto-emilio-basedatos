@@ -73,6 +73,7 @@ export default async function SolicitudesPage({
     )
     .order('creado_en', { ascending: false })
     .order('id', { ascending: false })
+  if (!verTodas && session?.perfil?.id) query = query.eq('solicitante_id', session.perfil.id)
   if (filters.obra) query = query.eq('obra_id', filters.obra)
   if (filters.estatus === 'recibida') query = query.in('estado', ['recibida', 'pendiente'])
   else if (filters.estatus) query = query.eq('estado', filters.estatus)

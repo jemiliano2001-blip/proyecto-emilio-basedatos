@@ -224,8 +224,12 @@ export function CatalogoMaterialesView({
   }
 
   async function exportSelected() {
-    const { descargarMaterialesCsv } = await import('@/lib/export-selected-materials')
-    descargarMaterialesCsv(selectedMaterials, verPrecios)
+    const { descargarMaterialesExcel, descargarMaterialesCsv } = await import('@/lib/export-selected-materials')
+    try {
+      await descargarMaterialesExcel(selectedMaterials, verPrecios)
+    } catch {
+      descargarMaterialesCsv(selectedMaterials, verPrecios)
+    }
   }
 
   const categoryDialogRef = useRef<HTMLDivElement>(null)

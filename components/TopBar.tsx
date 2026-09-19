@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Fragment } from 'react'
 import { NotificacionCampanita } from '@/components/NotificacionCampanita'
-import { IconChevron, IconLogo, IconSearch } from '@/components/icons'
+import { IconChevron, IconLogo, IconSearch, IconAbastecimiento } from '@/components/icons'
 import { migasDeRuta, tituloDeRuta } from '@/lib/nav'
 
 export function TopBar({ nombre }: { nombre: string | null }) {
@@ -66,7 +66,7 @@ export function TopBar({ nombre }: { nombre: string | null }) {
           </nav>
         </div>
 
-        {/* Derecha · buscador, avisos */}
+        {/* Derecha · buscador, control de abastecimiento, avisos */}
         <div className="flex shrink-0 items-center gap-1">
           {nombre && (
             <span className="mr-2 hidden max-w-[14rem] truncate text-sm text-muted-foreground xl:inline">
@@ -82,6 +82,15 @@ export function TopBar({ nombre }: { nombre: string | null }) {
           >
             <IconSearch className="size-5 lg:size-[18px]" />
             <kbd className="kbd hidden sm:inline-flex">⌘K</kbd>
+          </button>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-abastecimiento-drawer'))}
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-[40px] lg:min-w-[40px]"
+            title="Control de abastecimiento y pendientes"
+            aria-label="Abrir control de abastecimiento y pendientes"
+          >
+            <IconAbastecimiento className="size-5 lg:size-[18px]" />
           </button>
           <NotificacionCampanita />
         </div>

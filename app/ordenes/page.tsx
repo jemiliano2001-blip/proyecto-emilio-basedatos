@@ -12,6 +12,8 @@ import { puedeVerPrecios } from '@/lib/roles'
 import { formatMoneyMx } from '@/lib/money'
 import { createClient } from '@/lib/supabase/server'
 
+import { BotonEscanearQROrden } from '@/components/BotonEscanearQROrden'
+
 interface OrdenRow {
   id: string
   folio: string
@@ -64,9 +66,12 @@ export default async function OrdenesPage({
         title="Órdenes de compra"
         description="Emitidas desde cotizaciones o requisiciones pagadas"
         actions={
-          <Link href="/proveedores" className="btn-secondary btn-sm">
-            Proveedores
-          </Link>
+          <div className="flex items-center gap-2">
+            <BotonEscanearQROrden size="sm" />
+            <Link href="/proveedores" className="btn-secondary btn-sm">
+              Proveedores
+            </Link>
+          </div>
         }
       />
 

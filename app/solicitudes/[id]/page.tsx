@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
 import { CopyButton } from '@/components/CopyButton'
+import { StepperAbastecimiento } from '@/components/StepperAbastecimiento'
 import {
   AprobarComprasButton,
   AprobarPagoButton,
@@ -215,6 +216,79 @@ export default async function SolicitudDetallePage({
           </Badge>
         }
       />
+
+      <div className="mb-4">
+        <StepperAbastecimiento
+          pasos={[
+            {
+              id: 'paso-req',
+              titulo: '1. Requisición',
+              subtitulo: 'Captura en campo',
+              fecha: new Date(detalle.creado_en).toLocaleDateString('es-MX', {
+                day: '2-digit',
+                month: 'short',
+              }),
+              responsable: detalle.solicitante?.nombre ?? 'Residente',
+              estado:
+                detalle.estado === 'cancelada' || detalle.estado === 'rechazada'
+                  ? 'rechazado'
+                  : 'completado',
+            },
+            {
+              id: 'paso-cot',
+              titulo: '2. Cotización',
+              subtitulo: 'Revisión y proveedor',
+              responsable: 'Compras (Talía)',
+              estado:
+                detalle.estado === 'cancelada' || detalle.estado === 'rechazada'
+                  ? 'rechazado'
+                  : estadoRecibida
+                    ? 'en_proceso'
+                    : 'completado',
+            },
+            {
+              id: 'paso-oc',
+              titulo: '3. Orden y Pago',
+              subtitulo: 'Autorización formal',
+              responsable: 'Finanzas (Blanquita)',
+              estado:
+                detalle.estado === 'cancelada' || detalle.estado === 'rechazada'
+                  ? 'rechazado'
+                  : estadoRecibida
+                    ? 'pendiente'
+                    : estadoProceso
+                      ? 'en_proceso'
+                      : 'completado',
+              enlaceHref:
+                ordenesRelacionadas.length > 0
+                  ? `/ordenes/${ordenesRelacionadas[0].id}`
+                  : null,
+              enlaceTexto:
+                ordenesRelacionadas.length > 0
+                  ? `Ver ${ordenesRelacionadas[0].folio}`
+                  : null,
+            },
+            {
+              id: 'paso-rec',
+              titulo: '4. Recepción',
+              subtitulo: 'Cotejo en obra',
+              responsable: 'Personal en Obra',
+              estado:
+                detalle.estado === 'cancelada' || detalle.estado === 'rechazada'
+                  ? 'rechazado'
+                  : detalle.estado === 'finalizada'
+                    ? 'en_proceso'
+                    : 'pendiente',
+              enlaceHref:
+                ordenesRelacionadas.length > 0
+                  ? `/ordenes/${ordenesRelacionadas[0].id}/recibir`
+                  : null,
+              enlaceTexto:
+                ordenesRelacionadas.length > 0 ? 'Ir a recepción' : null,
+            },
+          ]}
+        />
+      </div>
 
       {detalle.nota && (
         <div className="card mb-4">

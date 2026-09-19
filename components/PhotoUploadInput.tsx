@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { IconBasura, IconCheck, IconUbicacion } from '@/components/icons'
 import { comprimirImagenEnCliente } from '@/lib/image-compression'
 import { analizarCalidadArchivoImagen, DiagnosticoCalidadImagen } from '@/lib/image-quality'
+import { vibrarTap, vibrarExito } from '@/lib/haptics'
 import dynamic from 'next/dynamic'
 
 const CameraCaptureModal = dynamic(
@@ -129,6 +130,7 @@ export function PhotoUploadInput({
       })
       setRemoveExisting(false)
       onChangeFile?.(compressedFile)
+      vibrarExito()
     })
   }
 
@@ -199,7 +201,10 @@ export function PhotoUploadInput({
         {captureCamera && (
           <button
             type="button"
-            onClick={() => setIsCameraModalOpen(true)}
+            onClick={() => {
+              vibrarTap()
+              setIsCameraModalOpen(true)
+            }}
             className="text-xs font-semibold text-primary hover:text-primary-soft-foreground bg-primary-soft hover:bg-primary-soft px-2.5 py-1 rounded-lg border border-primary/30 transition-colors flex items-center gap-1.5"
           >
             <span className="w-2 h-2 rounded-full bg-primary animate-ping" />

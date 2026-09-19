@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { logoutAction } from '@/lib/actions/auth'
-import { IconCampana, IconCerrar, IconSalir } from '@/components/icons'
+import { IconCampana, IconCerrar, IconSalir, IconAbastecimiento } from '@/components/icons'
 import { NavIcon } from '@/components/NavIcon'
 import type { NavItem } from '@/lib/nav'
 import { cn } from '@/lib/utils'
@@ -109,6 +109,18 @@ export function MoreSheet({
               </Link>
             )
           })}
+
+          <button
+            type="button"
+            className={itemClass(false)}
+            onClick={() => {
+              onClose()
+              window.dispatchEvent(new CustomEvent('open-abastecimiento-drawer'))
+            }}
+          >
+            <IconAbastecimiento className="size-5 shrink-0 text-muted-foreground" />
+            Control de Abastecimiento
+          </button>
 
           <Link
             href="/notificaciones"

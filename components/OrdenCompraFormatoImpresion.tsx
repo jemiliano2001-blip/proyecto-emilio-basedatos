@@ -2,7 +2,12 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { IconFlechaAtras, IconImprimir, IconCheck } from '@/components/icons'
+import { IconFlechaAtras, IconImprimir } from '@/components/icons'
+import { BotonEnviarWhatsApp } from '@/components/BotonEnviarWhatsApp'
+import { BotonDescargarOrdenExcel } from '@/components/BotonDescargarOrdenExcel'
+import { QRCodeSvg } from '@/lib/qr'
+import type { DatosOrdenWhatsApp } from '@/lib/whatsapp-notificacion'
+import type { DatosOrdenExcel } from '@/lib/orden-excel-export'
 
 interface ItemImpresion {
   id: string
@@ -24,6 +29,7 @@ interface OrdenFormatoProps {
     total: number
     solicitante_nombre: string
     proveedor_nombre: string
+    proveedor_telefono?: string | null
     obra_nombre: string
     obra_fraccionamiento?: string | null
     autorizado_por: string
@@ -39,7 +45,6 @@ export function OrdenCompraFormatoImpresion({
   volverLabel,
 }: OrdenFormatoProps) {
   const [estiloPapel, setEstiloPapel] = useState<'amarillo' | 'blanco'>('amarillo')
-  const [copiado, setCopiado] = useState(false)
   const hrefVolver = volverHref ?? `/ordenes/${orden.id}`
   const labelVolver = volverLabel ?? 'Volver a la orden'
 
@@ -78,32 +83,54 @@ export function OrdenCompraFormatoImpresion({
     }
   })
 
-  // Generar texto para WhatsApp
-  const handleCopiarWhatsApp = () => {
-    const folioStr = orden.folio_fisico ? `${orden.folio} (Talonario: ${orden.folio_fisico})` : orden.folio
-    let texto = `*GRUPO GARZA-ESCOBEDO, S.A. DE C.V.*\n`
-    texto += `*ORDEN DE COMPRA:* ${folioStr}\n`
-    texto += `*FECHA:* ${fechaFormateada}\n`
-    texto += `*PROVEEDOR:* ${orden.proveedor_nombre || 'Pendiente'}\n`
-    texto += `*OBRA:* ${orden.obra_nombre}\n`
-    texto += `*SOLICITANTE:* ${orden.solicitante_nombre}\n\n`
-    texto += `*LISTADO DE MATERIALES:*\n`
-    items.forEach((it, idx) => {
-      texto += `${idx + 1}.- ${it}\n`
-    })
-    texto += `\n*AUTORIZÓ:* ${orden.autorizado_por}`
-
-    navigator.clipboard.writeText(texto).then(() => {
-      setCopiado(true)
-      setTimeout(() => setCopiado(false), 3000)
-    })
-  }
-
   const handlePrint = () => {
     window.print()
   }
 
   const folioMostrado = orden.folio_fisico || orden.folio
+
+  const datosWhatsApp: DatosOrdenWhatsApp = {
+    folio: orden.folio,
+    folioFisico: orden.folio_fisico,
+    obraNombre: orden.obra_nombre,
+    fraccionamiento: orden.obra_fraccionamiento,
+    proveedorNombre: orden.proveedor_nombre,
+    proveedorTelefono: orden.proveedor_telefono,
+    solicitanteNombre: orden.solicitante_nombre,
+    autorizadoPor: orden.autorizado_por,
+    fechaEmision: fechaFormateada,
+    moneda: orden.moneda,
+    total: orden.total,
+    items: (orden.items ?? []).map((it) => ({
+      cantidad: it.cantidad,
+      unidad: it.unidad_medida,
+      descripcion:
+        it.tipo_linea === 'material' || !it.tipo_linea
+          ? `${it.nombre_material}${it.variante ? ` (${it.variante})` : ''}`
+          : it.descripcion || it.nombre_material,
+    })),
+  }
+
+  const datosExcel: DatosOrdenExcel = {
+    folio: orden.folio,
+    folioFisico: orden.folio_fisico,
+    obraNombre: orden.obra_nombre,
+    fraccionamiento: orden.obra_fraccionamiento,
+    proveedorNombre: orden.proveedor_nombre,
+    proveedorTelefono: orden.proveedor_telefono,
+    solicitanteNombre: orden.solicitante_nombre,
+    autorizadoPor: orden.autorizado_por,
+    fechaEmision: fechaFormateada,
+    moneda: orden.moneda,
+    total: orden.total,
+    items: (orden.items ?? []).map((it, idx) => ({
+      no: idx + 1,
+      material: it.nombre_material,
+      variante: it.variante,
+      unidad: it.unidad_medida,
+      cantidad: it.cantidad,
+    })),
+  }
 
   return (
     <div className="min-h-screen bg-background py-6 px-4 print:p-0 print:bg-card">
@@ -155,21 +182,11 @@ export function OrdenCompraFormatoImpresion({
             </button>
           </div>
 
-          {/* Botón WhatsApp */}
-          <button
-            type="button"
-            onClick={handleCopiarWhatsApp}
-            className="px-3 py-1.5 rounded-xl bg-success hover:bg-success text-primary-foreground text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
-          >
-            {copiado ? (
-              <>
-                <IconCheck className="w-3.5 h-3.5" />
-                <span>Copiado</span>
-              </>
-            ) : (
-              <span>Copiar para WhatsApp</span>
-            )}
-          </button>
+          {/* Botón WhatsApp Directo */}
+          <BotonEnviarWhatsApp orden={datosWhatsApp} size="xs" />
+
+          {/* Botón Descargar Excel */}
+          <BotonDescargarOrdenExcel orden={datosExcel} size="xs" />
 
           {/* Botón Imprimir / PDF */}
           <button
@@ -178,7 +195,7 @@ export function OrdenCompraFormatoImpresion({
             className="btn-primary text-xs"
           >
             <IconImprimir className="w-3.5 h-3.5" />
-            <span>Imprimir / Guardar PDF</span>
+            <span>Imprimir / PDF</span>
           </button>
         </div>
       </div>
@@ -231,8 +248,8 @@ export function OrdenCompraFormatoImpresion({
             </div>
           </div>
 
-          {/* Bloque Superior Derecho: Orden de Compra y Fecha */}
-          <div className="text-right shrink-0">
+          {/* Bloque Superior Derecho: Orden de Compra, Fecha y QR */}
+          <div className="text-right shrink-0 flex flex-col items-end">
             <div className="border-2 border-foreground px-3 py-1.5 rounded bg-card/60 text-center min-w-[170px]">
               <span className="block text-[11px] font-extrabold tracking-wider uppercase text-foreground">
                 ORDEN DE COMPRA
@@ -241,9 +258,19 @@ export function OrdenCompraFormatoImpresion({
                 No &nbsp;{folioMostrado}
               </span>
             </div>
-            <p className="text-[11px] font-medium text-foreground mt-2">
-              <strong className="font-bold">FECHA:</strong> {fechaFormateada}
-            </p>
+            <div className="mt-2 flex items-center justify-end gap-2.5">
+              <div className="text-right">
+                <p className="text-[11px] font-medium text-foreground">
+                  <strong className="font-bold">FECHA:</strong> {fechaFormateada}
+                </p>
+                <span className="text-[9px] text-muted-foreground font-mono block">
+                  Escanear en obra
+                </span>
+              </div>
+              <div className="p-1 bg-white border border-foreground/30 rounded shadow-xs">
+                <QRCodeSvg value={`emilio:oc:${orden.id}`} size={56} />
+              </div>
+            </div>
           </div>
         </div>
 

@@ -409,3 +409,45 @@ export function IconUbicacion(props: IconProps) {
     </svg>
   )
 }
+
+export function IconWhatsApp(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    </svg>
+  )
+}
+
+export function IconCamara(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  )
+}
+
+export function IconQR(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="3" height="3" fill="currentColor" stroke="none" />
+      <rect x="18" y="18" width="3" height="3" fill="currentColor" stroke="none" />
+      <path d="M14 20h3" />
+      <path d="M20 14v3" />
+    </svg>
+  )
+}
+
+export function IconAbastecimiento(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+      <rect x="9" y="3" width="6" height="4" rx="1" />
+      <path d="m9 14 2 2 4-4" />
+    </svg>
+  )
+}
+

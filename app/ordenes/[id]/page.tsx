@@ -5,10 +5,16 @@ import { Badge } from '@/components/Badge'
 import { CopyButton } from '@/components/CopyButton'
 import { EmptyState } from '@/components/EmptyState'
 import { IconChevron, IconImprimir, IconPaquete } from '@/components/icons'
+import { BotonEnviarWhatsApp } from '@/components/BotonEnviarWhatsApp'
+import { BotonDescargarOrdenExcel } from '@/components/BotonDescargarOrdenExcel'
+import { StepperAbastecimiento } from '@/components/StepperAbastecimiento'
+import { LeadTimeBadge } from '@/components/LeadTimeBadge'
 import { OrdenCompraFacturasSection } from '@/components/OrdenCompraFacturasSection'
 import { OrdenCompraProveedorModal } from '@/components/OrdenCompraProveedorModal'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { formatMoneyMx } from '@/lib/money'
+import type { DatosOrdenWhatsApp } from '@/lib/whatsapp-notificacion'
+import type { DatosOrdenExcel } from '@/lib/orden-excel-export'
 import {
   puedeAsignarProveedorOC,
   puedeCapturarRecepcion,
@@ -235,6 +241,52 @@ export default async function OrdenDetallePage({
     year: 'numeric',
   })
 
+  const datosWhatsApp: DatosOrdenWhatsApp = {
+    folio: detalle.folio,
+    folioFisico: detalle.folio_fisico,
+    obraNombre: detalle.obra?.nombre || 'Proyecto',
+    fraccionamiento: detalle.obra?.fraccionamiento,
+    proveedorNombre: detalle.proveedor?.nombre || 'Proveedor',
+    proveedorTelefono: detalle.proveedor?.telefono,
+    fechaEmision,
+    moneda: detalle.moneda,
+    total: detalle.total,
+    items: (detalle.items ?? []).map((it) => {
+      const mat = it.material
+      const desc = mat
+        ? `${mat.nombre_base}${mat.variante ? ` (${mat.variante})` : ''}`
+        : 'Material'
+      return {
+        cantidad: Number(it.cantidad),
+        unidad: mat?.unidad_medida || 'PZA',
+        descripcion: desc,
+        precioUnitario: Number(it.precio_unitario),
+        subtotal: Number(it.subtotal),
+      }
+    }),
+  }
+
+  const datosExcel: DatosOrdenExcel = {
+    folio: detalle.folio,
+    folioFisico: detalle.folio_fisico,
+    obraNombre: detalle.obra?.nombre || 'Proyecto',
+    fraccionamiento: detalle.obra?.fraccionamiento,
+    proveedorNombre: detalle.proveedor?.nombre || 'Proveedor',
+    proveedorTelefono: detalle.proveedor?.telefono,
+    fechaEmision,
+    moneda: detalle.moneda,
+    total: detalle.total,
+    items: (detalle.items ?? []).map((it, idx) => ({
+      no: idx + 1,
+      material: it.material?.nombre_base || 'Material',
+      variante: it.material?.variante,
+      unidad: it.material?.unidad_medida || 'PZA',
+      cantidad: Number(it.cantidad),
+      precioUnitario: Number(it.precio_unitario),
+      subtotal: Number(it.subtotal),
+    })),
+  }
+
   return (
     <main className="page-shell-wide">
       <PageHeader
@@ -246,9 +298,12 @@ export default async function OrdenDetallePage({
           </span>
         }
         badge={
-          <Badge variant={badge.variant} dot>
-            {badge.label}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={badge.variant} dot>
+              {badge.label}
+            </Badge>
+            <LeadTimeBadge fechaEmision={detalle.creado_en} />
+          </div>
         }
         description={
           detalle.obra
@@ -258,7 +313,9 @@ export default async function OrdenDetallePage({
         backHref="/ordenes"
         backLabel="Órdenes"
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2">
+            <BotonEnviarWhatsApp orden={datosWhatsApp} size="sm" />
+            <BotonDescargarOrdenExcel orden={datosExcel} size="sm" />
             <Link href={`/ordenes/${detalle.id}/formato`} className="btn-secondary btn-sm">
               <IconImprimir className="size-4" />
               Formato OC (PDF)
@@ -269,9 +326,67 @@ export default async function OrdenDetallePage({
                 Registrar recepción
               </Link>
             )}
-          </>
+          </div>
         }
       />
+
+      {/* Stepper del Ciclo de Abastecimiento */}
+      <div className="mb-6">
+        <StepperAbastecimiento
+          pasos={[
+            {
+              id: 'paso-req',
+              titulo: '1. Requisición',
+              subtitulo: 'Aprobada en sistema',
+              fecha: fechaEmision,
+              responsable: 'Aprobada',
+              estado: 'completado',
+            },
+            {
+              id: 'paso-cot',
+              titulo: '2. Cotización',
+              subtitulo: detalle.proveedor?.nombre ?? 'Proveedor asignado',
+              responsable: 'Compras (Talía)',
+              estado: 'completado',
+            },
+            {
+              id: 'paso-oc',
+              titulo: '3. Orden Emitida',
+              subtitulo: `${detalle.folio} · $${detalle.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`,
+              fecha: fechaEmision,
+              responsable: 'Finanzas (Blanquita)',
+              estado: 'completado',
+            },
+            {
+              id: 'paso-rec',
+              titulo: '4. Recepción en Obra',
+              subtitulo:
+                detalle.estado === 'completada' || detalle.estado === 'recibida'
+                  ? 'Material recibido al 100%'
+                  : detalle.estado === 'parcialmente_recibida'
+                    ? `${pctRecibido.toFixed(0)}% recibido en sitio`
+                    : 'En tránsito a obra',
+              fecha:
+                recepciones.length > 0
+                  ? new Date(recepciones[0].recibido_en).toLocaleDateString('es-MX', {
+                      day: '2-digit',
+                      month: 'short',
+                    })
+                  : null,
+              responsable:
+                recepciones.length > 0 && recepciones[0].receptor?.nombre
+                  ? recepciones[0].receptor.nombre
+                  : 'Personal en Campo',
+              estado:
+                detalle.estado === 'completada' || detalle.estado === 'recibida'
+                  ? 'completado'
+                  : 'en_proceso',
+              enlaceHref: puedeRecibir ? `/ordenes/${detalle.id}/recibir` : null,
+              enlaceTexto: puedeRecibir ? 'Registrar recepción' : null,
+            },
+          ]}
+        />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
         {/* Columna principal */}

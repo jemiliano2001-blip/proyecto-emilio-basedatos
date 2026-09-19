@@ -12,11 +12,20 @@ const KeyboardShortcutsModal = dynamic(
   { ssr: false }
 )
 
+const DrawerPendientesAbastecimiento = dynamic(
+  () =>
+    import('@/components/DrawerPendientesAbastecimiento').then(
+      (module) => module.DrawerPendientesAbastecimiento
+    ),
+  { ssr: false }
+)
+
 export function GlobalClientTools({ rol, userId, traspasosDisponibles }: { rol: RolUsuario | null; userId: string; traspasosDisponibles: boolean }) {
   return (
     <>
       <CommandPalette rol={rol} userId={userId} traspasosDisponibles={traspasosDisponibles} />
       <KeyboardShortcutsModal />
+      <DrawerPendientesAbastecimiento />
     </>
   )
 }
