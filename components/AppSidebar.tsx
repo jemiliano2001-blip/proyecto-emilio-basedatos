@@ -10,14 +10,8 @@ import { NAV_SECTIONS, SIDEBAR_COOKIE, navItemsVisibles, type NavContext } from 
 import type { RolUsuario } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { etiquetaRol } from '@/lib/validations/usuarios'
+import { Avatar } from '@/components/ui/avatar'
 
-function iniciales(nombre: string | null, email: string | null): string {
-  const fuente = (nombre ?? email ?? '').trim()
-  if (!fuente) return '·'
-  const partes = fuente.split(/\s+/).filter(Boolean)
-  if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase()
-  return fuente.slice(0, 2).toUpperCase()
-}
 
 export function AppSidebar({
   rol,
@@ -163,25 +157,25 @@ export function AppSidebar({
                         aria-current={active ? 'page' : undefined}
                         title={collapsed ? item.label : undefined}
                         className={cn(
-                          'group relative flex items-center gap-3 rounded-lg text-sm font-medium transition-colors',
-                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                          'group relative flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-180',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
                           collapsed ? 'size-10 justify-center mx-auto' : 'h-10 px-3',
                           active
-                            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                            : 'text-sidebar-foreground hover:bg-muted hover:text-foreground'
+                            ? 'bg-primary-soft text-primary font-semibold shadow-xs'
+                            : 'text-sidebar-foreground hover:bg-amber-50/70 hover:text-stone-900'
                         )}
                       >
                         {active && !collapsed && (
                           <span
                             aria-hidden
-                            className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary"
+                            className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary"
                           />
                         )}
                         <NavIcon
                           id={item.icon}
                           className={cn(
                             'size-5 shrink-0 transition-colors',
-                            active ? 'text-primary' : 'text-sidebar-muted group-hover:text-foreground'
+                            active ? 'text-primary' : 'text-sidebar-muted group-hover:text-primary'
                           )}
                         />
                         {!collapsed && <span className="truncate">{item.label}</span>}
@@ -199,16 +193,16 @@ export function AppSidebar({
       <div className="shrink-0 border-t border-sidebar-border p-2">
         <div
           className={cn(
-            'flex items-center gap-3 rounded-lg',
+            'flex items-center gap-3 rounded-xl',
             collapsed ? 'flex-col py-1' : 'px-2 py-1.5'
           )}
         >
-          <span
-            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary-soft-foreground"
-            title={nombre ?? email ?? undefined}
-          >
-            {iniciales(nombre, email)}
-          </span>
+          <Avatar
+            name={nombre ?? email}
+            size={collapsed ? 'sm' : 'md'}
+            status="online"
+            className="shrink-0"
+          />
           {!collapsed && (
             <div className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-sm font-medium text-foreground">{nombre ?? email ?? 'Usuario'}</p>

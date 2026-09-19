@@ -13,23 +13,24 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover',
-        accent: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover',
-        secondary: 'bg-card text-foreground border border-border shadow-xs hover:bg-muted hover:border-input',
-        destructive: 'bg-danger text-danger-foreground shadow-sm hover:bg-danger/90 focus-visible:ring-danger',
-        outline: 'border border-border bg-transparent text-foreground hover:bg-muted',
-        ghost: 'text-muted-foreground hover:bg-muted hover:text-foreground',
+        default: 'bg-primary text-primary-foreground shadow-sm hover:opacity-90',
+        accent: 'bg-primary text-primary-foreground shadow-sm hover:opacity-90',
+        secondary: 'bg-card text-foreground border border-border shadow-xs hover:bg-muted/80 hover:border-input',
+        support: 'bg-secondary text-secondary-foreground shadow-sm hover:opacity-90',
+        destructive: 'bg-danger text-danger-foreground shadow-sm hover:opacity-90 focus-visible:ring-danger',
+        outline: 'border border-border bg-transparent text-foreground hover:bg-muted/70',
+        ghost: 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
         soft: 'bg-primary-soft text-primary-soft-foreground hover:bg-primary/15',
         link: 'text-primary underline-offset-4 hover:underline p-0 h-auto min-h-0 active:scale-100',
       },
       size: {
-        // Mobile-first: default cumple los 44px táctiles para obra
-        default: 'min-h-[44px] px-5 py-2.5 text-base rounded-lg gap-2',
-        sm: 'min-h-[40px] px-4 py-2 text-sm rounded-lg gap-1.5',
-        xs: 'min-h-[32px] px-3 py-1.5 text-sm rounded-md gap-1.5',
-        lg: 'min-h-[48px] px-8 text-base rounded-lg gap-2.5',
-        icon: 'min-h-[44px] min-w-[44px] size-11 p-0 rounded-lg justify-center',
-        'icon-sm': 'min-h-[36px] min-w-[36px] size-9 p-0 rounded-md justify-center',
+        // Mobile-first: 16px radius consistente (rounded-2xl) & ≥44px táctil
+        default: 'min-h-[44px] px-5 py-2.5 text-base rounded-2xl gap-2',
+        sm: 'min-h-[40px] px-4 py-2 text-sm rounded-xl gap-1.5',
+        xs: 'min-h-[32px] px-3 py-1.5 text-sm rounded-lg gap-1.5',
+        lg: 'min-h-[48px] px-8 text-base rounded-2xl gap-2.5',
+        icon: 'min-h-[44px] min-w-[44px] size-11 p-0 rounded-2xl justify-center',
+        'icon-sm': 'min-h-[36px] min-w-[36px] size-9 p-0 rounded-xl justify-center',
       },
     },
     defaultVariants: {

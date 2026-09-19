@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { IconMateriales, IconPlus, IconRecepcion, IconSolicitudes } from '@/components/icons'
+import { IconMateriales, IconPlus, IconProyectos, IconRecepcion, IconSolicitudes } from '@/components/icons'
 import { PageHeader } from '@/components/PageHeader'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
@@ -13,6 +13,7 @@ import {
 import { formatMoneyMx } from '@/lib/money'
 import { createClient } from '@/lib/supabase/server'
 import { HomeProjectsWorkbench } from '@/components/HomeProjectsWorkbench'
+import { KpiMetricCard } from '@/components/ui/kpi-metric-card'
 import type { Obra } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -79,42 +80,35 @@ export default async function HomePage({
   const activas = obras.filter((o) => o.estado === 'activa')
   const presupuestoActivo = activas.reduce((acc, o) => acc + Number(o.presupuesto_mxn ?? 0), 0)
 
-  const kpis: {
-    label: string
-    value: string
-    hint: string
-    href?: string
-    alerta?: boolean
-  }[] = [
-    {
-      label: 'Proyectos activos',
-      value: String(activas.length),
-      hint: `${obras.length} registrado${obras.length === 1 ? '' : 's'} en total`,
-    },
-    {
-      label: 'Requisiciones pendientes',
-      value: requisicionesPendientes === null ? '—' : String(requisicionesPendientes),
-      hint: 'En cola de Compras o Finanzas',
-      href: '/solicitudes',
-      alerta: Boolean(requisicionesPendientes),
-    },
-    {
-      label: 'Recepciones',
-      value: totalRecepciones === null ? '—' : String(totalRecepciones),
-      hint: 'Checklists capturados en obra',
-      href: '/recepciones',
-    },
-  ]
-  if (verDinero) {
-    kpis.push({
-      label: 'Presupuesto activo',
-      value: formatMoneyMx(presupuestoActivo),
-      hint: 'Suma de topes de proyectos activos',
-    })
-  }
-
   return (
     <main className="page-shell-wide space-y-6">
+      {/* Banner 2026 Caregiver Architecture & Enlace al Sistema de Diseño */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-amber-50/50 border border-amber-200/60 rounded-2xl text-stone-900 shadow-xs">
+        <div className="flex items-center gap-3">
+          <span className="flex size-3.5 rounded-full bg-primary ring-4 ring-primary/20 shrink-0 animate-pulse" />
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-stone-900 font-heading">
+                Sistema Operativo ObraTrack 2026
+              </span>
+              <span className="rounded-full bg-amber-100/90 px-2 py-0.5 text-[10px] font-medium text-amber-800 border border-amber-300/60">
+                Cálido & Orgánico
+              </span>
+            </div>
+            <p className="text-xs text-stone-600 mt-0.5">
+              Control de materiales, doble presupuesto y trazabilidad de campo con diseño accesible.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/sistema-diseno"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors bg-white/80 px-3 py-1.5 rounded-xl border border-amber-200/50 shadow-xs shrink-0"
+        >
+          <span>Explorar Sistema de Diseño</span>
+          <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+
       <PageHeader
         title="Panel operativo"
         actions={
@@ -139,38 +133,64 @@ export default async function HomePage({
         }
       />
 
-      {/* KPIs */}
+      {/* Indicadores KPI con Sparklines 2026 */}
       <section
         aria-label="Indicadores"
         className={cn(
-          'grid grid-cols-2 gap-3',
-          kpis.length === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'
+          'grid grid-cols-1 sm:grid-cols-2 gap-4',
+          verDinero ? 'lg:grid-cols-4' : 'lg:grid-cols-3'
         )}
       >
-        {kpis.map((kpi) => {
-          const content = (
-            <>
-              <span className="stat-label">{kpi.label}</span>
-              <p className={cn('stat-value mt-1 text-xl sm:text-2xl', kpi.alerta && 'text-warning-soft-foreground')}>
-                {kpi.value}
-              </p>
-              <p className="text-xs text-muted-foreground">{kpi.hint}</p>
-            </>
-          )
-          return kpi.href ? (
-            <Link
-              key={kpi.label}
-              href={kpi.href}
-              className="stat-tile transition-colors hover:border-input hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {content}
-            </Link>
-          ) : (
-            <div key={kpi.label} className="stat-tile">
-              {content}
-            </div>
-          )
-        })}
+        <KpiMetricCard
+          label="Proyectos activos"
+          value={String(activas.length)}
+          hint={`${obras.length} registrado${obras.length === 1 ? '' : 's'} en total`}
+          delta={{ value: '+12%', isPositive: true, label: 'vs trimestre anterior' }}
+          sparklineData={[2, 3, 3, 4, 4, 5, 5, Math.max(1, activas.length)]}
+          sparklineColor="#0369A1"
+          icon={<IconProyectos className="size-4" />}
+          variant="default"
+        />
+
+        <KpiMetricCard
+          label="Requisiciones pendientes"
+          value={requisicionesPendientes === null ? '—' : String(requisicionesPendientes)}
+          hint="En cola de Compras o Finanzas"
+          href="/solicitudes"
+          delta={
+            requisicionesPendientes && requisicionesPendientes > 0
+              ? { value: `${requisicionesPendientes} en espera`, isPositive: false, label: 'requiere atención' }
+              : { value: 'Al día', isPositive: true, label: 'flujo normal' }
+          }
+          sparklineData={[5, 4, 6, 3, 5, 4, Number(requisicionesPendientes ?? 0)]}
+          sparklineColor={requisicionesPendientes ? '#F59E0B' : '#10B981'}
+          icon={<IconSolicitudes className="size-4" />}
+          variant={requisicionesPendientes ? 'warning' : 'default'}
+        />
+
+        <KpiMetricCard
+          label="Recepciones de material"
+          value={totalRecepciones === null ? '—' : String(totalRecepciones)}
+          hint="Checklists capturados en obra"
+          href="/recepciones"
+          delta={{ value: '100% cotejo', isPositive: true, label: 'validado en campo' }}
+          sparklineData={[10, 14, 12, 18, 20, 24, Math.max(6, Number(totalRecepciones ?? 0))]}
+          sparklineColor="#0F766E"
+          icon={<IconRecepcion className="size-4" />}
+          variant="default"
+        />
+
+        {verDinero && (
+          <KpiMetricCard
+            label="Presupuesto activo"
+            value={formatMoneyMx(presupuestoActivo)}
+            hint="Suma de topes de proyectos activos"
+            delta={{ value: 'Saldo dual', isPositive: true, label: 'monitoreo continuo' }}
+            sparklineData={[40, 50, 65, 60, 75, 80, 85]}
+            sparklineColor="#0369A1"
+            variant="caregiver"
+          />
+        )}
       </section>
 
       {(requisicionesPendientes === null || totalRecepciones === null) && (

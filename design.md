@@ -3,16 +3,16 @@
 Sistema visual de la app. Toda pantalla nueva o rediseño lee este archivo antes
 de emitir código. No se regenera por página: se extiende o corrige aquí.
 
-> Cambio de rumbo (sep-2026): el producto se posiciona como **SaaS** de
-> trazabilidad de materiales. Se reemplazó la paleta navy/teal de campo por
-> "Slate + Cobalto", se adoptó **Inter** (self-hosted) y el shell de escritorio
-> pasó de barra superior a **sidebar colapsable**. La bottom nav móvil se
-> conserva porque Personal la usa en obra.
+> Especificación 2026: Arquitectura UI/UX **Cálido & Orgánico (Humanist Wellness)**
+> Arquetipo de Marca: **El Cuidador (The Caregiver)** — accesibilidad universal (WCAG AAA),
+> ergonomía visual que reduce la ansiedad digital mediante tonos tierra, calidez y
+> alta densidad operativa. Se adoptó la paleta **60-30-10** (#F8FAFC / #FFFFFF / #0369A1 / #0F766E),
+> titulares en **Playfair Display**, cuerpo en **Poppins** y radio consistente de **16px**.
 
 ## Género
 
-modern-minimal · tono: SaaS operativo / financiero. Una acción primaria por
-pantalla. Densidad media en oficina, táctil (≥44px) en campo.
+modern-organic · tono: SaaS operativo / financiero humano y sereno. Una acción primaria por
+pantalla (#0369A1). Densidad media en oficina, táctil (≥44px) en campo.
 
 ## Tokens (fuente de verdad: `app/globals.css` + `tailwind.config.ts`)
 
@@ -22,43 +22,35 @@ soporte de opacidad (`bg-primary/10`). **No usar colores crudos de Tailwind**
 
 | Rol | Token | Light |
 |-----|-------|-------|
-| Fondo de página | `background` | slate-50 |
-| Superficie / tarjeta | `card` | white |
-| Texto | `foreground` | slate-900 |
-| Texto secundario | `muted-foreground` | slate-500 (4.8:1) |
-| Relleno suave | `muted` | slate-100 |
-| Borde | `border` / `input` | slate-200 / slate-300 |
-| Acción primaria | `primary` · `primary-hover` · `primary-foreground` | blue-600 / blue-700 / white |
-| Tinte primario | `primary-soft` · `primary-soft-foreground` | blue-50 / blue-700 |
-| Estatus | `success` · `warning` · `danger` · `info` (+ `-soft`, `-soft-foreground`) | emerald / amber / red / sky |
+| 60% Fondo de página | `background` | #F8FAFC (`210 40% 98%`) |
+| 30% Superficie / tarjeta | `card` | #FFFFFF con sombra `elevated` |
+| Texto principal | `foreground` | #0F172A (`222.2 47.4% 11.2%`) |
+| Texto secundario | `muted-foreground` | #64748B (`215.4 16.3% 46.9%`) |
+| Relleno suave | `muted` | #F1F5F9 (`210 40% 96.1%`) |
+| Borde | `border` / `input` | #E2E8F0 (`214.3 31.8% 91.4%`) |
+| 10% Acción primaria (CTA) | `primary` · `primary-hover` · `primary-foreground` | #0369A1 / #075985 / #FFFFFF |
+| Tinte primario suave | `primary-soft` · `primary-soft-foreground` | #F0F9FF / #0369A1 |
+| Soporte secundario | `secondary` · `secondary-soft` | #0F766E / #F0FDFA |
+| Estatus | `success` (#10B981) · `warning` (#F59E0B) · `danger` (#EF4444) · `info` (#0369A1) | |
 | Sidebar | `sidebar`, `sidebar-foreground`, `sidebar-muted`, `sidebar-border`, `sidebar-accent(-foreground)` | |
 
 Patrón de estatus: **sólido** (`bg-danger text-danger-foreground`) para
 controles; **suave** (`bg-danger-soft text-danger-soft-foreground
-border-danger/25`) para badges, alertas y filas. Nunca texto de estatus sobre
-tinte de otro tono.
-
-Alias legacy (`ink`, `navy`, `teal`, `accent`, `paper`, `warn`) siguen
-compilando pero **no se usan en código nuevo**.
-
-### Dark mode
-
-Preparado en `:root[data-theme='dark']`, sin exponer en la UI. Activar = poner
-`data-theme="dark"` en `<html>` y revisar contraste por pantalla. No agregar
-overrides `dark:` en componentes: todo debe resolverse por tokens.
+border-danger/25`) para badges, alertas y filas.
 
 ## Tipografía
 
-- **Inter** vía `next/font/google` (`--font-sans`), self-hosted en build:
-  cero requests a Google, cacheada por el service worker como asset estático.
-- Pesos: 400 cuerpo · 500 etiquetas/nav · 600 títulos y botones. Sin 700+.
-- Tamaños: 12 (meta) · 14 (UI densa) · 16 (cuerpo/inputs móvil) · 20/24 (h1).
+- **Titulares (H1 / H2):** **Playfair Display** (`--font-heading`), pesos 600/700/800.
+- **Cuerpo y Datos:** **Poppins** (`--font-sans`), pesos 400/500/600/700.
+- Regla de los 3 niveles: H1 (28-32px), H2 (18-22px), Body (16px base, interlineado 1.5 a 1.6).
+- Longitud de línea: Máximo 70 a 80 caracteres (`max-w-[75ch]`) para evitar fatiga visual.
 - Dinero y cantidades: `tabular-nums`.
 
 ## Espaciado y radio
 
-4-pt scale. `--radius: 0.5rem` (controles), `rounded-xl` (tarjetas).
-Botones y nav: ≥44px en móvil; en oficina `btn-sm` (40px) y `btn-xs` (32px).
+- Border Radius: **16px** consistente en botones, tarjetas, inputs y modales (`rounded-2xl` / `--radius: 1rem`).
+- Modificadores de densidad para oficina: `btn-sm` (40px, rounded-xl 12px) y `btn-xs` (32px, rounded-lg 10px).
+- Sombras: `elevated` suaves y acogedoras, evitando aristas duras o contrastes negros agresivos.
 
 ## Shell
 

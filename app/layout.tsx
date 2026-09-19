@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Playfair_Display, Poppins } from 'next/font/google'
 import { cookies } from 'next/headers'
 import { AppNav } from '@/components/AppNav'
 import { AppSidebar } from '@/components/AppSidebar'
@@ -15,12 +15,18 @@ import { ToastUndoContainer } from '@/components/ToastUndoContainer'
 import { cn } from '@/lib/utils'
 import './globals.css'
 
-// Self-hosted en build: se sirve desde /_next/static (sin request a Google)
-// y el service worker lo cachea como cualquier asset estático.
-const inter = Inter({
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-heading',
+  weight: ['600', '700', '800'],
+})
+
+const poppins = Poppins({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-sans',
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -56,7 +62,7 @@ export default async function RootLayout({
   return (
     <html
       lang="es"
-      className={inter.variable}
+      className={cn(poppins.variable, playfair.variable)}
       data-sidebar={showNav ? (sidebarCollapsed ? 'collapsed' : 'expanded') : undefined}
     >
       <body className="min-h-dvh bg-background text-foreground">

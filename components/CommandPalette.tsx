@@ -431,8 +431,8 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
         aria-label="Buscador global y comandos"
         className="relative w-full max-w-lg bg-card rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[80vh] z-10 animate-fade-in"
       >
-        {/* Header con Input */}
-        <div className="flex items-center px-4 py-3 border-b border-border gap-2.5 bg-muted/40">
+        {/* Header con Input (Estilo Cálido & Orgánico) */}
+        <div className="flex items-center px-4 py-3 border-b border-amber-200/50 gap-2.5 bg-amber-50/40">
           <IconSearch className="w-5 h-5 text-muted-foreground shrink-0" />
           <input
             ref={inputRef}

@@ -76,7 +76,7 @@ export function TopBar({ nombre }: { nombre: string | null }) {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-[40px] lg:min-w-[40px]"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-xl px-2.5 text-muted-foreground transition-all duration-180 hover:bg-amber-50/70 hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] lg:min-h-[40px] lg:min-w-[40px]"
             title="Buscador y comandos (Ctrl+K)"
             aria-label="Buscar (⌘K)"
           >
@@ -86,7 +86,7 @@ export function TopBar({ nombre }: { nombre: string | null }) {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('open-abastecimiento-drawer'))}
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-[40px] lg:min-w-[40px]"
+            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2 text-muted-foreground transition-all duration-180 hover:bg-amber-50/70 hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] lg:min-h-[40px] lg:min-w-[40px]"
             title="Control de abastecimiento y pendientes"
             aria-label="Abrir control de abastecimiento y pendientes"
           >

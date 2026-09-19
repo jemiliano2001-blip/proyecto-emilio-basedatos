@@ -3,9 +3,12 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
+export type TabsVariant = 'segmented' | 'pill' | 'underline'
+
 interface TabsContextValue {
   value: string
   onValueChange: (value: string) => void
+  variant: TabsVariant
 }
 
 const TabsContext = React.createContext<TabsContextValue | null>(null)
@@ -21,12 +24,14 @@ function useTabs() {
 export interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: string
   defaultValue?: string
+  variant?: TabsVariant
   onValueChange?: (value: string) => void
 }
 
 export function Tabs({
   value: controlledValue,
   defaultValue = '',
+  variant = 'segmented',
   onValueChange,
   className,
   children,
@@ -47,7 +52,7 @@ export function Tabs({
   )
 
   return (
-    <TabsContext.Provider value={{ value, onValueChange: handleValueChange }}>
+    <TabsContext.Provider value={{ value, onValueChange: handleValueChange, variant }}>
       <div className={cn('w-full', className)} {...props}>
         {children}
       </div>
@@ -55,13 +60,24 @@ export function Tabs({
   )
 }
 
-export function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export interface TabsListProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: TabsVariant
+}
+
+export function TabsList({ className, variant: listVariant, ...props }: TabsListProps) {
+  const context = useTabs()
+  const activeVariant = listVariant || context.variant
+
+  const variantClasses = {
+    segmented: 'inline-flex min-h-[44px] items-center gap-1 overflow-x-auto rounded-2xl bg-muted/80 p-1 text-muted-foreground border border-border/80 shadow-xs [scrollbar-width:none]',
+    pill: 'inline-flex min-h-[44px] items-center gap-1.5 overflow-x-auto rounded-full bg-muted/60 p-1.5 text-muted-foreground border border-border/60 [scrollbar-width:none]',
+    underline: 'flex min-h-[44px] items-center gap-6 overflow-x-auto border-b border-border bg-transparent p-0 [scrollbar-width:none]',
+  }
+
   return (
     <div
-      className={cn(
-        'inline-flex min-h-[44px] max-w-full items-center justify-start gap-0.5 overflow-x-auto rounded-lg bg-muted p-1 text-muted-foreground [scrollbar-width:none] lg:min-h-[40px]',
-        className
-      )}
+      role="tablist"
+      className={cn(variantClasses[activeVariant], className)}
       {...props}
     />
   )
@@ -69,11 +85,34 @@ export function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 
 export interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   value: string
+  variant?: TabsVariant
 }
 
-export function TabsTrigger({ value, className, children, ...props }: TabsTriggerProps) {
-  const { value: activeValue, onValueChange } = useTabs()
+export function TabsTrigger({ value, variant: triggerVariant, className, children, ...props }: TabsTriggerProps) {
+  const { value: activeValue, onValueChange, variant: contextVariant } = useTabs()
+  const activeVariant = triggerVariant || contextVariant
   const isActive = activeValue === value
+
+  const triggerStyles: Record<TabsVariant, string> = {
+    segmented: cn(
+      'inline-flex min-h-[38px] cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-xl px-4 py-1.5 text-sm font-medium transition-all duration-180 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
+      isActive
+        ? 'bg-card text-foreground font-semibold shadow-xs'
+        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+    ),
+    pill: cn(
+      'inline-flex min-h-[36px] cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-full px-4 py-1 text-sm font-medium transition-all duration-180 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
+      isActive
+        ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
+        : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
+    ),
+    underline: cn(
+      'inline-flex min-h-[44px] cursor-pointer select-none items-center justify-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium transition-all duration-180 -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
+      isActive
+        ? 'border-primary text-primary font-bold'
+        : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+    ),
+  }
 
   return (
     <button
@@ -82,13 +121,7 @@ export function TabsTrigger({ value, className, children, ...props }: TabsTrigge
       aria-selected={isActive}
       data-state={isActive ? 'active' : 'inactive'}
       onClick={() => onValueChange(value)}
-      className={cn(
-        'inline-flex min-h-[40px] cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 lg:min-h-[32px]',
-        isActive
-          ? 'bg-card text-foreground shadow-xs'
-          : 'text-muted-foreground hover:text-foreground',
-        className
-      )}
+      className={cn(triggerStyles[activeVariant], className)}
       {...props}
     >
       {children}
@@ -102,12 +135,19 @@ export interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function TabsContent({ value, className, children, ...props }: TabsContentProps) {
   const { value: activeValue } = useTabs()
-  if (activeValue !== value) return null
+  const isSelected = activeValue === value
+
+  if (!isSelected) return null
 
   return (
     <div
       role="tabpanel"
-      className={cn('mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', className)}
+      data-state={isSelected ? 'active' : 'inactive'}
+      tabIndex={0}
+      className={cn(
+        'mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 animate-fade-in',
+        className
+      )}
       {...props}
     >
       {children}

@@ -12,55 +12,59 @@
 @layer base {
   :root {
     /* Superficies y texto */
-    --background: 210 40% 98%;            /* slate-50  */
-    --foreground: 222.2 47.4% 11.2%;      /* slate-900 */
-    --card: 0 0% 100%;
+    --background: 210 40% 98%;            /* #F8FAFC */
+    --foreground: 222.2 47.4% 11.2%;      /* #0F172A */
+    --card: 0 0% 100%;                    /* #FFFFFF */
     --card-foreground: 222.2 47.4% 11.2%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;               /* slate-100 */
-    --muted-foreground: 215.4 16.3% 46.9%;/* slate-500 · 4.8:1 sobre blanco */
-    --border: 214.3 31.8% 91.4%;          /* slate-200 */
-    --input: 212.7 26.8% 83.9%;           /* slate-300 */
-    --ring: 221.2 83.2% 53.3%;
+    --muted: 210 40% 96.1%;               /* #F1F5F9 */
+    --muted-foreground: 215.4 16.3% 46.9%;/* #64748B */
+    --border: 214.3 31.8% 91.4%;          /* #E2E8F0 */
+    --input: 214.3 31.8% 88%;
+    --ring: 201.3 96.3% 32.2%;
 
-    /* Marca / acción primaria */
-    --primary: 221.2 83.2% 53.3%;         /* blue-600 */
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 224.3 76.3% 48%;     /* blue-700 */
-    --primary-soft: 213.8 100% 96.9%;     /* blue-50  */
-    --primary-soft-foreground: 224.3 76.3% 48%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Marca / acción primaria exclusiva (#0369A1) */
+    --primary: 201.3 96.3% 32.2%;         /* #0369A1 (Sky 700) */
+    --primary-foreground: 0 0% 100%;      /* #FFFFFF */
+    --primary-hover: 201.6 90.1% 27.5%;   /* #075985 */
+    --primary-soft: 204 100% 97.1%;       /* #F0F9FF */
+    --primary-soft-foreground: 201.3 96.3% 32.2%;
+    
+    /* Soporte secundario (#0F766E) */
+    --secondary: 174.4 77.4% 26.1%;       /* #0F766E (Teal 700) */
+    --secondary-foreground: 0 0% 100%;    /* #FFFFFF */
+    --secondary-soft: 166 76% 97%;        /* #F0FDFA */
+    --secondary-soft-foreground: 174.4 77.4% 26.1%;
 
     /* Estatus */
-    --success: 160.1 84.1% 39.4%;         /* emerald-600 */
+    --success: 160 84.1% 39.4%;           /* #10B981 */
     --success-foreground: 0 0% 100%;
-    --success-soft: 151.8 81% 95.9%;      /* emerald-50 */
-    --success-soft-foreground: 163.1 88.1% 19.8%; /* emerald-800 */
-    --warning: 32.1 94.6% 43.7%;          /* amber-600 */
+    --success-soft: 151.8 81% 95.9%;      /* #ECFDF5 */
+    --success-soft-foreground: 163.1 88.1% 19.8%;
+    --warning: 37.7 92.1% 50.2%;          /* #F59E0B */
     --warning-foreground: 0 0% 100%;
-    --warning-soft: 48 100% 96.1%;        /* amber-50 */
-    --warning-soft-foreground: 22.7 82.5% 31.4%;  /* amber-800 */
-    --danger: 0 72.2% 50.6%;              /* red-600 */
+    --warning-soft: 48 100% 96.1%;        /* #FFFBEB */
+    --warning-soft-foreground: 22.7 82.5% 31.4%;
+    --danger: 0 84.2% 60.2%;              /* #EF4444 */
     --danger-foreground: 0 0% 100%;
-    --danger-soft: 0 85.7% 97.3%;         /* red-50 */
-    --danger-soft-foreground: 0 70% 35.3%;        /* red-800 */
-    --info: 200.4 98% 39.4%;              /* sky-600 */
+    --danger-soft: 0 85.7% 97.3%;         /* #FEF2F2 */
+    --danger-soft-foreground: 0 70% 35.3%;
+    --info: 201.3 96.3% 32.2%;            /* #0369A1 */
     --info-foreground: 0 0% 100%;
-    --info-soft: 204 100% 97.1%;          /* sky-50 */
-    --info-soft-foreground: 201 90% 27.5%;        /* sky-800 */
+    --info-soft: 204 100% 97.1%;
+    --info-soft-foreground: 201.3 96.3% 32.2%;
 
     /* Sidebar */
     --sidebar: 0 0% 100%;
     --sidebar-foreground: 215.3 25% 26.7%;        /* slate-700 */
     --sidebar-muted: 215.4 16.3% 46.9%;           /* slate-500 */
-    --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-accent: 213.8 100% 96.9%;           /* blue-50 */
-    --sidebar-accent-foreground: 224.3 76.3% 48%; /* blue-700 */
+    --sidebar-border: 214.3 31.8% 91.4%;          /* #E2E8F0 */
+    --sidebar-accent: 204 100% 97.1%;             /* #F0F9FF */
+    --sidebar-accent-foreground: 201.3 96.3% 32.2%;/* #0369A1 */
 
-    /* Geometría y movimiento */
-    --radius: 0.5rem;
+    /* Geometría y movimiento: 16px consistente */
+    --radius: 1rem;                               /* 16px */
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --dur-short: 180ms;
     --nav-height: 4rem;
@@ -159,9 +163,9 @@
 }
 
 @layer components {
-  /* ---------- Botones (≥44px táctiles; densidad sm/xs para oficina) ---------- */
+  /* ---------- Botones (≥44px táctiles; 16px radius consistente) ---------- */
   .btn-base {
-    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl
            font-semibold cursor-pointer select-none
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background
            disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed
@@ -176,7 +180,7 @@
   .btn-primary {
     @apply btn-base min-h-[44px] px-5 py-2.5 text-base
            bg-primary text-primary-foreground shadow-sm
-           hover:bg-primary-hover;
+           hover:opacity-90;
   }
 
   .btn-secondary {
@@ -198,26 +202,39 @@
 
   /* Modificadores de densidad para toolbars de oficina */
   .btn-sm {
-    @apply min-h-[40px] px-4 py-2 text-sm;
+    @apply min-h-[40px] px-4 py-2 text-sm rounded-xl;
   }
 
   .btn-xs {
-    @apply min-h-[32px] px-3 py-1.5 text-sm rounded-md;
+    @apply min-h-[32px] px-3 py-1.5 text-sm rounded-lg;
   }
 
-  /* ---------- Superficies ---------- */
+  /* ---------- Superficies (16px radius consistente & sombras elevadas) ---------- */
   .card {
-    @apply bg-card text-card-foreground rounded-xl border border-border/80 p-4 shadow-card;
+    @apply bg-card text-card-foreground rounded-2xl border border-border/80 p-5 shadow-card;
     transition: border-color var(--dur-short) var(--ease-out),
       box-shadow var(--dur-short) var(--ease-out);
   }
 
   .card-interactive {
-    @apply card hover:border-input hover:shadow-card-hover active:scale-[0.99] cursor-pointer;
+    @apply card hover:border-input hover:shadow-elevated active:scale-[0.99] cursor-pointer;
   }
 
   .card-flat {
-    @apply bg-card text-card-foreground rounded-xl border border-border/80 p-4;
+    @apply bg-card text-card-foreground rounded-2xl border border-border/80 p-5;
+  }
+
+  /* Firma de estilo 2026: Cálido & Orgánico (El Cuidador) */
+  .card-caregiver {
+    @apply bg-amber-50/40 text-foreground border border-amber-200/60 rounded-2xl p-5 shadow-sm transition-all duration-200;
+  }
+
+  .hero-pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-amber-200/80 bg-amber-50/80 px-3.5 py-1 text-xs font-medium text-stone-800 shadow-xs;
+  }
+
+  .heading-display {
+    @apply font-heading tracking-tight text-foreground;
   }
 
   .card-header {
@@ -225,36 +242,36 @@
   }
 
   .card-title {
-    @apply text-sm font-semibold tracking-tight text-foreground;
+    @apply text-base font-bold tracking-tight text-foreground font-heading;
   }
 
   .stat-tile {
-    @apply card flex flex-col gap-1 hover:border-input hover:shadow-sm transition-all;
+    @apply card flex flex-col gap-1.5 hover:border-input hover:shadow-elevated transition-all;
   }
 
   .stat-label {
-    @apply text-[11px] font-semibold uppercase tracking-wider text-muted-foreground;
+    @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
   }
 
   .stat-value {
-    @apply text-2xl font-semibold tracking-tight text-foreground tabular-nums;
+    @apply text-2xl sm:text-3xl font-bold tracking-tight text-foreground tabular-nums font-heading;
   }
 
   .surface-raised {
-    @apply bg-card rounded-xl shadow-md border border-border/80;
+    @apply bg-card rounded-2xl shadow-elevated border border-border/80;
   }
 
   .surface-inset {
-    @apply bg-muted/40 rounded-lg border border-border/60 p-3;
+    @apply bg-muted/40 rounded-xl border border-border/60 p-3.5;
   }
 
   .glass-header {
     @apply sticky top-0 z-30 border-b border-border/80 bg-card/90 backdrop-blur-md print:hidden;
   }
 
-  /* ---------- Formularios ---------- */
+  /* ---------- Formularios (16px radius consistente & WCAG AAA) ---------- */
   .input-base {
-    @apply w-full min-h-[44px] rounded-lg border border-input bg-card px-3.5 py-2.5 text-base text-foreground
+    @apply w-full min-h-[44px] rounded-2xl border border-input bg-card px-4 py-2.5 text-base text-foreground
            placeholder:text-muted-foreground/60 shadow-xs
            hover:border-muted-foreground/50
            focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20
@@ -265,7 +282,7 @@
   }
 
   .field-label {
-    @apply block text-sm font-medium text-foreground mb-1.5;
+    @apply block text-sm font-semibold text-foreground mb-1.5;
   }
 
   .field-hint {
@@ -273,7 +290,7 @@
   }
 
   .field-error {
-    @apply mt-1.5 text-xs font-medium text-danger;
+    @apply mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-danger;
   }
 
   /* ---------- Badges de estatus ---------- */

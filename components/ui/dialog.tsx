@@ -135,7 +135,7 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
       {/* Modal Box */}
       <div
         className={cn(
-          'relative z-50 w-full max-w-lg rounded-2xl border border-border bg-card p-5 shadow-lg animate-scale-in sm:p-6',
+          'relative z-50 w-full max-w-lg rounded-2xl border border-border bg-card p-5 shadow-elevated animate-scale-in sm:p-6',
           className
         )}
         {...props}

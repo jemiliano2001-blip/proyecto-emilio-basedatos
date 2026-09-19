@@ -6,7 +6,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-colors duration-150',
+        'rounded-2xl border border-border/80 bg-card text-card-foreground shadow-card transition-colors duration-150',
         className
       )}
       {...props}
@@ -15,12 +15,26 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
 )
 Card.displayName = 'Card'
 
+const CardCaregiver = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        'rounded-2xl border border-amber-200/60 bg-amber-50/40 text-stone-900 shadow-sm transition-all duration-200',
+        className
+      )}
+      {...props}
+    />
+  )
+)
+CardCaregiver.displayName = 'CardCaregiver'
+
 const CardInteractive = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-180 hover:border-input hover:shadow-md active:scale-[0.99] cursor-pointer',
+        'rounded-2xl border border-border/80 bg-card text-card-foreground shadow-card transition-all duration-180 hover:border-input hover:shadow-elevated active:scale-[0.99] cursor-pointer',
         className
       )}
       {...props}
@@ -33,7 +47,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex flex-col gap-1.5 p-4 sm:p-5', className)}
+      className={cn('flex flex-col gap-1.5 p-5 sm:p-6', className)}
       {...props}
     />
   )
@@ -46,7 +60,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('font-bold leading-tight tracking-tight text-foreground text-lg sm:text-xl', className)}
+    className={cn('font-bold leading-tight tracking-tight text-foreground text-lg sm:text-xl font-heading', className)}
     {...props}
   />
 ))
@@ -82,4 +96,4 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 )
 CardFooter.displayName = 'CardFooter'
 
-export { Card, CardInteractive, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export { Card, CardCaregiver, CardInteractive, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
