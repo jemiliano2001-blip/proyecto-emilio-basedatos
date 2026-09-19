@@ -50,3 +50,22 @@ test('toFinite y formatMoneyMx previenen propagación de NaN', () => {
   assert.equal(formatMoneyMx(NaN), '$0.00')
   assert.equal(formatMoneyMx(Infinity), '$0.00')
 })
+
+test('Auditoría Post-Fase: filtrado seguro con campos nulos o no definidos', () => {
+  const items = [
+    { nombre_base: null, variante: undefined, categoria: 'Obra Civil', subcategoria: null },
+    { nombre_base: 'Tubo PVC', variante: null, categoria: null, subcategoria: 'Canalización' },
+    { nombre_base: undefined, variante: 'Especial', categoria: undefined, subcategoria: undefined },
+  ]
+  const q = 'tubo'
+  const filtrados = items.filter(
+    (s) =>
+      (s.nombre_base || '').toLowerCase().includes(q) ||
+      (s.variante ? s.variante.toLowerCase().includes(q) : false) ||
+      (s.categoria ? s.categoria.toLowerCase().includes(q) : false) ||
+      (s.subcategoria ? s.subcategoria.toLowerCase().includes(q) : false)
+  )
+  assert.equal(filtrados.length, 1)
+  assert.equal(filtrados[0].nombre_base, 'Tubo PVC')
+})
+

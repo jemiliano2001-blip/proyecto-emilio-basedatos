@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useTransition } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
 import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
 import { EditTopeInline } from '@/components/EditTopeInline'
@@ -100,10 +101,10 @@ export function ObraMaterialesList({
     if (q) {
       result = result.filter(
         (s) =>
-          s.nombre_base.toLowerCase().includes(q) ||
-          (s.variante && s.variante.toLowerCase().includes(q)) ||
-          (s.categoria && s.categoria.toLowerCase().includes(q)) ||
-          (s.subcategoria && s.subcategoria.toLowerCase().includes(q))
+          (s.nombre_base || '').toLowerCase().includes(q) ||
+          (s.variante ? s.variante.toLowerCase().includes(q) : false) ||
+          (s.categoria ? s.categoria.toLowerCase().includes(q) : false) ||
+          (s.subcategoria ? s.subcategoria.toLowerCase().includes(q) : false)
       )
     }
 
@@ -199,52 +200,91 @@ export function ObraMaterialesList({
 
   return (
     <div className="space-y-4">
-      {/* Barra de Filtros por Categoría (Pills) y Acción Global de Borrado */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none">
-          <button
-            type="button"
-            onClick={() => setCategoriaSeleccionada('todas')}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-              categoriaSeleccionada === 'todas'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'bg-muted text-foreground hover:bg-border'
-            }`}
-          >
-            Todas <span className="opacity-75 tabular-nums">({saldos.length})</span>
-          </button>
-
-          {categoriasPresentes.map((cat) => {
-            const count = saldos.filter((s) => s.categoria?.trim() === cat).length
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setCategoriaSeleccionada(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                  categoriaSeleccionada === cat
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-muted text-foreground hover:bg-border'
-                }`}
-              >
-                {cat} <span className="opacity-75 tabular-nums">({count})</span>
-              </button>
-            )
-          })}
-
-          {countSinCategoria > 0 && (
+      {/* Barra de Filtros por Categoría (Segmentos Canónicos) y Acción Global de Borrado */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/70">
+        <div className="overflow-x-auto rounded-lg bg-muted p-0.5 max-w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex shrink-0 items-center gap-0.5">
             <button
               type="button"
-              onClick={() => setCategoriaSeleccionada('sin_categoria')}
-              className={`min-h-[44px] px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                categoriaSeleccionada === 'sin_categoria'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-muted text-foreground hover:bg-border'
-              }`}
+              onClick={() => setCategoriaSeleccionada('todas')}
+              className={cn(
+                'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                categoriaSeleccionada === 'todas'
+                  ? 'bg-card text-foreground shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+              )}
             >
-              Sin categoría <span className="opacity-75 tabular-nums">({countSinCategoria})</span>
+              Todas
+              <span
+                className={cn(
+                  'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                  categoriaSeleccionada === 'todas'
+                    ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
+                    : 'bg-border/70 text-muted-foreground'
+                )}
+              >
+                {saldos.length}
+              </span>
             </button>
-          )}
+
+            {categoriasPresentes.map((cat) => {
+              const count = saldos.filter((s) => s.categoria?.trim() === cat).length
+              const active = categoriaSeleccionada === cat
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setCategoriaSeleccionada(cat)}
+                  className={cn(
+                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    active
+                      ? 'bg-card text-foreground shadow-xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                  )}
+                >
+                  {cat}
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                      active
+                        ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
+                        : 'bg-border/70 text-muted-foreground'
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
+
+            {countSinCategoria > 0 && (
+              <button
+                type="button"
+                onClick={() => setCategoriaSeleccionada('sin_categoria')}
+                className={cn(
+                  'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  categoriaSeleccionada === 'sin_categoria'
+                    ? 'bg-card text-foreground shadow-xs font-semibold'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                )}
+              >
+                Sin categoría
+                <span
+                  className={cn(
+                    'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                    categoriaSeleccionada === 'sin_categoria'
+                      ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
+                      : 'bg-border/70 text-muted-foreground'
+                  )}
+                >
+                  {countSinCategoria}
+                </span>
+              </button>
+            )}
+          </div>
         </div>
 
         {puedeTopes && saldos.length > 0 && (
@@ -254,7 +294,7 @@ export function ObraMaterialesList({
               setDeleteError(null)
               setModalBorrarTodo(true)
             }}
-            className="min-h-[44px] text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-2.5 py-1.5 rounded-md border border-danger/30 transition-colors inline-flex items-center gap-1.5 font-medium shrink-0 self-start sm:self-auto"
+            className="min-h-[36px] text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-3 py-1.5 rounded-lg border border-danger/20 transition-colors inline-flex items-center gap-1.5 font-medium shrink-0 self-start sm:self-auto active:scale-[0.985]"
             title="Eliminar todas las partidas contratadas en este proyecto"
           >
             <IconBasura className="w-3.5 h-3.5" />
@@ -278,17 +318,17 @@ export function ObraMaterialesList({
       )}
 
       {saldosFiltrados.length === 0 && (
-        <div className="card text-center py-6 text-muted-foreground text-sm">
+        <div className="card text-center py-8 text-muted-foreground text-sm">
           No se encontraron materiales que coincidan con &quot;{filtroTexto}&quot;.
         </div>
       )}
 
-      {/* Listado agrupado en Acordeón Compacto */}
+      {/* Listado agrupado en list-stack limpio */}
       <div className="space-y-6">
         {[...rubrosMap.entries()].map(([rubro, items]) => (
           <div key={rubro} className="space-y-2">
-            <div className="flex items-center justify-between border-b border-border pb-1.5">
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                 {rubro}
               </h3>
               <span className="text-xs text-muted-foreground tabular-nums">
@@ -296,7 +336,7 @@ export function ObraMaterialesList({
               </span>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="list-stack">
               {items.map((s) => {
                 const tope = topePorMaterial.get(s.material_id)
                 const asignado = Number(s.cantidad_asignada ?? s.cantidad_contratada ?? 0)
@@ -310,26 +350,27 @@ export function ObraMaterialesList({
                 return (
                   <div
                     key={s.material_id}
-                    className={`card p-3 transition-colors hover:border-input ${
-                      sinSaldo ? 'border-l-2 border-l-warning' : ''
-                    }`}
+                    className={cn(
+                      'p-3.5 transition-colors hover:bg-muted/30',
+                      sinSaldo && 'border-l-2 border-l-warning'
+                    )}
                   >
                     {/* Fila compacta (Header de acordeón) */}
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         {/* Botón de ficha / foto */}
                         <button
                           type="button"
                           onClick={() => handleAbrirFicha(s)}
-                          className="w-9 h-9 rounded-lg bg-muted border border-border shrink-0 flex items-center justify-center overflow-hidden hover:opacity-90 hover:ring-2 hover:ring-ring transition-all cursor-pointer"
+                          className="w-10 h-10 rounded-lg bg-muted border border-border/80 shrink-0 flex items-center justify-center overflow-hidden hover:opacity-90 hover:ring-2 hover:ring-ring/40 transition-all cursor-pointer"
                           title="Ver ficha técnica"
                         >
                           {s.foto_url ? (
                             <Image
                               src={s.foto_url}
                               alt={s.nombre_base}
-                              width={36}
-                              height={36}
+                              width={40}
+                              height={40}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -357,69 +398,69 @@ export function ObraMaterialesList({
                       </div>
 
                       {/* Estatus rápido y botón desplegable */}
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2.5 shrink-0">
                         {sinSaldo ? (
-                          <Badge variant="warning">Sin saldo</Badge>
+                          <Badge variant="warning" dot>Sin saldo</Badge>
                         ) : (
-                          <span className="text-xs font-semibold text-primary-soft-foreground bg-primary-soft border border-primary/30 px-2 py-0.5 rounded-md tabular-nums">
+                          <Badge variant="success" dot>
                             Disp: {disponible}
-                          </span>
+                          </Badge>
                         )}
 
                         <button
                           type="button"
                           onClick={() => toggleExpand(s.material_id)}
-                          className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none"
-                          title={isExpanded ? 'Colapsar detalle' : 'Ver detalle numérico y acciones'}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          title={isExpanded ? 'Colapsar detalle' : 'Ver desglose numérico'}
                           aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
                         >
                           <IconChevron
-                            className={`w-4 h-4 transition-transform duration-200 ${
-                              isExpanded ? 'rotate-90 text-foreground' : ''
-                            }`}
+                            className={cn(
+                              'w-4 h-4 transition-transform duration-200',
+                              isExpanded && 'rotate-90 text-foreground'
+                            )}
                           />
                         </button>
                       </div>
                     </div>
 
-                    {/* Detalle expandible del Acordeón */}
+                    {/* Detalle expandible del Acordeón (Franja métrica limpia, sin cajas anidadas) */}
                     {isExpanded && (
-                      <div className="mt-3 pt-3 border-t border-border animate-fade-in space-y-3">
-                        {/* Desglose de saldos numérico */}
-                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
-                          <div className="bg-muted/50 p-2 rounded border border-border">
-                            <p className="text-muted-foreground font-medium">Asignado</p>
+                      <div className="mt-3 pt-3 border-t border-border/60 animate-enter space-y-3">
+                        {/* Franja métrica horizontal limpia y tabular */}
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 rounded-lg bg-muted/40 p-3">
+                          <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Asignado</p>
                             <p className="tabular-nums font-semibold text-foreground text-sm mt-0.5">
                               {asignado}
                             </p>
                           </div>
-                          <div className="bg-muted/50 p-2 rounded border border-border">
-                            <p className="text-muted-foreground font-medium">En proceso</p>
+                          <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">En proceso</p>
                             <p className="tabular-nums font-semibold text-foreground text-sm mt-0.5">
                               {enProceso}
                             </p>
                           </div>
-                          <div className="bg-muted/50 p-2 rounded border border-border">
-                            <p className="text-muted-foreground font-medium">Comprado</p>
+                          <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Comprado</p>
                             <p className="tabular-nums font-semibold text-foreground text-sm mt-0.5">
                               {comprado}
                             </p>
                           </div>
-                          <div className="bg-muted/50 p-2 rounded border border-border">
-                            <p className="text-muted-foreground font-medium">Entregado</p>
+                          <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Entregado</p>
                             <p className="tabular-nums font-semibold text-foreground text-sm mt-0.5">
                               {entregado}
                             </p>
                           </div>
-                          <div
-                            className={`p-2 rounded col-span-2 sm:col-span-1 border ${
-                              sinSaldo
-                                ? 'bg-danger-soft border-danger/30 text-danger-soft-foreground'
-                                : 'bg-primary-soft border-primary/30 text-primary-soft-foreground'
-                            }`}
-                          >
-                            <p className="font-semibold">Disponible</p>
-                            <p className="tabular-nums font-bold text-sm mt-0.5">
+                          <div className="col-span-2 sm:col-span-1">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Disponible</p>
+                            <p
+                              className={cn(
+                                'tabular-nums font-bold text-sm mt-0.5',
+                                sinSaldo ? 'text-danger' : 'text-primary'
+                              )}
+                            >
                               {disponible}
                             </p>
                           </div>
@@ -427,7 +468,7 @@ export function ObraMaterialesList({
 
                         {/* Acciones de gestión para usuarios con permisos */}
                         {puedeTopes && tope && (
-                          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-border">
+                          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-border/60">
                             <div className="flex-1">
                               <EditTopeInline
                                 topeId={tope.id}
@@ -443,7 +484,7 @@ export function ObraMaterialesList({
                                 setDeleteError(null)
                                 setMaterialAEliminar(s)
                               }}
-                              className="min-h-[44px] text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-2.5 py-1.5 rounded border border-danger/30 transition-colors inline-flex items-center gap-1 self-end sm:self-center font-medium"
+                              className="min-h-[36px] text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-3 py-1.5 rounded-lg border border-danger/20 transition-colors inline-flex items-center gap-1.5 self-end sm:self-center font-medium active:scale-[0.985]"
                               title="Eliminar este material del proyecto"
                             >
                               <IconBasura className="w-3.5 h-3.5" />

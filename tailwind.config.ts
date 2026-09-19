@@ -110,10 +110,12 @@ const config: Config = {
       },
       boxShadow: {
         xs: '0 1px 2px 0 rgb(15 23 42 / 0.04)',
-        sm: '0 1px 2px 0 rgb(15 23 42 / 0.05), 0 1px 3px 0 rgb(15 23 42 / 0.04)',
-        md: '0 2px 4px -1px rgb(15 23 42 / 0.05), 0 4px 12px -2px rgb(15 23 42 / 0.08)',
-        lg: '0 8px 24px -4px rgb(15 23 42 / 0.10), 0 2px 6px -1px rgb(15 23 42 / 0.06)',
-        popover: '0 8px 24px rgb(15 23 42 / 0.12), 0 2px 6px rgb(15 23 42 / 0.08)',
+        sm: '0 1px 3px 0 rgb(15 23 42 / 0.04), 0 1px 2px -1px rgb(15 23 42 / 0.03)',
+        card: '0 0 0 1px rgb(15 23 42 / 0.05), 0 1px 2px 0 rgb(15 23 42 / 0.03)',
+        'card-hover': '0 0 0 1px rgb(15 23 42 / 0.08), 0 4px 12px -2px rgb(15 23 42 / 0.06), 0 2px 4px -1px rgb(15 23 42 / 0.03)',
+        md: '0 0 0 1px rgb(15 23 42 / 0.05), 0 4px 12px -2px rgb(15 23 42 / 0.06), 0 2px 4px -1px rgb(15 23 42 / 0.04)',
+        lg: '0 0 0 1px rgb(15 23 42 / 0.06), 0 10px 28px -4px rgb(15 23 42 / 0.08), 0 4px 8px -2px rgb(15 23 42 / 0.04)',
+        popover: '0 0 0 1px rgb(15 23 42 / 0.06), 0 12px 32px -4px rgb(15 23 42 / 0.12), 0 4px 8px -2px rgb(15 23 42 / 0.06)',
       },
       spacing: {
         sidebar: 'var(--sidebar-width)',

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import Image from 'next/image'
-import { IconCerrar, IconExterno } from '@/components/icons'
+import { IconCerrar, IconExterno, IconChevron } from '@/components/icons'
 import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 export interface QuickLookItem {
@@ -151,35 +151,42 @@ export function QuickLookModal({
           <div className="flex items-center gap-1.5 shrink-0">
             {/* Controles para imagen: zoom */}
             {esImagen && (
-              <div className="hidden sm:flex items-center gap-1 mr-2 px-2 py-1 bg-muted rounded-lg text-xs">
+              <div className="hidden sm:flex items-center gap-1 mr-2 px-1.5 py-0.5 bg-muted/80 border border-border/60 rounded-lg text-xs">
                 <button
                   type="button"
                   onClick={() => setZoomNivel((z) => Math.max(0.5, z - 0.25))}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded font-bold text-foreground hover:bg-muted-foreground/20"
+                  className="flex h-7 w-7 items-center justify-center rounded-md font-bold text-muted-foreground hover:text-foreground hover:bg-background transition-colors"
                   aria-label="Reducir zoom"
                   title="Reducir zoom"
                 >
-                  −
+                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
                 </button>
-                <span className="tabular-nums font-medium text-foreground px-1">
+                <span className="tabular-nums font-semibold text-foreground px-1.5 text-[11px]">
                   {Math.round(zoomNivel * 100)}%
                 </span>
                 <button
                   type="button"
                   onClick={() => setZoomNivel((z) => Math.min(3, z + 0.25))}
-                  className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded font-bold text-foreground hover:bg-muted-foreground/20"
+                  className="flex h-7 w-7 items-center justify-center rounded-md font-bold text-muted-foreground hover:text-foreground hover:bg-background transition-colors"
                   aria-label="Aumentar zoom"
                   title="Aumentar zoom"
                 >
-                  +
+                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setZoomNivel(1)}
-                  className="ml-1 min-h-[44px] px-2 text-xs font-semibold text-primary hover:underline"
-                >
-                  Reiniciar
-                </button>
+                {zoomNivel !== 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setZoomNivel(1)}
+                    className="ml-1 px-1.5 py-0.5 text-[11px] font-medium text-primary hover:text-primary-hover hover:underline"
+                  >
+                    Restablecer
+                  </button>
+                )}
               </div>
             )}
 
@@ -189,7 +196,7 @@ export function QuickLookModal({
               download={itemActual.nombre}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary btn-sm font-semibold min-h-[44px]"
+              className="btn-secondary btn-sm font-medium"
               title="Descargar o abrir en pestaña externa"
             >
               <span>Descargar</span>
@@ -200,7 +207,7 @@ export function QuickLookModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors ml-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors ml-1 p-1.5 flex items-center justify-center"
               aria-label="Cerrar vista previa (Esc)"
               title="Cerrar vista previa (Esc)"
             >
@@ -264,21 +271,21 @@ export function QuickLookModal({
               <button
                 type="button"
                 onClick={handlePrev}
-                className="absolute left-3 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-lg border border-border transition-transform active:scale-95"
+                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-card hover:shadow-card-hover border border-border/80 transition-all active:scale-95 backdrop-blur-sm"
                 title="Elemento anterior (←)"
                 aria-label="Elemento anterior"
               >
-                <span className="text-lg font-bold leading-none">‹</span>
+                <IconChevron className="size-5 rotate-180" />
               </button>
 
               <button
                 type="button"
                 onClick={handleNext}
-                className="absolute right-3 top-1/2 flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-lg border border-border transition-transform active:scale-95"
+                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-card hover:shadow-card-hover border border-border/80 transition-all active:scale-95 backdrop-blur-sm"
                 title="Elemento siguiente (→)"
                 aria-label="Elemento siguiente"
               >
-                <span className="text-lg font-bold leading-none">›</span>
+                <IconChevron className="size-5" />
               </button>
             </>
           )}

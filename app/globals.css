@@ -207,33 +207,33 @@
 
   /* ---------- Superficies ---------- */
   .card {
-    @apply bg-card text-card-foreground rounded-xl border border-border p-4 shadow-xs;
+    @apply bg-card text-card-foreground rounded-xl border border-border/80 p-4 shadow-card;
     transition: border-color var(--dur-short) var(--ease-out),
       box-shadow var(--dur-short) var(--ease-out);
   }
 
   .card-interactive {
-    @apply card hover:border-input hover:shadow-md active:scale-[0.995] cursor-pointer;
+    @apply card hover:border-input hover:shadow-card-hover active:scale-[0.99] cursor-pointer;
   }
 
   .card-flat {
-    @apply bg-card text-card-foreground rounded-xl border border-border p-4;
+    @apply bg-card text-card-foreground rounded-xl border border-border/80 p-4;
   }
 
   .card-header {
-    @apply flex items-start justify-between gap-3 border-b border-border pb-3 mb-4;
+    @apply flex items-start justify-between gap-3 border-b border-border/70 pb-3 mb-4;
   }
 
   .card-title {
-    @apply text-sm font-semibold text-foreground;
+    @apply text-sm font-semibold tracking-tight text-foreground;
   }
 
   .stat-tile {
-    @apply card flex flex-col gap-1;
+    @apply card flex flex-col gap-1 hover:border-input hover:shadow-sm transition-all;
   }
 
   .stat-label {
-    @apply text-xs font-medium text-muted-foreground;
+    @apply text-[11px] font-semibold uppercase tracking-wider text-muted-foreground;
   }
 
   .stat-value {
@@ -241,25 +241,25 @@
   }
 
   .surface-raised {
-    @apply bg-card rounded-xl shadow-md border border-border;
+    @apply bg-card rounded-xl shadow-md border border-border/80;
   }
 
   .surface-inset {
-    @apply bg-muted/50 rounded-lg border border-border/70 p-3;
+    @apply bg-muted/40 rounded-lg border border-border/60 p-3;
   }
 
   .glass-header {
-    @apply sticky top-0 z-30 border-b border-border bg-card/90 backdrop-blur-md print:hidden;
+    @apply sticky top-0 z-30 border-b border-border/80 bg-card/90 backdrop-blur-md print:hidden;
   }
 
   /* ---------- Formularios ---------- */
   .input-base {
     @apply w-full min-h-[44px] rounded-lg border border-input bg-card px-3.5 py-2.5 text-base text-foreground
-           placeholder:text-muted-foreground/70 shadow-xs
-           hover:border-muted-foreground/60
-           focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/15
+           placeholder:text-muted-foreground/60 shadow-xs
+           hover:border-muted-foreground/50
+           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20
            disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-muted/60
-           aria-[invalid=true]:border-danger aria-[invalid=true]:focus:ring-danger/15;
+           aria-[invalid=true]:border-danger aria-[invalid=true]:focus:ring-2 aria-[invalid=true]:focus:ring-danger/20;
     transition: border-color var(--dur-short) var(--ease-out),
       box-shadow var(--dur-short) var(--ease-out);
   }
@@ -351,18 +351,18 @@
 
   /* ---------- Listas densas ---------- */
   .list-stack {
-    @apply rounded-xl border border-border bg-card divide-y divide-border overflow-hidden shadow-xs;
+    @apply rounded-xl border border-border/80 bg-card divide-y divide-border/60 overflow-hidden shadow-card;
   }
 
   .list-row {
     @apply flex min-h-[56px] items-start justify-between gap-3 px-4 py-3
-           hover:bg-muted/60 active:bg-muted transition-colors
+           hover:bg-muted/40 active:bg-muted/70 transition-colors
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring;
   }
 
   .list-header {
-    @apply hidden lg:grid items-center gap-3 px-4 py-2 text-xs font-medium uppercase tracking-wide
-           text-muted-foreground bg-muted/50 border-b border-border;
+    @apply hidden lg:grid items-center gap-3 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider
+           text-muted-foreground bg-muted/40 border-b border-border/60;
   }
 
   /* Skeleton rows — mismas medidas que .list-row para CLS = 0 */

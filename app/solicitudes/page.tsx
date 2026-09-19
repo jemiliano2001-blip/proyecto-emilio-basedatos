@@ -25,6 +25,7 @@ import {
 } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import type { EstadoSolicitud } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 interface SolicitudRow {
   id: string
@@ -128,28 +129,54 @@ export default async function SolicitudesPage({
       )}
 
       {(esCompras || esFinanzas) && (
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Colas</span>
-          {esCompras && (
-            <Link
-              href="/solicitudes?estatus=recibida"
-              className={
-                filters.estatus === 'recibida' ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'
-              }
-            >
-              Pendientes de Compras
-            </Link>
-          )}
-          {(esFinanzas || esCompras) && (
-            <Link
-              href="/solicitudes?estatus=en_proceso"
-              className={
-                filters.estatus === 'en_proceso' ? 'btn-primary btn-sm' : 'btn-secondary btn-sm'
-              }
-            >
-              Pendientes de Finanzas
-            </Link>
-          )}
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground shrink-0">
+            Colas operativas
+          </span>
+          <div className="overflow-x-auto rounded-lg bg-muted p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex shrink-0 items-center gap-0.5">
+              {esCompras && (
+                <Link
+                  href="/solicitudes?estatus=recibida"
+                  className={cn(
+                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    filters.estatus === 'recibida'
+                      ? 'bg-card text-foreground shadow-xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                  )}
+                >
+                  Pendientes de Compras
+                </Link>
+              )}
+              {(esFinanzas || esCompras) && (
+                <Link
+                  href="/solicitudes?estatus=en_proceso"
+                  className={cn(
+                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    filters.estatus === 'en_proceso'
+                      ? 'bg-card text-foreground shadow-xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                  )}
+                >
+                  Pendientes de Finanzas
+                </Link>
+              )}
+              <Link
+                href="/solicitudes"
+                className={cn(
+                  'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  !filters.estatus
+                    ? 'bg-card text-foreground shadow-xs font-semibold'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                )}
+              >
+                Ver todas
+              </Link>
+            </div>
+          </div>
         </div>
       )}
       <SolicitudesListClient

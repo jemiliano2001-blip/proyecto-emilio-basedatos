@@ -35,21 +35,21 @@ interface SolicitudesListClientProps {
   esFinanzas: boolean
 }
 
-function badgeVariant(estado: EstadoSolicitud): 'red' | 'teal' | 'navy' | 'amber' {
+function badgeVariant(estado: EstadoSolicitud): 'danger' | 'success' | 'info' | 'warning' {
   switch (estado) {
     case 'cancelada':
     case 'rechazada':
-      return 'red'
+      return 'danger'
     case 'finalizada':
     case 'aprobada':
-      return 'teal'
+      return 'success'
     case 'en_proceso':
     case 'en_cotizacion':
-      return 'navy'
+      return 'info'
     case 'recibida':
     case 'pendiente':
     default:
-      return 'amber'
+      return 'warning'
   }
 }
 
@@ -201,13 +201,8 @@ export function SolicitudesListClient({
         </div>
       )}
 
-      {/* Lista de solicitudes con soporte para shift-select y densidad adaptable */}
-      <div
-        className={cn(
-          'space-y-2 md:space-y-0 md:rounded-xl md:border md:border-border md:bg-card md:divide-y md:divide-border/50 md:overflow-hidden',
-          density === 'compact' && 'space-y-1.5 md:space-y-0'
-        )}
-      >
+      {/* Lista de solicitudes unificada en list-stack */}
+      <div className="list-stack">
         {solicitudes.map((s, index) => {
           const selected = isSelected(s.id)
           const reqCode = `REQ-${s.id.slice(0, 8).toUpperCase()}`
@@ -218,11 +213,9 @@ export function SolicitudesListClient({
             <div
               key={s.id}
               className={cn(
-                'card-interactive relative flex items-center gap-3 transition-colors',
-                selected ? 'bg-primary/10 border-primary/40' : 'bg-card',
-                density === 'comfortable' ? 'p-3.5 sm:p-4 min-h-[76px]' : 'p-2.5 sm:p-3 min-h-[58px]',
-                'md:rounded-none md:border-0 md:shadow-none',
-                selected ? 'md:bg-primary/10' : 'md:hover:bg-muted/50'
+                'list-row group items-center gap-3 transition-colors',
+                selected ? 'bg-primary/10' : 'hover:bg-muted/40',
+                density === 'comfortable' ? 'min-h-[72px]' : 'min-h-[56px] py-2'
               )}
             >
               {/* Checkbox táctil amigable de selección para Compras/Finanzas */}
@@ -240,19 +233,19 @@ export function SolicitudesListClient({
                     aria-checked={selected}
                     aria-label={`Seleccionar ${reqCode}`}
                     className={cn(
-                      'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg transition-colors cursor-pointer',
+                      'flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg transition-colors cursor-pointer',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                     )}
                   >
                     <span
                       className={cn(
-                        'flex h-5 w-5 items-center justify-center rounded border transition-colors',
+                        'flex h-4 w-4 items-center justify-center rounded border transition-colors',
                         selected
                           ? 'bg-primary border-primary text-primary-foreground font-bold'
-                          : 'border-border bg-card hover:border-input'
+                          : 'border-border/80 bg-card hover:border-input'
                       )}
                     >
-                      {selected && <IconCheck className="w-3.5 h-3.5" />}
+                      {selected && <IconCheck className="w-3 h-3" />}
                     </span>
                   </button>
                 </div>
@@ -271,25 +264,25 @@ export function SolicitudesListClient({
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-muted text-foreground border border-border">
+                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-foreground border border-border/80">
                       {reqCode}
                     </span>
                     {ordenes.map((oc) => (
                       <span
                         key={oc.id}
-                        className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-primary-soft text-primary-soft-foreground border border-primary/30"
+                        className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-primary-soft text-primary-soft-foreground border border-primary/25"
                       >
                         {oc.folio}
                       </span>
                     ))}
                   </div>
-                  <p className="font-semibold text-foreground truncate">
+                  <p className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
                     {s.obra?.nombre ?? 'Proyecto'}
                   </p>
                   <p
                     className={cn(
                       'text-muted-foreground truncate',
-                      density === 'comfortable' ? 'mt-1 text-xs sm:text-sm' : 'mt-0.5 text-xs'
+                      density === 'comfortable' ? 'mt-1 text-xs' : 'mt-0.5 text-xs'
                     )}
                   >
                     {labelMateriales(s.items.length)}
@@ -303,8 +296,8 @@ export function SolicitudesListClient({
                   </p>
                 </div>
 
-                <div className="shrink-0">
-                  <Badge variant={badgeVariant(s.estado)}>
+                <div className="shrink-0 pt-0.5">
+                  <Badge variant={badgeVariant(s.estado)} dot>
                     {labelEstado(s.estado)}
                   </Badge>
                 </div>

@@ -36,21 +36,21 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-xl border border-dashed border-input bg-card/60 px-4 py-12 text-center animate-fade-in',
+        'flex flex-col items-center justify-center rounded-xl border border-border/80 bg-card/40 px-4 py-12 text-center animate-enter',
         className
       )}
     >
       {icon && (
-        <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+        <div className="mb-3.5 flex size-12 items-center justify-center rounded-xl bg-muted/80 text-muted-foreground ring-1 ring-border/80 shadow-xs">
           {renderIcon(icon, 'h-6 w-6')}
         </div>
       )}
-      <p className="text-base font-semibold text-foreground">{title}</p>
+      <h3 className="text-sm font-semibold text-foreground tracking-tight">{title}</h3>
       {description && (
-        <p className="mx-auto mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">{description}</p>
+        <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-relaxed">{description}</p>
       )}
       {action && (
-        <div className="mt-6">
+        <div className="mt-5">
           {action.href ? (
             <Link href={action.href} className="btn-primary btn-sm">
               {renderIcon(action.icon, 'h-4 w-4')}

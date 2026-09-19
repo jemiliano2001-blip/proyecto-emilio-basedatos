@@ -20,14 +20,14 @@ function labelEstatusChip(estatus: string): string {
 
 const chipClass = (active: boolean) =>
   cn(
-    'shrink-0 inline-flex min-h-[40px] items-center rounded-full px-3.5 text-sm capitalize transition-colors',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'shrink-0 inline-flex min-h-[36px] items-center rounded-md px-3 text-xs sm:text-sm font-medium capitalize transition-all select-none',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     active
-      ? 'bg-foreground font-semibold text-background'
-      : 'bg-card font-medium text-muted-foreground border border-border hover:border-input hover:text-foreground'
+      ? 'bg-card text-foreground shadow-xs font-semibold'
+      : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
   )
 
-const labelClass = 'block text-xs font-medium text-muted-foreground mb-1'
+const labelClass = 'block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5'
 
 export function ListFilters({
   path,
@@ -59,37 +59,39 @@ export function ListFilters({
   return (
     <div className={compact ? 'mb-4 space-y-2.5' : 'mb-5 space-y-3'}>
       {showChipBar && (
-        <nav
-          className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          aria-label="Filtrar por estatus"
-        >
-          <Link
-            href={filterHref(path, params, { estatus: undefined })}
-            aria-current={!currentEstatus ? 'page' : undefined}
-            className={chipClass(!currentEstatus)}
+        <div className="overflow-x-auto rounded-lg bg-muted p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <nav
+            className="flex shrink-0 items-center gap-0.5"
+            aria-label="Filtrar por estatus"
           >
-            Todos
-          </Link>
-          {statuses.map((s) => {
-            const active = currentEstatus === s
-            return (
-              <Link
-                key={s}
-                href={filterHref(path, params, { estatus: s })}
-                aria-current={active ? 'page' : undefined}
-                className={chipClass(active)}
-              >
-                {labelEstatusChip(s)}
-              </Link>
-            )
-          })}
-        </nav>
+            <Link
+              href={filterHref(path, params, { estatus: undefined })}
+              aria-current={!currentEstatus ? 'page' : undefined}
+              className={chipClass(!currentEstatus)}
+            >
+              Todos
+            </Link>
+            {statuses.map((s) => {
+              const active = currentEstatus === s
+              return (
+                <Link
+                  key={s}
+                  href={filterHref(path, params, { estatus: s })}
+                  aria-current={active ? 'page' : undefined}
+                  className={chipClass(active)}
+                >
+                  {labelEstatusChip(s)}
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
       )}
 
       <form
         action={path}
         className={cn(
-          'rounded-xl border border-border bg-card shadow-xs',
+          'card',
           compact
             ? 'grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end'
             : 'grid grid-cols-1 gap-4 p-4 sm:grid-cols-2'

@@ -8,6 +8,7 @@ import { IconPlus, IconEditar, IconBasura, IconPaquete } from '@/components/icon
 import { EmptyState } from '@/components/EmptyState'
 import { MaterialPreviewModal } from '@/components/MaterialPreviewModal'
 import { formatMoneyMx } from '@/lib/money'
+import { cn } from '@/lib/utils'
 import { useModalFocus } from '@/lib/hooks/useModalFocus'
 import type { CatalogoMaterial, MaterialCategoria } from '@/lib/types'
 import {
@@ -49,23 +50,37 @@ function MaterialCard({
           onSelect(m)
         }
       }}
-      className={`card-interactive relative text-left group cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring/50 ${compact ? 'p-2' : ''} ${showImage ? '' : 'pt-14'}`}
+      className={cn(
+        'card-interactive relative text-left group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        compact ? 'p-2.5' : 'p-3',
+        selected && 'ring-2 ring-primary border-primary/50'
+      )}
     >
-      <label className="absolute left-2 top-2 z-10 flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg bg-card/95 shadow-sm border border-border" onClick={(event) => event.stopPropagation()}>
+      {/* Checkbox discreto y elegante */}
+      <label
+        className={cn(
+          'absolute left-2.5 top-2.5 z-10 flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-lg transition-all',
+          'bg-card/90 backdrop-blur-xs border border-border/80 shadow-xs hover:border-primary',
+          selected ? 'opacity-100 bg-primary border-primary text-primary-foreground' : 'opacity-80 sm:opacity-0 group-hover:opacity-100 focus-within:opacity-100'
+        )}
+        onClick={(event) => event.stopPropagation()}
+      >
         <span className="sr-only">Seleccionar {m.nombre_base}</span>
         <input
           type="checkbox"
           checked={selected}
           onChange={() => undefined}
           onClick={onToggleSelected}
-          className="h-5 w-5 accent-teal-800"
+          className="h-4 w-4 rounded accent-primary cursor-pointer"
         />
       </label>
+
+      {/* Botón editar discreto en hover */}
       {puedeEditar && (
         <Link
           href={`/materiales/${m.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="absolute top-2 right-2 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-card/90 shadow-sm border border-border text-muted-foreground hover:text-foreground hover:bg-card transition-colors opacity-80 group-hover:opacity-100"
+          className="absolute top-2.5 right-2.5 z-10 flex min-h-[32px] min-w-[32px] items-center justify-center rounded-lg bg-card/90 backdrop-blur-xs shadow-xs border border-border/80 text-muted-foreground hover:text-foreground hover:bg-card transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
           title="Editar material"
           aria-label={`Editar ${m.nombre_base}`}
         >
@@ -73,33 +88,39 @@ function MaterialCard({
         </Link>
       )}
 
-      {showImage && <div className="aspect-square bg-muted rounded-lg mb-2 flex items-center justify-center overflow-hidden border border-border">
-        {m.foto_url ? (
-          // Imagen de catálogo servida por Storage
-          <Image
-            src={m.foto_url}
-            alt={m.nombre_base}
-            width={200}
-            height={200}
-            unoptimized
-            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
-          />
-        ) : (
-          <span className="text-muted-foreground text-xs font-medium">Sin foto</span>
-        )}
-      </div>}
-      <p className="font-bold text-sm text-foreground line-clamp-2 group-hover:text-foreground transition-colors">
+      {showImage && (
+        <div className="aspect-square bg-muted/40 rounded-lg mb-2.5 flex items-center justify-center overflow-hidden border border-border/60">
+          {m.foto_url ? (
+            <Image
+              src={m.foto_url}
+              alt={m.nombre_base}
+              width={200}
+              height={200}
+              unoptimized
+              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+            />
+          ) : (
+            <span className="text-muted-foreground text-xs font-medium">Sin foto</span>
+          )}
+        </div>
+      )}
+
+      <p className="font-semibold text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors">
         {m.nombre_base}
       </p>
       {!m.activo && (
-        <p className="mt-1 text-[11px] font-semibold text-warning-soft-foreground">Inactivo: no se puede seleccionar en requisiciones.</p>
+        <p className="mt-1 text-[11px] font-semibold text-warning-soft-foreground">
+          Inactivo: no disponible en requisiciones.
+        </p>
       )}
-      {m.variante && <p className="text-xs text-muted-foreground truncate">{m.variante}</p>}
+      {m.variante && <p className="text-xs text-muted-foreground truncate mt-0.5">{m.variante}</p>}
       {m.subcategoria && (
-        <p className="text-xs text-muted-foreground mt-0.5">{m.subcategoria}</p>
+        <p className="text-[11px] text-muted-foreground/80 mt-0.5">{m.subcategoria}</p>
       )}
-      <div className="mt-2 flex items-center justify-between pt-1 border-t border-border">
-        <span className="text-xs text-muted-foreground font-medium">{m.unidad_medida}</span>
+      <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-border/60">
+        <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+          {m.unidad_medida}
+        </span>
         {verPrecios && m.precio_base !== undefined && m.precio_base > 0 && (
           <span className="text-xs font-semibold tabular-nums text-primary">
             {formatMoneyMx(m.precio_base)}
@@ -418,52 +439,90 @@ export function CatalogoMaterialesView({
           )}
         </div>
 
-        {/* Botones de selección de categoría (Pills) */}
-        <div className="flex flex-wrap items-center gap-2">
-          {categorias.map((cat) => {
-            const isSelected = selectedCat === cat.nombre
-            const count = materiales.filter((m) => m.categoria === cat.nombre).length
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCat(cat.nombre)}
-                className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
-                  isSelected
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-muted text-foreground hover:bg-border'
-                }`}
-              >
-                {cat.nombre} <span className="opacity-75 tabular-nums">({count})</span>
-              </button>
-            )
-          })}
+        {/* Selector de categoría (Control Segmentado Canónico) */}
+        <div className="overflow-x-auto rounded-lg bg-muted p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex shrink-0 items-center gap-0.5">
+            {categorias.map((cat) => {
+              const isSelected = selectedCat === cat.nombre
+              const count = materiales.filter((m) => m.categoria === cat.nombre).length
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCat(cat.nombre)}
+                  className={cn(
+                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    isSelected
+                      ? 'bg-card text-foreground shadow-xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                  )}
+                >
+                  {cat.nombre}
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                      isSelected
+                        ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
+                        : 'bg-border/70 text-muted-foreground'
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
 
-          {sinCategoria.length > 0 && (
+            {sinCategoria.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectedCat('sin_categoria')}
+                className={cn(
+                  'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  selectedCat === 'sin_categoria'
+                    ? 'bg-card text-foreground shadow-xs font-semibold'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                )}
+              >
+                Sin categoría
+                <span
+                  className={cn(
+                    'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                    selectedCat === 'sin_categoria'
+                      ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
+                      : 'bg-border/70 text-muted-foreground'
+                  )}
+                >
+                  {sinCategoria.length}
+                </span>
+              </button>
+            )}
+
             <button
               type="button"
-              onClick={() => setSelectedCat('sin_categoria')}
-              className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedCat === 'sin_categoria'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-muted text-foreground hover:bg-border'
-              }`}
+              onClick={() => setSelectedCat('todas')}
+              className={cn(
+                'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                selectedCat === 'todas'
+                  ? 'bg-card text-foreground shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+              )}
             >
-              Sin categoría <span className="opacity-75 tabular-nums">({sinCategoria.length})</span>
+              Todas
+              <span
+                className={cn(
+                  'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                  selectedCat === 'todas'
+                    ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
+                    : 'bg-border/70 text-muted-foreground'
+                )}
+              >
+                {materiales.length}
+              </span>
             </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setSelectedCat('todas')}
-            className={`min-h-[44px] px-3.5 py-2 rounded-full text-sm font-medium transition-colors ${
-              selectedCat === 'todas'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'bg-muted text-foreground hover:bg-border'
-            }`}
-          >
-            Todas <span className="opacity-75 tabular-nums">({materiales.length})</span>
-          </button>
+          </div>
         </div>
       </div>
 
