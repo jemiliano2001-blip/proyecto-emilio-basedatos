@@ -82,32 +82,6 @@ export default async function HomePage({
 
   return (
     <main className="page-shell-wide space-y-6">
-      {/* Banner 2026 Caregiver Architecture & Enlace al Sistema de Diseño */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-amber-50/50 border border-amber-200/60 rounded-2xl text-stone-900 shadow-xs">
-        <div className="flex items-center gap-3">
-          <span className="flex size-3.5 rounded-full bg-primary ring-4 ring-primary/20 shrink-0 animate-pulse" />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-stone-900 font-heading">
-                Sistema Operativo ObraTrack 2026
-              </span>
-              <span className="rounded-full bg-amber-100/90 px-2 py-0.5 text-[10px] font-medium text-amber-800 border border-amber-300/60">
-                Cálido & Orgánico
-              </span>
-            </div>
-            <p className="text-xs text-stone-600 mt-0.5">
-              Control de materiales, doble presupuesto y trazabilidad de campo con diseño accesible.
-            </p>
-          </div>
-        </div>
-        <Link
-          href="/sistema-diseno"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors bg-white/80 px-3 py-1.5 rounded-xl border border-amber-200/50 shadow-xs shrink-0"
-        >
-          <span>Explorar Sistema de Diseño</span>
-          <span aria-hidden="true">→</span>
-        </Link>
-      </div>
 
       <PageHeader
         title="Panel operativo"
