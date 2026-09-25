@@ -146,6 +146,7 @@ export async function actualizarUsuarioAction(
   }
 
   const parsed = validateActualizarUsuarioInput({
+    email: formData.get('email'),
     nombre: formData.get('nombre'),
     rol: formData.get('rol'),
     activo: formData.get('activo'),
@@ -159,12 +160,32 @@ export async function actualizarUsuarioAction(
   const supabase = await createClient()
   const { data: actual, error: loadError } = await supabase
     .from('usuarios')
-    .select('id, rol, activo')
+    .select('id, email, rol, activo')
     .eq('id', usuarioId)
     .maybeSingle()
 
   if (loadError || !actual) {
     return { error: 'No se encontró el usuario.' }
+  }
+
+  // Si se modificó el correo, actualizar en Supabase Auth
+  if (parsed.data.email && parsed.data.email !== actual.email) {
+    try {
+      const admin = createAdminClient()
+      const { error: authEmailErr } = await admin.auth.admin.updateUserById(usuarioId, {
+        email: parsed.data.email,
+        email_confirm: true,
+      })
+      if (authEmailErr) {
+        const msg = authEmailErr.message.toLowerCase()
+        if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
+          return { error: 'Ya existe otro usuario registrado con ese correo.' }
+        }
+        return { error: `No se pudo actualizar el correo: ${authEmailErr.message}` }
+      }
+    } catch {
+      return { error: 'Se requiere SUPABASE_SERVICE_ROLE_KEY en el servidor para modificar correos.' }
+    }
   }
 
   const pierdeAccesoTotal =
@@ -192,6 +213,7 @@ export async function actualizarUsuarioAction(
       nombre: parsed.data.nombre,
       rol: parsed.data.rol,
       activo: parsed.data.activo,
+      ...(parsed.data.email ? { email: parsed.data.email } : {}),
     })
     .eq('id', usuarioId)
 

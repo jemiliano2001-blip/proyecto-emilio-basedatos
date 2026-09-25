@@ -338,6 +338,15 @@ export function AsignarMaterialesObraForm({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={agregarMaterialIndividual}
+              className="btn-primary btn-sm min-h-[44px]"
+              disabled={materiales.length === 0}
+            >
+              <IconPlus className="w-3.5 h-3.5" />
+              <span>Material individual</span>
+            </button>
             {kits.length > 0 && (
               <button
                 type="button"
@@ -348,15 +357,6 @@ export function AsignarMaterialesObraForm({
                 <span>Cargar Kit / Ensamble</span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={agregarMaterialIndividual}
-              className="btn-primary btn-sm min-h-[44px]"
-              disabled={materiales.length === 0}
-            >
-              <IconPlus className="w-3.5 h-3.5" />
-              <span>Material individual</span>
-            </button>
           </div>
         </div>
 
@@ -500,166 +500,7 @@ export function AsignarMaterialesObraForm({
           </div>
         )}
 
-        {/* 1. SECCIÓN DE KITS / ENSAMBLES ASIGNADOS (JERÁRQUICOS Y COLAPSIBLES) */}
-        {kitsAsignados.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-1">
-              <h3 className="text-xs font-bold text-primary-soft-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <IconRayo className="w-3.5 h-3.5 text-warning" />
-                <span>Kits y Ensambles ({kitsAsignados.length})</span>
-              </h3>
-              <span className="text-xs text-muted-foreground">
-                Componentes editables por ensamble
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              {kitsAsignados.map((kit) => {
-                const subtotalKit = kit.componentes.reduce((acc, c) => {
-                  const cant = parseQuantity(c.cantidad) ?? 0
-                  return acc + cant * c.precioUnitario
-                }, 0)
-
-                return (
-                  <div
-                    key={kit.instanceId}
-                    className="border-2 border-primary/30 bg-primary-soft/15 rounded-xl overflow-hidden shadow-sm transition-all"
-                  >
-                    {/* Header del Kit Asignado */}
-                    <div className="bg-muted/50 border-b border-border p-3 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <button
-                          type="button"
-                          onClick={() => toggleExpandKit(kit.instanceId)}
-                          className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-border transition-colors"
-                          title={kit.isExpanded ? 'Colapsar componentes' : 'Expandir componentes'}
-                        >
-                          <IconChevron
-                            className={`w-4 h-4 transition-transform duration-200 ${
-                              kit.isExpanded ? 'rotate-90 text-primary-soft-foreground' : ''
-                            }`}
-                          />
-                        </button>
-
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold text-sm text-foreground">
-                              {kit.nombre}
-                            </span>
-                            {kit.configuracion && (
-                              <span className="text-xs font-normal text-muted-foreground">
-                                ({kit.configuracion})
-                              </span>
-                            )}
-                            <span className="badge-teal text-[11px] font-semibold">
-                              x{kit.multiplicador} {kit.multiplicador === 1 ? 'kit' : 'kits'}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {kit.componentes.length} componentes · Costo ensamble:{' '}
-                            <strong className="text-foreground">
-                              {formatMoneyMx(subtotalKit)}
-                            </strong>
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Botón de 1-Clic para Borrar el Kit Completo */}
-                      <button
-                        type="button"
-                        onClick={() => eliminarKitCompleto(kit.instanceId)}
-                        className="text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-2.5 py-1.5 rounded border border-danger/30 transition-colors inline-flex items-center gap-1 shrink-0 font-medium"
-                        title="Eliminar este kit completo y todos sus componentes"
-                      >
-                        <IconBasura className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Eliminar Kit</span>
-                      </button>
-                    </div>
-
-                    {/* Lista Expandible de Componentes del Kit */}
-                    {kit.isExpanded && (
-                      <div className="p-3 space-y-2 bg-card animate-fade-in">
-                        <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 grid grid-cols-12 gap-2">
-                          <span className="col-span-6 sm:col-span-6">Componente</span>
-                          <span className="col-span-3 sm:col-span-2 text-center">Cantidad</span>
-                          <span className="hidden sm:block sm:col-span-2 text-right">Precio unit.</span>
-                          <span className="col-span-3 sm:col-span-2 text-right">Subtotal</span>
-                        </div>
-
-                        {kit.componentes.map((comp) => {
-                          const cantNum = parseQuantity(comp.cantidad) ?? 0
-                          const subtotalComp = cantNum * comp.precioUnitario
-
-                          return (
-                            <div
-                              key={comp.id}
-                              className="p-2 rounded-lg border border-border hover:border-border bg-muted/50 grid grid-cols-12 gap-2 items-center text-xs"
-                            >
-                              <div className="col-span-6 sm:col-span-6 min-w-0">
-                                <p className="font-semibold text-foreground truncate">
-                                  {comp.nombre_base}
-                                </p>
-                                <div className="text-[11px] text-muted-foreground truncate">
-                                  {comp.variante && <span>{comp.variante} · </span>}
-                                  <span>{comp.unidad_medida}</span>
-                                </div>
-                              </div>
-
-                              <div className="col-span-3 sm:col-span-2">
-                                <input
-                                  type="text"
-                                  inputMode="decimal"
-                                  value={comp.cantidad}
-                                  onChange={(e) =>
-                                    actualizarCantidadComponenteKit(
-                                      kit.instanceId,
-                                      comp.id,
-                                      e.target.value
-                                    )
-                                  }
-                                  className="input-base text-xs text-center font-semibold py-1 bg-card"
-                                  title="Editar cantidad para este kit"
-                                />
-                              </div>
-
-                              <div className="hidden sm:block sm:col-span-2 text-right text-muted-foreground tabular-nums">
-                                {formatMoneyMx(comp.precioUnitario)}
-                              </div>
-
-                              <div className="col-span-3 sm:col-span-2 flex items-center justify-end gap-1.5">
-                                <span className="font-bold text-foreground tabular-nums">
-                                  {formatMoneyMx(subtotalComp)}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    eliminarComponenteDeKit(kit.instanceId, comp.id)
-                                  }
-                                  className="text-muted-foreground hover:text-danger p-0.5 rounded"
-                                  title="Quitar este componente del kit"
-                                >
-                                  <IconCerrar className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-                          )
-                        })}
-
-                        {kit.componentes.length === 0 && (
-                          <p className="text-center text-xs text-muted-foreground py-3">
-                            Este kit no tiene componentes asignados.
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* 2. SECCIÓN DE MATERIALES INDIVIDUALES */}
+        {/* 1. SECCIÓN DE MATERIALES INDIVIDUALES (PARTIDAS NORMALES) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-border pb-1">
             <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
@@ -797,6 +638,165 @@ export function AsignarMaterialesObraForm({
             )}
           </div>
         </div>
+
+        {/* 2. SECCIÓN DE KITS / ENSAMBLES ASIGNADOS (JERÁRQUICOS Y COLAPSIBLES) */}
+        {kitsAsignados.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-1">
+              <h3 className="text-xs font-bold text-primary-soft-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <IconRayo className="w-3.5 h-3.5 text-warning" />
+                <span>Kits y Ensambles ({kitsAsignados.length})</span>
+              </h3>
+              <span className="text-xs text-muted-foreground">
+                Componentes editables por ensamble
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {kitsAsignados.map((kit) => {
+                const subtotalKit = kit.componentes.reduce((acc, c) => {
+                  const cant = parseQuantity(c.cantidad) ?? 0
+                  return acc + cant * c.precioUnitario
+                }, 0)
+
+                return (
+                  <div
+                    key={kit.instanceId}
+                    className="border-2 border-primary/30 bg-primary-soft/15 rounded-xl overflow-hidden shadow-sm transition-all"
+                  >
+                    {/* Header del Kit Asignado */}
+                    <div className="bg-muted/50 border-b border-border p-3 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <button
+                          type="button"
+                          onClick={() => toggleExpandKit(kit.instanceId)}
+                          className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-border transition-colors"
+                          title={kit.isExpanded ? 'Colapsar componentes' : 'Expandir componentes'}
+                        >
+                          <IconChevron
+                            className={`w-4 h-4 transition-transform duration-200 ${
+                              kit.isExpanded ? 'rotate-90 text-primary-soft-foreground' : ''
+                            }`}
+                          />
+                        </button>
+
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-sm text-foreground">
+                              {kit.nombre}
+                            </span>
+                            {kit.configuracion && (
+                              <span className="text-xs font-normal text-muted-foreground">
+                                ({kit.configuracion})
+                              </span>
+                            )}
+                            <span className="badge-teal text-[11px] font-semibold">
+                              x{kit.multiplicador} {kit.multiplicador === 1 ? 'kit' : 'kits'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {kit.componentes.length} componentes · Costo ensamble:{' '}
+                            <strong className="text-foreground">
+                              {formatMoneyMx(subtotalKit)}
+                            </strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Botón de 1-Clic para Borrar el Kit Completo */}
+                      <button
+                        type="button"
+                        onClick={() => eliminarKitCompleto(kit.instanceId)}
+                        className="text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-2.5 py-1.5 rounded border border-danger/30 transition-colors inline-flex items-center gap-1 shrink-0 font-medium"
+                        title="Eliminar este kit completo y todos sus componentes"
+                      >
+                        <IconBasura className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Eliminar Kit</span>
+                      </button>
+                    </div>
+
+                    {/* Lista Expandible de Componentes del Kit */}
+                    {kit.isExpanded && (
+                      <div className="p-3 space-y-2 bg-card animate-fade-in">
+                        <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 grid grid-cols-12 gap-2">
+                          <span className="col-span-6 sm:col-span-6">Componente</span>
+                          <span className="col-span-3 sm:col-span-2 text-center">Cantidad</span>
+                          <span className="hidden sm:block sm:col-span-2 text-right">Precio unit.</span>
+                          <span className="col-span-3 sm:col-span-2 text-right">Subtotal</span>
+                        </div>
+
+                        {kit.componentes.map((comp) => {
+                          const cantNum = parseQuantity(comp.cantidad) ?? 0
+                          const subtotalComp = cantNum * comp.precioUnitario
+
+                          return (
+                            <div
+                              key={comp.id}
+                              className="p-2 rounded-lg border border-border hover:border-border bg-muted/50 grid grid-cols-12 gap-2 items-center text-xs"
+                            >
+                              <div className="col-span-6 sm:col-span-6 min-w-0">
+                                <p className="font-semibold text-foreground truncate">
+                                   {comp.nombre_base}
+                                </p>
+                                <div className="text-[11px] text-muted-foreground truncate">
+                                  {comp.variante && <span>{comp.variante} · </span>}
+                                  <span>{comp.unidad_medida}</span>
+                                </div>
+                              </div>
+
+                              <div className="col-span-3 sm:col-span-2">
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  value={comp.cantidad}
+                                  onChange={(e) =>
+                                    actualizarCantidadComponenteKit(
+                                      kit.instanceId,
+                                      comp.id,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="input-base text-xs text-center font-semibold py-1 bg-card"
+                                  title="Editar cantidad para este kit"
+                                />
+                              </div>
+
+                              <div className="hidden sm:block sm:col-span-2 text-right text-muted-foreground tabular-nums">
+                                {formatMoneyMx(comp.precioUnitario)}
+                              </div>
+
+                              <div className="col-span-3 sm:col-span-2 flex items-center justify-end gap-1.5">
+                                <span className="font-bold text-foreground tabular-nums">
+                                  {formatMoneyMx(subtotalComp)}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    eliminarComponenteDeKit(kit.instanceId, comp.id)
+                                  }
+                                  className="text-muted-foreground hover:text-danger p-0.5 rounded"
+                                  title="Quitar este componente del kit"
+                                >
+                                  <IconCerrar className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
+
+                        {kit.componentes.length === 0 && (
+                          <p className="text-center text-xs text-muted-foreground py-3">
+                            Este kit no tiene componentes asignados.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* 3. RESUMEN CONSOLIDADO DE CANTIDADES TOTALES */}
         {materialesConsolidados.length > 0 && (

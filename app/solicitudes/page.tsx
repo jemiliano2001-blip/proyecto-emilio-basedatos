@@ -93,7 +93,7 @@ export default async function SolicitudesPage({
   return (
     <main className="page-shell">
       <PageHeader
-        title={verTodas ? 'Control de solicitudes' : 'Mis solicitudes'}
+        title={verTodas ? 'Control de solicitudes de compra' : 'Mis solicitudes de compra'}
         subtitle={
           verTodas
             ? 'Requisiciones por estatus · Compras → Finanzas'

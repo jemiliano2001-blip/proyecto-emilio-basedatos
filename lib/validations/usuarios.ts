@@ -17,6 +17,7 @@ export interface CrearUsuarioInput {
 }
 
 export interface ActualizarUsuarioInput {
+  email?: string
   nombre: string
   rol: RolUsuario
   activo: boolean
@@ -106,6 +107,7 @@ export function validateActualizarUsuarioInput(
 
   const body = raw as Record<string, unknown>
   const nombre = typeof body.nombre === 'string' ? body.nombre.trim() : ''
+  const emailRaw = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
   const rol = asRol(body.rol)
   const activo =
     typeof body.activo === 'boolean'
@@ -116,6 +118,12 @@ export function validateActualizarUsuarioInput(
           ? true
           : null
 
+  if (emailRaw && !EMAIL_RE.test(emailRaw)) {
+    return { ok: false, error: 'Escribe un correo válido.' }
+  }
+  if (emailRaw && emailRaw.length > 254) {
+    return { ok: false, error: 'El correo es demasiado largo.' }
+  }
   if (nombre.length < 2) {
     return { ok: false, error: 'El nombre debe tener al menos 2 caracteres.' }
   }
@@ -131,7 +139,12 @@ export function validateActualizarUsuarioInput(
 
   return {
     ok: true,
-    data: { nombre, rol, activo },
+    data: {
+      nombre,
+      rol,
+      activo,
+      ...(emailRaw ? { email: emailRaw } : {}),
+    },
   }
 }
 

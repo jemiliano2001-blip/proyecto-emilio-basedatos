@@ -60,11 +60,11 @@ const STATIC_COMMANDS: CommandItem[] = [
   },
   {
     id: 'nav-solicitudes',
-    label: 'Solicitudes y Requisiciones',
+    label: 'Solicitudes de compra',
     category: 'Navegación',
     href: '/solicitudes',
     icon: IconDocumento,
-    keywords: 'solicitud requisicion materiales pedidos',
+    keywords: 'solicitud solicitudes compra requisicion materiales pedidos',
   },
   {
     id: 'nav-ordenes',

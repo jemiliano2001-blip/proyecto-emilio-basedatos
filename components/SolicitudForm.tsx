@@ -69,6 +69,7 @@ export function SolicitudForm({
   saldos = [],
   defaultObraId,
   permiteMultiObra = false,
+  solicitanteNombre,
 }: {
   action: (prev: ActionResult, formData: FormData) => Promise<ActionResult>
   obras: ObraOption[]
@@ -76,6 +77,7 @@ export function SolicitudForm({
   saldos?: SaldoItemOption[]
   defaultObraId?: string
   permiteMultiObra?: boolean
+  solicitanteNombre?: string
 }) {
   const router = useRouter()
   const userId = useOfflineUser()
@@ -487,11 +489,18 @@ export function SolicitudForm({
       )}
 
       <div className="space-y-3">
-        <label className="block text-sm font-semibold text-foreground">
-          Renglones de la requisición
-        </label>
+        <div className="flex items-center justify-between gap-2">
+          <label className="block text-sm font-semibold text-foreground">
+            Renglones de la requisición
+          </label>
+          {solicitanteNombre && (
+            <span className="text-xs text-muted-foreground">
+              Solicitado por: <strong className="text-foreground font-medium">{solicitanteNombre}</strong>
+            </span>
+          )}
+        </div>
 
-        <div className="card space-y-0 divide-y divide-border p-0 overflow-hidden">
+        <div className="card space-y-0 divide-y divide-border p-0">
           {items.map((item, idx) => {
             const effectiveObraId = multiObra ? item.obra_id : selectedObraId
             const info = item.material_id ? getSaldoInfo(effectiveObraId, item.material_id) : { disponible: null, comprometido: null }
@@ -725,6 +734,7 @@ export function SolicitudForm({
         obraNombrePrincipal={obraNombrePrincipal}
         notaGeneral={notaGeneral}
         items={previewItems}
+        solicitanteNombre={solicitanteNombre}
       />
     </form>
   )

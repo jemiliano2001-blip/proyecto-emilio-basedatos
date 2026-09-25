@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
 import { PageHeader } from '@/components/PageHeader'
+import { MatrizPermisosRoles } from '@/components/MatrizPermisosRoles'
 import { IconChevron, IconPlus, IconUsuarios } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeGestionarUsuarios } from '@/lib/roles'
@@ -25,7 +26,7 @@ export default async function UsuariosPage() {
   const lista = (data as Usuario[] | null) ?? []
 
   return (
-    <main className="page-shell">
+    <main className="page-shell space-y-6">
       <PageHeader
         title="Usuarios"
         description="Altas, roles y cuentas activas. Solo acceso total."
@@ -102,6 +103,10 @@ export default async function UsuariosPage() {
           ))}
         </div>
       )}
+
+      <div className="pt-2">
+        <MatrizPermisosRoles />
+      </div>
     </main>
   )
 }

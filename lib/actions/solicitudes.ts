@@ -18,14 +18,20 @@ export type ActionResult = { error: string | null; ok?: boolean }
 
 function mapRpcError(error: { message?: string } | null, fallback: string): string {
   const msg = error?.message ?? ''
-  if (msg.includes('Saldo de cantidad insuficiente')) {
-    return 'Saldo de cantidad insuficiente para un material.'
+  if (msg.includes('Saldo insuficiente en partida')) {
+    return msg
   }
   if (msg.includes('Presupuesto monetario insuficiente')) {
-    return 'Presupuesto monetario insuficiente.'
+    return msg
   }
-  if (msg.includes('no tiene presupuesto de cantidad')) {
-    return 'Ese material no tiene presupuesto de cantidad en el proyecto.'
+  if (msg.includes('no tiene presupuesto')) {
+    return msg
+  }
+  if (msg.includes('debe conservar al menos una partida')) {
+    return msg
+  }
+  if (msg.includes('Saldo de cantidad insuficiente')) {
+    return 'Saldo de cantidad insuficiente para un material.'
   }
   if (msg.includes('Falta el precio cotizado')) {
     return 'Captura el precio cotizado en todos los materiales antes de aprobar.'
@@ -33,7 +39,7 @@ function mapRpcError(error: { message?: string } | null, fallback: string): stri
   if (msg.includes('precio cotizado no puede ser negativo')) {
     return 'El precio cotizado no puede ser negativo.'
   }
-  if (msg.length > 0 && msg.length < 180) return msg
+  if (msg.length > 0 && msg.length < 240) return msg
   return fallback
 }
 
@@ -521,6 +527,57 @@ export async function cancelSolicitudAction(
   return { error: null, ok: true }
 }
 
+export async function eliminarPartidaSolicitudAction(
+  solicitudId: string,
+  itemId: string
+): Promise<ActionResult> {
+  const session = await getSessionUsuario()
+  if (!session || !puedeAprobarCompras(session.rol)) {
+    return { error: 'No tienes permiso para modificar partidas de la requisición.' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('eliminar_item_solicitud', {
+    p_solicitud_id: solicitudId,
+    p_item_id: itemId,
+  })
+
+  if (error) {
+    if (esRelacionAusente(error) || error.message?.includes('eliminar_item_solicitud')) {
+      const { data: sol } = await supabase
+        .from('solicitudes_material')
+        .select('estado')
+        .eq('id', solicitudId)
+        .maybeSingle()
+      if (sol?.estado === 'recibida' || sol?.estado === 'pendiente') {
+        const { count } = await supabase
+          .from('solicitud_items')
+          .select('id', { count: 'exact', head: true })
+          .eq('solicitud_id', solicitudId)
+        if ((count ?? 0) > 1) {
+          const { error: delErr } = await supabase
+            .from('solicitud_items')
+            .delete()
+            .eq('id', itemId)
+            .eq('solicitud_id', solicitudId)
+          if (!delErr) {
+            revalidatePath('/solicitudes')
+            revalidatePath(`/solicitudes/${solicitudId}`)
+            return { error: null, ok: true }
+          }
+        } else {
+          return { error: 'La requisición debe conservar al menos una partida. Si deseas anularla completa, utiliza Rechazar.' }
+        }
+      }
+    }
+    return { error: mapRpcError(error, 'No se pudo eliminar la partida.') }
+  }
+
+  revalidatePath('/solicitudes')
+  revalidatePath(`/solicitudes/${solicitudId}`)
+  return { error: null, ok: true }
+}
+
 export async function aprobarSolicitudComprasAction(
   solicitudId: string,
   _prev: ActionResult,
@@ -531,7 +588,13 @@ export async function aprobarSolicitudComprasAction(
     return { error: 'No tienes permiso para aprobar como Compras.' }
   }
 
-  const precios: { item_id: string; precio_unitario: number }[] = []
+  const precios: {
+    item_id: string
+    precio_unitario: number
+    cantidad_solicitada?: number
+    proveedor_id?: string | null
+  }[] = []
+
   for (const [key, value] of formData.entries()) {
     if (!key.startsWith('precio_unitario_')) continue
     const itemId = key.slice('precio_unitario_'.length)
@@ -543,9 +606,28 @@ export async function aprobarSolicitudComprasAction(
     if (!Number.isFinite(precio) || precio < 0) {
       return { error: 'Hay un precio cotizado inválido.' }
     }
+
+    const rawCant = formData.get(`cantidad_${itemId}`)
+    let cantidad: number | undefined = undefined
+    if (rawCant !== null && rawCant !== undefined && String(rawCant).trim() !== '') {
+      const parsedCant = Number(String(rawCant).trim().replace(',', '.'))
+      if (!Number.isFinite(parsedCant) || parsedCant <= 0) {
+        return { error: 'La cantidad debe ser mayor a cero en todas las partidas.' }
+      }
+      cantidad = Math.round(parsedCant * 100) / 100
+    }
+
+    const rawProv = formData.get(`proveedor_${itemId}`)
+    let proveedorId: string | null = null
+    if (rawProv && String(rawProv).trim()) {
+      proveedorId = String(rawProv).trim()
+    }
+
     precios.push({
       item_id: itemId,
       precio_unitario: Math.round(precio * 100) / 100,
+      ...(cantidad !== undefined ? { cantidad_solicitada: cantidad } : {}),
+      ...(proveedorId ? { proveedor_id: proveedorId } : {}),
     })
   }
 

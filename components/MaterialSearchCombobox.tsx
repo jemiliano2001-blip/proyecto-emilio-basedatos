@@ -161,65 +161,72 @@ export function MaterialSearchCombobox({
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg py-1"
+          className="absolute z-30 mt-1 max-h-72 sm:max-h-80 w-full overflow-y-auto overscroll-contain rounded-lg border border-border bg-card shadow-lg py-1 scrollbar-thin"
         >
           {filtered.length === 0 ? (
-            <li className="px-3 py-2 text-xs text-muted-foreground text-center">
-              Sin materiales con saldo disponible
+            <li className="px-3 py-3 text-xs text-muted-foreground text-center">
+              Sin materiales con saldo disponible en este proyecto
             </li>
           ) : (
-            filtered.map((m, index) => {
-              const isSelected = m.id === value
-              return (
-                <li
-                  id={`${listId}-${index}`}
-                  key={m.id}
-                  role="option"
-                  aria-selected={isSelected}
-                  className={index === activeIndex ? 'bg-primary/10 ring-1 ring-inset ring-ring' : ''}
-                >
-                  <button
-                    type="button"
-                    tabIndex={-1}
-                    onMouseDown={(e) => e.preventDefault()}
-                    className={`min-h-[44px] w-full text-left px-3 py-2 text-xs sm:text-sm flex items-center justify-between gap-2 border-b border-border/40 last:border-0 ${
-                      isSelected
-                        ? 'bg-primary/15 text-foreground font-semibold hover:bg-primary/20'
-                        : 'text-foreground hover:bg-muted'
-                    }`}
-                    onClick={() => {
-                      onChange(m.id)
-                      setQuery(labelMaterial(m))
-                      setOpen(false)
-                    }}
+            <>
+              {filtered.map((m, index) => {
+                const isSelected = m.id === value
+                return (
+                  <li
+                    id={`${listId}-${index}`}
+                    key={m.id}
+                    role="option"
+                    aria-selected={isSelected}
+                    className={index === activeIndex ? 'bg-primary/10 ring-1 ring-inset ring-ring' : ''}
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-semibold text-foreground">{m.nombre_base}</span>
-                        {m.variante && <span className="text-muted-foreground">· {m.variante}</span>}
-                        <span className="text-muted-foreground font-medium">({m.unidad_medida})</span>
+                    <button
+                      type="button"
+                      tabIndex={-1}
+                      onMouseDown={(e) => e.preventDefault()}
+                      className={`min-h-[44px] w-full text-left px-3 py-2 text-xs sm:text-sm flex items-center justify-between gap-2 border-b border-border/40 last:border-0 ${
+                        isSelected
+                          ? 'bg-primary/15 text-foreground font-semibold hover:bg-primary/20'
+                          : 'text-foreground hover:bg-muted'
+                      }`}
+                      onClick={() => {
+                        onChange(m.id)
+                        setQuery(labelMaterial(m))
+                        setOpen(false)
+                      }}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-semibold text-foreground">{m.nombre_base}</span>
+                          {m.variante && <span className="text-muted-foreground">· {m.variante}</span>}
+                          <span className="text-muted-foreground font-medium">({m.unidad_medida})</span>
+                        </div>
+                        {m.subcategoria && (
+                          <span className="block text-[11px] text-muted-foreground mt-0.5">{m.subcategoria}</span>
+                        )}
                       </div>
-                      {m.subcategoria && (
-                        <span className="block text-[11px] text-muted-foreground mt-0.5">{m.subcategoria}</span>
-                      )}
-                    </div>
 
-                    <div className="shrink-0 text-right">
-                      {m.disponible !== undefined && m.disponible !== null && (
-                        <span className="inline-block font-bold text-primary-soft-foreground bg-primary-soft px-2 py-0.5 rounded text-xs">
-                          {m.disponible} {m.unidad_medida} disp.
-                        </span>
-                      )}
-                      {m.comprometido !== undefined && m.comprometido !== null && m.comprometido > 0 && (
-                        <span className="block text-[10px] text-warning-soft-foreground font-medium mt-0.5">
-                          {m.comprometido} comp.
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                </li>
-              )
-            })
+                      <div className="shrink-0 text-right">
+                        {m.disponible !== undefined && m.disponible !== null && (
+                          <span className="inline-block font-bold text-primary-soft-foreground bg-primary-soft px-2 py-0.5 rounded text-xs">
+                            {m.disponible} {m.unidad_medida} disp.
+                          </span>
+                        )}
+                        {m.comprometido !== undefined && m.comprometido !== null && m.comprometido > 0 && (
+                          <span className="block text-[10px] text-warning-soft-foreground font-medium mt-0.5">
+                            {m.comprometido} comp.
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  </li>
+                )
+              })}
+              <li className="px-3 py-1.5 text-[11px] text-muted-foreground text-center bg-muted/40 border-t border-border/60 sticky bottom-0 backdrop-blur-xs select-none">
+                {filtered.length === 1
+                  ? '1 material con saldo disponible'
+                  : `${filtered.length} materiales con saldo disponible`}
+              </li>
+            </>
           )}
         </ul>
       )}

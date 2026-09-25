@@ -30,6 +30,7 @@ interface SolicitudPreviewModalProps {
   fecha?: string
   folio?: string
   ordenCompraFolio?: string
+  solicitanteNombre?: string | null
 }
 
 export function SolicitudPreviewModal({
@@ -43,6 +44,7 @@ export function SolicitudPreviewModal({
   fecha,
   folio,
   ordenCompraFolio,
+  solicitanteNombre,
 }: SolicitudPreviewModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
   useModalFocus(open, dialogRef)
@@ -118,6 +120,14 @@ export function SolicitudPreviewModal({
                 <p>
                   Proyecto: <strong className="text-foreground font-semibold">{obraNombrePrincipal}</strong>
                 </p>
+                {solicitanteNombre && (
+                  <>
+                    <span>·</span>
+                    <p>
+                      Solicitado por: <strong className="text-foreground font-semibold">{solicitanteNombre}</strong>
+                    </p>
+                  </>
+                )}
                 <span>·</span>
                 <p>
                   Fecha: <strong className="text-foreground font-medium">{displayFecha}</strong>

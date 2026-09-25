@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
+import { MatrizPermisosRoles } from '@/components/MatrizPermisosRoles'
 import {
   UsuarioEditarForm,
   UsuarioResetPasswordForm,
@@ -64,6 +65,10 @@ export default async function UsuarioDetallePage({
           pantalla.
         </p>
         <UsuarioResetPasswordForm action={boundReset} />
+      </section>
+
+      <section className="space-y-3">
+        <MatrizPermisosRoles rolInicial={usuario.rol} />
       </section>
     </main>
   )

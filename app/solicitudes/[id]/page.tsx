@@ -42,7 +42,9 @@ interface SolicitudDetalle {
     monto_mxn: number | null
     nota: string | null
     obra_id: string | null
+    proveedor_id?: string | null
     item_obra: { nombre: string } | null
+    proveedor?: { id: string; nombre: string } | null
     material: {
       nombre_base: string
       variante: string | null
@@ -99,22 +101,51 @@ export default async function SolicitudDetallePage({
   const session = await getSessionUsuario()
   const supabase = await createClient()
 
-  const { data: solicitud } = await supabase
+  let solicitud: unknown = null
+  const { data: solDataWithProv, error: errWithProv } = await supabase
     .from('solicitudes_material')
     .select(
       `id, estado, nota, creado_en, solicitante_id,
        obra:obras(id, nombre, fraccionamiento),
        solicitante:usuarios(nombre),
        items:solicitud_items(
-         id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn, nota, obra_id,
+         id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn, nota, obra_id, proveedor_id,
          material:catalogo_materiales(nombre_base, variante, unidad_medida, precio_base),
-         item_obra:obras!solicitud_items_obra_id_fkey(nombre)
+         item_obra:obras!solicitud_items_obra_id_fkey(nombre),
+         proveedor:proveedores(id, nombre)
        )`
     )
     .eq('id', resolvedparams.id)
     .maybeSingle()
 
+  if (!errWithProv && solDataWithProv) {
+    solicitud = solDataWithProv
+  } else {
+    const { data: solDataFallback } = await supabase
+      .from('solicitudes_material')
+      .select(
+        `id, estado, nota, creado_en, solicitante_id,
+         obra:obras(id, nombre, fraccionamiento),
+         solicitante:usuarios(nombre),
+         items:solicitud_items(
+           id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn, nota, obra_id,
+           material:catalogo_materiales(nombre_base, variante, unidad_medida, precio_base),
+           item_obra:obras!solicitud_items_obra_id_fkey(nombre)
+         )`
+      )
+      .eq('id', resolvedparams.id)
+      .maybeSingle()
+    solicitud = solDataFallback
+  }
+
   if (!solicitud) notFound()
+
+  const { data: proveedoresData } = await supabase
+    .from('proveedores')
+    .select('id, nombre')
+    .eq('activo', true)
+    .order('nombre')
+  const proveedores = proveedoresData ?? []
 
   const detalle = solicitud as unknown as SolicitudDetalle
   const esMultiObra = (detalle.items ?? []).some((i) => i.obra_id)
@@ -159,6 +190,7 @@ export default async function SolicitudDetallePage({
           i.material!.precio_base != null ? Number(i.material!.precio_base) : null,
         precioUnitarioActual:
           monto != null && cant > 0 ? Math.round((monto / cant) * 100) / 100 : null,
+        proveedorId: i.proveedor_id ?? null,
       }
     })
 
@@ -201,15 +233,16 @@ export default async function SolicitudDetallePage({
             )}
             <p className="text-sm font-semibold text-foreground mt-2">{fechaVisible}</p>
             <div className="flex items-center gap-2 mt-1">
-              <p className="text-xs text-muted-foreground">
-                {detalle.solicitante?.nombre ? `${detalle.solicitante.nombre}` : 'Solicitante'}
+              <p className="text-xs text-foreground font-medium">
+                Solicitado por: <span className="font-semibold">{detalle.solicitante?.nombre ?? 'Residente de obra'}</span>
               </p>
+              <span className="text-muted-foreground">·</span>
               <CopyButton text={detalle.id} label="Copiar ID" className="text-[11px]" />
             </div>
           </div>
         }
         backHref="/solicitudes"
-        backLabel="Solicitudes"
+        backLabel="Solicitudes de compra"
         badge={
           <Badge variant={badgeVariant(detalle.estado)}>
             {labelEstado(detalle.estado)}
@@ -359,6 +392,11 @@ export default async function SolicitudDetallePage({
                       {formatMoneyMx(Number(item.monto_mxn))}
                     </p>
                   )}
+                  {item.proveedor && (
+                    <p className="text-primary font-medium">
+                      Proveedor asignado: {item.proveedor.nombre}
+                    </p>
+                  )}
                 </div>
               )}
               {item.nota && <p className="text-xs text-muted-foreground mt-1">{item.nota}</p>}
@@ -399,6 +437,7 @@ export default async function SolicitudDetallePage({
           <AprobarComprasButton
             solicitudId={detalle.id}
             materiales={materialesParaAprobar}
+            proveedores={proveedores}
           />
         )}
         {puedeFinanzas && <AprobarPagoButton solicitudId={detalle.id} />}

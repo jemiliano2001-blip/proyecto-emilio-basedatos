@@ -77,7 +77,7 @@ export default async function NuevaSolicitudPage({
         title="Solicitud para requisición de materiales"
         description="Elige el proyecto y agrega las partidas de materiales. Solo se listan materiales con saldo presupuestal disponible en la obra."
         backHref="/solicitudes"
-        backLabel="Solicitudes"
+        backLabel="Solicitudes de compra"
       />
 
       {!obras?.length ? (
@@ -94,6 +94,7 @@ export default async function NuevaSolicitudPage({
           saldos={saldos}
           defaultObraId={resolvedsearchParams.obra}
           permiteMultiObra={puedeCrearSolicitudMultiObra(session.rol)}
+          solicitanteNombre={session.perfil?.nombre ?? session.email ?? 'Usuario'}
         />
       )}
     </main>

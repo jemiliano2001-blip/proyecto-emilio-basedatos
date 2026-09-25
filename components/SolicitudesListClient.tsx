@@ -287,7 +287,7 @@ export function SolicitudesListClient({
                   >
                     {labelMateriales(s.items.length)}
                     {esMulti ? ' · varios proyectos' : ''}
-                    {verTodas && s.solicitante?.nombre ? ` · ${s.solicitante.nombre}` : ''}
+                    {s.solicitante?.nombre ? ` · Solicitó: ${s.solicitante.nombre}` : ''}
                     {' · '}
                     {new Date(s.creado_en).toLocaleString('es-MX', {
                       dateStyle: 'short',

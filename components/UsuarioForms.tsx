@@ -192,9 +192,19 @@ export function UsuarioEditarForm({
         </p>
       )}
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1">Correo</label>
-        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2.5 text-sm text-foreground">
-          {usuario.email ?? '—'}
+        <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+          Correo de acceso
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          defaultValue={usuario.email ?? ''}
+          className="input-base"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          Modificar el correo actualiza tanto el perfil como el usuario de inicio de sesión.
         </p>
       </div>
       <div>

@@ -88,7 +88,8 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     id: 'solicitudes',
-    label: 'Solicitudes',
+    label: 'Solicitudes de compra',
+    shortLabel: 'Solicitudes',
     href: '/solicitudes',
     icon: 'solicitudes',
     section: 'operacion',
@@ -216,7 +217,7 @@ export function tituloDeRuta(pathname: string): string {
   if (pathname.startsWith('/notificaciones')) return 'Avisos'
   if (pathname.startsWith('/usuarios')) return 'Usuarios'
   if (pathname.startsWith('/bitacora')) return 'Bitácora'
-  if (pathname.startsWith('/solicitudes')) return 'Solicitudes'
+  if (pathname.startsWith('/solicitudes')) return 'Solicitudes de compra'
   if (pathname.startsWith('/recepciones') || pathname.includes('/recibir')) return 'Recepción'
   if (pathname.startsWith('/inventario')) return 'Inventario'
   if (pathname.startsWith('/traspasos')) return 'Traspasos'
