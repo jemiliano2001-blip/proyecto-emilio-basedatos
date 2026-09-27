@@ -36,12 +36,14 @@ export default async function InventarioObraPage({
   const puedeReportar = puedeReportarInstalacion(session.rol)
   const supabase = await createClient()
 
-  const { data: obra } = await supabase
+  const { data: obra, error: obraError } = await supabase
     .from('obras')
     .select('id, nombre, fraccionamiento')
     .eq('id', obraId)
     .maybeSingle()
 
+  // Una falla de consulta no es "no existe": va a app/error.tsx, que ofrece reintentar.
+  if (obraError) throw new Error('No se pudo cargar el proyecto del inventario.')
   if (!obra) notFound()
 
   const { data: inv, error: invError } = await supabase

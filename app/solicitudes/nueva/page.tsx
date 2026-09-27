@@ -28,7 +28,8 @@ export default async function NuevaSolicitudPage({
 
   const { data: materiales } = await supabase
     .from('catalogo_materiales')
-    .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria, precio_base')
+    // Sin precio_base: el formulario no lo usa y Personal (quien más captura aquí) no debe recibirlo.
+    .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria')
     .eq('activo', true)
     .order('nombre_base')
 

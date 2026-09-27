@@ -121,7 +121,7 @@ export function KitForm({
               <option value="">-- Ninguno o genérico --</option>
               {materiales.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.nombre_base} {m.variante ? `· ${m.variante}` : ''} ({m.unidad_medida})
+                  {m.nombre_base} {m.variante ? `· ${m.variante}` : ''} ({m.unidad_medida}){m.activo === false ? ' — inactivo' : ''}
                 </option>
               ))}
             </select>
@@ -200,7 +200,7 @@ export function KitForm({
                   <option value="">-- Selecciona material accesorio --</option>
                   {materiales.map((m) => (
                     <option key={m.id} value={m.id} disabled={m.id !== it.material_id && selectedMaterialIds.has(m.id)}>
-                      {m.nombre_base} {m.variante ? `· ${m.variante}` : ''} ({m.unidad_medida})
+                      {m.nombre_base} {m.variante ? `· ${m.variante}` : ''} ({m.unidad_medida}){m.activo === false ? ' — inactivo' : ''}
                     </option>
                   ))}
                 </select>

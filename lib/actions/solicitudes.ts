@@ -617,17 +617,18 @@ export async function aprobarSolicitudComprasAction(
       cantidad = Math.round(parsedCant * 100) / 100
     }
 
+    // Sin proveedor la OC se emite pero no se puede recibir (el checklist exige proveedor).
     const rawProv = formData.get(`proveedor_${itemId}`)
-    let proveedorId: string | null = null
-    if (rawProv && String(rawProv).trim()) {
-      proveedorId = String(rawProv).trim()
+    const proveedorId = rawProv ? String(rawProv).trim() : ''
+    if (!proveedorId) {
+      return { error: 'Asigna un proveedor a cada material antes de aprobar.' }
     }
 
     precios.push({
       item_id: itemId,
       precio_unitario: Math.round(precio * 100) / 100,
       ...(cantidad !== undefined ? { cantidad_solicitada: cantidad } : {}),
-      ...(proveedorId ? { proveedor_id: proveedorId } : {}),
+      proveedor_id: proveedorId,
     })
   }
 
@@ -740,11 +741,18 @@ export async function aprobarMultiplesSolicitudesAction(
         // Compras
         const { data: items } = await supabase
           .from('solicitud_items')
-          .select('id, tipo_linea, cantidad_solicitada, monto_mxn, material:catalogo_materiales(precio_base)')
+          .select('id, tipo_linea, cantidad_solicitada, monto_mxn, proveedor_id, material:catalogo_materiales(precio_base)')
           .eq('solicitud_id', id)
 
         const precios: { item_id: string; precio_unitario: number }[] = []
         let faltaPrecio = false
+
+        // El lote no asigna proveedores; sin proveedor la OC no se podría recibir.
+        if ((items ?? []).some((item) => item.tipo_linea === 'material' && !item.proveedor_id)) {
+          fallidas++
+          errores.push(`REQ-${id.slice(0, 8)}: Requiere asignar proveedor a cada material en su detalle.`)
+          continue
+        }
 
         for (const item of (items ?? [])) {
           if (item.tipo_linea === 'material') {

@@ -146,9 +146,16 @@ export function CatalogoMaterialesView({
   hasLoadError?: boolean
   initialCategoria?: string
 }) {
+  // Una URL o vista guardada puede apuntar a una categoría ya eliminada o renombrada;
+  // sin esta validación el catálogo quedaba en blanco sin explicación.
+  const categoriaValida = (nombre: string | undefined): string | null =>
+    nombre &&
+    (nombre === 'todas' || nombre === 'sin_categoria' || categorias.some((c) => c.nombre === nombre))
+      ? nombre
+      : null
   // Selector de categoría: si viene por query inicial o la primera categoría disponible
   const [selectedCat, setSelectedCat] = useState<string>(
-    initialCategoria ?? categorias[0]?.nombre ?? 'todas'
+    categoriaValida(initialCategoria) ?? categorias[0]?.nombre ?? 'todas'
   )
   const router = useRouter()
   const pathname = usePathname()
@@ -431,7 +438,7 @@ export function CatalogoMaterialesView({
           {savedViews.length > 0 && (
             <label className="text-sm font-semibold text-foreground">
               <span className="sr-only">Abrir vista guardada</span>
-              <select className="input-base min-w-48 py-2" value="" onChange={(event) => event.target.value && setSelectedCat(event.target.value)}>
+              <select className="input-base min-w-48 py-2" value="" onChange={(event) => event.target.value && setSelectedCat(categoriaValida(event.target.value) ?? 'todas')}>
                 <option value="">Vistas guardadas</option>
                 {savedViews.map((view) => <option key={view} value={view}>{view === 'todas' ? 'Todas' : view.replaceAll('_', ' ')}</option>)}
               </select>

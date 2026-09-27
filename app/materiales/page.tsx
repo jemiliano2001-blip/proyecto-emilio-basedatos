@@ -18,11 +18,13 @@ export default async function MaterialesPage({
   const supabase = await createClient()
 
   // 1. Consulta de materiales activos
+  // El precio no se oculta solo en la vista: si el rol no lo puede ver, ni siquiera se envía
+  // al navegador (el componente es cliente y todo su prop viaja en el payload).
+  const columnas =
+    'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, activo'
   let materialesQuery = supabase
     .from('catalogo_materiales')
-    .select(
-      'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, precio_base, activo'
-    )
+    .select(verPrecios ? `${columnas}, precio_base` : columnas)
     .order('nombre_base')
   if (!puedeEditar) materialesQuery = materialesQuery.eq('activo', true)
   const { data: materiales, error: errMateriales } = await materialesQuery

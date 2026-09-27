@@ -13,8 +13,10 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  // Fail-closed: sin configuración no se puede validar sesión, así que no se deja pasar a nadie.
   if (!supabaseUrl || !supabaseAnonKey) {
-    return supabaseResponse
+    console.error('middleware: faltan NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    return new NextResponse('Servicio no configurado. Avisa al administrador.', { status: 503 })
   }
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {

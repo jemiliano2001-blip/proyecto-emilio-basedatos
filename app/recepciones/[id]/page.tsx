@@ -6,7 +6,7 @@ import { Badge } from '@/components/Badge'
 import { CopyButton } from '@/components/CopyButton'
 import { RecepcionEvidenciasViewer } from '@/components/RecepcionEvidenciasViewer'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { puedeRevisarRecepcion, puedeVerRecepciones } from '@/lib/roles'
+import { puedeCapturarRecepcion, puedeRevisarRecepcion, puedeVerRecepciones } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import type { EstadoRecepcion, EstadoRecepcionItem, RecepcionFoto } from '@/lib/types'
 
@@ -181,7 +181,7 @@ export default async function RecepcionDetallePage({
           </Link>
         )}
 
-        {detalle.orden?.id && (
+        {detalle.orden?.id && puedeCapturarRecepcion(session.rol) && (
           <Link
             href={`/ordenes/${detalle.orden.id}/recibir`}
             className="btn-secondary w-full text-center block"

@@ -41,12 +41,23 @@ interface OrdenDetalle {
     cantidad: number
     precio_unitario: number
     subtotal: number
+    descripcion: string | null
     material: {
       nombre_base: string
       variante: string | null
       unidad_medida: string
     } | null
   }[]
+}
+
+type MaterialItem = { nombre_base: string; variante: string | null } | null
+
+// Los renglones de flete/camiones/etc. no tienen material: su nombre vive en `descripcion`.
+function nombreItem(material: MaterialItem, descripcion: string | null): string {
+  if (material) {
+    return `${material.nombre_base}${material.variante ? ` · ${material.variante}` : ''}`
+  }
+  return descripcion?.trim() || 'Material'
 }
 
 interface RecepcionHist {
@@ -75,7 +86,7 @@ export default async function OrdenDetallePage({
        obra:obras(nombre, fraccionamiento),
        proveedor:proveedores(nombre, contacto, telefono),
        items:orden_compra_items(
-         id, cantidad, precio_unitario, subtotal,
+         id, cantidad, precio_unitario, subtotal, descripcion,
          material:catalogo_materiales(nombre_base, variante, unidad_medida)
        )`
     )
@@ -122,10 +133,12 @@ export default async function OrdenDetallePage({
   // Cargar lista de proveedores si el usuario puede asignar
   let proveedores: { id: string; nombre: string }[] = []
   if (puedeAsignar) {
-    const { data: provs } = await supabase
-      .from('proveedores')
-      .select('id, nombre')
-      .order('nombre')
+    // Solo activos, pero conserva el proveedor actual aunque se haya dado de baja.
+    let provQuery = supabase.from('proveedores').select('id, nombre').order('nombre')
+    provQuery = detalle.proveedor_id
+      ? provQuery.or(`activo.eq.true,id.eq.${detalle.proveedor_id}`)
+      : provQuery.eq('activo', true)
+    const { data: provs } = await provQuery
     proveedores = (provs ?? []) as { id: string; nombre: string }[]
   }
 
@@ -140,7 +153,7 @@ export default async function OrdenDetallePage({
        items:orden_compra_factura_items(
          orden_item_id,
          orden_item:orden_compra_items(
-           id, cantidad,
+           id, cantidad, descripcion,
            material:catalogo_materiales(nombre_base, variante, unidad_medida)
          )
        )`
@@ -153,6 +166,7 @@ export default async function OrdenDetallePage({
     orden_item: {
       id: string
       cantidad: number
+      descripcion: string | null
       material: {
         nombre_base: string
         variante: string | null
@@ -196,9 +210,7 @@ export default async function OrdenDetallePage({
     subido_por_nombre: f.subidor?.nombre,
     items: (f.items ?? []).map((link) => {
       const mat = link.orden_item?.material
-      const nombre = mat
-        ? `${mat.nombre_base}${mat.variante ? ` · ${mat.variante}` : ''}`
-        : 'Material'
+      const nombre = nombreItem(mat ?? null, link.orden_item?.descripcion ?? null)
       return {
         orden_item_id: link.orden_item_id,
         nombre,
@@ -210,9 +222,7 @@ export default async function OrdenDetallePage({
 
   const itemsParaFactura = (detalle.items ?? []).map((it) => ({
     id: it.id,
-    nombre: it.material
-      ? `${it.material.nombre_base}${it.material.variante ? ` · ${it.material.variante}` : ''}`
-      : 'Material',
+    nombre: nombreItem(it.material, it.descripcion),
     cantidad: Number(it.cantidad),
     unidad: it.material?.unidad_medida ?? 'PZA',
   }))
@@ -255,7 +265,7 @@ export default async function OrdenDetallePage({
       const mat = it.material
       const desc = mat
         ? `${mat.nombre_base}${mat.variante ? ` (${mat.variante})` : ''}`
-        : 'Material'
+        : nombreItem(null, it.descripcion)
       return {
         cantidad: Number(it.cantidad),
         unidad: mat?.unidad_medida || 'PZA',
@@ -278,7 +288,7 @@ export default async function OrdenDetallePage({
     total: detalle.total,
     items: (detalle.items ?? []).map((it, idx) => ({
       no: idx + 1,
-      material: it.material?.nombre_base || 'Material',
+      material: it.material?.nombre_base || nombreItem(null, it.descripcion),
       variante: it.material?.variante,
       unidad: it.material?.unidad_medida || 'PZA',
       cantidad: Number(it.cantidad),
@@ -423,7 +433,7 @@ export default async function OrdenDetallePage({
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground">
-                        {item.material?.nombre_base ?? 'Material'}
+                        {item.material?.nombre_base ?? nombreItem(null, item.descripcion)}
                         {item.material?.variante ? (
                           <span className="text-muted-foreground"> · {item.material.variante}</span>
                         ) : null}

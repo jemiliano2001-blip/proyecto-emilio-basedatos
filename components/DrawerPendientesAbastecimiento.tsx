@@ -48,6 +48,7 @@ export function DrawerPendientesAbastecimiento() {
   const [cargando, setCargando] = useState(false)
   const [datos, setDatos] = useState<AbastecimientoData | null>(null)
   const [filtroTexto, setFiltroTexto] = useState('')
+  const [errorCarga, setErrorCarga] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
   // Escuchar evento global para abrir el drawer
@@ -66,15 +67,26 @@ export function DrawerPendientesAbastecimiento() {
 
     let cancelado = false
     setCargando(true)
+    setErrorCarga(null)
 
     fetch('/api/abastecimiento/pendientes')
       .then((res) => (res.ok ? res.json() : null))
       .then((resJson: AbastecimientoData | null) => {
-        if (!cancelado && resJson) {
+        if (cancelado) return
+        if (resJson) {
           setDatos(resJson)
+        } else {
+          setDatos(null)
+          setErrorCarga('No se pudieron cargar los pendientes. Cierra y vuelve a abrir para reintentar.')
         }
       })
-      .catch((err) => console.error('Error cargando abastecimiento:', err))
+      .catch((err) => {
+        console.error('Error cargando abastecimiento:', err)
+        if (!cancelado) {
+          setDatos(null)
+          setErrorCarga('Sin conexión con el servidor. Cierra y vuelve a abrir para reintentar.')
+        }
+      })
       .finally(() => {
         if (!cancelado) setCargando(false)
       })
@@ -249,8 +261,17 @@ export function DrawerPendientesAbastecimiento() {
             </div>
           ) : null}
 
+          {!cargando && errorCarga && (
+            <div
+              role="alert"
+              className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-3 text-sm text-danger-soft-foreground"
+            >
+              {errorCarga}
+            </div>
+          )}
+
           {/* TAB 1: COMPRAS */}
-          {!cargando && tabActiva === 'compras' && (
+          {!cargando && !errorCarga && tabActiva === 'compras' && (
             <>
               {solicitudesComprasFiltradas.length === 0 ? (
                 <div className="py-10 text-center text-xs text-muted-foreground">
@@ -297,7 +318,7 @@ export function DrawerPendientesAbastecimiento() {
           )}
 
           {/* TAB 2: FINANZAS */}
-          {!cargando && tabActiva === 'finanzas' && (
+          {!cargando && !errorCarga && tabActiva === 'finanzas' && (
             <>
               {solicitudesFinanzasFiltradas.length === 0 ? (
                 <div className="py-10 text-center text-xs text-muted-foreground">
@@ -339,7 +360,7 @@ export function DrawerPendientesAbastecimiento() {
           )}
 
           {/* TAB 3: TRÁNSITO */}
-          {!cargando && tabActiva === 'transito' && (
+          {!cargando && !errorCarga && tabActiva === 'transito' && (
             <>
               {ordenesTransitoFiltradas.length === 0 ? (
                 <div className="py-10 text-center text-xs text-muted-foreground">

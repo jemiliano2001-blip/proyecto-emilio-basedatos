@@ -53,7 +53,7 @@ export default async function ConciliacionObraPage({
     notFound()
   }
 
-  const { data: materialesData } = await supabase
+  const { data: materialesData, error: errMats } = await supabase
     .from('v_conciliacion_obra_material')
     .select('*')
     .eq('obra_id', resolvedparams.id)
@@ -86,10 +86,13 @@ export default async function ConciliacionObraPage({
         }
         actions={
           <div className="flex items-center gap-2">
-            <ExportarConciliacionButton
-              presupuesto={pres}
-              materiales={mats}
-            />
+            {/* Sin detalle de materiales el reporte exportado saldría incompleto. */}
+            {!errMats && (
+              <ExportarConciliacionButton
+                presupuesto={pres}
+                materiales={mats}
+              />
+            )}
           </div>
         }
       />
@@ -211,7 +214,13 @@ export default async function ConciliacionObraPage({
           </span>
         </div>
 
-        {mats.length === 0 ? (
+        {errMats ? (
+          <div className="rounded-lg border border-danger/30 bg-danger-soft px-3 py-3 text-xs text-danger-soft-foreground">
+            {esRelacionAusente(errMats)
+              ? 'El detalle de materiales no está disponible en la base (falta la vista de conciliación). Pide que se aplique la migración 0028.'
+              : 'No se pudo cargar el detalle de materiales. Recarga la página; si persiste, avisa al administrador.'}
+          </div>
+        ) : mats.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-6">
             No se registraron materiales contratados ni movimientos en este proyecto.
           </p>

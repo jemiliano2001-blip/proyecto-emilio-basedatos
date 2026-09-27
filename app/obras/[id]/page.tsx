@@ -201,7 +201,7 @@ export default async function ObraDetallePage({
                   Asignado → En proceso de compra → Comprado → Entregado en obra.
                 </p>
               </div>
-              {puedeTopes && (
+              {puedeTopes && obra.estado !== 'cerrada' && (
                 <Link
                   href={`/obras/${resolvedparams.id}/asignar-materiales`}
                   className="btn-secondary btn-sm"
@@ -216,7 +216,7 @@ export default async function ObraDetallePage({
               obraId={resolvedparams.id}
               saldos={(saldos as SaldoMaterialObra[] | null) ?? []}
               topes={topes ?? []}
-              puedeTopes={puedeTopes}
+              puedeTopes={puedeTopes && obra.estado !== 'cerrada'}
               verPrecios={verPrecios}
               puedeEditarCatalogo={puedeEditarCatalogo}
             />

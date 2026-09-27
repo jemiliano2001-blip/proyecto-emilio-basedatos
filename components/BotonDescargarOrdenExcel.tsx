@@ -19,14 +19,17 @@ export function BotonDescargarOrdenExcel({
   size = 'sm',
 }: BotonDescargarOrdenExcelProps) {
   const [generando, setGenerando] = useState(false)
+  const [fallo, setFallo] = useState(false)
 
   const handleDescargar = async () => {
     vibrarTap()
     try {
       setGenerando(true)
+      setFallo(false)
       await descargarOrdenCompraExcel(orden)
     } catch (err) {
       console.error('Error al exportar orden a Excel:', err)
+      setFallo(true)
     } finally {
       setTimeout(() => setGenerando(false), 600)
     }
@@ -47,7 +50,9 @@ export function BotonDescargarOrdenExcel({
       title="Descargar orden de compra en formato formal de Excel (.xlsx)"
     >
       <IconDescargar className="size-4 shrink-0 text-primary" />
-      <span>{generando ? 'Generando Excel…' : label}</span>
+      <span role={fallo ? 'alert' : undefined} className={fallo ? 'text-danger' : undefined}>
+        {generando ? 'Generando Excel…' : fallo ? 'No se pudo generar. Reintentar' : label}
+      </span>
     </button>
   )
 }

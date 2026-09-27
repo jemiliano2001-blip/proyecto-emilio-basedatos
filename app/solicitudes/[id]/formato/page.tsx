@@ -88,6 +88,7 @@ export default async function SolicitudFormatoPage({ params }: PageProps) {
       orden={formatoData}
       volverHref={`/solicitudes/${solicitud.id}`}
       volverLabel="Volver a la solicitud"
+      esBorrador
     />
   )
 }

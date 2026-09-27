@@ -160,9 +160,12 @@ export function AprobarComprasButton({
                       <select
                         name={`proveedor_${m.id}`}
                         defaultValue={m.proveedorId ?? ''}
+                        required
                         className="input-base text-sm"
                       >
-                        <option value="">-- Por definir --</option>
+                        <option value="" disabled>
+                          -- Elige proveedor --
+                        </option>
                         {proveedores.map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.nombre}

@@ -5,6 +5,21 @@ import { type SolicitudPendienteRecord, type RecepcionPendienteRecord, putSolici
 import { validateSolicitudInput } from '@/lib/validations/solicitud'
 import { validateRecepcionInput } from '@/lib/validations/recepcion'
 
+// Mismas reglas que sugerirEstado() de RecepcionForm. El registro offline no guarda lo
+// pendiente de la OC, así que "completo" solo se conserva si la captura original lo era y la
+// cantidad buena no bajó; ante la duda queda "parcial" y Compras lo confirma al revisar.
+function recalcularEstadoItem(
+  original: { cantidad_recibida: number; cantidad_danada: number; estado: string },
+  buena: number,
+  danada: number
+): string {
+  if (danada > 0 && buena === 0) return 'danado'
+  if (buena === 0 && danada === 0) return 'faltante'
+  if (danada > 0) return 'parcial'
+  if (original.estado === 'completo' && buena >= Number(original.cantidad_recibida)) return 'completo'
+  return 'parcial'
+}
+
 export function OfflineRecordEditor({ record, onSaved, onCancel }: {
   record: SolicitudPendienteRecord | RecepcionPendienteRecord; onSaved: () => Promise<void>; onCancel: () => void
 }) {
@@ -20,8 +35,13 @@ export function OfflineRecordEditor({ record, onSaved, onCancel }: {
           descripcion: data.get(`descripcion-${index}`) ?? item.descripcion,
           nota: data.get(`nota-${index}`),
         }
+        const buena = Number(data.get(`cantidad-${index}`))
+        const danada = Number(data.get(`danada-${index}`))
         return { ...item, cantidad_recibida: data.get(`cantidad-${index}`),
-          cantidad_danada: data.get(`danada-${index}`), observacion: data.get(`nota-${index}`) }
+          cantidad_danada: data.get(`danada-${index}`), observacion: data.get(`nota-${index}`),
+          estado: Number.isFinite(buena) && Number.isFinite(danada)
+            ? recalcularEstadoItem(item, buena, danada)
+            : item.estado }
       })
       const raw = { ...record, nota: data.get('nota'), items }
       if (isSolicitud) {

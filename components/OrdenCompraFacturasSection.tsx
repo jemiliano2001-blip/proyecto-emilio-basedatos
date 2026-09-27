@@ -11,6 +11,7 @@ import {
   cotejarPartidasConOC,
 } from '@/lib/extractor-facturas-nativo'
 import { vibrarExito, vibrarTap } from '@/lib/haptics'
+import { formatMoneyMx } from '@/lib/money'
 
 interface Props {
   ordenId: string
@@ -398,6 +399,21 @@ export function OrdenCompraFacturasSection({
                   onChange={(e) => setMontoFactura(e.target.value)}
                   className="input-base text-sm"
                 />
+                {(() => {
+                  // Aviso, no bloqueo: puede haber ajustes legítimos (fletes, redondeos del SAT).
+                  const yaFacturado = facturas.reduce((acc, f) => acc + Number(f.monto_factura ?? 0), 0)
+                  const nuevo = Number(montoFactura.trim().replace(',', '.'))
+                  if (!(totalOrden > 0) || !Number.isFinite(nuevo)) return null
+                  const exceso = yaFacturado + nuevo - totalOrden
+                  if (exceso <= 0.01) return null
+                  return (
+                    <p role="alert" className="mt-1 text-xs text-warning-soft-foreground">
+                      Con esta factura lo facturado ({formatMoneyMx(yaFacturado + nuevo)}) supera el
+                      total de la orden ({formatMoneyMx(totalOrden)}) por {formatMoneyMx(exceso)}.
+                      Revisa el monto antes de guardar.
+                    </p>
+                  )
+                })()}
               </div>
 
               {items.length > 0 && (

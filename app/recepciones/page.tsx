@@ -51,7 +51,7 @@ export default async function RecepcionesPage() {
   const puedeCapturar = puedeCapturarRecepcion(session.rol)
   const puedeRevisar = puedeRevisarRecepcion(session.rol)
 
-  const { data: recepciones } = await supabase.rpc('listar_recepciones')
+  const { data: recepciones, error: errRecepciones } = await supabase.rpc('listar_recepciones')
   const rows = (recepciones ?? []) as RecepcionListaRow[]
 
   let ordenesChecklist: OrdenChecklistRow[] = []
@@ -168,7 +168,12 @@ export default async function RecepcionesPage() {
             <h2 className="text-base font-semibold text-foreground">Historial</h2>
             <span className="text-sm tabular-nums text-muted-foreground">{historial.length}</span>
           </div>
-          {historial.length === 0 ? (
+          {errRecepciones ? (
+            <div className="card border-danger/40 bg-danger-soft text-sm text-danger-soft-foreground">
+              No se pudo cargar el historial de recepciones. Recarga la página; si persiste,
+              puede ser que tu rol todavía no tenga acceso en la base.
+            </div>
+          ) : historial.length === 0 ? (
             <EmptyState
               icon={IconPaquete}
               title="Sin recepciones registradas"

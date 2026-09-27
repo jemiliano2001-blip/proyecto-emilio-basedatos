@@ -21,11 +21,13 @@ export default async function AsignarMaterialesPage({
   const supabase = await createClient()
   const { data: obra } = await supabase
     .from('obras')
-    .select('id, nombre')
+    .select('id, nombre, estado')
     .eq('id', resolvedparams.id)
     .maybeSingle()
 
   if (!obra) notFound()
+  // Mismo candado que /editar: un proyecto cerrado tiene sus saldos congelados.
+  if (obra.estado === 'cerrada') redirect(`/obras/${resolvedparams.id}`)
 
   // Materiales activos con precio_base
   const { data: materialesRaw } = await supabase

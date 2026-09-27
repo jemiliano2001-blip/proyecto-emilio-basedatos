@@ -41,12 +41,21 @@ export default async function EditarKitPage({
 
   if (!kit) notFound()
 
-  // Consulta de materiales activos para los selectores
-  const { data: materialesRaw } = await supabase
+  // Materiales activos + los que el kit ya usa aunque se hayan desactivado: si no, su select
+  // queda sin opción válida y el formulario no deja guardar.
+  const idsEnKit = [
+    ...(kit.material_kit_items ?? []).map((it: { material_id: string }) => it.material_id),
+    ...(kit.material_principal_id ? [kit.material_principal_id] : []),
+  ]
+  let materialesQuery = supabase
     .from('catalogo_materiales')
     .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria, precio_base, activo')
-    .eq('activo', true)
     .order('nombre_base')
+  materialesQuery =
+    idsEnKit.length > 0
+      ? materialesQuery.or(`activo.eq.true,id.in.(${idsEnKit.join(',')})`)
+      : materialesQuery.eq('activo', true)
+  const { data: materialesRaw } = await materialesQuery
 
   const materiales = (materialesRaw as CatalogoMaterial[] | null) ?? []
   const updateAction = updateKitAction.bind(null, kit.id)

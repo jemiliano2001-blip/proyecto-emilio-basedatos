@@ -208,7 +208,7 @@ export function ObraMaterialesList({
               type="button"
               onClick={() => setCategoriaSeleccionada('todas')}
               className={cn(
-                'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 categoriaSeleccionada === 'todas'
                   ? 'bg-card text-foreground shadow-xs font-semibold'
@@ -237,7 +237,7 @@ export function ObraMaterialesList({
                   type="button"
                   onClick={() => setCategoriaSeleccionada(cat)}
                   className={cn(
-                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     active
                       ? 'bg-card text-foreground shadow-xs font-semibold'
@@ -264,7 +264,7 @@ export function ObraMaterialesList({
                 type="button"
                 onClick={() => setCategoriaSeleccionada('sin_categoria')}
                 className={cn(
-                  'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                  'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   categoriaSeleccionada === 'sin_categoria'
                     ? 'bg-card text-foreground shadow-xs font-semibold'
@@ -294,7 +294,7 @@ export function ObraMaterialesList({
               setDeleteError(null)
               setModalBorrarTodo(true)
             }}
-            className="min-h-[36px] text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-3 py-1.5 rounded-lg border border-danger/20 transition-colors inline-flex items-center gap-1.5 font-medium shrink-0 self-start sm:self-auto active:scale-[0.985]"
+            className="min-h-[44px] text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-3 py-1.5 rounded-lg border border-danger/20 transition-colors inline-flex items-center gap-1.5 font-medium shrink-0 self-start sm:self-auto active:scale-[0.985]"
             title="Eliminar todas las partidas contratadas en este proyecto"
           >
             <IconBasura className="w-3.5 h-3.5" />
@@ -410,7 +410,7 @@ export function ObraMaterialesList({
                         <button
                           type="button"
                           onClick={() => toggleExpand(s.material_id)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="inline-flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           title={isExpanded ? 'Colapsar detalle' : 'Ver desglose numérico'}
                           aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
                         >
@@ -484,7 +484,7 @@ export function ObraMaterialesList({
                                 setDeleteError(null)
                                 setMaterialAEliminar(s)
                               }}
-                              className="min-h-[36px] text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-3 py-1.5 rounded-lg border border-danger/20 transition-colors inline-flex items-center gap-1.5 self-end sm:self-center font-medium active:scale-[0.985]"
+                              className="min-h-[44px] text-xs text-danger hover:text-danger-soft-foreground hover:bg-danger-soft px-3 py-1.5 rounded-lg border border-danger/20 transition-colors inline-flex items-center gap-1.5 self-end sm:self-center font-medium active:scale-[0.985]"
                               title="Eliminar este material del proyecto"
                             >
                               <IconBasura className="w-3.5 h-3.5" />

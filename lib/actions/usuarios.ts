@@ -168,26 +168,6 @@ export async function actualizarUsuarioAction(
     return { error: 'No se encontró el usuario.' }
   }
 
-  // Si se modificó el correo, actualizar en Supabase Auth
-  if (parsed.data.email && parsed.data.email !== actual.email) {
-    try {
-      const admin = createAdminClient()
-      const { error: authEmailErr } = await admin.auth.admin.updateUserById(usuarioId, {
-        email: parsed.data.email,
-        email_confirm: true,
-      })
-      if (authEmailErr) {
-        const msg = authEmailErr.message.toLowerCase()
-        if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
-          return { error: 'Ya existe otro usuario registrado con ese correo.' }
-        }
-        return { error: `No se pudo actualizar el correo: ${authEmailErr.message}` }
-      }
-    } catch {
-      return { error: 'Se requiere SUPABASE_SERVICE_ROLE_KEY en el servidor para modificar correos.' }
-    }
-  }
-
   const pierdeAccesoTotal =
     actual.rol === 'acceso_total' &&
     actual.activo === true &&
@@ -207,6 +187,28 @@ export async function actualizarUsuarioAction(
     }
   }
 
+  // El correo se cambia en Auth hasta después de todas las validaciones; si el perfil no se
+  // puede guardar, se revierte para que Auth y usuarios.email no queden desincronizados.
+  const cambiaEmail = Boolean(parsed.data.email && parsed.data.email !== actual.email)
+  if (cambiaEmail) {
+    try {
+      const admin = createAdminClient()
+      const { error: authEmailErr } = await admin.auth.admin.updateUserById(usuarioId, {
+        email: parsed.data.email,
+        email_confirm: true,
+      })
+      if (authEmailErr) {
+        const msg = authEmailErr.message.toLowerCase()
+        if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
+          return { error: 'Ya existe otro usuario registrado con ese correo.' }
+        }
+        return { error: `No se pudo actualizar el correo: ${authEmailErr.message}` }
+      }
+    } catch {
+      return { error: 'Se requiere SUPABASE_SERVICE_ROLE_KEY en el servidor para modificar correos.' }
+    }
+  }
+
   const { error: updateError } = await supabase
     .from('usuarios')
     .update({
@@ -216,6 +218,25 @@ export async function actualizarUsuarioAction(
       ...(parsed.data.email ? { email: parsed.data.email } : {}),
     })
     .eq('id', usuarioId)
+
+  if (updateError && cambiaEmail && actual.email) {
+    try {
+      const admin = createAdminClient()
+      const { error: revertErr } = await admin.auth.admin.updateUserById(usuarioId, {
+        email: actual.email,
+        email_confirm: true,
+      })
+      if (revertErr) {
+        return {
+          error: `No se guardó el perfil y no se pudo restaurar el correo de acceso (${actual.email}). Revísalo en Supabase Auth.`,
+        }
+      }
+    } catch {
+      return {
+        error: `No se guardó el perfil y no se pudo restaurar el correo de acceso (${actual.email}). Revísalo en Supabase Auth.`,
+      }
+    }
+  }
 
   if (updateError) {
     const msg = updateError.message.toLowerCase()

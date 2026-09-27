@@ -9,6 +9,18 @@ import { validateTopeInput } from '@/lib/validations/tope'
 
 export type ActionResult = { error: string | null; ok?: boolean }
 
+type ServerClient = Awaited<ReturnType<typeof createClient>>
+
+// Cerrar el proyecto congela saldos: sin esto, los topes se podían editar o borrar después
+// de la conciliación final. La base lo refuerza con trigger (migración 0029).
+async function errorSiObraCerrada(supabase: ServerClient, obraId: string): Promise<string | null> {
+  const { data, error } = await supabase.from('obras').select('estado').eq('id', obraId).maybeSingle()
+  if (error) return 'No se pudo verificar el estado del proyecto. Intenta de nuevo.'
+  if (!data) return 'El proyecto no existe.'
+  if (data.estado === 'cerrada') return 'El proyecto está cerrado: sus materiales ya no se pueden modificar.'
+  return null
+}
+
 export async function createTopeAction(
   _prev: ActionResult,
   formData: FormData
@@ -29,6 +41,9 @@ export async function createTopeAction(
   }
 
   const supabase = await createClient()
+  const errCierre = await errorSiObraCerrada(supabase, parsed.data.obra_id)
+  if (errCierre) return { error: errCierre }
+
   const { error } = await supabase.from('obra_material_contratado').insert(parsed.data)
 
   if (error) {
@@ -64,6 +79,9 @@ export async function updateTopeAction(
   }
 
   const supabase = await createClient()
+  const errCierre = await errorSiObraCerrada(supabase, obraId)
+  if (errCierre) return { error: errCierre }
+
   const { error } = await supabase
     .from('obra_material_contratado')
     .update({ cantidad_contratada: parsed.data.cantidad_contratada })
@@ -112,6 +130,8 @@ export async function asignarMaterialesMasivosAction(
   }
 
   const supabase = await createClient()
+  const errCierre = await errorSiObraCerrada(supabase, obraId)
+  if (errCierre) return { error: errCierre }
   const { error } = await supabase.rpc('asignar_materiales_proyecto', {
     p_obra_id: obraId,
     p_partidas: partidas,
@@ -136,6 +156,9 @@ export async function eliminarMaterialObraAction(
   }
 
   const supabase = await createClient()
+  const errCierre = await errorSiObraCerrada(supabase, obraId)
+  if (errCierre) return { error: errCierre }
+
   const { data, error } = await supabase
     .from('obra_material_contratado')
     .delete()
@@ -167,6 +190,9 @@ export async function eliminarTodosMaterialesObraAction(
   }
 
   const supabase = await createClient()
+  const errCierre = await errorSiObraCerrada(supabase, obraId)
+  if (errCierre) return { error: errCierre }
+
   const { data, error } = await supabase
     .from('obra_material_contratado')
     .delete()

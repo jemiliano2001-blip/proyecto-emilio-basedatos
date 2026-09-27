@@ -37,12 +37,15 @@ interface OrdenFormatoProps {
   }
   volverHref?: string
   volverLabel?: string
+  /** Plantilla previa a la aprobación: total en $0 y proveedor sin definir. */
+  esBorrador?: boolean
 }
 
 export function OrdenCompraFormatoImpresion({
   orden,
   volverHref,
   volverLabel,
+  esBorrador = false,
 }: OrdenFormatoProps) {
   const [estiloPapel, setEstiloPapel] = useState<'amarillo' | 'blanco'>('amarillo')
   const hrefVolver = volverHref ?? `/ordenes/${orden.id}`
@@ -182,11 +185,16 @@ export function OrdenCompraFormatoImpresion({
             </button>
           </div>
 
-          {/* Botón WhatsApp Directo */}
-          <BotonEnviarWhatsApp orden={datosWhatsApp} size="xs" />
+          {/* Un borrador ($0, proveedor "A DETERMINAR") no se manda a proveedores: solo se imprime. */}
+          {!esBorrador && (
+            <>
+              {/* Botón WhatsApp Directo */}
+              <BotonEnviarWhatsApp orden={datosWhatsApp} size="xs" />
 
-          {/* Botón Descargar Excel */}
-          <BotonDescargarOrdenExcel orden={datosExcel} size="xs" />
+              {/* Botón Descargar Excel */}
+              <BotonDescargarOrdenExcel orden={datosExcel} size="xs" />
+            </>
+          )}
 
           {/* Botón Imprimir / PDF */}
           <button
