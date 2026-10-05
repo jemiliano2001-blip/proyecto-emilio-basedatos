@@ -126,7 +126,7 @@ export const NAV_ITEMS: NavItem[] = [
     section: 'operacion',
     isActive: startsWith('/traspasos'),
     visible: ({ rol, traspasosDisponibles }) =>
-      traspasosDisponibles && puedeVerTraspasos(rol) && !esVistaCampoLimitada(rol),
+      traspasosDisponibles && puedeVerTraspasos(rol),
     mobileTab: () => false,
   },
   {

@@ -67,18 +67,12 @@ export async function uploadObraDocumentoAction(
     }
   }
 
-  const { data: publicUrlData } = supabase.storage
-    .from('obra-documentos')
-    .getPublicUrl(storagePath)
-
-  const archivoUrl = publicUrlData?.publicUrl || storagePath
-
   const { error: dbError } = await supabase.from('obra_documentos').insert({
     obra_id: obraId,
     nombre: parsed.data.nombre,
     tipo_documento: parsed.data.tipo_documento,
     archivo_path: storagePath,
-    archivo_url: archivoUrl,
+    archivo_url: storagePath,
     tamano_bytes: file.size,
     subido_por: session.perfil.id,
   })

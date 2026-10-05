@@ -6,8 +6,10 @@ import { Fragment } from 'react'
 import { NotificacionCampanita } from '@/components/NotificacionCampanita'
 import { IconChevron, IconLogo, IconSearch, IconAbastecimiento } from '@/components/icons'
 import { migasDeRuta, tituloDeRuta } from '@/lib/nav'
+import { tabsAbastecimiento } from '@/lib/roles'
+import type { RolUsuario } from '@/lib/types'
 
-export function TopBar({ nombre }: { nombre: string | null }) {
+export function TopBar({ nombre, rol }: { nombre: string | null; rol: RolUsuario | null }) {
   const pathname = usePathname()
   const titulo = tituloDeRuta(pathname)
   const migas = migasDeRuta(pathname)
@@ -22,32 +24,32 @@ export function TopBar({ nombre }: { nombre: string | null }) {
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm lg:hidden"
+            className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs transition-transform active:scale-95 lg:hidden"
             aria-label="Inicio"
           >
             <IconLogo className="size-5" />
           </Link>
           <div className="min-w-0 lg:hidden">
-            <p className="truncate text-base font-semibold text-foreground">{titulo}</p>
+            <p className="truncate text-base font-bold font-heading text-foreground">{titulo}</p>
           </div>
 
           <nav aria-label="Ubicación" className="hidden min-w-0 lg:block">
-            <ol className="flex min-w-0 items-center gap-1.5 text-sm">
+            <ol className="flex min-w-0 items-center gap-2 text-xs sm:text-sm font-medium">
               {migas.length === 0 && (
-                <li className="font-medium text-foreground">{titulo}</li>
+                <li className="font-semibold text-foreground">{titulo}</li>
               )}
               {migas.map((miga, index) => {
                 const last = index === migas.length - 1
                 return (
                   <Fragment key={`${miga.href}-${index}`}>
                     {index > 0 && (
-                      <li aria-hidden className="text-muted-foreground/60">
+                      <li aria-hidden className="text-muted-foreground/50">
                         <IconChevron className="size-3.5" />
                       </li>
                     )}
                     <li className="min-w-0">
                       {last ? (
-                        <span aria-current="page" className="block truncate font-medium text-foreground">
+                        <span aria-current="page" className="block truncate font-semibold text-foreground">
                           {miga.label}
                         </span>
                       ) : (
@@ -67,31 +69,34 @@ export function TopBar({ nombre }: { nombre: string | null }) {
         </div>
 
         {/* Derecha · buscador, control de abastecimiento, avisos */}
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-2">
           {nombre && (
-            <span className="mr-2 hidden max-w-[14rem] truncate text-sm text-muted-foreground xl:inline">
+            <span className="mr-1 hidden max-w-[14rem] truncate text-xs font-medium text-muted-foreground xl:inline">
               {nombre}
             </span>
           )}
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-2 rounded-xl px-2.5 text-muted-foreground transition-all duration-180 hover:bg-amber-50/70 hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] lg:min-h-[40px] lg:min-w-[40px]"
+            className="inline-flex min-h-[38px] items-center gap-2 rounded-xl border border-border/80 bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-xs transition-all duration-150 hover:border-input hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
             title="Buscador y comandos (Ctrl+K)"
             aria-label="Buscar (⌘K)"
           >
-            <IconSearch className="size-5 lg:size-[18px]" aria-hidden="true" />
+            <IconSearch className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span className="hidden sm:inline">Buscar...</span>
             <kbd className="kbd hidden sm:inline-flex" aria-hidden="true">⌘K</kbd>
           </button>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent('open-abastecimiento-drawer'))}
-            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2 text-muted-foreground transition-all duration-180 hover:bg-amber-50/70 hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] lg:min-h-[40px] lg:min-w-[40px]"
-            title="Control de abastecimiento y pendientes"
-            aria-label="Abrir control de abastecimiento y pendientes"
-          >
-            <IconAbastecimiento className="size-5 lg:size-[18px]" />
-          </button>
+          {tabsAbastecimiento(rol).length > 0 && (
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open-abastecimiento-drawer'))}
+              className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-xl border border-border/80 bg-muted/40 p-2 text-muted-foreground shadow-xs transition-all duration-150 hover:border-input hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
+              title="Control de abastecimiento y pendientes"
+              aria-label="Abrir control de abastecimiento y pendientes"
+            >
+              <IconAbastecimiento className="size-[18px]" />
+            </button>
+          )}
           <NotificacionCampanita />
         </div>
       </div>

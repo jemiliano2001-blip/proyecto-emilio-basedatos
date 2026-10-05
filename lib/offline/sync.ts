@@ -1,4 +1,8 @@
 import {
+  listInstalacionesPendientes,
+  updateInstalacionPendienteStatus,
+  deleteInstalacionPendiente,
+  type InstalacionPendienteRecord,
   deleteRecepcionPendiente,
   deleteSolicitudPendiente,
   listRecepcionesPendientes,
@@ -10,6 +14,7 @@ import {
 } from '@/lib/offline/db'
 
 export type SyncSummary = {
+  instalacionesOk: number
   recepcionesOk: number
   solicitudesOk: number
   conflictos: number
@@ -28,6 +33,28 @@ type SyncSolicitudResponse =
   | { status: 'conflicto'; error: string }
   | { status: 'no_autenticado' }
   | { status: 'reintentar'; error: string }
+
+async function syncOneInstalacion(record: InstalacionPendienteRecord): Promise<'ok' | 'conflicto' | 'reintentar' | 'no_autenticado'> {
+  await updateInstalacionPendienteStatus(record.id, record.usuario_id, 'pendiente')
+  const response = await fetch('/api/instalaciones/sync', {
+    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(record),
+  })
+  const payload = await response.json() as SyncSolicitudResponse
+  if (response.ok && payload.status === 'sincronizado') {
+    await deleteInstalacionPendiente(record.id, record.usuario_id)
+    return 'ok'
+  }
+  if (payload.status === 'no_autenticado') {
+    await updateInstalacionPendienteStatus(record.id, record.usuario_id, 'necesita_revision', 'Inicia sesión con la cuenta de esta captura.')
+    return 'no_autenticado'
+  }
+  if (payload.status === 'conflicto') {
+    await updateInstalacionPendienteStatus(record.id, record.usuario_id, 'conflicto', payload.error)
+    return 'conflicto'
+  }
+  await updateInstalacionPendienteStatus(record.id, record.usuario_id, 'pendiente', 'error' in payload ? payload.error : 'Reintentar envío.')
+  return 'reintentar'
+}
 
 async function syncOneRecepcion(
   record: RecepcionPendienteRecord
@@ -159,6 +186,7 @@ async function syncOneSolicitud(
 
 export async function runOfflineQueues(userId: string): Promise<SyncSummary> {
   const summary: SyncSummary = {
+    instalacionesOk: 0,
     recepcionesOk: 0,
     solicitudesOk: 0,
     conflictos: 0,
@@ -203,6 +231,15 @@ export async function runOfflineQueues(userId: string): Promise<SyncSummary> {
     }
   }
 
+  if (summary.noAutenticado) return summary
+  for (const record of await listInstalacionesPendientes(userId)) {
+    if (record.status === 'conflicto') { summary.conflictos += 1; continue }
+    const result = await syncOneInstalacion(record).catch(() => 'reintentar' as const)
+    if (result === 'ok') summary.instalacionesOk += 1
+    if (result === 'conflicto') summary.conflictos += 1
+    if (result === 'reintentar') summary.reintentos += 1
+    if (result === 'no_autenticado') { summary.noAutenticado = true; break }
+  }
   return summary
 }
 

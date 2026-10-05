@@ -165,22 +165,7 @@ export async function crearRecepcionAction(
 
   const recepcionId = typeof data === 'string' ? data : parsed.data.id
 
-  // Actualizar fotos defensivamente en recepciones_material
-  if (foto_remision_url || foto_evidencia_url) {
-    try {
-      await supabase
-        .from('recepciones_material')
-        .update({
-          ...(foto_remision_url ? { foto_remision_url } : {}),
-          ...(foto_evidencia_url ? { foto_evidencia_url } : {}),
-        })
-        .eq('id', recepcionId)
-    } catch (err) {
-      console.warn('Advertencia: No se pudieron asignar fotos a la recepción en base de datos:', err)
-    }
-  }
-
-  // Registrar fotos en la tabla recepcion_fotos (con metadatos GPS y calidad)
+  // Guarda encabezado, renglones y metadatos en una sola transacción autorizada.
   try {
     const fotosAInsertar = []
 
@@ -217,6 +202,7 @@ export async function crearRecepcionAction(
     for (const ifoto of itemFotosSubidas) {
       fotosAInsertar.push({
         recepcion_id: recepcionId,
+        orden_item_id: ifoto.orden_item_id,
         tipo_foto: ifoto.estado === 'danado' ? 'dano_evidencia' : 'material_completo',
         storage_path: ifoto.storage_path,
         foto_url: ifoto.foto_url,
@@ -230,19 +216,16 @@ export async function crearRecepcionAction(
     }
 
     if (fotosAInsertar.length > 0) {
-      await supabase.from('recepcion_fotos').insert(fotosAInsertar)
+      const { error: evidenciaError } = await supabase.rpc('guardar_evidencias_recepcion', {
+        p_recepcion_id: recepcionId, p_fotos: fotosAInsertar,
+      })
+      if (evidenciaError) return {
+        id: recepcionId,
+        error: 'La recepción se guardó, pero sus fotos no quedaron vinculadas. Vuelve a adjuntarlas y reintenta aquí con el mismo registro. Si persiste, avisa a Operación para verificar las migraciones de evidencias.',
+      }
     }
-
-    // Actualizar foto_url en recepcion_items si existen
-    for (const ifoto of itemFotosSubidas) {
-      await supabase
-        .from('recepcion_items')
-        .update({ foto_url: ifoto.foto_url })
-        .eq('recepcion_id', recepcionId)
-        .eq('orden_item_id', ifoto.orden_item_id)
-    }
-  } catch (fotoErr) {
-    console.warn('Advertencia: No se pudieron registrar metadatos de recepcion_fotos:', fotoErr)
+  } catch {
+    return { id: recepcionId, error: 'La recepción se guardó, pero falta confirmar sus fotografías. Conserva el formulario y reintenta.' }
   }
 
   revalidatePath('/recepciones')

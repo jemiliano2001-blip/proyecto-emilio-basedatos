@@ -1,4 +1,4 @@
-export type ListParams = { pagina?: string; q?: string; estatus?: string; desde?: string; hasta?: string; proyecto?: string; obra?: string }
+export type ListParams = { pagina?: string; q?: string; estatus?: string; desde?: string; hasta?: string; proyecto?: string; obra?: string; vista?: string }
 export const PAGE_SIZE = 25
 
 export function listFilters(params: ListParams, statuses: readonly string[]) {
@@ -13,7 +13,7 @@ export function listFilters(params: ListParams, statuses: readonly string[]) {
 
 export function pageHref(path: string, params: ListParams, page: number) {
   const query = new URLSearchParams()
-  for (const key of ['q', 'estatus', 'desde', 'hasta', 'proyecto', 'obra'] as const) {
+  for (const key of ['q', 'estatus', 'desde', 'hasta', 'proyecto', 'obra', 'vista'] as const) {
     if (params[key]) query.set(key, params[key]!)
   }
   query.set('pagina', String(page))

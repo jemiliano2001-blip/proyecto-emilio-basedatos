@@ -46,14 +46,14 @@ export default async function HomePage({
   let obrasLoadError = false
 
   const { data: obrasData, error: obrasError } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select('id, nombre, ciudad, fraccionamiento, cliente, estado, foto_url, presupuesto_mxn')
     .order('nombre')
 
   if (obrasError) {
     // Fallback defensivo si la columna foto_url aún no se aplica en BD remota
     const { data: fallbackData, error: fallbackError } = await supabase
-      .from('obras')
+      .from('obras_lectura')
       .select('id, nombre, ciudad, fraccionamiento, cliente, estado, presupuesto_mxn')
       .order('nombre')
     obras = (fallbackData ?? []).map((o) => ({ ...o, foto_url: null }))
@@ -107,7 +107,7 @@ export default async function HomePage({
         }
       />
 
-      {/* Indicadores KPI con Sparklines 2026 */}
+      {/* Indicadores calculados a partir de registros reales */}
       <section
         aria-label="Indicadores"
         className={cn(
@@ -117,11 +117,8 @@ export default async function HomePage({
       >
         <KpiMetricCard
           label="Proyectos activos"
-          value={String(activas.length)}
+          value={obrasLoadError ? '—' : String(activas.length)}
           hint={`${obras.length} registrado${obras.length === 1 ? '' : 's'} en total`}
-          delta={{ value: '+12%', isPositive: true, label: 'vs trimestre anterior' }}
-          sparklineData={[2, 3, 3, 4, 4, 5, 5, Math.max(1, activas.length)]}
-          sparklineColor="#0369A1"
           icon={<IconProyectos className="size-4" />}
           variant="default"
         />
@@ -131,13 +128,6 @@ export default async function HomePage({
           value={requisicionesPendientes === null ? '—' : String(requisicionesPendientes)}
           hint="En cola de Compras o Finanzas"
           href="/solicitudes"
-          delta={
-            requisicionesPendientes && requisicionesPendientes > 0
-              ? { value: `${requisicionesPendientes} en espera`, isPositive: false, label: 'requiere atención' }
-              : { value: 'Al día', isPositive: true, label: 'flujo normal' }
-          }
-          sparklineData={[5, 4, 6, 3, 5, 4, Number(requisicionesPendientes ?? 0)]}
-          sparklineColor={requisicionesPendientes ? '#F59E0B' : '#10B981'}
           icon={<IconSolicitudes className="size-4" />}
           variant={requisicionesPendientes ? 'warning' : 'default'}
         />
@@ -147,9 +137,6 @@ export default async function HomePage({
           value={totalRecepciones === null ? '—' : String(totalRecepciones)}
           hint="Checklists capturados en obra"
           href="/recepciones"
-          delta={{ value: '100% cotejo', isPositive: true, label: 'validado en campo' }}
-          sparklineData={[10, 14, 12, 18, 20, 24, Math.max(6, Number(totalRecepciones ?? 0))]}
-          sparklineColor="#0F766E"
           icon={<IconRecepcion className="size-4" />}
           variant="default"
         />
@@ -157,11 +144,8 @@ export default async function HomePage({
         {verDinero && (
           <KpiMetricCard
             label="Presupuesto activo"
-            value={formatMoneyMx(presupuestoActivo)}
+            value={obrasLoadError ? '—' : formatMoneyMx(presupuestoActivo)}
             hint="Suma de topes de proyectos activos"
-            delta={{ value: 'Saldo dual', isPositive: true, label: 'monitoreo continuo' }}
-            sparklineData={[40, 50, 65, 60, 75, 80, 85]}
-            sparklineColor="#0369A1"
             variant="caregiver"
           />
         )}

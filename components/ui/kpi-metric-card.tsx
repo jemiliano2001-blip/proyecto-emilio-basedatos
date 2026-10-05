@@ -58,10 +58,10 @@ export function KpiMetricCard({
   const strokeColor = sparklineColor || defaultColor
 
   const variantStyles = {
-    default: 'bg-card border-border/80 shadow-card hover:shadow-elevated',
-    caregiver: 'bg-amber-50/40 border-amber-200/70 shadow-sm hover:shadow-elevated',
-    warning: 'bg-warning-soft/40 border-warning/30 shadow-sm hover:shadow-elevated',
-    success: 'bg-success-soft/40 border-success/30 shadow-sm hover:shadow-elevated',
+    default: 'bg-card border-border/80 shadow-card hover:shadow-card-hover hover:border-border',
+    caregiver: 'bg-primary-soft/30 border-primary/20 shadow-card hover:shadow-card-hover hover:border-primary/40',
+    warning: 'bg-warning-soft/30 border-warning/25 shadow-card hover:shadow-card-hover hover:border-warning/40',
+    success: 'bg-success-soft/30 border-success/25 shadow-card hover:shadow-card-hover hover:border-success/40',
   }
 
   const content = (
@@ -78,7 +78,7 @@ export function KpiMetricCard({
           {label}
         </span>
         {icon && (
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground group-hover:text-primary transition-colors">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary-soft/60 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200">
             {icon}
           </span>
         )}

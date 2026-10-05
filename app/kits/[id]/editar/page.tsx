@@ -48,7 +48,7 @@ export default async function EditarKitPage({
     ...(kit.material_principal_id ? [kit.material_principal_id] : []),
   ]
   let materialesQuery = supabase
-    .from('catalogo_materiales')
+    .from('catalogo_materiales_lectura')
     .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria, precio_base, activo')
     .order('nombre_base')
   materialesQuery =

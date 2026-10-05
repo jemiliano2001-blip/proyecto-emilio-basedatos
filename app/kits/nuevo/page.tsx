@@ -15,7 +15,7 @@ export default async function NuevoKitPage() {
 
   const supabase = await createClient()
   const { data: materialesRaw } = await supabase
-    .from('catalogo_materiales')
+    .from('catalogo_materiales_lectura')
     .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria, precio_base, activo')
     .eq('activo', true)
     .order('nombre_base')

@@ -114,7 +114,7 @@ export function HomeProjectsWorkbench({
         </div>
 
         <div
-          className="flex shrink-0 items-center gap-0.5 overflow-x-auto rounded-lg bg-muted p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex shrink-0 items-center gap-1 overflow-x-auto rounded-xl bg-muted/60 p-1 border border-border/50 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           role="tablist"
           aria-label="Estatus del proyecto"
         >
@@ -128,18 +128,18 @@ export function HomeProjectsWorkbench({
                 aria-selected={active}
                 onClick={() => setSelectedTab(tab.id)}
                 className={cn(
-                  'inline-flex min-h-[40px] items-center gap-1.5 whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors sm:min-h-[36px]',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-all sm:min-h-[34px]',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring select-none',
                   active
-                    ? 'bg-card text-foreground shadow-xs'
+                    ? 'bg-card text-foreground shadow-xs font-bold'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 {tab.label}
                 <span
                   className={cn(
-                    'rounded-full px-1.5 text-[11px] tabular-nums',
-                    active ? 'bg-primary-soft text-primary-soft-foreground' : 'bg-border/70 text-muted-foreground'
+                    'rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums transition-colors',
+                    active ? 'bg-primary-soft text-primary' : 'bg-muted text-muted-foreground'
                   )}
                 >
                   {counts[tab.id]}
@@ -169,7 +169,7 @@ export function HomeProjectsWorkbench({
                 href={`/obras/${obra.id}`}
                 className="list-row group items-center lg:grid lg:grid-cols-[2.5rem_minmax(0,2fr)_minmax(0,1.2fr)_6.5rem_1.5rem] lg:gap-3"
               >
-                <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted lg:size-10">
+                <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/80 bg-muted/50 lg:size-10 shadow-2xs">
                   {obra.foto_url ? (
                     <Image
                       src={obra.foto_url}
@@ -180,13 +180,15 @@ export function HomeProjectsWorkbench({
                       className="size-full object-cover"
                     />
                   ) : (
-                    <IconProyectos className="size-5 text-muted-foreground" />
+                    <span className="flex size-full items-center justify-center bg-primary-soft/50 text-primary">
+                      <IconProyectos className="size-5" />
+                    </span>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary">
+                    <p className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors font-sans">
                       {obra.nombre}
                     </p>
                     <span className="lg:hidden">

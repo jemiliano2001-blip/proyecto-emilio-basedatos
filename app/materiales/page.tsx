@@ -23,7 +23,7 @@ export default async function MaterialesPage({
   const columnas =
     'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, activo'
   let materialesQuery = supabase
-    .from('catalogo_materiales')
+    .from('catalogo_materiales_lectura')
     .select(verPrecios ? `${columnas}, precio_base` : columnas)
     .order('nombre_base')
   if (!puedeEditar) materialesQuery = materialesQuery.eq('activo', true)

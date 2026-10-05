@@ -118,7 +118,7 @@ export async function createObraAction(
   if (topes.length > 0 && finalPresupuesto === 0) {
     const matIds = topes.map((t) => t.material_id)
     const { data: mats } = await supabase
-      .from('catalogo_materiales')
+      .from('catalogo_materiales_lectura')
       .select('id, precio_base')
       .in('id', matIds)
 

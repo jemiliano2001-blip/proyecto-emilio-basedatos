@@ -20,7 +20,7 @@ export default async function EditarObraPage({
 
   const supabase = await createClient()
   const { data: obra } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select(
       'id, nombre, cliente, ciudad, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn, foto_url, creado_en'
     )

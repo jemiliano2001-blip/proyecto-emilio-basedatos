@@ -24,6 +24,7 @@ export type MaterialPrecioRow = {
   /** Precio unitario ya guardado (monto/cantidad), si existe */
   precioUnitarioActual: number | null
   proveedorId?: string | null
+  esServicio?: boolean
 }
 
 export type ProveedorOpcion = {
@@ -117,7 +118,7 @@ export function AprobarComprasButton({
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                    <div>
+                    {!m.esServicio && <div>
                       <label className="block text-xs font-semibold text-muted-foreground mb-1">
                         Cantidad ({m.unidad}) *
                       </label>
@@ -130,11 +131,11 @@ export function AprobarComprasButton({
                         defaultValue={m.cantidad}
                         className="input-base text-sm"
                       />
-                    </div>
+                    </div>}
 
                     <div>
                       <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                        Precio cotizado ({m.unidad}) *
+                        {m.esServicio ? 'Importe cotizado (MXN) *' : `Precio cotizado (${m.unidad}) *`}
                       </label>
                       <input
                         type="text"

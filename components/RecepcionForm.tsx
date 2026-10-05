@@ -193,6 +193,7 @@ export function RecepcionForm({
       <input type="hidden" name="items_json" value={itemsJson} />
 
       <FormError message={state.error ?? offlineError} />
+      {state.error && state.id && <p className="text-sm"><a href={`/recepciones/${state.id}`} className="text-primary underline">Abrir la recepción guardada</a>. Para completar la evidencia, vuelve a adjuntar las fotos y reintenta desde este formulario.</p>}
       {offlineMsg && (
         <p className="rounded-lg bg-primary-soft text-primary-soft-foreground text-sm px-3 py-2">{offlineMsg}</p>
       )}

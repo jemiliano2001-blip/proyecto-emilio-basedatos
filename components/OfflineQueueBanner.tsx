@@ -5,6 +5,9 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   listRecepcionesPendientes,
   listSolicitudesPendientes,
+  listInstalacionesPendientes,
+  deleteInstalacionPendiente,
+  type InstalacionPendienteRecord,
   type RecepcionPendienteRecord,
   type SolicitudPendienteRecord,
 } from '@/lib/offline/db'
@@ -25,19 +28,22 @@ export function OfflineQueueBanner() {
   const userId = useOfflineUser()
   const [recepciones, setRecepciones] = useState<RecepcionPendienteRecord[]>([])
   const [solicitudes, setSolicitudes] = useState<SolicitudPendienteRecord[]>([])
+  const [instalaciones, setInstalaciones] = useState<InstalacionPendienteRecord[]>([])
   const [msg, setMsg] = useState<string | null>(null)
 
-  const [editing, setEditing] = useState<SolicitudPendienteRecord | RecepcionPendienteRecord | null>(null)
+  const [editing, setEditing] = useState<SolicitudPendienteRecord | RecepcionPendienteRecord | InstalacionPendienteRecord | null>(null)
   const [busy, setBusy] = useState(false)
   const refresh = useCallback(async () => {
     if (!userId) return
     try {
-      const [r, s] = await Promise.all([
+      const [r, s, i] = await Promise.all([
         listRecepcionesPendientes(userId!),
         listSolicitudesPendientes(userId!),
+        listInstalacionesPendientes(userId!),
       ])
       setRecepciones(r)
       setSolicitudes(s)
+      setInstalaciones(i)
     } catch {
       // IndexedDB puede fallar en modo privado estricto
     }
@@ -45,11 +51,18 @@ export function OfflineQueueBanner() {
 
   useEffect(() => {
     void refresh()
+    window.addEventListener('offline-queue-changed', refresh)
+    window.addEventListener('online', refresh)
+    return () => {
+      window.removeEventListener('offline-queue-changed', refresh)
+      window.removeEventListener('online', refresh)
+    }
   }, [refresh])
 
   const ownedRecepciones = recepciones.filter(r => r.usuario_id === userId)
   const ownedSolicitudes = solicitudes.filter(s => s.usuario_id === userId)
-  const total = ownedRecepciones.length + ownedSolicitudes.length
+  const ownedInstalaciones = instalaciones.filter(i => i.usuario_id === userId)
+  const total = ownedRecepciones.length + ownedSolicitudes.length + ownedInstalaciones.length
   if (total === 0) return null
 
   return (
@@ -58,6 +71,16 @@ export function OfflineQueueBanner() {
         Pendientes en este teléfono ({total})
       </p>
       <ul className="space-y-1 text-xs text-warning-soft-foreground mb-3">
+        {ownedInstalaciones.map(i => <li key={i.id}>
+          Instalación {i.id.slice(0,8)}… — {labelStatus(i.status)}{i.error ? ` (${i.error})` : ''}
+          <div className="flex gap-4 my-2">
+            <button type="button" className="btn-secondary" disabled={busy || i.status !== 'conflicto'} onClick={() => setEditing(i)}>Revisar</button>
+            <button type="button" className="btn-secondary text-danger" disabled={busy || i.status !== 'conflicto'} onClick={async () => {
+              if (!window.confirm('¿Descartar esta instalación guardada? Esta acción no se puede deshacer.')) return
+              try { await deleteInstalacionPendiente(i.id, userId!); await refresh() } catch { setMsg('No se pudo descartar la captura.') }
+            }}>Descartar</button>
+          </div>
+        </li>)}
         {ownedRecepciones.map((r) => (
           <li key={r.id}>
             Recepción {(r.id ?? '').slice(0, 8)}… — {labelStatus(r.status)}
@@ -100,7 +123,7 @@ export function OfflineQueueBanner() {
               setMsg('Sesión expirada. Vuelve a iniciar sesión.')
             } else {
               setMsg(
-                `Enviados: ${summary.recepcionesOk + summary.solicitudesOk}. Conflictos: ${summary.conflictos}.`
+                `Enviados: ${summary.recepcionesOk + summary.solicitudesOk + summary.instalacionesOk}. Conflictos: ${summary.conflictos}.`
               )
             }
           }).catch(() => setMsg("No se pudo conectar. Tus capturas siguen guardadas.")).finally(() => setBusy(false))

@@ -87,7 +87,7 @@ export default async function OrdenDetallePage({
        proveedor:proveedores(nombre, contacto, telefono),
        items:orden_compra_items(
          id, cantidad, precio_unitario, subtotal, descripcion,
-         material:catalogo_materiales(nombre_base, variante, unidad_medida)
+         material:catalogo_materiales_lectura(nombre_base, variante, unidad_medida)
        )`
     )
     .eq('id', resolvedparams.id)
@@ -154,7 +154,7 @@ export default async function OrdenDetallePage({
          orden_item_id,
          orden_item:orden_compra_items(
            id, cantidad, descripcion,
-           material:catalogo_materiales(nombre_base, variante, unidad_medida)
+           material:catalogo_materiales_lectura(nombre_base, variante, unidad_medida)
          )
        )`
     )

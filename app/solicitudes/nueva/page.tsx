@@ -21,7 +21,7 @@ export default async function NuevaSolicitudPage({
   const supabase = await createClient()
 
   const { data: obras } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select('id, nombre, fraccionamiento')
     .eq('estado', 'activa')
     .order('nombre')
@@ -40,7 +40,7 @@ export default async function NuevaSolicitudPage({
 
   // Obtener cantidades de solicitudes pendientes de aprobación para deducción provisional en tiempo real
   const { data: itemsPendientes } = await supabase
-    .from('solicitud_items')
+    .from('solicitud_items_lectura')
     .select('material_id, obra_id, cantidad_solicitada, solicitud:solicitudes_material!inner(id, obra_id, estado)')
     .in('solicitud.estado', ['recibida', 'pendiente'])
 

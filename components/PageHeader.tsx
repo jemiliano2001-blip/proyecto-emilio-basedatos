@@ -52,12 +52,12 @@ export function PageHeader({
   return (
     <header className={cn('mb-5 sm:mb-6', className)}>
       {backHref && (
-        <div className="mb-3">
+        <div className="mb-2.5">
           <Link
             href={backHref}
-            className="inline-flex min-h-[32px] items-center gap-1.5 rounded-md text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <IconFlechaAtras className="h-4 w-4" />
+            <IconFlechaAtras className="size-3.5" />
             <span>{backLabel}</span>
           </Link>
         </div>
@@ -66,19 +66,25 @@ export function PageHeader({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div className="min-w-0 flex-1">
           {eyebrow && (
-            <p className="mb-1 text-sm text-muted-foreground">
+            <div className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary select-none">
               {eyebrow}
-            </p>
+            </div>
           )}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{title}</h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground font-heading">
+              {title}
+            </h1>
             {badge && <div className="shrink-0">{badge}</div>}
           </div>
           {desc &&
             (typeof desc === 'string' ? (
-              <p className="mt-1 max-w-prose text-sm text-muted-foreground">{desc}</p>
+              <p className="mt-1.5 max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                {desc}
+              </p>
             ) : (
-              <div className="mt-1 max-w-prose text-sm text-muted-foreground">{desc}</div>
+              <div className="mt-1.5 max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                {desc}
+              </div>
             ))}
         </div>
 

@@ -14,7 +14,7 @@ type ServerClient = Awaited<ReturnType<typeof createClient>>
 // Cerrar el proyecto congela saldos: sin esto, los topes se podían editar o borrar después
 // de la conciliación final. La base lo refuerza con trigger (migración 0029).
 async function errorSiObraCerrada(supabase: ServerClient, obraId: string): Promise<string | null> {
-  const { data, error } = await supabase.from('obras').select('estado').eq('id', obraId).maybeSingle()
+  const { data, error } = await supabase.from('obras_lectura').select('estado').eq('id', obraId).maybeSingle()
   if (error) return 'No se pudo verificar el estado del proyecto. Intenta de nuevo.'
   if (!data) return 'El proyecto no existe.'
   if (data.estado === 'cerrada') return 'El proyecto está cerrado: sus materiales ya no se pueden modificar.'

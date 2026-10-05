@@ -91,7 +91,7 @@ export default async function RootLayout({
               showNav && 'lg:pl-sidebar'
             )}
           >
-            {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} />}
+            {showNav && <TopBar nombre={session?.perfil?.nombre ?? null} rol={session?.rol ?? null} />}
             <div id="contenido" className="flex-1">
               {children}
             </div>

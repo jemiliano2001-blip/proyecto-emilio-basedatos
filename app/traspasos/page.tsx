@@ -82,7 +82,7 @@ export default async function TraspasosPage() {
       items:traspaso_items(
         id,
         cantidad,
-        material:catalogo_materiales(nombre_base, variante, unidad_medida)
+        material:catalogo_materiales_lectura(nombre_base, variante, unidad_medida)
       )
     `
     )

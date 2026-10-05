@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
+import { tabsAbastecimiento } from '@/lib/roles'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,12 +10,14 @@ export async function GET() {
   if (!session) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
+  const tabs = tabsAbastecimiento(session.rol)
+  if (tabs.length === 0) return NextResponse.json({ error: 'Sin permiso para abastecimiento.' }, { status: 403 })
 
   const supabase = await createClient()
 
   try {
     // 1. Solicitudes pendientes de compras (recibida / pendiente)
-    const { data: reqCompras, error: errCompras, count: cntCompras } = await supabase
+    const { data: reqCompras, error: errCompras, count: cntCompras } = tabs.includes('compras') ? await supabase
       .from('solicitudes_material')
       .select(`
         id, estado, nota, creado_en,
@@ -23,10 +26,10 @@ export async function GET() {
       `, { count: 'exact' })
       .in('estado', ['recibida', 'pendiente'])
       .order('creado_en', { ascending: false })
-      .limit(20)
+      .limit(20) : { data: [], error: null, count: 0 }
 
     // 2. Solicitudes pendientes de finanzas (en_proceso / en_cotizacion)
-    const { data: reqFinanzas, error: errFinanzas, count: cntFinanzas } = await supabase
+    const { data: reqFinanzas, error: errFinanzas, count: cntFinanzas } = tabs.includes('finanzas') ? await supabase
       .from('solicitudes_material')
       .select(`
         id, estado, nota, creado_en,
@@ -35,7 +38,7 @@ export async function GET() {
       `, { count: 'exact' })
       .in('estado', ['en_proceso', 'en_cotizacion'])
       .order('creado_en', { ascending: false })
-      .limit(20)
+      .limit(20) : { data: [], error: null, count: 0 }
 
     // 3. Órdenes en tránsito o pendientes de recepción total
     const { data: ordTransito, error: errOrdenes, count: cntTransito } = await supabase

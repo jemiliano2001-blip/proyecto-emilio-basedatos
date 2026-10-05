@@ -28,9 +28,9 @@ const sizeClasses: Record<AvatarSize, { container: string; status: string; text:
 }
 
 const statusColors: Record<AvatarStatus, { dot: string; label: string }> = {
-  online: { dot: 'bg-emerald-500', label: 'En línea' },
-  busy: { dot: 'bg-amber-500', label: 'Ocupado' },
-  offline: { dot: 'bg-slate-400', label: 'Desconectado' },
+  online: { dot: 'bg-success', label: 'En línea' },
+  busy: { dot: 'bg-warning', label: 'Ocupado' },
+  offline: { dot: 'bg-muted-foreground', label: 'Desconectado' },
 }
 
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
@@ -49,7 +49,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         )}
         {...props}
       >
-        <div className="relative size-full overflow-hidden rounded-2xl bg-amber-100/60 text-stone-800 font-semibold border border-amber-200/80 shadow-xs flex items-center justify-center">
+        <div className="relative size-full overflow-hidden rounded-2xl bg-primary-soft text-primary font-semibold border border-primary/20 shadow-xs flex items-center justify-center">
           {src && !imageError ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -59,7 +59,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
               className="size-full object-cover"
             />
           ) : (
-            <span className={cn('select-none tracking-tight', config.text)}>
+            <span className={cn('select-none tracking-tight font-sans', config.text)}>
               {initials}
             </span>
           )}
@@ -68,7 +68,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {status && (
           <span
             className={cn(
-              'absolute bottom-0 right-0 rounded-full ring-white',
+              'absolute bottom-0 right-0 rounded-full ring-2 ring-card',
               config.status,
               statusColors[status].dot
             )}
@@ -76,7 +76,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
             aria-label={statusColors[status].label}
           >
             {status === 'online' && (
-              <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+              <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-75" />
             )}
           </span>
         )}

@@ -165,7 +165,7 @@ export function puedeVerNavProyectos(rol: RolUsuario | null): boolean {
 
 /** Landing post-login / home: colas operativas van directo a solicitudes. */
 export function homePathForRol(rol: RolUsuario | null): string {
-  if (rol === 'compras' || rol === 'personal') return '/solicitudes'
+  if (rol === 'compras' || rol === 'personal' || rol === 'finanzas') return '/solicitudes'
   return '/'
 }
 
@@ -201,6 +201,16 @@ export function puedeGestionarUsuarios(rol: RolUsuario | null): boolean {
 /** Emilio + operación (Iveth): lectura de la bitácora de auditoría. */
 export function puedeVerBitacora(rol: RolUsuario | null): boolean {
   return rol === 'acceso_total' || rol === 'operacion'
+}
+
+export type TabAbastecimiento = 'compras' | 'finanzas' | 'transito'
+
+export function tabsAbastecimiento(rol: RolUsuario | null): TabAbastecimiento[] {
+  if (rol === 'acceso_total') return ['compras', 'finanzas', 'transito']
+  if (rol === 'compras') return ['compras', 'transito']
+  if (rol === 'finanzas') return ['finanzas', 'transito']
+  if (rol === 'proyectos' || rol === 'operacion') return ['transito']
+  return []
 }
 
 

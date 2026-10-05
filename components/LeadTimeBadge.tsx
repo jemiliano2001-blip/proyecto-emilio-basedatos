@@ -19,20 +19,20 @@ const ESTILOS_POR_ESTADO: Record<
   { contenedor: string; punto: string }
 > = {
   a_tiempo: {
-    contenedor: 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20 dark:text-emerald-300',
-    punto: 'bg-emerald-500',
+    contenedor: 'bg-success-soft text-success-soft-foreground border-success/30',
+    punto: 'bg-success',
   },
   proximo_a_vencer: {
-    contenedor: 'bg-amber-500/10 text-amber-800 border-amber-500/20 dark:text-amber-300',
-    punto: 'bg-amber-500 animate-pulse',
+    contenedor: 'bg-warning-soft text-warning-soft-foreground border-warning/30',
+    punto: 'bg-warning animate-pulse',
   },
   retrasado: {
-    contenedor: 'bg-rose-500/10 text-rose-800 border-rose-500/20 dark:text-rose-300',
-    punto: 'bg-rose-500 animate-ping',
+    contenedor: 'bg-danger-soft text-danger-soft-foreground border-danger/30',
+    punto: 'bg-danger animate-pulse',
   },
   entregado: {
-    contenedor: 'bg-teal-500/10 text-teal-800 border-teal-500/20 dark:text-teal-300',
-    punto: 'bg-teal-500',
+    contenedor: 'bg-primary-soft text-primary-soft-foreground border-primary/30',
+    punto: 'bg-primary',
   },
 }
 

@@ -15,13 +15,13 @@ export default async function NuevoTraspasoPage() {
   const supabase = await createClient()
 
   const { data: obras, error: obrasError } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select('id, nombre, fraccionamiento')
     .eq('estado', 'activa')
     .order('nombre')
 
   const { data: materiales, error: materialesError } = await supabase
-    .from('catalogo_materiales')
+    .from('catalogo_materiales_lectura')
     .select('id, nombre_base, variante, unidad_medida')
     .eq('activo', true)
     .order('nombre_base')

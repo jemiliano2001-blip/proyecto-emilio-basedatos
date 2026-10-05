@@ -29,7 +29,7 @@ export default async function OrdenFormatoPage({ params }: PageProps) {
        ),
        items:orden_compra_items(
          id, cantidad, precio_unitario, subtotal, descripcion, tipo_linea,
-         material:catalogo_materiales(nombre_base, variante, unidad_medida)
+         material:catalogo_materiales_lectura(nombre_base, variante, unidad_medida)
        )`
     )
     .eq('id', resolvedparams.id)

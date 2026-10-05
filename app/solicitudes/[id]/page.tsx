@@ -108,9 +108,9 @@ export default async function SolicitudDetallePage({
       `id, estado, nota, creado_en, solicitante_id,
        obra:obras(id, nombre, fraccionamiento),
        solicitante:usuarios(nombre),
-       items:solicitud_items(
+       items:solicitud_items_lectura(
          id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn, nota, obra_id, proveedor_id,
-         material:catalogo_materiales(nombre_base, variante, unidad_medida, precio_base),
+         material:catalogo_materiales_lectura(nombre_base, variante, unidad_medida, precio_base),
          item_obra:obras!solicitud_items_obra_id_fkey(nombre),
          proveedor:proveedores(id, nombre)
        )`
@@ -127,9 +127,9 @@ export default async function SolicitudDetallePage({
         `id, estado, nota, creado_en, solicitante_id,
          obra:obras(id, nombre, fraccionamiento),
          solicitante:usuarios(nombre),
-         items:solicitud_items(
+         items:solicitud_items_lectura(
            id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn, nota, obra_id,
-           material:catalogo_materiales(nombre_base, variante, unidad_medida, precio_base),
+           material:catalogo_materiales_lectura(nombre_base, variante, unidad_medida, precio_base),
            item_obra:obras!solicitud_items_obra_id_fkey(nombre)
          )`
       )
@@ -176,21 +176,22 @@ export default async function SolicitudDetallePage({
     timeStyle: 'short',
   })
   const materialesParaAprobar = (detalle.items ?? [])
-    .filter((i) => (i.tipo_linea ?? 'material') === 'material' && i.material)
     .map((i) => {
+      const esServicio = (i.tipo_linea ?? 'material') !== 'material'
       const cant = Number(i.cantidad_solicitada ?? 0)
       const monto = i.monto_mxn != null ? Number(i.monto_mxn) : null
       return {
         id: i.id,
         nombre:
-          `${i.material!.nombre_base}${i.material!.variante ? ` · ${i.material!.variante}` : ''}`,
+          esServicio ? `${i.tipo_linea}: ${i.descripcion ?? 'Servicio'}` : `${i.material?.nombre_base ?? 'Material'}${i.material?.variante ? ` · ${i.material.variante}` : ''}`,
         cantidad: cant,
-        unidad: i.material!.unidad_medida,
+        unidad: i.material?.unidad_medida ?? 'servicio',
         precioBase:
-          i.material!.precio_base != null ? Number(i.material!.precio_base) : null,
+          i.material?.precio_base != null ? Number(i.material.precio_base) : null,
         precioUnitarioActual:
-          monto != null && cant > 0 ? Math.round((monto / cant) * 100) / 100 : null,
+          esServicio ? monto : monto != null && cant > 0 ? Math.round((monto / cant) * 100) / 100 : null,
         proveedorId: i.proveedor_id ?? null,
+        esServicio,
       }
     })
 
@@ -324,107 +325,118 @@ export default async function SolicitudDetallePage({
       </div>
 
       {detalle.nota && (
-        <div className="card mb-4">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+        <div className="card mb-5 border-border/80 bg-card p-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
             Nota
           </p>
-          <p className="text-sm text-foreground">{detalle.nota}</p>
+          <p className="text-sm text-foreground leading-relaxed">{detalle.nota}</p>
         </div>
       )}
 
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-        Materiales
-      </h2>
-      <div className="card mb-6 divide-y divide-border p-0 overflow-hidden">
-        {(detalle.items ?? []).map((item) => {
-          const tipo = item.tipo_linea ?? 'material'
-          return (
-            <div key={item.id} className="p-3 sm:p-4 space-y-1">
-              <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                {labelTipoLinea(tipo)}
-              </p>
-              {esMultiObra && item.item_obra && (
-                <p className="text-xs font-semibold text-primary mb-1">
-                  Proyecto: {item.item_obra.nombre}
-                </p>
-              )}
-              {tipo === 'material' ? (
-                <div className="flex justify-between items-baseline gap-3">
-                  <p className="font-medium">
-                    {item.material?.nombre_base}
-                    {item.material?.variante && (
-                      <span className="text-muted-foreground"> · {item.material.variante}</span>
-                    )}
-                  </p>
-                  <span className="text-sm text-muted-foreground shrink-0">
-                    {item.cantidad_solicitada} {item.material?.unidad_medida}
-                  </span>
-                </div>
-              ) : (
-                <div className="flex justify-between items-baseline gap-3">
-                  <p className="font-medium">{item.descripcion}</p>
-                  {verPrecios && item.monto_mxn != null && (
-                    <span className="text-sm text-muted-foreground shrink-0">
-                      {formatMoneyMx(Number(item.monto_mxn))}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2.5">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Partidas solicitadas
+          </h2>
+          <span className="text-xs text-muted-foreground">
+            {(detalle.items ?? []).length} {((detalle.items ?? []).length === 1) ? 'concepto' : 'conceptos'}
+          </span>
+        </div>
+        <div className="card divide-y divide-border/60 p-0 overflow-hidden shadow-xs">
+          {(detalle.items ?? []).map((item) => {
+            const tipo = item.tipo_linea ?? 'material'
+            return (
+              <div key={item.id} className="p-3.5 sm:p-4 space-y-1.5 transition-colors hover:bg-muted/20">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant={tipo === 'material' ? 'neutral' : 'info'} className="text-[10px] uppercase font-semibold">
+                    {labelTipoLinea(tipo)}
+                  </Badge>
+                  {esMultiObra && item.item_obra && (
+                    <span className="text-xs font-semibold text-primary">
+                      Proyecto: {item.item_obra.nombre}
                     </span>
                   )}
                 </div>
-              )}
-              {verPrecios && tipo === 'material' && (
-                <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
-                  {item.material?.precio_base != null &&
-                    Number(item.material.precio_base) > 0 && (
-                      <p>
-                        Precio base ref.:{' '}
-                        {formatMoneyMx(Number(item.material.precio_base))} /{' '}
-                        {item.material.unidad_medida}
+                {tipo === 'material' ? (
+                  <div className="flex justify-between items-baseline gap-3">
+                    <p className="font-semibold text-foreground text-sm">
+                      {item.material?.nombre_base}
+                      {item.material?.variante && (
+                        <span className="text-muted-foreground font-normal"> · {item.material.variante}</span>
+                      )}
+                    </p>
+                    <span className="text-xs font-semibold font-mono bg-muted/70 px-2 py-0.5 rounded text-foreground shrink-0 tabular-nums">
+                      {item.cantidad_solicitada} {item.material?.unidad_medida}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-baseline gap-3">
+                    <p className="font-semibold text-foreground text-sm">{item.descripcion}</p>
+                    {verPrecios && item.monto_mxn != null && (
+                      <span className="text-sm font-semibold text-foreground shrink-0 tabular-nums">
+                        {formatMoneyMx(Number(item.monto_mxn))}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {verPrecios && tipo === 'material' && (
+                  <div className="text-xs text-muted-foreground mt-1 space-y-0.5 pt-0.5">
+                    {item.material?.precio_base != null &&
+                      Number(item.material.precio_base) > 0 && (
+                        <p className="tabular-nums">
+                          Precio catálogo ref.:{' '}
+                          <span className="font-medium text-foreground">{formatMoneyMx(Number(item.material.precio_base))}</span> /{' '}
+                          {item.material.unidad_medida}
+                        </p>
+                      )}
+                    {item.monto_mxn != null && Number(item.monto_mxn) > 0 && (
+                      <p className="tabular-nums">
+                        Cotizado:{' '}
+                        <span className="font-medium text-foreground">
+                          {formatMoneyMx(
+                            Number(item.cantidad_solicitada) > 0
+                              ? Number(item.monto_mxn) / Number(item.cantidad_solicitada)
+                              : Number(item.monto_mxn)
+                          )}
+                        </span>{' '}
+                        / {item.material?.unidad_medida} · Total{' '}
+                        <span className="font-semibold text-foreground">{formatMoneyMx(Number(item.monto_mxn))}</span>
                       </p>
                     )}
-                  {item.monto_mxn != null && Number(item.monto_mxn) > 0 && (
-                    <p>
-                      Cotizado:{' '}
-                      {formatMoneyMx(
-                        Number(item.cantidad_solicitada) > 0
-                          ? Number(item.monto_mxn) / Number(item.cantidad_solicitada)
-                          : Number(item.monto_mxn)
-                      )}{' '}
-                      / {item.material?.unidad_medida} · Total{' '}
-                      {formatMoneyMx(Number(item.monto_mxn))}
-                    </p>
-                  )}
-                  {item.proveedor && (
-                    <p className="text-primary font-medium">
-                      Proveedor asignado: {item.proveedor.nombre}
-                    </p>
-                  )}
-                </div>
-              )}
-              {item.nota && <p className="text-xs text-muted-foreground mt-1">{item.nota}</p>}
-            </div>
-          )
-        })}
+                    {item.proveedor && (
+                      <p className="text-primary font-medium">
+                        Proveedor asignado: {item.proveedor.nombre}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {item.nota && <p className="text-xs text-muted-foreground mt-1 italic">{item.nota}</p>}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {ordenesRelacionadas.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
             Órdenes de compra generadas
           </h2>
           <div className="space-y-2">
             {ordenesRelacionadas.map((oc) => (
-              <Link key={oc.id} href={`/ordenes/${oc.id}`} className="card block">
-                <div className="flex justify-between">
-                  <span className="font-medium">{oc.folio}</span>
-                  <span className="text-sm text-muted-foreground">{oc.obra?.nombre}</span>
+              <Link key={oc.id} href={`/ordenes/${oc.id}`} className="card-interactive block p-3.5">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-foreground text-sm font-mono">{oc.folio}</span>
+                  <span className="text-xs text-muted-foreground">{oc.obra?.nombre}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{formatMoneyMx(Number(oc.total))}</p>
+                <p className="text-sm font-bold text-foreground mt-1 tabular-nums">{formatMoneyMx(Number(oc.total))}</p>
               </Link>
             ))}
           </div>
         </div>
       )}
 
-      <div className="space-y-3 mt-2 lg:sticky lg:bottom-4 lg:z-10 lg:rounded-xl lg:border lg:border-border lg:bg-card/95 lg:backdrop-blur-sm lg:p-3 lg:shadow-sm">
+      <div className="space-y-3 mt-4 lg:sticky lg:bottom-4 lg:z-10 lg:rounded-xl lg:border lg:border-border/80 lg:bg-card/95 lg:backdrop-blur-md lg:p-4 lg:shadow-elevated">
         {(puedeCompras || puedeFinanzas || verPrecios) && (
           <Link
             href={`/solicitudes/${detalle.id}/formato`}
@@ -450,6 +462,7 @@ export default async function SolicitudDetallePage({
           Aprobada por Compras — pendiente de pago en Finanzas.
         </p>
       )}
+      {detalle.estado === 'finalizada' && <p className="text-xs text-muted-foreground text-center mt-4">Finalizada indica pago aprobado y órdenes de compra emitidas. La recepción física y la instalación se consultan por separado.</p>}
         </div>
       </div>
     </main>

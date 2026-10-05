@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { type SolicitudPendienteRecord, type RecepcionPendienteRecord, putSolicitudPendiente, putRecepcionPendiente } from '@/lib/offline/db'
+import { type SolicitudPendienteRecord, type RecepcionPendienteRecord, type InstalacionPendienteRecord, putSolicitudPendiente, putRecepcionPendiente, putInstalacionPendiente } from '@/lib/offline/db'
+import { validateInstalacionInput } from '@/lib/validations/instalacion'
 import { validateSolicitudInput } from '@/lib/validations/solicitud'
 import { validateRecepcionInput } from '@/lib/validations/recepcion'
 
@@ -21,6 +22,14 @@ function recalcularEstadoItem(
 }
 
 export function OfflineRecordEditor({ record, onSaved, onCancel }: {
+  record: SolicitudPendienteRecord | RecepcionPendienteRecord | InstalacionPendienteRecord; onSaved: () => Promise<void>; onCancel: () => void
+}) {
+  return 'material_id' in record
+    ? <OfflineInstalacionEditor record={record} onSaved={onSaved} onCancel={onCancel} />
+    : <OfflineChecklistEditor record={record} onSaved={onSaved} onCancel={onCancel} />
+}
+
+function OfflineChecklistEditor({ record, onSaved, onCancel }: {
   record: SolicitudPendienteRecord | RecepcionPendienteRecord; onSaved: () => Promise<void>; onCancel: () => void
 }) {
   const [error, setError] = useState<string | null>(null)
@@ -70,5 +79,29 @@ export function OfflineRecordEditor({ record, onSaved, onCancel }: {
     <label className="block">Nota general<textarea className="input-base" name="nota" defaultValue={record.nota ?? ''} /></label>
     {error && <p role="alert" className="text-danger">{error}</p>}
     <div className="flex gap-4"><button className="btn-primary" disabled={busy} aria-busy={busy}>Guardar corrección</button><button type="button" className="btn-secondary" disabled={busy} onClick={onCancel}>Volver</button></div>
+  </form>
+}
+
+function OfflineInstalacionEditor({record,onSaved,onCancel}: {
+  record: InstalacionPendienteRecord; onSaved: () => Promise<void>; onCancel: () => void
+}) {
+  const [error,setError] = useState<string | null>(null)
+  const [busy,setBusy] = useState(false)
+  return <form className="card my-4 space-y-3" action={async data => {
+    setBusy(true); setError(null)
+    try {
+      const parsed = validateInstalacionInput({...record,cantidad:data.get('cantidad'),nota:data.get('nota')})
+      if (!parsed.ok) {setError(parsed.error);return}
+      await putInstalacionPendiente({...record,...parsed.data,status:'guardado_local',error:null,updated_at:new Date().toISOString()})
+      await onSaved()
+    } catch {setError('No se guardó la corrección. La captura permanece en el teléfono.')}
+    finally {setBusy(false)}
+  }}>
+    <h3 className="font-semibold">Revisar instalación</h3>
+    <p className="text-sm">Si el proyecto ya no admite reportes, resuelve el acceso con Operación antes de reintentar.</p>
+    <label className="block">Cantidad<input className="input-base" name="cantidad" type="number" min="0.01" step="0.01" required defaultValue={record.cantidad} /></label>
+    <label className="block">Nota<textarea className="input-base" name="nota" maxLength={2000} defaultValue={record.nota ?? ''} /></label>
+    {error && <p role="alert" className="text-danger">{error}</p>}
+    <div className="flex gap-3"><button className="btn-primary" disabled={busy}>Guardar corrección</button><button type="button" className="btn-secondary" disabled={busy} onClick={onCancel}>Volver</button></div>
   </form>
 }

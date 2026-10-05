@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
-import { IconCopy } from '@/components/icons'
+import { IconCopy, IconCheck, IconAlerta } from '@/components/icons'
 import type { UsuarioActionResult } from '@/lib/actions/usuarios'
 import { ROLES_USUARIO, etiquetaRol } from '@/lib/validations/usuarios'
 import type { RolUsuario, Usuario } from '@/lib/types'
@@ -25,6 +25,7 @@ function PasswordBanner({
     try {
       await navigator.clipboard.writeText(password)
       setCopiado(true)
+      setTimeout(() => setCopiado(false), 3000)
     } catch {
       setCopiado(false)
     }
@@ -33,31 +34,47 @@ function PasswordBanner({
   return (
     <div
       role="status"
-      className="rounded-xl border border-warning/40 bg-warning-soft px-3.5 py-3 text-sm text-warning-soft-foreground"
+      className="rounded-xl border border-warning/40 bg-warning-soft p-4 text-sm text-warning-soft-foreground shadow-xs animate-enter"
     >
-      <p className="font-bold">Contraseña temporal (solo esta vez)</p>
-      <p className="mt-1 text-warning-soft-foreground/80">
-        Cópiala y pásasela a la persona. No se vuelve a mostrar.
-      </p>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
-        <code className="rounded-lg bg-card px-2.5 py-1.5 font-mono text-sm break-all border border-warning/30">
-          {password}
-        </code>
-        <button
-          type="button"
-          onClick={() => void copiar()}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-warning/40 bg-card px-3 text-sm font-semibold text-foreground hover:bg-warning-soft"
-        >
-          <IconCopy className="h-4 w-4" />
-          {copiado ? 'Copiada' : 'Copiar'}
-        </button>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="min-h-[44px] px-3 text-sm font-semibold text-warning-soft-foreground/70 hover:underline"
-        >
-          Entendido
-        </button>
+      <div className="flex items-start gap-3">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-warning/20 text-warning">
+          <IconAlerta className="h-4 w-4" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-foreground">Contraseña temporal (solo se muestra esta vez)</p>
+          <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+            Cópiala ahora y compártela de forma segura con la persona. Por seguridad no volverá a mostrarse.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <code className="rounded-lg bg-card px-3 py-1.5 font-mono text-sm font-semibold tracking-wider text-foreground break-all border border-border shadow-2xs select-all">
+              {password}
+            </code>
+            <button
+              type="button"
+              onClick={() => void copiar()}
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-muted active:scale-[0.98] transition-all shadow-2xs"
+            >
+              {copiado ? (
+                <>
+                  <IconCheck className="h-3.5 w-3.5 text-success" />
+                  <span className="text-success font-bold">¡Copiada!</span>
+                </>
+              ) : (
+                <>
+                  <IconCopy className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Copiar</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="min-h-[40px] px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:underline transition-colors"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

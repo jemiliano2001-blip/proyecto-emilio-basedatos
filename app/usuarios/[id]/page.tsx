@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { MatrizPermisosRoles } from '@/components/MatrizPermisosRoles'
+import { UsuarioProyectosForm } from '@/components/UsuarioProyectosForm'
 import {
   UsuarioEditarForm,
   UsuarioResetPasswordForm,
@@ -8,6 +9,7 @@ import {
 import {
   actualizarUsuarioAction,
   resetPasswordUsuarioAction,
+  asignarProyectosUsuarioAction,
 } from '@/lib/actions/usuarios'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeGestionarUsuarios } from '@/lib/roles'
@@ -39,6 +41,10 @@ export default async function UsuarioDetallePage({
   const usuario = data as Usuario
   const boundUpdate = actualizarUsuarioAction.bind(null, usuario.id)
   const boundReset = resetPasswordUsuarioAction.bind(null, usuario.id)
+  const [proyectos, asignaciones] = usuario.rol === 'personal' ? await Promise.all([
+    supabase.from('obras_lectura').select('id,nombre,estado').order('nombre'),
+    supabase.from('usuario_obras').select('obra_id').eq('usuario_id', usuario.id),
+  ]) : [null, null]
 
   return (
     <main className="page-shell-narrow space-y-6">
@@ -66,6 +72,13 @@ export default async function UsuarioDetallePage({
         </p>
         <UsuarioResetPasswordForm action={boundReset} />
       </section>
+
+      {usuario.rol === 'personal' && <section className="card space-y-3">
+        <h2 className="text-base font-bold text-foreground">Proyectos asignados</h2>
+        {proyectos?.error || asignaciones?.error
+          ? <p role="alert" className="text-sm text-danger">No se pudieron cargar las asignaciones. Verifica la migración 0034 y reintenta.</p>
+          : <UsuarioProyectosForm proyectos={proyectos?.data ?? []} asignados={(asignaciones?.data ?? []).map(a => a.obra_id)} action={asignarProyectosUsuarioAction.bind(null, usuario.id)} />}
+      </section>}
 
       <section className="space-y-3">
         <MatrizPermisosRoles rolInicial={usuario.rol} />

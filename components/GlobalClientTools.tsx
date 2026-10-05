@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import type { RolUsuario } from '@/lib/types'
+import { tabsAbastecimiento } from '@/lib/roles'
 
 const CommandPalette = dynamic(
   () => import('@/components/CommandPalette').then((module) => module.CommandPalette),
@@ -25,7 +26,7 @@ export function GlobalClientTools({ rol, userId, traspasosDisponibles }: { rol: 
     <>
       <CommandPalette rol={rol} userId={userId} traspasosDisponibles={traspasosDisponibles} />
       <KeyboardShortcutsModal />
-      <DrawerPendientesAbastecimiento />
+      {tabsAbastecimiento(rol).length > 0 && <DrawerPendientesAbastecimiento rol={rol} />}
     </>
   )
 }

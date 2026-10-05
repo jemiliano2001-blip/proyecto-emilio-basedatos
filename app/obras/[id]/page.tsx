@@ -51,7 +51,7 @@ export default async function ObraDetallePage({
   const puedeEliminarDocs = puedeEliminarDocumentos(rol)
 
   const { data: obra } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select('id, nombre, cliente, ciudad, fraccionamiento, paquete, ubicacion, estado, presupuesto_mxn, foto_url')
     .eq('id', resolvedparams.id)
     .maybeSingle()
@@ -64,11 +64,11 @@ export default async function ObraDetallePage({
     .eq('obra_id', resolvedparams.id)
     .order('nombre_base')
 
-  const { data: saldoMx } = verPrecios
+  const { data: saldoMx, error: saldoError } = verPrecios
     ? await supabase
         .rpc('saldo_presupuesto_proyecto', { p_obra_id: resolvedparams.id })
         .maybeSingle()
-    : { data: null }
+    : { data: null, error: null }
 
   const { data: topes } = await supabase
     .from('obra_material_contratado')
@@ -113,7 +113,7 @@ export default async function ObraDetallePage({
     nombre: d.nombre,
     tipo_documento: d.tipo_documento,
     archivo_path: d.archivo_path,
-    archivo_url: d.archivo_url,
+    archivo_url: `/api/documentos/${d.id}`,
     tamano_bytes: d.tamano_bytes,
     subido_por: d.subido_por,
     creado_en: d.creado_en,
@@ -121,6 +121,7 @@ export default async function ObraDetallePage({
   }))
 
   const presupuesto = saldoMx as SaldoPresupuestoObra | null
+  const saldoDisponible = !saldoError && presupuesto !== null
   const totalMx = Number(presupuesto?.presupuesto_mxn ?? obra.presupuesto_mxn ?? 0)
   const comprometidoMx = Number(presupuesto?.comprometido_mxn ?? 0)
   const gastadoMx = Number(presupuesto?.gastado_mxn ?? 0)
@@ -172,7 +173,7 @@ export default async function ObraDetallePage({
       />
 
       {obra.foto_url && (
-        <div className="relative mb-6 h-40 overflow-hidden rounded-xl border border-border bg-muted sm:h-52">
+        <div className="relative mb-6 h-44 overflow-hidden rounded-2xl border border-border/80 bg-muted/40 sm:h-56 shadow-xs">
           <Image src={obra.foto_url} alt={obra.nombre} fill unoptimized className="object-cover" />
         </div>
       )}
@@ -181,7 +182,7 @@ export default async function ObraDetallePage({
         {/* Columna principal */}
         <div className="min-w-0 space-y-6">
           {/* Presupuesto en móvil/tablet (en desktop vive en el rail) */}
-          {verPrecios && (
+          {verPrecios && saldoDisponible && (
             <section className="card lg:hidden">
               <PresupuestoResumen
                 total={totalMx}
@@ -192,12 +193,17 @@ export default async function ObraDetallePage({
               />
             </section>
           )}
+          {verPrecios && !saldoDisponible && (
+            <p role="alert" className="card text-sm text-danger border-danger/30 bg-danger-soft">
+              El saldo financiero no está disponible. <Link href={`/obras/${obra.id}`} className="underline font-semibold">Reintentar</Link>
+            </p>
+          )}
 
           <section className="space-y-3">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-base font-semibold text-foreground">Materiales y saldo</h2>
-                <p className="text-sm text-muted-foreground">
+                <h2 className="text-base sm:text-lg font-bold font-heading text-foreground">Materiales y saldo</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                   Asignado → En proceso de compra → Comprado → Entregado en obra.
                 </p>
               </div>
@@ -234,7 +240,7 @@ export default async function ObraDetallePage({
 
         {/* Rail derecho */}
         <aside className="space-y-4 lg:sticky lg:top-[calc(var(--topbar-height)+1.5rem)]">
-          {verPrecios && (
+          {verPrecios && saldoDisponible && (
             <section className="card hidden lg:block">
               <PresupuestoResumen
                 total={totalMx}
@@ -247,38 +253,38 @@ export default async function ObraDetallePage({
           )}
 
           <section className="card">
-            <h2 className="card-title mb-3">Resumen</h2>
-            <dl className="space-y-2.5 text-sm">
-              <div className="flex items-start justify-between gap-3">
-                <dt className="text-muted-foreground">Estatus</dt>
-                <dd className="font-medium text-foreground">{labelEstatus(obra.estado)}</dd>
+            <h2 className="card-title font-heading font-bold text-base sm:text-lg mb-3">Resumen del proyecto</h2>
+            <dl className="divide-y divide-border/60 text-xs sm:text-sm">
+              <div className="flex items-center justify-between gap-3 py-2.5 first:pt-0">
+                <dt className="text-muted-foreground font-medium">Estatus</dt>
+                <dd className="font-semibold text-foreground">{labelEstatus(obra.estado)}</dd>
               </div>
               {obra.cliente && (
-                <div className="flex items-start justify-between gap-3">
-                  <dt className="text-muted-foreground">Cliente</dt>
-                  <dd className="text-right font-medium text-foreground">{obra.cliente}</dd>
+                <div className="flex items-center justify-between gap-3 py-2.5">
+                  <dt className="text-muted-foreground font-medium">Cliente</dt>
+                  <dd className="text-right font-semibold text-foreground">{obra.cliente}</dd>
                 </div>
               )}
               {meta && (
-                <div className="flex items-start justify-between gap-3">
-                  <dt className="text-muted-foreground">Ubicación</dt>
+                <div className="flex items-center justify-between gap-3 py-2.5">
+                  <dt className="text-muted-foreground font-medium">Ubicación</dt>
                   <dd className="text-right font-medium text-foreground">{meta}</dd>
                 </div>
               )}
               {obra.paquete && (
-                <div className="flex items-start justify-between gap-3">
-                  <dt className="text-muted-foreground">Paquete</dt>
+                <div className="flex items-center justify-between gap-3 py-2.5">
+                  <dt className="text-muted-foreground font-medium">Paquete</dt>
                   <dd className="text-right font-medium text-foreground">{obra.paquete}</dd>
                 </div>
               )}
-              <div className="flex items-start justify-between gap-3">
-                <dt className="text-muted-foreground">Materiales</dt>
-                <dd className="font-medium text-foreground tabular-nums">{(saldos ?? []).length}</dd>
+              <div className="flex items-center justify-between gap-3 py-2.5">
+                <dt className="text-muted-foreground font-medium">Materiales</dt>
+                <dd className="font-semibold text-foreground tabular-nums">{(saldos ?? []).length}</dd>
               </div>
-              <div className="flex items-start justify-between gap-3">
-                <dt className="text-muted-foreground">Documentos</dt>
-                <dd className="font-medium tabular-nums">
-                  <a href="#documentos" className="inline-flex items-center gap-1 text-primary hover:underline">
+              <div className="flex items-center justify-between gap-3 py-2.5 last:pb-0">
+                <dt className="text-muted-foreground font-medium">Documentos</dt>
+                <dd className="font-semibold tabular-nums">
+                  <a href="#documentos" className="inline-flex items-center gap-1.5 text-primary hover:underline">
                     <IconDocumento className="size-3.5" />
                     {documentos.length}
                   </a>
@@ -289,8 +295,8 @@ export default async function ObraDetallePage({
 
           {(puedeCerrar || puedeReabrir) && (
             <section className="card border-dashed">
-              <h2 className="card-title mb-1">Ciclo de vida</h2>
-              <p className="mb-3 text-xs text-muted-foreground">
+              <h2 className="card-title font-heading font-bold text-base mb-1">Ciclo de vida</h2>
+              <p className="mb-3 text-xs text-muted-foreground leading-relaxed">
                 Cerrar el proyecto congela saldos y genera la conciliación final.
               </p>
               <CierreObraAcciones
@@ -329,24 +335,26 @@ function PresupuestoResumen({
     <>
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h2 className="card-title">Presupuesto</h2>
-          <p className="text-xs text-muted-foreground">MXN · tope contratado</p>
+          <h2 className="card-title font-heading font-bold text-base sm:text-lg">Presupuesto</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">MXN · tope contratado</p>
         </div>
-        <p className="text-right text-lg font-semibold tabular-nums text-foreground">{formatMoneyMx(total)}</p>
+        <p className="text-right text-lg sm:text-xl font-bold font-heading tabular-nums text-foreground">
+          {formatMoneyMx(total)}
+        </p>
       </div>
       {/* Barra apilada: gastado + comprometido sobre el total */}
-      <div className="mb-4 flex h-2 w-full overflow-hidden rounded-full bg-muted" aria-hidden>
-        <span className="h-full bg-foreground" style={{ width: `${pct(gastado)}%` }} />
-        <span className="h-full bg-warning" style={{ width: `${pct(comprometido)}%` }} />
+      <div className="mb-4 flex h-2.5 w-full overflow-hidden rounded-full bg-muted/80 ring-1 ring-border/50" aria-hidden>
+        <span className="h-full bg-foreground transition-all duration-300" style={{ width: `${pct(gastado)}%` }} />
+        <span className="h-full bg-warning transition-all duration-300" style={{ width: `${pct(comprometido)}%` }} />
       </div>
-      <dl className="space-y-2">
+      <dl className="space-y-2.5 pt-2 border-t border-border/60">
         {filas.map((f) => (
-          <div key={f.label} className="flex items-center justify-between gap-3 text-sm">
+          <div key={f.label} className="flex items-center justify-between gap-3 text-xs sm:text-sm">
             <dt className="flex items-center gap-2 text-muted-foreground">
               <span className={`size-2 rounded-full ${f.bar}`} aria-hidden />
-              {f.label}
+              <span className="font-medium">{f.label}</span>
             </dt>
-            <dd className={`tabular-nums font-semibold ${f.highlight ? 'text-primary' : 'text-foreground'}`}>
+            <dd className={`tabular-nums font-bold ${f.highlight ? 'text-primary' : 'text-foreground'}`}>
               {formatMoneyMx(f.value)}
             </dd>
           </div>

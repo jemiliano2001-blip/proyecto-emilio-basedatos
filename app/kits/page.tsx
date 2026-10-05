@@ -24,7 +24,7 @@ export default async function KitsPage() {
       descripcion,
       activo,
       creado_en,
-      material_principal:catalogo_materiales!material_kits_material_principal_id_fkey(
+      material_principal:catalogo_materiales_lectura!material_kits_material_principal_id_fkey(
         nombre_base,
         variante
       ),
@@ -33,7 +33,7 @@ export default async function KitsPage() {
         kit_id,
         material_id,
         cantidad,
-        catalogo_materiales (
+        catalogo_materiales:catalogo_materiales_lectura (
           id,
           nombre_base,
           variante,

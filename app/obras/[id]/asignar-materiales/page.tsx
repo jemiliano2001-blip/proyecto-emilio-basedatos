@@ -20,7 +20,7 @@ export default async function AsignarMaterialesPage({
 
   const supabase = await createClient()
   const { data: obra } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select('id, nombre, estado')
     .eq('id', resolvedparams.id)
     .maybeSingle()
@@ -31,7 +31,7 @@ export default async function AsignarMaterialesPage({
 
   // Materiales activos con precio_base
   const { data: materialesRaw } = await supabase
-    .from('catalogo_materiales')
+    .from('catalogo_materiales_lectura')
     .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, precio_base, activo, foto_url')
     .eq('activo', true)
     .order('nombre_base')
@@ -58,7 +58,7 @@ export default async function AsignarMaterialesPage({
         material_id,
         cantidad,
         creado_en,
-        catalogo_materiales (
+        catalogo_materiales:catalogo_materiales_lectura (
           id,
           nombre_base,
           variante,

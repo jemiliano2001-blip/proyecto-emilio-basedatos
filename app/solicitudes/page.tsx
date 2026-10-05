@@ -1,5 +1,5 @@
 import { ListFilters, ListPagination } from '@/components/ListFilters'
-import { listFilters, type ListParams } from '@/lib/list-filters'
+import { listFilters, pageHref, type ListParams } from '@/lib/list-filters'
 const STATUSES = [
   'recibida',
   'en_proceso',
@@ -52,24 +52,23 @@ export default async function SolicitudesPage({
   const colaComprasOnly = rol === 'compras'
   const colaFinanzasOnly = rol === 'finanzas'
   const colaOperativa = colaComprasOnly || colaFinanzasOnly
+  const historial = params.vista === 'historial'
 
   // Default: solo pendientes de la cola del rol (sin filtro de estatus en UI)
-  if (colaOperativa && !params.estatus) {
-    redirect(
-      colaComprasOnly ? '/solicitudes?estatus=recibida' : '/solicitudes?estatus=en_proceso'
-    )
+  if (colaOperativa && !historial && !params.estatus) {
+    redirect(pageHref('/solicitudes', { ...params, estatus: colaComprasOnly ? 'recibida' : 'en_proceso' }, 1))
   }
 
   const filters = listFilters(params, STATUSES)
   const supabase = await createClient()
 
-  const { data: obrasData } = await supabase.from('obras').select('id, nombre').order('nombre')
+  const { data: obrasData } = await supabase.from('obras_lectura').select('id, nombre').order('nombre')
   const obras = obrasData ?? []
 
   let query = supabase
     .from('solicitudes_material')
     .select(
-      'id, estado, creado_en, obra:obras!inner(nombre, fraccionamiento), solicitante:usuarios(nombre), items:solicitud_items(id, obra_id), ordenes:ordenes_compra(id, folio)',
+      'id, estado, creado_en, obra:obras!inner(nombre, fraccionamiento), solicitante:usuarios(nombre), items:solicitud_items_lectura(id, obra_id), ordenes:ordenes_compra(id, folio)',
       { count: 'exact' }
     )
     .order('creado_en', { ascending: false })
@@ -118,8 +117,8 @@ export default async function SolicitudesPage({
         statuses={STATUSES}
         searchLabel="Proyecto principal"
         obras={obras}
-        hideEstatus={colaOperativa}
-        estatusAsChips={!colaOperativa}
+        hideEstatus={colaOperativa && !historial}
+        estatusAsChips={!colaOperativa || historial}
         compact
       />
       {error && (
@@ -164,7 +163,7 @@ export default async function SolicitudesPage({
                 </Link>
               )}
               <Link
-                href="/solicitudes"
+                href="/solicitudes?vista=historial"
                 className={cn(
                   'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',

@@ -16,6 +16,7 @@ import {
 } from '@/lib/actions/solicitudes'
 import type { EstadoSolicitud } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { etapaAprobacionLote } from '@/lib/solicitudes-workflow'
 
 export interface SolicitudListItem {
   id: string
@@ -73,7 +74,7 @@ function labelEstado(estado: EstadoSolicitud) {
 }
 
 function labelMateriales(n: number): string {
-  return n === 1 ? '1 material' : `${n} materiales`
+  return n === 1 ? '1 partida' : `${n} partidas`
 }
 
 export function SolicitudesListClient({
@@ -103,11 +104,12 @@ export function SolicitudesListClient({
 
   const puedeAccionesEnLote = esCompras || esFinanzas
   const selectedArray = Array.from(selectedIds)
+  const etapa = etapaAprobacionLote(solicitudes.filter(s => selectedIds.has(s.id)).map(s => s.estado), esCompras, esFinanzas)
 
   const handleAprobarLote = () => {
-    if (selectedArray.length === 0) return
+    if (selectedArray.length === 0 || !etapa) return
     const confirmMsg =
-      esFinanzas
+      etapa === 'finanzas'
         ? `¿Aprobar el pago y emitir órdenes de compra para ${selectedCount} requisición(es)?`
         : `¿Aprobar ${selectedCount} requisición(es) de compras usando los precios base de referencia?`
 
@@ -115,7 +117,7 @@ export function SolicitudesListClient({
 
     startTransition(async () => {
       setFeedback(null)
-      const res = await aprobarMultiplesSolicitudesAction(selectedArray)
+      const res = await aprobarMultiplesSolicitudesAction(selectedArray, etapa)
       setFeedback(res)
       if (res.exitosas > 0) {
         clearSelection()
@@ -214,8 +216,8 @@ export function SolicitudesListClient({
               key={s.id}
               className={cn(
                 'list-row group items-center gap-3 transition-colors',
-                selected ? 'bg-primary/10' : 'hover:bg-muted/40',
-                density === 'comfortable' ? 'min-h-[72px]' : 'min-h-[56px] py-2'
+                selected ? 'bg-primary-soft/40 border-l-4 border-l-primary' : 'hover:bg-muted/30',
+                density === 'comfortable' ? 'min-h-[72px]' : 'min-h-[58px] py-2.5'
               )}
             >
               {/* Checkbox táctil amigable de selección para Compras/Finanzas */}
@@ -233,19 +235,19 @@ export function SolicitudesListClient({
                     aria-checked={selected}
                     aria-label={`Seleccionar ${reqCode}`}
                     className={cn(
-                      'flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg transition-colors cursor-pointer',
+                      'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors cursor-pointer',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                     )}
                   >
                     <span
                       className={cn(
-                        'flex h-4 w-4 items-center justify-center rounded border transition-colors',
+                        'flex size-5 items-center justify-center rounded-md border transition-all duration-150 shadow-xs',
                         selected
                           ? 'bg-primary border-primary text-primary-foreground font-bold'
-                          : 'border-border/80 bg-card hover:border-input'
+                          : 'border-border/90 bg-card hover:border-input'
                       )}
                     >
-                      {selected && <IconCheck className="w-3 h-3" />}
+                      {selected && <IconCheck className="size-3.5 stroke-[2.5]" />}
                     </span>
                   </button>
                 </div>
@@ -264,19 +266,19 @@ export function SolicitudesListClient({
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-foreground border border-border/80">
+                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-lg bg-muted/80 text-foreground border border-border/80 shadow-2xs">
                       {reqCode}
                     </span>
                     {ordenes.map((oc) => (
                       <span
                         key={oc.id}
-                        className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-primary-soft text-primary-soft-foreground border border-primary/25"
+                        className="font-mono text-xs font-semibold px-2 py-0.5 rounded-lg bg-primary-soft text-primary-soft-foreground border border-primary/25 shadow-2xs"
                       >
                         {oc.folio}
                       </span>
                     ))}
                   </div>
-                  <p className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                  <p className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors font-sans">
                     {s.obra?.nombre ?? 'Proyecto'}
                   </p>
                   <p
@@ -328,6 +330,9 @@ export function SolicitudesListClient({
       </div>
 
       {/* Floating BulkBar para acciones en lote */}
+      {selectedCount > 0 && !etapa && (
+        <p role="status" className="text-sm text-muted-foreground">Selecciona requisiciones de una sola etapa que puedas aprobar.</p>
+      )}
       {puedeAccionesEnLote && (
         <BulkBar
           selectedCount={selectedCount}
@@ -337,10 +342,10 @@ export function SolicitudesListClient({
           entityName="requisiciones"
           actions={[
             {
-              label: esFinanzas ? 'Pagar en lote' : 'Aprobar en lote',
+              label: etapa === 'finanzas' ? 'Pagar en lote' : 'Aprobar en Compras',
               onClick: handleAprobarLote,
               variant: 'primary',
-              disabled: isPending,
+              disabled: isPending || !etapa,
               loading: isPending,
               icon: <IconCheck className="w-4 h-4" />,
             },
@@ -361,13 +366,13 @@ export function SolicitudesListClient({
           role="dialog"
           aria-modal="true"
           aria-labelledby="rechazo-lote-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-sm animate-fade-in"
         >
-          <div className="w-full max-w-md bg-card rounded-2xl shadow-2xl border border-border p-5 space-y-4 animate-scale-in">
-            <h3 id="rechazo-lote-title" className="text-base font-bold text-foreground">
+          <div className="w-full max-w-md bg-card rounded-2xl shadow-elevated border border-border p-6 space-y-4 animate-scale-in">
+            <h3 id="rechazo-lote-title" className="text-base sm:text-lg font-bold font-heading text-foreground">
               Rechazar {selectedCount} requisición(es)
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               Indica opcionalmente el motivo para informar a los solicitantes.
             </p>
             <textarea
@@ -375,7 +380,7 @@ export function SolicitudesListClient({
               onChange={(e) => setMotivoRechazo(e.target.value)}
               placeholder="Motivo del rechazo (opcional)…"
               rows={3}
-              className="w-full rounded-xl border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
+              className="input-base min-h-[80px] py-2.5 text-sm resize-none"
             />
             <div className="flex items-center justify-end gap-2 pt-2">
               <button

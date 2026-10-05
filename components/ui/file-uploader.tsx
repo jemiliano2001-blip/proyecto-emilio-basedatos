@@ -101,7 +101,7 @@ export function FileUploader({
           'relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-200 cursor-pointer select-none',
           isDragging
             ? 'border-primary bg-primary-soft/60 scale-[1.01] shadow-elevated'
-            : 'border-border/80 bg-muted/20 hover:border-amber-300 hover:bg-amber-50/30'
+            : 'border-border/80 bg-muted/20 hover:border-primary/50 hover:bg-primary-soft/40'
         )}
       >
         <input
@@ -113,7 +113,7 @@ export function FileUploader({
           className="hidden"
         />
 
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100/70 text-amber-800 mb-3 shadow-xs">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-primary-soft text-primary mb-3 shadow-xs ring-1 ring-primary/20">
           <svg className="size-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>

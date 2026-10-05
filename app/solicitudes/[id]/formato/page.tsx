@@ -29,9 +29,9 @@ export default async function SolicitudFormatoPage({ params }: PageProps) {
       `id, creado_en, estado,
        obra:obras(nombre, fraccionamiento),
        solicitante:usuarios(nombre),
-       items:solicitud_items(
+       items:solicitud_items_lectura(
          id, tipo_linea, cantidad_solicitada, descripcion, monto_mxn,
-         material:catalogo_materiales(nombre_base, variante, unidad_medida)
+         material:catalogo_materiales_lectura(nombre_base, variante, unidad_medida)
        )`
     )
     .eq('id', resolved.id)

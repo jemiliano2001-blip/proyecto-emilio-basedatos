@@ -6,6 +6,9 @@ import { LeadTimeBadge } from '@/components/LeadTimeBadge'
 import { IconCerrar } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { vibrarTap } from '@/lib/haptics'
+import { tabsAbastecimiento } from '@/lib/roles'
+import type { RolUsuario } from '@/lib/types'
+import { useModalFocus } from '@/lib/hooks/useModalFocus'
 
 interface SolicitudItem {
   id: string
@@ -42,14 +45,16 @@ interface AbastecimientoData {
 
 type TabType = 'compras' | 'finanzas' | 'transito'
 
-export function DrawerPendientesAbastecimiento() {
+export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null }) {
+  const tabs = tabsAbastecimiento(rol)
   const [abierto, setAbierto] = useState(false)
-  const [tabActiva, setTabActiva] = useState<TabType>('compras')
+  const [tabActiva, setTabActiva] = useState<TabType>(tabs[0] ?? 'transito')
   const [cargando, setCargando] = useState(false)
   const [datos, setDatos] = useState<AbastecimientoData | null>(null)
   const [filtroTexto, setFiltroTexto] = useState('')
   const [errorCarga, setErrorCarga] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  useModalFocus(abierto, panelRef)
 
   // Escuchar evento global para abrir el drawer
   useEffect(() => {
@@ -63,7 +68,7 @@ export function DrawerPendientesAbastecimiento() {
 
   // Cargar datos al abrir
   useEffect(() => {
-    if (!abierto) return
+    if (!abierto || tabsAbastecimiento(rol).length === 0) return
 
     let cancelado = false
     setCargando(true)
@@ -94,7 +99,7 @@ export function DrawerPendientesAbastecimiento() {
     return () => {
       cancelado = true
     }
-  }, [abierto])
+  }, [abierto, rol])
 
   // Manejo de tecla Escape
   useEffect(() => {
@@ -106,7 +111,7 @@ export function DrawerPendientesAbastecimiento() {
     return () => window.removeEventListener('keydown', onKey)
   }, [abierto])
 
-  if (!abierto) return null
+  if (!abierto || tabs.length === 0) return null
 
   const filtrado = (texto: string) => {
     if (!filtroTexto.trim()) return true
@@ -145,6 +150,7 @@ export function DrawerPendientesAbastecimiento() {
       {/* Contenedor Slide-Over */}
       <div
         ref={panelRef}
+        tabIndex={-1}
         className="relative z-10 flex h-full w-full max-w-md flex-col bg-background shadow-2xl border-l border-border transition-transform animate-in slide-in-from-right duration-300 sm:max-w-lg"
       >
         {/* Cabecera */}
@@ -171,8 +177,8 @@ export function DrawerPendientesAbastecimiento() {
         </div>
 
         {/* Pestañas / Tabs */}
-        <div className="grid grid-cols-3 border-b border-border bg-muted/40 p-1">
-          <button
+        <div className="grid border-b border-border bg-muted/40 p-1" style={{gridTemplateColumns:`repeat(${tabs.length}, minmax(0,1fr))`}}>
+          {tabs.includes('compras') && <button
             type="button"
             onClick={() => setTabActiva('compras')}
             className={cn(
@@ -187,15 +193,15 @@ export function DrawerPendientesAbastecimiento() {
               className={cn(
                 'mt-0.5 rounded-full px-1.5 py-0.2 text-[10px] font-bold',
                 (datos?.resumen.totalCompras ?? 0) > 0
-                  ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                  ? 'bg-warning-soft text-warning-soft-foreground border border-warning/30'
                   : 'bg-muted text-muted-foreground'
               )}
             >
               {datos?.resumen.totalCompras ?? 0}
             </span>
-          </button>
+          </button>}
 
-          <button
+          {tabs.includes('finanzas') && <button
             type="button"
             onClick={() => setTabActiva('finanzas')}
             className={cn(
@@ -216,9 +222,9 @@ export function DrawerPendientesAbastecimiento() {
             >
               {datos?.resumen.totalFinanzas ?? 0}
             </span>
-          </button>
+          </button>}
 
-          <button
+          {tabs.includes('transito') && <button
             type="button"
             onClick={() => setTabActiva('transito')}
             className={cn(
@@ -239,7 +245,7 @@ export function DrawerPendientesAbastecimiento() {
             >
               {datos?.resumen.totalTransito ?? 0}
             </span>
-          </button>
+          </button>}
         </div>
 
         {/* Buscador interno */}
@@ -289,7 +295,7 @@ export function DrawerPendientesAbastecimiento() {
                       <p className="text-xs font-semibold text-foreground">
                         {req.obra?.nombre ?? 'Proyecto'}
                       </p>
-                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+                      <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[10px] font-medium text-warning-soft-foreground border border-warning/30">
                         Recibida
                       </span>
                     </div>

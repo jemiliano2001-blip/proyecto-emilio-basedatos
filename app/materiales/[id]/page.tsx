@@ -20,7 +20,7 @@ export default async function EditarMaterialPage({
 
   const supabase = await createClient()
   const { data: material } = await supabase
-    .from('catalogo_materiales')
+    .from('catalogo_materiales_lectura')
     .select(
       'id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, foto_url, precio_base, activo'
     )

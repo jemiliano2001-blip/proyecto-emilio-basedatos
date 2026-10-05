@@ -6,6 +6,7 @@ import { IconPaquete, IconChevron } from '@/components/icons'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeVerInventarioCampo } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
+import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
 
 interface InventarioRow {
   obra_id: string
@@ -49,7 +50,7 @@ export default async function InventarioPage() {
   const { data: obrasData } =
     obraIds.length > 0
       ? await supabase
-          .from('obras')
+          .from('obras_lectura')
           .select('id, nombre, fraccionamiento')
           .in('id', obraIds)
           .order('nombre')
@@ -73,6 +74,8 @@ export default async function InventarioPage() {
         title="Inventario en obra"
         subtitle="Material recibido en sitio y pendiente de instalar"
       />
+
+      <OfflineQueueBanner />
 
       {invError && (
         <div role="alert" className="card mb-4 border-danger/40 bg-danger-soft text-danger-soft-foreground">

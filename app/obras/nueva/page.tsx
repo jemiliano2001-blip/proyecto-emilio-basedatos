@@ -17,7 +17,7 @@ export default async function NuevaObraPage() {
 
   // Materiales con precio_base
   const { data: materialesRaw, error: materialesError } = await supabase
-    .from('catalogo_materiales')
+    .from('catalogo_materiales_lectura')
     .select('id, nombre_base, variante, unidad_medida, categoria, subcategoria, especificacion, precio_base, activo, foto_url')
     .eq('activo', true)
     .order('nombre_base')
@@ -44,7 +44,7 @@ export default async function NuevaObraPage() {
         material_id,
         cantidad,
         creado_en,
-        catalogo_materiales (
+        catalogo_materiales:catalogo_materiales_lectura (
           id,
           nombre_base,
           variante,

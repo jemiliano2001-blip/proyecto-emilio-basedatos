@@ -21,6 +21,25 @@ export type UsuarioActionResult = {
 
 const BAN_LARGO = '876000h' // ~100 años
 
+export async function asignarProyectosUsuarioAction(
+  usuarioId: string, _prev: UsuarioActionResult, formData: FormData
+): Promise<UsuarioActionResult> {
+  const gate = await requireAdminUsuarios()
+  if (!gate.ok) return { error: gate.error }
+  const ids = formData.getAll('obra_id')
+  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuid.test(usuarioId) || ids.length > 500 || ids.some(id => typeof id !== 'string' || !uuid.test(id))) {
+    return { error: 'La lista de proyectos no es válida.' }
+  }
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('asignar_proyectos_usuario', { p_usuario_id: usuarioId, p_obra_ids: ids })
+  if (error) return { error: 'No se guardaron las asignaciones. Verifica la migración 0034 y vuelve a intentar.' }
+  revalidatePath(`/usuarios/${usuarioId}`)
+  revalidatePath('/usuarios')
+  revalidatePath('/inventario')
+  return { error: null, ok: true }
+}
+
 function generarPasswordTemporal(): string {
   // 18 bytes → ~24 chars base64url, sin caracteres ambiguos problemáticos
   return randomBytes(18).toString('base64url')

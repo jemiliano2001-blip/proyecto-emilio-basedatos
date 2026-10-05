@@ -9,6 +9,7 @@ import {
   puedeVerInventarioCampo,
 } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
+import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
 
 interface InventarioDetalle {
   obra_id: string
@@ -37,7 +38,7 @@ export default async function InventarioObraPage({
   const supabase = await createClient()
 
   const { data: obra, error: obraError } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select('id, nombre, fraccionamiento')
     .eq('id', obraId)
     .maybeSingle()
@@ -79,6 +80,8 @@ export default async function InventarioObraPage({
         backHref="/inventario"
         backLabel="Inventario"
       />
+
+      <OfflineQueueBanner />
 
       {invError && (
         <div role="alert" className="card mb-4 border-danger/40 bg-danger-soft text-danger-soft-foreground">

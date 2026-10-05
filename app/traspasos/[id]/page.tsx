@@ -28,6 +28,7 @@ interface TraspasoDetalle {
   aprobado_en: string | null
   recibido_en: string | null
   solicitante_id: string
+  obra_destino_id: string
   obra_origen: { nombre: string; fraccionamiento: string | null } | null
   obra_destino: { nombre: string; fraccionamiento: string | null } | null
   solicitante: { nombre: string } | null
@@ -98,6 +99,7 @@ export default async function TraspasoDetallePage({
       aprobado_en,
       recibido_en,
       solicitante_id,
+      obra_destino_id,
       obra_origen:obras!obra_origen_id(nombre, fraccionamiento),
       obra_destino:obras!obra_destino_id(nombre, fraccionamiento),
       solicitante:usuarios!solicitante_id(nombre),
@@ -107,7 +109,7 @@ export default async function TraspasoDetallePage({
         id,
         cantidad,
 
-        material:catalogo_materiales(nombre_base, variante, unidad_medida)
+        material:catalogo_materiales_lectura(nombre_base, variante, unidad_medida)
       )
     `
     )
@@ -122,7 +124,8 @@ export default async function TraspasoDetallePage({
 
   const esSolicitante = session?.perfil?.id === data.solicitante_id
   const puedeAprobar = puedeAprobarTraspaso(session?.rol ?? null)
-  const puedeConfirmar = puedeConfirmarTraspaso(session?.rol ?? null)
+  const { data: accesoDestino } = await supabase.rpc('puede_acceder_obra', { p_obra_id: data.obra_destino_id })
+  const puedeConfirmar = puedeConfirmarTraspaso(session?.rol ?? null) && accesoDestino === true
   const puedeCancelar = puedeCancelarTraspaso(session?.rol ?? null)
   const verPrecios = puedeVerPrecios(session?.rol ?? null)
 

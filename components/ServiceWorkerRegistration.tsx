@@ -33,7 +33,8 @@ export function ServiceWorkerRegistration() {
           setMensaje('Hay cambios guardados en este teléfono. Inicia sesión para enviarlos.')
           return
         }
-        const total = summary.recepcionesOk + summary.solicitudesOk
+        const total = summary.recepcionesOk + summary.solicitudesOk + summary.instalacionesOk
+        if (total > 0) window.dispatchEvent(new Event('offline-queue-changed'))
         if (total > 0) {
           setMensaje(`Se enviaron ${total} registro(s) pendientes.`)
         } else if (summary.conflictos > 0) {
@@ -70,7 +71,8 @@ export function ServiceWorkerRegistration() {
           className="underline font-semibold shrink-0"
           onClick={() => {
             void syncOfflineQueues(userId!).then((summary) => {
-              const total = summary.recepcionesOk + summary.solicitudesOk
+              const total = summary.recepcionesOk + summary.solicitudesOk + summary.instalacionesOk
+              if (total > 0) window.dispatchEvent(new Event('offline-queue-changed'))
               if (summary.noAutenticado) {
                 setMensaje('Sesión expirada. Vuelve a iniciar sesión.')
               } else if (total > 0) {

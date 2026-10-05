@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 function filterHref(path: string, params: ListParams, patch: Partial<ListParams>): string {
   const next: ListParams = { ...params, ...patch, pagina: '1' }
   const query = new URLSearchParams()
-  for (const key of ['q', 'estatus', 'desde', 'hasta', 'proyecto', 'obra'] as const) {
+  for (const key of ['q', 'estatus', 'desde', 'hasta', 'proyecto', 'obra', 'vista'] as const) {
     const value = next[key]
     if (value) query.set(key, value)
   }
@@ -97,6 +97,7 @@ export function ListFilters({
             : 'grid grid-cols-1 gap-4 p-4 sm:grid-cols-2'
         )}
       >
+        {params.vista === 'historial' && <input type="hidden" name="vista" value="historial" />}
         <label
           className={cn(
             compact ? 'lg:col-span-4' : '',

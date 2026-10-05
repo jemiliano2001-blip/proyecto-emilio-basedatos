@@ -102,7 +102,7 @@ export async function createSolicitudAction(
   const solicitanteId = session.perfil.id
 
   const { data: obra } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select('id, estado')
     .eq('id', parsed.data.obra_id)
     .maybeSingle()
@@ -124,7 +124,7 @@ export async function createSolicitudAction(
 
   if (materialIds.length > 0) {
     const { data: materiales } = await supabase
-      .from('catalogo_materiales')
+      .from('catalogo_materiales_lectura')
       .select('id, nombre_base, variante, activo')
       .in('id', materialIds)
 
@@ -143,7 +143,7 @@ export async function createSolicitudAction(
       .in('material_id', materialIds)
 
     const { data: itemsPendientes } = await supabase
-      .from('solicitud_items')
+      .from('solicitud_items_lectura')
       .select('material_id, obra_id, cantidad_solicitada, solicitud:solicitudes_material!inner(id, obra_id, estado)')
       .in('material_id', materialIds)
       .in('solicitud.estado', ['recibida', 'pendiente'])
@@ -353,7 +353,7 @@ export async function syncSolicitudPayload(
   }
 
   const { data: obra } = await supabase
-    .from('obras')
+    .from('obras_lectura')
     .select('id, estado')
     .eq('id', parsed.data.obra_id)
     .maybeSingle()
@@ -375,7 +375,7 @@ export async function syncSolicitudPayload(
 
   if (materialIds.length > 0) {
     const { data: materiales } = await supabase
-      .from('catalogo_materiales')
+      .from('catalogo_materiales_lectura')
       .select('id, nombre_base, variante, activo')
       .in('id', materialIds)
 
@@ -551,7 +551,7 @@ export async function eliminarPartidaSolicitudAction(
         .maybeSingle()
       if (sol?.estado === 'recibida' || sol?.estado === 'pendiente') {
         const { count } = await supabase
-          .from('solicitud_items')
+          .from('solicitud_items_lectura')
           .select('id', { count: 'exact', head: true })
           .eq('solicitud_id', solicitudId)
         if ((count ?? 0) > 1) {
@@ -600,7 +600,7 @@ export async function aprobarSolicitudComprasAction(
     const itemId = key.slice('precio_unitario_'.length)
     const raw = String(value).trim().replace(',', '.')
     if (!raw) {
-      return { error: 'Captura el precio cotizado en todos los materiales.' }
+      return { error: 'Captura el precio o importe cotizado en todas las partidas.' }
     }
     const precio = Number(raw)
     if (!Number.isFinite(precio) || precio < 0) {
@@ -621,7 +621,7 @@ export async function aprobarSolicitudComprasAction(
     const rawProv = formData.get(`proveedor_${itemId}`)
     const proveedorId = rawProv ? String(rawProv).trim() : ''
     if (!proveedorId) {
-      return { error: 'Asigna un proveedor a cada material antes de aprobar.' }
+      return { error: 'Asigna un proveedor a cada partida antes de aprobar.' }
     }
 
     precios.push({
@@ -715,10 +715,11 @@ export type BatchActionResult = {
 }
 
 export async function aprobarMultiplesSolicitudesAction(
-  solicitudIds: string[]
+  solicitudIds: string[],
+  etapa: 'compras' | 'finanzas'
 ): Promise<BatchActionResult> {
   const session = await getSessionUsuario()
-  if (!session || (!puedeAprobarCompras(session.rol) && !puedeAprobarPago(session.rol))) {
+  if (!session || !(etapa === 'compras' ? puedeAprobarCompras(session.rol) : etapa === 'finanzas' && puedeAprobarPago(session.rol))) {
     return { exitosas: 0, fallidas: solicitudIds.length, errores: ['Sin permisos para aprobar.'], error: 'Sin permisos.' }
   }
 
@@ -729,7 +730,7 @@ export async function aprobarMultiplesSolicitudesAction(
 
   for (const id of solicitudIds) {
     try {
-      if (session.rol === 'finanzas') {
+      if (etapa === 'finanzas') {
         const { error } = await supabase.rpc('aprobar_pago_solicitud', { p_solicitud_id: id })
         if (error) {
           fallidas++
@@ -739,18 +740,19 @@ export async function aprobarMultiplesSolicitudesAction(
         }
       } else {
         // Compras
-        const { data: items } = await supabase
-          .from('solicitud_items')
-          .select('id, tipo_linea, cantidad_solicitada, monto_mxn, proveedor_id, material:catalogo_materiales(precio_base)')
+        const { data: items, error: itemsError } = await supabase
+          .from('solicitud_items_lectura')
+          .select('id, tipo_linea, cantidad_solicitada, monto_mxn, proveedor_id, material:catalogo_materiales_lectura(precio_base)')
           .eq('solicitud_id', id)
+        if (itemsError || !items?.length) throw new Error('No se pudieron cargar los conceptos de la requisición.')
 
         const precios: { item_id: string; precio_unitario: number }[] = []
         let faltaPrecio = false
 
         // El lote no asigna proveedores; sin proveedor la OC no se podría recibir.
-        if ((items ?? []).some((item) => item.tipo_linea === 'material' && !item.proveedor_id)) {
+        if ((items ?? []).some((item) => !item.proveedor_id)) {
           fallidas++
-          errores.push(`REQ-${id.slice(0, 8)}: Requiere asignar proveedor a cada material en su detalle.`)
+          errores.push(`REQ-${id.slice(0, 8)}: Requiere asignar proveedor a cada partida en su detalle.`)
           continue
         }
 
@@ -773,6 +775,10 @@ export async function aprobarMultiplesSolicitudesAction(
               break
             }
             precios.push({ item_id: item.id, precio_unitario: unitario })
+          } else {
+            const monto = Number(item.monto_mxn ?? 0)
+            if (monto <= 0) { faltaPrecio = true; break }
+            precios.push({item_id:item.id,precio_unitario:monto})
           }
         }
 
@@ -801,7 +807,7 @@ export async function aprobarMultiplesSolicitudesAction(
 
   revalidatePath('/solicitudes')
   revalidatePath('/')
-  if (session.rol === 'finanzas') revalidatePath('/ordenes')
+  if (etapa === 'finanzas') revalidatePath('/ordenes')
 
   return { exitosas, fallidas, errores, error: errores.length > 0 && exitosas === 0 ? errores[0] : null }
 }

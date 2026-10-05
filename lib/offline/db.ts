@@ -1,7 +1,7 @@
 import type { RecepcionFotoInput } from '@/lib/validations/recepcion'
 
 const DB_NAME = 'proyecto-emilio-offline'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 export type OfflineQueueStatus =
   | 'guardado_local'
@@ -70,6 +70,19 @@ export interface SolicitudPendienteRecord {
   updated_at: string
 }
 
+export interface InstalacionPendienteRecord {
+  id: string
+  usuario_id: string
+  obra_id: string
+  material_id: string
+  cantidad: number
+  nota: string | null
+  status: OfflineQueueStatus
+  error: string | null
+  created_at: string
+  updated_at: string
+}
+
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (typeof indexedDB === 'undefined') {
@@ -81,6 +94,9 @@ function openDb(): Promise<IDBDatabase> {
 
     request.onupgradeneeded = () => {
       const db = request.result
+      if (!db.objectStoreNames.contains('instalaciones_pendientes')) {
+        db.createObjectStore('instalaciones_pendientes', { keyPath: 'id' })
+      }
       if (!db.objectStoreNames.contains('recepciones_pendientes')) {
         db.createObjectStore('recepciones_pendientes', { keyPath: 'id' })
       }
@@ -127,6 +143,34 @@ async function withStore<T>(
     tx.onerror = () => {
       reject(tx.error ?? new Error('Error en IndexedDB.'))
       db.close()
+    }
+  })
+}
+
+export async function putInstalacionPendiente(record: InstalacionPendienteRecord): Promise<void> {
+  await withStore('instalaciones_pendientes', 'readwrite', store => store.put(record))
+}
+
+export async function listInstalacionesPendientes(userId: string): Promise<InstalacionPendienteRecord[]> {
+  const records = await withStore<InstalacionPendienteRecord[]>('instalaciones_pendientes', 'readonly', store => store.getAll())
+  return (records ?? []).filter(record => record.usuario_id === userId)
+}
+
+export async function updateInstalacionPendienteStatus(id: string, userId: string, status: OfflineQueueStatus, error: string | null = null): Promise<void> {
+  await withStore('instalaciones_pendientes', 'readwrite', store => {
+    const request = store.get(id)
+    request.onsuccess = () => {
+      const record = request.result as InstalacionPendienteRecord | undefined
+      if (record?.usuario_id === userId) store.put({...record,status,error,updated_at:new Date().toISOString()})
+    }
+  })
+}
+
+export async function deleteInstalacionPendiente(id: string, userId: string): Promise<void> {
+  await withStore('instalaciones_pendientes', 'readwrite', store => {
+    const request = store.get(id)
+    request.onsuccess = () => {
+      if (request.result?.usuario_id === userId) store.delete(id)
     }
   })
 }
