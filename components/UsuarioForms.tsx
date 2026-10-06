@@ -34,34 +34,34 @@ function PasswordBanner({
   return (
     <div
       role="status"
-      className="rounded-xl border border-warning/40 bg-warning-soft p-4 text-sm text-warning-soft-foreground shadow-xs animate-enter"
+      className="rounded-2xl border border-warning/40 bg-warning-soft/90 p-5 text-sm text-warning-soft-foreground shadow-sm animate-enter"
     >
-      <div className="flex items-start gap-3">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-warning/20 text-warning">
-          <IconAlerta className="h-4 w-4" />
+      <div className="flex items-start gap-3.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-warning/20 text-warning shadow-2xs">
+          <IconAlerta className="size-5" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-foreground">Contraseña temporal (solo se muestra esta vez)</p>
           <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
             Cópiala ahora y compártela de forma segura con la persona. Por seguridad no volverá a mostrarse.
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <code className="rounded-lg bg-card px-3 py-1.5 font-mono text-sm font-semibold tracking-wider text-foreground break-all border border-border shadow-2xs select-all">
+          <div className="mt-3.5 flex flex-wrap items-center gap-2">
+            <code className="rounded-xl bg-card px-3.5 py-2 font-mono text-sm font-bold tracking-wider text-foreground break-all border border-border shadow-xs select-all">
               {password}
             </code>
             <button
               type="button"
               onClick={() => void copiar()}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-muted active:scale-[0.98] transition-all shadow-2xs"
+              className="btn-secondary btn-sm"
             >
               {copiado ? (
                 <>
-                  <IconCheck className="h-3.5 w-3.5 text-success" />
+                  <IconCheck className="size-3.5 text-success" />
                   <span className="text-success font-bold">¡Copiada!</span>
                 </>
               ) : (
                 <>
-                  <IconCopy className="h-3.5 w-3.5 text-muted-foreground" />
+                  <IconCopy className="size-3.5 text-muted-foreground" />
                   <span>Copiar</span>
                 </>
               )}
@@ -69,7 +69,7 @@ function PasswordBanner({
             <button
               type="button"
               onClick={onDismiss}
-              className="min-h-[40px] px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:underline transition-colors"
+              className="btn-ghost btn-sm"
             >
               Entendido
             </button>
@@ -114,7 +114,7 @@ export function UsuarioCrearForm({
         <form action={formAction} className="space-y-4">
           <FormError message={state.error} />
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+            <label htmlFor="email" className="field-label">
               Correo
             </label>
             <input
@@ -128,7 +128,7 @@ export function UsuarioCrearForm({
             />
           </div>
           <div>
-            <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-1">
+            <label htmlFor="nombre" className="field-label">
               Nombre
             </label>
             <input
@@ -140,7 +140,7 @@ export function UsuarioCrearForm({
             />
           </div>
           <div>
-            <label htmlFor="rol" className="block text-sm font-medium text-foreground mb-1">
+            <label htmlFor="rol" className="field-label">
               Rol
             </label>
             <select id="rol" name="rol" required defaultValue="personal" className="input-base">
@@ -152,7 +152,7 @@ export function UsuarioCrearForm({
             </select>
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
+            <label htmlFor="password" className="field-label">
               Contraseña (opcional)
             </label>
             <input
@@ -209,7 +209,7 @@ export function UsuarioEditarForm({
         </p>
       )}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+        <label htmlFor="email" className="field-label">
           Correo de acceso
         </label>
         <input
@@ -220,12 +220,12 @@ export function UsuarioEditarForm({
           defaultValue={usuario.email ?? ''}
           className="input-base"
         />
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="field-hint">
           Modificar el correo actualiza tanto el perfil como el usuario de inicio de sesión.
         </p>
       </div>
       <div>
-        <label htmlFor="nombre" className="block text-sm font-medium text-foreground mb-1">
+        <label htmlFor="nombre" className="field-label">
           Nombre
         </label>
         <input
@@ -237,7 +237,7 @@ export function UsuarioEditarForm({
         />
       </div>
       <div>
-        <label htmlFor="rol" className="block text-sm font-medium text-foreground mb-1">
+        <label htmlFor="rol" className="field-label">
           Rol
         </label>
         <select

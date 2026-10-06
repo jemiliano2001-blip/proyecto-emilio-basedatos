@@ -46,11 +46,37 @@ border-danger/25`) para badges, alertas y filas.
 - Longitud de línea: Máximo 70 a 80 caracteres (`max-w-[75ch]`) para evitar fatiga visual.
 - Dinero y cantidades: `tabular-nums`.
 
+### Escala tipográfica (utilidades en `globals.css`)
+
+| Clase | Uso | Tamaño |
+|-------|-----|--------|
+| `.t-display` | Login, pantallas de bienvenida | 30 / 36px · Playfair 700 |
+| `.t-h1` | Título de página (`PageHeader`) | 24 / 30px · Playfair 700 |
+| `.t-h2` | Título de sección | 18 / 20px · Playfair 700 |
+| `.t-body` | Texto de lectura | 14 / 16px · Poppins 400 |
+| `.t-caption` | Ayudas, metadatos | 12px · muted |
+| `.t-eyebrow` | Contexto sobre el título (con filete de marca) | 11px · caps · tracking 0.14em |
+
+Usa estas clases en lugar de recomponer `text-* font-heading` a mano.
+
 ## Espaciado y radio
 
 - Border Radius: **16px** consistente en botones, tarjetas, inputs y modales (`rounded-2xl` / `--radius: 1rem`).
 - Modificadores de densidad para oficina: `btn-sm` (40px, rounded-xl 12px) y `btn-xs` (32px, rounded-lg 10px).
 - Sombras: `elevated` suaves y acogedoras, evitando aristas duras o contrastes negros agresivos.
+- Escala de elevación: `xs` (controles) → `card` (superficies en reposo) →
+  `card-hover` (interactivas) → `elevated` (diálogos) → `popover` (menús).
+  CTA primario: `shadow-primary` / `shadow-primary-hover` (brillo interior +
+  sombra tintada con el color de marca).
+- Espaciado: múltiplos de 4px (`gap-2/3/4/6`, `p-5` tarjetas, `py-8` secciones).
+
+## Identidad
+
+- **Plano de obra:** retícula fina `.bg-blueprint` (enmascarada en radial) en
+  paneles de marca y estados vacíos. Es la firma visual; no usarla como fondo
+  de contenido.
+- Fondo de página con dos halos de marca muy sutiles (`body` en `globals.css`).
+- Eyebrow con filete (`.t-eyebrow`) sobre los títulos de página.
 
 ## Shell
 
@@ -94,6 +120,16 @@ border-danger/25`) para badges, alertas y filas.
 - Estados vacíos: `EmptyState` (borde punteado, icono en caja, una acción).
 - Iconos: SVG inline de un trazo en `components/icons.tsx`. **Nunca emojis ni
   glifos Unicode como iconos.**
+- Estados de todo control interactivo: hover (color + elevación), `focus-visible`
+  (anillo `ring`, nunca animado), active (`scale-[0.98]`), disabled (50 %, sin
+  eventos) y loading.
+- **Loading:** `aria-busy="true"` en cualquier `.btn-*` muestra spinner por CSS y
+  bloquea clics; `ui/button` con `loading` hace lo mismo. Listas y tarjetas
+  usan `.skeleton` / `ui/skeleton` (shimmer con las mismas medidas que el
+  contenido, CLS = 0).
+- `select.input-base` lleva chevron propio (`appearance-none`).
+- `KpiMetricCard`: el sparkline solo se dibuja si se pasan `sparklineData`
+  reales. Nunca inventar tendencias.
 
 ## Movimiento
 

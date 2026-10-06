@@ -13,12 +13,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow-sm hover:opacity-90',
-        accent: 'bg-primary text-primary-foreground shadow-sm hover:opacity-90',
-        secondary: 'bg-card text-foreground border border-border shadow-xs hover:bg-muted/80 hover:border-input',
-        support: 'bg-secondary text-secondary-foreground shadow-sm hover:opacity-90',
-        destructive: 'bg-danger text-danger-foreground shadow-sm hover:opacity-90 focus-visible:ring-danger',
-        outline: 'border border-border bg-transparent text-foreground hover:bg-muted/70',
+        default:
+          'bg-primary text-primary-foreground shadow-primary hover:bg-primary-hover hover:shadow-primary-hover hover:-translate-y-px active:translate-y-0',
+        accent:
+          'bg-primary text-primary-foreground shadow-primary hover:bg-primary-hover hover:shadow-primary-hover hover:-translate-y-px active:translate-y-0',
+        secondary: 'bg-card text-foreground border border-border shadow-xs hover:bg-muted/70 hover:border-input hover:shadow-sm',
+        support: 'bg-secondary text-secondary-foreground shadow-sm hover:brightness-110 hover:shadow-md',
+        destructive: 'bg-danger text-danger-foreground shadow-sm hover:bg-danger/90 hover:shadow-md focus-visible:ring-danger',
+        outline: 'border border-border bg-transparent text-foreground hover:bg-muted/70 hover:border-input',
         ghost: 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
         soft: 'bg-primary-soft text-primary-soft-foreground hover:bg-primary/15',
         link: 'text-primary underline-offset-4 hover:underline p-0 h-auto min-h-0 active:scale-100',

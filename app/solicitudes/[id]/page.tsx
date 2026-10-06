@@ -61,19 +61,19 @@ interface OrdenRelacionada {
   obra: { nombre: string } | null
 }
 
-function badgeVariant(estado: EstadoSolicitud): 'red' | 'teal' | 'navy' | 'amber' {
+function badgeVariant(estado: EstadoSolicitud): 'danger' | 'success' | 'info' | 'warning' {
   switch (estado) {
     case 'cancelada':
     case 'rechazada':
-      return 'red'
+      return 'danger'
     case 'finalizada':
     case 'aprobada':
-      return 'teal'
+      return 'success'
     case 'en_proceso':
     case 'en_cotizacion':
-      return 'navy'
+      return 'info'
     default:
-      return 'amber'
+      return 'warning'
   }
 }
 
@@ -219,6 +219,8 @@ export default async function SolicitudDetallePage({
     obraNombre: s.obra?.nombre ?? 'Proyecto',
   }))
 
+  const reqCode = `REQ-${detalle.id.slice(0, 8).toUpperCase()}`
+
   return (
     <main className="page-shell">
       <div className="lg:flex lg:items-start lg:gap-5">
@@ -226,6 +228,7 @@ export default async function SolicitudDetallePage({
 
         <div className="min-w-0 flex-1">
       <PageHeader
+        eyebrow={reqCode}
         title={detalle.obra?.nombre ?? 'Proyecto'}
         description={
           <div>
@@ -335,10 +338,10 @@ export default async function SolicitudDetallePage({
 
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2.5">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <h2 className="section-title">
             Partidas solicitadas
           </h2>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {(detalle.items ?? []).length} {((detalle.items ?? []).length === 1) ? 'concepto' : 'conceptos'}
           </span>
         </div>

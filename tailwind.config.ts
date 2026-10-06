@@ -120,6 +120,9 @@ const config: Config = {
         md: '0 4px 12px -2px rgb(15 23 42 / 0.05), 0 2px 4px -1px rgb(15 23 42 / 0.03), 0 0 0 1px rgb(15 23 42 / 0.05)',
         lg: '0 10px 28px -4px rgb(15 23 42 / 0.07), 0 4px 8px -2px rgb(15 23 42 / 0.03), 0 0 0 1px rgb(15 23 42 / 0.06)',
         popover: '0 16px 36px -4px rgb(15 23 42 / 0.1), 0 4px 12px -2px rgb(15 23 42 / 0.05), 0 0 0 1px rgb(15 23 42 / 0.06)',
+        // CTA primario: brillo interior superior + sombra tintada con el color de marca
+        primary: 'inset 0 1px 0 0 rgb(255 255 255 / 0.18), 0 1px 2px 0 hsl(var(--primary) / 0.35), 0 1px 1px 0 rgb(15 23 42 / 0.08)',
+        'primary-hover': 'inset 0 1px 0 0 rgb(255 255 255 / 0.2), 0 6px 16px -4px hsl(var(--primary) / 0.45), 0 2px 4px 0 rgb(15 23 42 / 0.08)',
       },
       spacing: {
         sidebar: 'var(--sidebar-width)',
@@ -159,6 +162,9 @@ const config: Config = {
           from: { opacity: '1', transform: 'translateY(0)' },
           to: { opacity: '0', transform: 'translateY(100%)' },
         },
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 180ms cubic-bezier(0.16, 1, 0.3, 1)',
@@ -167,6 +173,7 @@ const config: Config = {
         'slide-in-right': 'slide-in-right 220ms cubic-bezier(0.16, 1, 0.3, 1)',
         'slide-out-right': 'slide-out-right 180ms cubic-bezier(0.16, 1, 0.3, 1)',
         'slide-in-bottom': 'slide-in-bottom 220ms cubic-bezier(0.16, 1, 0.3, 1)',
+        shimmer: 'shimmer 1.6s ease-in-out infinite',
         'slide-out-bottom': 'slide-out-bottom 180ms cubic-bezier(0.16, 1, 0.3, 1)',
       },
     },

@@ -39,21 +39,25 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-xl border border-border/80 bg-card/40 px-4 py-12 text-center animate-enter',
+        'relative isolate flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-card/60 px-6 py-14 text-center animate-enter',
         className
       )}
     >
+      <div aria-hidden className="bg-blueprint pointer-events-none absolute inset-0 -z-10" />
       {icon && (
-        <div className="mb-3.5 flex size-12 items-center justify-center rounded-xl bg-muted/80 text-muted-foreground ring-1 ring-border/80 shadow-xs">
-          {renderIcon(icon, 'h-6 w-6')}
+        <div className="relative mb-4">
+          <span aria-hidden className="absolute inset-0 -m-2 rounded-3xl bg-primary/10 blur-md" />
+          <div className="relative flex size-14 items-center justify-center rounded-2xl bg-card text-primary shadow-md ring-1 ring-border">
+            {renderIcon(icon, 'h-6 w-6')}
+          </div>
         </div>
       )}
-      <HeadingTag className="text-sm font-semibold text-foreground tracking-tight">{title}</HeadingTag>
+      <HeadingTag className="font-heading text-base font-bold tracking-tight text-foreground">{title}</HeadingTag>
       {description && (
-        <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-relaxed">{description}</p>
+        <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted-foreground leading-relaxed">{description}</p>
       )}
       {action && (
-        <div className="mt-5">
+        <div className="mt-6">
           {action.href ? (
             <Link href={action.href} className="btn-primary btn-sm">
               {renderIcon(action.icon, 'h-4 w-4')}

@@ -65,26 +65,16 @@ export function PageHeader({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
         <div className="min-w-0 flex-1">
-          {eyebrow && (
-            <div className="mb-1.5 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary select-none">
-              {eyebrow}
-            </div>
-          )}
+          {eyebrow && <div className="t-eyebrow mb-2 select-none">{eyebrow}</div>}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground font-heading">
-              {title}
-            </h1>
+            <h1 className="t-h1">{title}</h1>
             {badge && <div className="shrink-0">{badge}</div>}
           </div>
           {desc &&
             (typeof desc === 'string' ? (
-              <p className="mt-1.5 max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                {desc}
-              </p>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground leading-relaxed">{desc}</p>
             ) : (
-              <div className="mt-1.5 max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                {desc}
-              </div>
+              <div className="mt-2 max-w-2xl text-sm text-muted-foreground leading-relaxed">{desc}</div>
             ))}
         </div>
 

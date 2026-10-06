@@ -20,15 +20,15 @@ export interface FilterTabsProps {
 export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTabsProps) {
   return (
     <div
-      className={cn('flex gap-0.5 rounded-lg bg-muted p-0.5', className)}
+      className={cn('flex gap-1 rounded-xl bg-muted/60 p-1 border border-border/50', className)}
       role="tablist"
       aria-label={ariaLabel}
     >
       {tabs.map((tab) => {
         const itemClasses = cn(
-          'min-h-[40px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-center text-sm font-medium transition-colors select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:min-h-[36px]',
+          'min-h-[38px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-center text-xs sm:text-sm font-semibold transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-[34px]',
           tab.active
-            ? 'bg-card text-foreground shadow-xs'
+            ? 'bg-card text-foreground shadow-xs font-bold'
             : 'text-muted-foreground hover:text-foreground'
         )
 
@@ -46,8 +46,8 @@ export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTab
               {typeof tab.count === 'number' && (
                 <span
                   className={cn(
-                    'rounded-full px-1.5 text-[11px] font-medium tabular-nums',
-                    tab.active ? 'bg-primary-soft text-primary-soft-foreground' : 'bg-border/70 text-muted-foreground'
+                    'rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums transition-colors',
+                    tab.active ? 'bg-primary-soft text-primary' : 'bg-muted text-muted-foreground'
                   )}
                 >
                   {tab.count}
@@ -70,8 +70,8 @@ export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTab
             {typeof tab.count === 'number' && (
               <span
                 className={cn(
-                  'rounded-full px-1.5 text-[11px] font-medium tabular-nums',
-                  tab.active ? 'bg-primary-soft text-primary-soft-foreground' : 'bg-border/70 text-muted-foreground'
+                  'rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums transition-colors',
+                  tab.active ? 'bg-primary-soft text-primary' : 'bg-muted text-muted-foreground'
                 )}
               >
                 {tab.count}

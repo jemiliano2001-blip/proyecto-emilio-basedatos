@@ -9,6 +9,7 @@ import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeGestionarUsuarios } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import { etiquetaRol } from '@/lib/validations/usuarios'
+import { Avatar } from '@/components/ui/avatar'
 import type { Usuario } from '@/lib/types'
 
 export default async function UsuariosPage() {
@@ -73,12 +74,7 @@ export default async function UsuariosPage() {
               href={`/usuarios/${u.id}`}
               className="list-row group items-center lg:grid lg:grid-cols-[2.5rem_minmax(0,1.2fr)_minmax(0,1.4fr)_8rem_6rem_1.5rem] lg:gap-3"
             >
-              <span
-                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary-soft-foreground"
-                aria-hidden
-              >
-                {iniciales(u.nombre)}
-              </span>
+              <Avatar name={u.nombre} size="sm" className="shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary">{u.nombre}</p>
                 <p className="mt-0.5 truncate text-xs text-muted-foreground lg:hidden">
@@ -109,10 +105,4 @@ export default async function UsuariosPage() {
       </div>
     </main>
   )
-}
-
-function iniciales(nombre: string): string {
-  const partes = nombre.trim().split(/\s+/).filter(Boolean)
-  if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase()
-  return nombre.slice(0, 2).toUpperCase()
 }

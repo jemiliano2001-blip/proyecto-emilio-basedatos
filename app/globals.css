@@ -132,6 +132,11 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: 'cv11', 'ss01', 'ss03';
     text-rendering: optimizeLegibility;
+    /* Fondo ambiental: dos halos de marca muy sutiles sobre el lienzo slate */
+    background-image:
+      radial-gradient(52rem 26rem at 100% -8%, hsl(var(--primary) / 0.07), transparent 65%),
+      radial-gradient(40rem 22rem at -8% 105%, hsl(var(--secondary) / 0.05), transparent 65%);
+    background-repeat: no-repeat;
   }
 
   * {
@@ -179,14 +184,15 @@
 
   .btn-primary {
     @apply btn-base min-h-[44px] px-5 py-2.5 text-base sm:text-sm
-           bg-primary text-primary-foreground shadow-sm
-           hover:bg-primary-hover;
+           bg-primary text-primary-foreground shadow-primary
+           hover:bg-primary-hover hover:shadow-primary-hover hover:-translate-y-px
+           active:translate-y-0;
   }
 
   .btn-secondary {
     @apply btn-base min-h-[44px] px-5 py-2.5 text-base sm:text-sm
            bg-card text-foreground border border-border shadow-xs
-           hover:bg-muted/70 hover:border-input;
+           hover:bg-muted/70 hover:border-input hover:shadow-sm;
   }
 
   .btn-ghost {
@@ -197,7 +203,16 @@
   .btn-danger {
     @apply btn-base min-h-[44px] px-5 py-2.5 text-base sm:text-sm
            bg-danger text-danger-foreground shadow-sm
-           hover:bg-danger/90 focus-visible:ring-danger;
+           hover:bg-danger/90 hover:shadow-md focus-visible:ring-danger;
+  }
+
+  /* Estado loading para cualquier .btn-* con aria-busy: spinner CSS sin tocar el JSX */
+  :is(.btn-primary, .btn-secondary, .btn-ghost, .btn-danger)[aria-busy='true'] {
+    @apply pointer-events-none;
+  }
+  :is(.btn-primary, .btn-secondary, .btn-ghost, .btn-danger)[aria-busy='true']::before {
+    content: '';
+    @apply size-4 shrink-0 rounded-full border-2 border-current border-r-transparent animate-spin;
   }
 
   /* Modificadores de densidad para toolbars de oficina */
@@ -279,6 +294,14 @@
            aria-[invalid=true]:border-danger aria-[invalid=true]:focus:ring-2 aria-[invalid=true]:focus:ring-danger/20;
     transition: border-color var(--dur-short) var(--ease-out),
       box-shadow var(--dur-short) var(--ease-out);
+  }
+
+  /* Select nativo con chevron de marca (el color va en el SVG: muted-foreground) */
+  select.input-base {
+    @apply appearance-none pr-10 bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.9rem center;
+    background-size: 1rem;
   }
 
   .field-label {
@@ -394,8 +417,51 @@
     @apply flex min-h-[56px] items-center gap-3 px-4 py-3;
   }
 
+  .skeleton,
   .skeleton-block {
-    @apply rounded-md bg-muted animate-pulse;
+    @apply relative overflow-hidden rounded-lg bg-muted;
+  }
+
+  .skeleton::after,
+  .skeleton-block::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background-image: linear-gradient(90deg, transparent, hsl(var(--card) / 0.75), transparent);
+  }
+
+  /* ---------- Escala tipográfica (fuente de verdad: design.md) ---------- */
+  .t-display {
+    @apply font-heading text-3xl sm:text-4xl font-bold tracking-tight leading-[1.1] text-foreground;
+  }
+  .t-h1 {
+    @apply font-heading text-2xl sm:text-3xl font-bold tracking-tight leading-tight text-foreground;
+  }
+  .t-h2 {
+    @apply font-heading text-lg sm:text-xl font-bold tracking-tight text-foreground;
+  }
+  .t-body {
+    @apply text-sm sm:text-base leading-relaxed text-foreground;
+  }
+  .t-caption {
+    @apply text-xs leading-relaxed text-muted-foreground;
+  }
+  .t-eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary;
+  }
+  .t-eyebrow::before {
+    content: '';
+    @apply h-0.5 w-4 rounded-full bg-primary/70;
+  }
+
+  /* Textura "plano de obra": retícula fina que ancla la identidad (paneles de marca, vacíos) */
+  .bg-blueprint {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.55) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.55) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: -1px -1px;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
+    mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
   }
 
   .tabular-nums {

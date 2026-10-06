@@ -447,8 +447,8 @@ export function CatalogoMaterialesView({
         </div>
 
         {/* Selector de categoría (Control Segmentado Canónico) */}
-        <div className="overflow-x-auto rounded-lg bg-muted p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex shrink-0 items-center gap-0.5">
+        <div className="overflow-x-auto rounded-xl bg-muted/60 p-1 border border-border/50 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex shrink-0 items-center gap-1">
             {categorias.map((cat) => {
               const isSelected = selectedCat === cat.nombre
               const count = materiales.filter((m) => m.categoria === cat.nombre).length
@@ -458,20 +458,20 @@ export function CatalogoMaterialesView({
                   type="button"
                   onClick={() => setSelectedCat(cat.nombre)}
                   className={cn(
-                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-all select-none sm:min-h-[34px]',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     isSelected
-                      ? 'bg-card text-foreground shadow-xs font-semibold'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                      ? 'bg-card text-foreground shadow-xs font-bold'
+                      : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
                   {cat.nombre}
                   <span
                     className={cn(
-                      'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                      'rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums transition-colors',
                       isSelected
-                        ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
-                        : 'bg-border/70 text-muted-foreground'
+                        ? 'bg-primary-soft text-primary'
+                        : 'bg-muted text-muted-foreground'
                     )}
                   >
                     {count}
@@ -485,20 +485,20 @@ export function CatalogoMaterialesView({
                 type="button"
                 onClick={() => setSelectedCat('sin_categoria')}
                 className={cn(
-                  'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                  'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-all select-none sm:min-h-[34px]',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   selectedCat === 'sin_categoria'
-                    ? 'bg-card text-foreground shadow-xs font-semibold'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                    ? 'bg-card text-foreground shadow-xs font-bold'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 Sin categoría
                 <span
                   className={cn(
-                    'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                    'rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums transition-colors',
                     selectedCat === 'sin_categoria'
-                      ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
-                      : 'bg-border/70 text-muted-foreground'
+                      ? 'bg-primary-soft text-primary'
+                      : 'bg-muted text-muted-foreground'
                   )}
                 >
                   {sinCategoria.length}
@@ -510,20 +510,20 @@ export function CatalogoMaterialesView({
               type="button"
               onClick={() => setSelectedCat('todas')}
               className={cn(
-                'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-all select-none sm:min-h-[34px]',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 selectedCat === 'todas'
-                  ? 'bg-card text-foreground shadow-xs font-semibold'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                  ? 'bg-card text-foreground shadow-xs font-bold'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               Todas
               <span
                 className={cn(
-                  'rounded-full px-1.5 text-[11px] tabular-nums font-medium',
+                  'rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums transition-colors',
                   selectedCat === 'todas'
-                    ? 'bg-primary-soft text-primary-soft-foreground font-semibold'
-                    : 'bg-border/70 text-muted-foreground'
+                    ? 'bg-primary-soft text-primary'
+                    : 'bg-muted text-muted-foreground'
                 )}
               >
                 {materiales.length}

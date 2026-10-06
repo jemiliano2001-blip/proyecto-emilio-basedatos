@@ -204,130 +204,130 @@ export function SolicitudesListClient({
       )}
 
       {/* Lista de solicitudes unificada en list-stack */}
-      <div className="list-stack">
-        {solicitudes.map((s, index) => {
-          const selected = isSelected(s.id)
-          const reqCode = `REQ-${s.id.slice(0, 8).toUpperCase()}`
-          const ordenes = (s.ordenes ?? []) as { id: string; folio: string }[]
-          const esMulti = (s.items ?? []).some((i) => i.obra_id !== null)
+      {solicitudes.length > 0 ? (
+        <div className="list-stack">
+          {solicitudes.map((s, index) => {
+            const selected = isSelected(s.id)
+            const reqCode = `REQ-${s.id.slice(0, 8).toUpperCase()}`
+            const ordenes = (s.ordenes ?? []) as { id: string; folio: string }[]
+            const esMulti = (s.items ?? []).some((i) => i.obra_id !== null)
 
-          return (
-            <div
-              key={s.id}
-              className={cn(
-                'list-row group items-center gap-3 transition-colors',
-                selected ? 'bg-primary-soft/40 border-l-4 border-l-primary' : 'hover:bg-muted/30',
-                density === 'comfortable' ? 'min-h-[72px]' : 'min-h-[58px] py-2.5'
-              )}
-            >
-              {/* Checkbox táctil amigable de selección para Compras/Finanzas */}
-              {puedeAccionesEnLote && (
-                <div
-                  className="shrink-0 flex items-center justify-center"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    toggleSelect(s.id, index, (e.nativeEvent as MouseEvent).shiftKey)
-                  }}
-                >
-                  <button
-                    type="button"
-                    role="checkbox"
-                    aria-checked={selected}
-                    aria-label={`Seleccionar ${reqCode}`}
-                    className={cn(
-                      'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors cursor-pointer',
-                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-                    )}
+            return (
+              <div
+                key={s.id}
+                className={cn(
+                  'list-row group items-center gap-3 transition-colors',
+                  selected ? 'bg-primary-soft/40 border-l-4 border-l-primary' : 'hover:bg-muted/30',
+                  density === 'comfortable' ? 'min-h-[72px]' : 'min-h-[58px] py-2.5'
+                )}
+              >
+                {/* Checkbox táctil amigable de selección para Compras/Finanzas */}
+                {puedeAccionesEnLote && (
+                  <div
+                    className="shrink-0 flex items-center justify-center"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleSelect(s.id, index, (e.nativeEvent as MouseEvent).shiftKey)
+                    }}
                   >
-                    <span
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={selected}
+                      aria-label={`Seleccionar ${reqCode}`}
                       className={cn(
-                        'flex size-5 items-center justify-center rounded-md border transition-all duration-150 shadow-xs',
-                        selected
-                          ? 'bg-primary border-primary text-primary-foreground font-bold'
-                          : 'border-border/90 bg-card hover:border-input'
+                        'flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl transition-colors cursor-pointer',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                       )}
                     >
-                      {selected && <IconCheck className="size-3.5 stroke-[2.5]" />}
-                    </span>
-                  </button>
-                </div>
-              )}
-
-              {/* Contenido principal clicable hacia el detalle */}
-              <Link
-                href={`/solicitudes/${s.id}`}
-                className="min-w-0 flex-1 flex items-start justify-between gap-3"
-                onClick={(e) => {
-                  if (e.shiftKey && puedeAccionesEnLote) {
-                    e.preventDefault()
-                    toggleSelect(s.id, index, true)
-                  }
-                }}
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-lg bg-muted/80 text-foreground border border-border/80 shadow-2xs">
-                      {reqCode}
-                    </span>
-                    {ordenes.map((oc) => (
                       <span
-                        key={oc.id}
-                        className="font-mono text-xs font-semibold px-2 py-0.5 rounded-lg bg-primary-soft text-primary-soft-foreground border border-primary/25 shadow-2xs"
+                        className={cn(
+                          'flex size-5 items-center justify-center rounded-md border transition-all duration-150 shadow-xs',
+                          selected
+                            ? 'bg-primary border-primary text-primary-foreground font-bold'
+                            : 'border-border/90 bg-card hover:border-input'
+                        )}
                       >
-                        {oc.folio}
+                        {selected && <IconCheck className="size-3.5 stroke-[2.5]" />}
                       </span>
-                    ))}
+                    </button>
                   </div>
-                  <p className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors font-sans">
-                    {s.obra?.nombre ?? 'Proyecto'}
-                  </p>
-                  <p
-                    className={cn(
-                      'text-muted-foreground truncate',
-                      density === 'comfortable' ? 'mt-1 text-xs' : 'mt-0.5 text-xs'
-                    )}
-                  >
-                    {labelMateriales(s.items.length)}
-                    {esMulti ? ' · varios proyectos' : ''}
-                    {s.solicitante?.nombre ? ` · Solicitó: ${s.solicitante.nombre}` : ''}
-                    {' · '}
-                    {new Date(s.creado_en).toLocaleString('es-MX', {
-                      dateStyle: 'short',
-                      timeStyle: 'short',
-                    })}
-                  </p>
-                </div>
+                )}
 
-                <div className="shrink-0 pt-0.5">
-                  <Badge variant={badgeVariant(s.estado)} dot>
-                    {labelEstado(s.estado)}
-                  </Badge>
-                </div>
-              </Link>
-            </div>
-          )
-        })}
+                {/* Contenido principal clicable hacia el detalle */}
+                <Link
+                  href={`/solicitudes/${s.id}`}
+                  className="min-w-0 flex-1 flex items-start justify-between gap-3"
+                  onClick={(e) => {
+                    if (e.shiftKey && puedeAccionesEnLote) {
+                      e.preventDefault()
+                      toggleSelect(s.id, index, true)
+                    }
+                  }}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-lg bg-muted/80 text-foreground border border-border/80 shadow-2xs">
+                        {reqCode}
+                      </span>
+                      {ordenes.map((oc) => (
+                        <span
+                          key={oc.id}
+                          className="font-mono text-xs font-semibold px-2 py-0.5 rounded-lg bg-primary-soft text-primary-soft-foreground border border-primary/25 shadow-2xs"
+                        >
+                          {oc.folio}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors font-sans">
+                      {s.obra?.nombre ?? 'Proyecto'}
+                    </p>
+                    <p
+                      className={cn(
+                        'text-muted-foreground truncate',
+                        density === 'comfortable' ? 'mt-1 text-xs' : 'mt-0.5 text-xs'
+                      )}
+                    >
+                      {labelMateriales(s.items.length)}
+                      {esMulti ? ' · varios proyectos' : ''}
+                      {s.solicitante?.nombre ? ` · Solicitó: ${s.solicitante.nombre}` : ''}
+                      {' · '}
+                      {new Date(s.creado_en).toLocaleString('es-MX', {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
+                      })}
+                    </p>
+                  </div>
 
-        {solicitudes.length === 0 && (
-          <EmptyState
-            icon={IconDocumento}
-            title="Sin resultados"
-            description={
-              verTodas
-                ? 'Todavía no hay requisiciones registradas en el sistema.'
-                : 'Todavía no has levantado ninguna requisición.'
-            }
-            action={
-              puedeCrear
-                ? {
-                    label: 'Nueva requisición',
-                    href: '/solicitudes/nueva',
-                  }
-                : undefined
-            }
-          />
-        )}
-      </div>
+                  <div className="shrink-0 pt-0.5">
+                    <Badge variant={badgeVariant(s.estado)} dot>
+                      {labelEstado(s.estado)}
+                    </Badge>
+                  </div>
+                </Link>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <EmptyState
+          icon={IconDocumento}
+          title="Sin resultados"
+          description={
+            verTodas
+              ? 'Todavía no hay requisiciones registradas en el sistema.'
+              : 'Todavía no has levantado ninguna requisición.'
+          }
+          action={
+            puedeCrear
+              ? {
+                  label: 'Nueva requisición',
+                  href: '/solicitudes/nueva',
+                }
+              : undefined
+          }
+        />
+      )}
 
       {/* Floating BulkBar para acciones en lote */}
       {selectedCount > 0 && !etapa && (

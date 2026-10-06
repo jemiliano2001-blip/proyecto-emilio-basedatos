@@ -47,7 +47,7 @@ export function LoginForm({ next }: { next: string }) {
           <button
             type="button"
             onClick={() => setVerPassword((v) => !v)}
-            className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-lg text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-2xl text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             aria-pressed={verPassword}
           >

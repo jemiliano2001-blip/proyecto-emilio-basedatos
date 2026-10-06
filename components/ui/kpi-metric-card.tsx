@@ -24,7 +24,7 @@ export function KpiMetricCard({
   value,
   hint,
   delta,
-  sparklineData = [20, 28, 25, 35, 30, 45, 40, 55, 60],
+  sparklineData,
   sparklineColor,
   href,
   icon,
@@ -51,9 +51,9 @@ export function KpiMetricCard({
 
   const defaultColor = delta
     ? delta.isPositive
-      ? '#10B981'
-      : '#EF4444'
-    : '#0369A1'
+      ? 'hsl(var(--success))'
+      : 'hsl(var(--danger))'
+    : 'hsl(var(--primary))'
 
   const strokeColor = sparklineColor || defaultColor
 
@@ -78,7 +78,7 @@ export function KpiMetricCard({
           {label}
         </span>
         {icon && (
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary-soft/60 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-200">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary ring-1 ring-primary/15 transition-all duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:ring-transparent">
             {icon}
           </span>
         )}
@@ -104,7 +104,7 @@ export function KpiMetricCard({
               <path
                 d={points}
                 fill="none"
-                stroke={strokeColor}
+                style={{ stroke: strokeColor }}
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"

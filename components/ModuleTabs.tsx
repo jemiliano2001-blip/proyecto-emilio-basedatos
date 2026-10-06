@@ -68,7 +68,7 @@ export function ModuleTabs({
       role="tablist"
       aria-label={ariaLabel}
       className={cn(
-        'flex items-center gap-1.5 p-1 bg-muted rounded-xl border border-border overflow-x-auto shrink-0',
+        'flex items-center gap-1 p-1 bg-muted/60 rounded-xl border border-border/50 overflow-x-auto shrink-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
         className
       )}
     >
@@ -85,10 +85,10 @@ export function ModuleTabs({
             id={`tab-${tab.id}`}
             onClick={() => handleTabClick(tab.id)}
             className={cn(
-              'min-h-[44px] px-3.5 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shrink-0 select-none',
+              'min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-[34px]',
               isActive
-                ? 'bg-card text-foreground shadow-sm font-bold'
-                : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
+                ? 'bg-card text-foreground shadow-xs font-bold'
+                : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {tab.icon && <span className="shrink-0">{tab.icon}</span>}
@@ -96,10 +96,10 @@ export function ModuleTabs({
             {typeof tab.count === 'number' && (
               <span
                 className={cn(
-                  'text-xs px-1.5 py-0.2 rounded-full font-bold tabular-nums',
+                  'rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums transition-colors',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted-foreground/20 text-foreground'
+                    ? 'bg-primary-soft text-primary'
+                    : 'bg-muted text-muted-foreground'
                 )}
               >
                 {tab.count}

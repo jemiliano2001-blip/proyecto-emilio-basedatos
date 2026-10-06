@@ -14,6 +14,8 @@ import {
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeGestionarUsuarios } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
+import { etiquetaRol } from '@/lib/validations/usuarios'
+import { Badge } from '@/components/Badge'
 import type { Usuario } from '@/lib/types'
 
 export default async function UsuarioDetallePage({
@@ -49,14 +51,20 @@ export default async function UsuarioDetallePage({
   return (
     <main className="page-shell-narrow space-y-6">
       <PageHeader
+        eyebrow={etiquetaRol(usuario.rol)}
         title={usuario.nombre}
+        badge={
+          <Badge variant={usuario.activo ? 'success' : 'neutral'} dot>
+            {usuario.activo ? 'Activo' : 'Inactivo'}
+          </Badge>
+        }
         description={usuario.email ?? undefined}
         backHref="/usuarios"
         backLabel="Usuarios"
       />
 
       <section className="card space-y-3">
-        <h2 className="text-base font-bold text-foreground">Datos y rol</h2>
+        <h2 className="t-h2">Datos y rol</h2>
         <UsuarioEditarForm
           usuario={usuario}
           action={boundUpdate}
@@ -65,7 +73,7 @@ export default async function UsuarioDetallePage({
       </section>
 
       <section className="card space-y-3">
-        <h2 className="text-base font-bold text-foreground">Contraseña</h2>
+        <h2 className="t-h2">Contraseña</h2>
         <p className="text-sm text-muted-foreground">
           Genera una temporal o escribe una nueva. Se muestra una sola vez en
           pantalla.
@@ -74,7 +82,7 @@ export default async function UsuarioDetallePage({
       </section>
 
       {usuario.rol === 'personal' && <section className="card space-y-3">
-        <h2 className="text-base font-bold text-foreground">Proyectos asignados</h2>
+        <h2 className="t-h2">Proyectos asignados</h2>
         {proyectos?.error || asignaciones?.error
           ? <p role="alert" className="text-sm text-danger">No se pudieron cargar las asignaciones. Verifica la migración 0034 y reintenta.</p>
           : <UsuarioProyectosForm proyectos={proyectos?.data ?? []} asignados={(asignaciones?.data ?? []).map(a => a.obra_id)} action={asignarProyectosUsuarioAction.bind(null, usuario.id)} />}
