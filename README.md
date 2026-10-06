@@ -14,7 +14,7 @@ En UI se dice **proyecto**; la tabla sigue siendo `obras`.
 - Detalle completo del sistema en `design.md`.
 
 ### Mantenimiento y hardening (2026-09-08)
-- Next.js actualizado a `15.5.25`; `npm audit` sin vulnerabilidades.
+- Next.js actualizado a `15.5.25`. `npm audit` (2026-10-06): 8 avisos, todos de herramientas de desarrollo (`tailwindcss` 3 → `braces`/`micromatch`/`chokidar`/`fast-glob`/`postcss-nested`, y `@next/eslint-plugin-next`), sin impacto en el runtime desplegado; su arreglo exige migrar a Tailwind 4 (cambio mayor). Los avisos de `sharp`, `source-map-js` y `brace-expansion` se corrigieron con `npm audit fix`.
 - TypeScript estricto, ESLint y 13 pruebas aisladas en `tests/`.
 - El cierre requiere las RPC formales; la edición normal ya no puede falsificarlo.
 - Capturas offline aisladas por usuario, con corrección y descarte de conflictos.
