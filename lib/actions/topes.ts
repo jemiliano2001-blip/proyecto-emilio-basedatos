@@ -89,6 +89,8 @@ export async function updateTopeAction(
     .eq('obra_id', obraId)
 
   if (error) {
+    // P0001 = regla de negocio del trigger de piso (0042), con mensaje ya redactado para el usuario.
+    if (error.code === 'P0001') return { error: error.message }
     return { error: 'No se pudo actualizar el tope. Intenta de nuevo.' }
   }
 

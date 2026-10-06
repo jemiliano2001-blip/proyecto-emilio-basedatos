@@ -399,7 +399,9 @@ export function ObraMaterialesList({
 
                       {/* Estatus rápido y botón desplegable */}
                       <div className="flex items-center gap-2.5 shrink-0">
-                        {sinSaldo ? (
+                        {disponible < 0 ? (
+                          <Badge variant="danger" dot>Sobregirado: {disponible}</Badge>
+                        ) : sinSaldo ? (
                           <Badge variant="warning" dot>Sin saldo</Badge>
                         ) : (
                           <Badge variant="success" dot>
@@ -475,6 +477,7 @@ export function ObraMaterialesList({
                                 obraId={obraId}
                                 materialId={s.material_id}
                                 cantidadActual={Number(tope.cantidad_contratada)}
+                                minimo={Math.max(0, Number(tope.cantidad_contratada) - Math.max(0, disponible))}
                               />
                             </div>
 

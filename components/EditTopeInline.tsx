@@ -12,11 +12,14 @@ export function EditTopeInline({
   obraId,
   materialId,
   cantidadActual,
+  minimo = 0,
 }: {
   topeId: string
   obraId: string
   materialId: string
   cantidadActual: number
+  /** Piso informativo: lo comprometido y comprado. El servidor es quien lo hace cumplir. */
+  minimo?: number
 }) {
   const [open, setOpen] = useState(false)
   const bound = updateTopeAction.bind(null, topeId, obraId)
@@ -58,6 +61,11 @@ export function EditTopeInline({
             }
           }}
         />
+        {minimo > 0 && (
+          <span className="mt-1 block text-xs font-normal text-muted-foreground">
+            Mínimo permitido: {minimo} (ya comprometido o comprado).
+          </span>
+        )}
       </label>
       <div className="flex gap-2">
         <SubmitButton className="btn-primary flex-1">Guardar</SubmitButton>
