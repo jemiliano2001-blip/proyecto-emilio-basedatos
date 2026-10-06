@@ -113,11 +113,10 @@ export async function updateMaterialAction(
   const supabase = await createClient()
 
   const fotoFile = formData.get('foto') as File | null
-  const fotoExistenteRaw = formData.get('foto_url_existente')
   let foto_url: string | null =
-    typeof fotoExistenteRaw === 'string' && fotoExistenteRaw.trim() !== ''
-      ? fotoExistenteRaw.trim()
-      : null
+    formData.get('foto_eliminar') === 'true'
+      ? null
+      : ((formData.get('foto_existente') as string | null)?.trim() || null)
 
   if (fotoFile && fotoFile.size > 0) {
     const uploadRes = await uploadMaterialFoto(supabase, fotoFile)

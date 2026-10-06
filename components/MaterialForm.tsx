@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { useActionState } from 'react'
 import type { ActionResult } from '@/lib/actions/materiales'
 import { FormError } from '@/components/FormError'
 import { SubmitButton } from '@/components/SubmitButton'
+import { PhotoUploadInput } from '@/components/PhotoUploadInput'
 import type { CatalogoMaterial, MaterialCategoria } from '@/lib/types'
 
 const initialState: ActionResult = { error: null }
@@ -28,21 +28,10 @@ export function MaterialForm({
   const [state, formAction] = useActionState(action, initialState)
   const [categoria, setCategoria] = useState(material?.categoria ?? initialCategoria ?? '')
   const [subcategoria, setSubcategoria] = useState(material?.subcategoria ?? initialSubcategoria ?? '')
-  const [fotoPreview, setFotoPreview] = useState<string | null>(null)
 
   // Subcategorías de la categoría seleccionada
   const catActual = categorias.find((c) => c.nombre === categoria)
   const subcats = catActual?.material_subcategorias?.map((s) => s.nombre) ?? []
-
-  function handleFotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) {
-      const url = URL.createObjectURL(file)
-      setFotoPreview(url)
-    } else {
-      setFotoPreview(null)
-    }
-  }
 
   return (
     <form action={formAction} className="space-y-4">
@@ -165,54 +154,14 @@ export function MaterialForm({
         </p>
       </div>
 
-      {/* SUBIDA DE FOTO */}
-      <div>
-        <label htmlFor="foto" className="block text-sm font-medium text-foreground mb-1">
-          Foto del material
-        </label>
-        <input type="hidden" name="foto_url_existente" value={material?.foto_url ?? ''} />
-        <input
-          id="foto"
-          name="foto"
-          type="file"
-          accept="image/*"
-          onChange={handleFotoChange}
-          className="input-base text-sm file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-soft file:text-primary hover:file:bg-primary-soft cursor-pointer"
-        />
-
-        {fotoPreview ? (
-          <div className="mt-2 flex items-center gap-3 p-2 bg-primary-soft/50 rounded-lg border border-primary/30">
-            {/* Vista previa de foto seleccionada */}
-            <Image
-              src={fotoPreview}
-              alt="Vista previa"
-              width={56}
-              height={56}
-              unoptimized
-              className="w-14 h-14 object-cover rounded-md border border-primary/40"
-            />
-            <div>
-              <p className="text-xs font-semibold text-primary-soft-foreground">Nueva foto seleccionada</p>
-              <p className="text-[11px] text-primary">Se subirá y guardará al guardar el material.</p>
-            </div>
-          </div>
-        ) : material?.foto_url ? (
-          <div className="mt-2 flex items-center gap-3 p-2 bg-muted/50 rounded-lg border border-border">
-            {/* Imagen de catálogo servida por Storage */}
-            <Image
-              src={material.foto_url}
-              alt={material.nombre_base}
-              width={56}
-              height={56}
-              className="w-14 h-14 object-cover rounded-md border border-input"
-            />
-            <div>
-              <p className="text-xs font-semibold text-foreground">Foto actual</p>
-              <p className="text-[11px] text-muted-foreground">Selecciona otro archivo arriba para reemplazarla.</p>
-            </div>
-          </div>
-        ) : null}
-      </div>
+      {/* FOTO DEL MATERIAL (cámara, compresión y control de calidad) */}
+      <PhotoUploadInput
+        id="foto"
+        name="foto"
+        label="Foto del material"
+        existingUrl={material?.foto_url}
+        captureCamera
+      />
 
       {/* CAMPO ACTIVO CON EXPLICACIÓN EN ESPAÑOL */}
       <div>
