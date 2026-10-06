@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { limpiarLogin, registrarFalloLogin, segundosBloqueoLogin } from '@/lib/auth/login-limit'
 import { sanitizeNextPath } from '@/lib/auth/safe-next'
 import { checkRateLimit, getClientIp, resetRateLimit } from '@/lib/rate-limit'
 import { homePathForRol } from '@/lib/roles'
@@ -39,16 +40,27 @@ export async function loginAction(
   }
 
   const supabase = await createClient()
+
+  // Límite compartido entre instancias (BD); el de memoria de arriba queda como primera capa.
+  const segundos = await segundosBloqueoLogin(supabase, ip, email)
+  if (segundos > 0) {
+    return {
+      error: `Demasiados intentos fallidos. Por seguridad, espera ${Math.ceil(segundos / 60)} minuto(s) antes de volver a intentar.`,
+    }
+  }
+
   const { data: signInData, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
 
   if (error) {
+    await registrarFalloLogin(supabase, ip, email)
     return { error: 'No se pudo iniciar sesión. Revisa correo y contraseña.' }
   }
 
   resetRateLimit(rateLimitKey)
+  await limpiarLogin(supabase, ip, email)
 
   let next = nextRequested
   if (nextRequested === '/') {
