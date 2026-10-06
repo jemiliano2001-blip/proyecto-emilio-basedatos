@@ -61,7 +61,7 @@ Usuarios de prueba y sus contraseñas: `README.md` y `supabase/seed_usuarios_pru
 
 ## Migraciones
 
-SQL numerado en `supabase/migrations/` (`0001` … `0043`, todas aplicadas en remoto; `0040`–`0043` el 2026-10-06: límite de login en BD, categorías atómicas, piso de cantidad en topes y bloqueo de borrar topes con movimientos; algunas llevan sufijo `a`/`b`, p. ej. `0034a`). El orden de aplicación en remoto no siempre es el numérico: `0019` se aplicó después de `0033` — confirma con `list_migrations` del MCP de Supabase, no por el nombre del archivo. **No hay Supabase CLI ni
+SQL numerado en `supabase/migrations/` (`0001` … `0044`, todas aplicadas en remoto; `0040`–`0044` el 2026-10-06: límite de login en BD, categorías atómicas, piso de cantidad en topes, bloqueo de borrar topes con movimientos y EXECUTE de `anon` revocado en dos funciones; algunas llevan sufijo `a`/`b`, p. ej. `0034a`). El orden de aplicación en remoto no siempre es el numérico: `0019` se aplicó después de `0033` — confirma con `list_migrations` del MCP de Supabase, no por el nombre del archivo. **No hay Supabase CLI ni
 `supabase/config.toml` en el repo** — las migraciones las aplica el usuario a mano
 (dashboard / MCP de Supabase). No inventes un `supabase db push`.
 
