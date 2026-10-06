@@ -20,7 +20,7 @@ hallazgos altos. No se tocó Supabase ni se corrieron los E2E.
 | P1-2 | **`v_conciliacion_obra_material` se borra por CASCADE en 0020 y nadie la recrea.** La conciliación muestra la tabla de materiales vacía en silencio (la página no revisa el error). | `0020:17`, `app/obras/[id]/conciliacion/page.tsx:56` | Migración (recrear vista) + capturar error en página |
 | P1-3 | **Cerrar proyecto no congela topes:** editar cantidad, borrar un material o borrar todos no revisan `obras.estado` (ni la action ni la policy). | `lib/actions/topes.ts:66,129,161`, `0001:167`, `0020:13` | Código (chequeo en action + ocultar UI) y migración (trigger) |
 | P1-4 | **Borrar el tope de un material con compras lo desaparece** del detalle, conciliación y Excel (la vista arma su universo desde `obra_material_contratado`). | `0020:21-35`, `components/ObraMaterialesList.tsx:505-606` | Decisión de negocio |
-| P1-5 | **Personal recibe `precio_base`** en el payload de `/materiales` (oculto solo visualmente) y, más de fondo, `catalogo_select` deja a cualquier autenticado leer la columna vía PostgREST. | `app/materiales/page.tsx:21-28`, `0001:144` | Código (quitar del select) + migración (permiso de columna/vista) |
+| P1-5 | **[Resuelto, verificado 2026-10-06 en remoto: `authenticated` sin SELECT sobre `precio_base`/`presupuesto_mxn`/`monto_mxn`; las vistas `*_lectura` (0035) los enmascaran por rol; el código lee de ellas y `role-access.test.mjs` lo cubre.]** **Personal recibe `precio_base`** en el payload de `/materiales` (oculto solo visualmente) y, más de fondo, `catalogo_select` deja a cualquier autenticado leer la columna vía PostgREST. | `app/materiales/page.tsx:21-28`, `0001:144` | Código (quitar del select) + migración (permiso de columna/vista) |
 | P1-6 | **Editar correo de usuario puede quedar a medias:** se cambia en Auth antes de validar "último admin" y antes del UPDATE de `usuarios`; si falla después, no se revierte. | `lib/actions/usuarios.ts:175-232` | Código |
 | P1-7 | **El QR impreso en la OC no es un QR válido** (sin Reed-Solomon ni formato ISO 18004); `BarcodeDetector` no lo puede leer. El test solo valida la geometría. | `lib/qr.ts:75-103`, `OrdenCompraFormatoImpresion.tsx:271` | Encoder real o librería (dependencia nueva → preguntar) |
 | P1-8 | **Renglones no-material (flete, camiones…) salen como "Material"** en el detalle de OC, WhatsApp, Excel y el ligado de facturas (el select no trae `descripcion`/`tipo_linea`; `formato/page.tsx` sí lo hace bien). | `app/ordenes/[id]/page.tsx:73-80,211-288` | Código |
@@ -98,7 +98,7 @@ Hallazgos al revisar el remoto antes de aplicar:
   recepciones, RPC de recepciones con `finanzas` y sin referencias a `recepcion_fotos`.
 
 **Pendiente / requiere decisión:**
-- P1-5 a nivel base: ocultar `precio_base` a Personal no es un permiso de columna (todos los roles
+- **[Resuelto después, ver P1-5]** P1-5 a nivel base: ocultar `precio_base` a Personal no es un permiso de columna (todos los roles
   de la app son el mismo rol `authenticated` de Postgres). Requiere mover las lecturas de precio a
   una vista/RPC que filtre por `auth_rol()` y cambiar ~20 archivos. Es un proyecto aparte.
 - P1-4 (borrar material con compras lo oculta de reportes) — decisión de negocio.
