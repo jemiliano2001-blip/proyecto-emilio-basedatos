@@ -58,6 +58,8 @@ La lectura de documentos solo exige autenticación y no filtra `tipo_documento`;
 
 ## Consistencia del movimiento del sistema
 
+> **Verificación 2026-10-06:** todas las filas de esta tabla están resueltas en el código actual: «Ver todas» abre `?vista=historial`; el lote de pagos recibe `etapa` explícita (`lib/actions/solicitudes.ts:719`); la matriz de permisos ya dice que crear proyectos es de Operación y Acceso Total; el home no trae indicadores fijos (+12 %, 100 % cotejo); el detalle del proyecto distingue saldo no disponible (`saldoDisponible`); Abastecimiento se filtra por rol (`tabsAbastecimiento`); fotos de recepción y cola de instalaciones, ver filas siguientes.
+
 | Prioridad | Inconsistencia comprobada | Consecuencia y mejora |
 |---|---|---|
 | Media | `app/solicitudes/page.tsx:57,176`: “Ver todas” apunta a `/solicitudes`, que redirige a la cola por defecto para Compras/Finanzas. Además, se les oculta el filtro de estatus. | No abre el historial completo por ese control. Usar un modo explícito de historial y conservar búsqueda/proyecto/paginación al moverse entre cola y detalle. |
