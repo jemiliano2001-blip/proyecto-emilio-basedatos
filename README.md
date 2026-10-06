@@ -1,13 +1,13 @@
 # Proyecto Emilio - Base de Datos
 
-Sistema de trazabilidad de materiales y proyectos. Next.js 14 + Supabase (PostgreSQL).
+Sistema de trazabilidad de materiales y proyectos. Next.js 15.5 + Supabase (PostgreSQL).
 En UI se dice **proyecto**; la tabla sigue siendo `obras`.
 
 ## Estado actual: Fase 7 — Cierre de obra y reportes de conciliación (hecha)
 
 ### Rediseño SaaS (2026-09-18)
 - Paleta "Slate + Cobalto" como tokens semánticos (CSS variables HSL); dark mode preparado en `[data-theme=dark]`, sin exponer aún.
-- Tipografía Inter self-hosted vía `next/font` (funciona offline, la cachea el SW).
+- Tipografía Playfair Display + Poppins vía `next/font` (ver `design.md`).
 - Shell de escritorio con sidebar colapsable (`Ctrl/⌘+B`, cookie `ot-sidebar`) y migas en la barra superior; en móvil sigue la bottom nav + hoja "Más". Navegación por rol centralizada en `lib/nav.ts`.
 - Home como dashboard (KPIs + tabla de proyectos), login a dos paneles, detalle de proyecto a dos columnas con resumen de presupuesto.
 - El Service Worker solo se registra en producción (en desarrollo servía chunks viejos).
@@ -24,7 +24,7 @@ La migración `supabase/migrations/0016_integridad_proyectos_precios.sql` queda 
 
 ### Fase 0 — Infraestructura (hecha)
 - Proyecto Supabase: `proyecto-emilio-basedatos` (ref `uplxxnpurpqlvhjrsufa`)
-- Migraciones en repo: `0001` … `0011` (aplicadas en remoto, incluida `0011` de notificaciones Realtime)
+- Migraciones en repo: `0001` … `0039`, aplicadas en remoto (incluida `0019` de evidencias fotográficas, aplicada el 2026-10-01)
 - `.env.local` con URL + anon key (no subir a git)
 - Usuarios de prueba sembrados (ver abajo)
 

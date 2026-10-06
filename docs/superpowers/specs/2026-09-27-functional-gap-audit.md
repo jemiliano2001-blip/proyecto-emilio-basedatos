@@ -91,7 +91,7 @@ los triggers y de `revisar_recepcion`):
 Hallazgos al revisar el remoto antes de aplicar:
 - P1-2 **no ocurría en producción**: `v_conciliacion_obra_material` existía (idéntica a 0013).
   El bug es real solo en el historial del repo (una base nueva desde 0001 la pierde); 0028 lo corrige.
-- **0019 nunca se aplicó en remoto** (no existe `recepcion_fotos`): las fotos con metadatos/GPS de
+- **[Actualización 2026-10-06: 0019 ya está aplicada (2026-10-01), junto con 0034–0039; `recepcion_fotos` existe con RLS y `guardar_evidencias_recepcion` revisa el error. Lo que sigue es texto histórico.]** **0019 nunca se aplicó en remoto** (no existe `recepcion_fotos`): las fotos con metadatos/GPS de
   recepción no se guardan (el catch en `lib/actions/recepciones.ts` lo oculta). Por eso 0032 parcha
   la definición viva en vez de copiar la de 0019. Si se aplica 0019 después, re-correr 0032.
 - Verificado tras aplicar: 3 triggers activos, 0 OCs con estado incoherente respecto a sus

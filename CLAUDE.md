@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Qué es esto
 
 Sistema de trazabilidad de materiales, presupuestos y compras para una empresa de
-construcción/instalación eléctrica. Next.js 14 (App Router) + TypeScript estricto +
+construcción/instalación eléctrica. Next.js 15.5 (App Router) + TypeScript estricto +
 Tailwind + Supabase (PostgreSQL), como PWA offline-first.
 
 **Los errores aquí cuestan dinero real.** La correctitud de los datos financieros y la
@@ -35,19 +35,20 @@ npx tsc --noEmit   # typecheck — pasa limpio hoy; es LA puerta de verificació
 `components`, `lib` y `middleware.ts`; hoy pasa limpio y sí cuenta como verificación.
 
 **Sistema visual:** `design.md` es la fuente de verdad (tokens semánticos en
-`globals.css`/`tailwind.config.ts`, Inter vía `next/font`, sidebar en desktop +
+`globals.css`/`tailwind.config.ts`, Playfair Display (titulares) + Poppins (cuerpo) vía `next/font`, sidebar en desktop +
 bottom nav en móvil, navegación centralizada en `lib/nav.ts`). No uses colores crudos
 de Tailwind (`text-gray-500`, `bg-red-50`) ni importes constantes desde archivos
 `'use client'` hacia server components.
 
-**No hay framework de pruebas instalado** (ni Jest, ni Vitest, ni Playwright) y no se
-introduce uno sin pedirlo. No existe un comando para "correr un test suelto". La
-verificación es:
+**Pruebas:** `npm test` corre `node --test` sobre `tests/*.test.mjs` con PGlite (Postgres en
+memoria, sin tocar el remoto): 62 pruebas hoy, incluidas las de migraciones, roles/RLS y offline.
+No hay Jest, Vitest ni Playwright y no se introduce uno sin pedirlo; tampoco pruebas de UI.
+La verificación es:
 
-1. `npx tsc --noEmit`
-2. los smoke E2E en PowerShell: `scripts/e2e-fase3.ps1`, `e2e-fase4.ps1`, `e2e-fase5.ps1`,
-   `e2e-fase6.ps1` (traspasos), `e2e-fase7.ps1` (cierre/conciliación)
-   (correr uno solo es el equivalente más cercano a "un test")
+1. `npx tsc --noEmit` y `npm run lint`
+2. `npm test`
+3. los smoke E2E en PowerShell: `scripts/e2e-fase3.ps1` … `e2e-fase7.ps1`
+   (correr uno solo es el equivalente más cercano a "un test de integración")
 
 ⚠️ **Los scripts E2E pegan al Supabase remoto real y mutan datos.** Leen `.env.local`,
 se autentican con los usuarios sembrados y escriben en producción-de-desarrollo. En
@@ -60,7 +61,7 @@ Usuarios de prueba y sus contraseñas: `README.md` y `supabase/seed_usuarios_pru
 
 ## Migraciones
 
-SQL numerado en `supabase/migrations/` (`0001` … `0008`). **No hay Supabase CLI ni
+SQL numerado en `supabase/migrations/` (`0001` … `0039`; algunas llevan sufijo `a`/`b`, p. ej. `0034a`). El orden de aplicación en remoto no siempre es el numérico: `0019` se aplicó después de `0033` — confirma con `list_migrations` del MCP de Supabase, no por el nombre del archivo. **No hay Supabase CLI ni
 `supabase/config.toml` en el repo** — las migraciones las aplica el usuario a mano
 (dashboard / MCP de Supabase). No inventes un `supabase db push`.
 
@@ -91,8 +92,8 @@ Nunca por `update` directo desde el cliente:
 | `aprobar_pago_solicitud` | Finanzas paga y emite OC — **devuelve `uuid[]`** (una OC por obra) |
 | `rechazar_solicitud` / `cancelar_solicitud` | liberan lo reservado |
 | `crear_recepcion`, `revisar_recepcion`, `listar_*`, `detalle_*` | flujo de recepción (Fase 4); las vistas de recepción son internas, el cliente solo ve estas RPCs |
-| `crear_solicitud_traspaso`, `aprobar_traspaso`, `confirmar_recepcion_traspaso`, `rechazar_traspaso`, `cancelar_traspaso` | traspasos entre obras (Fase 6, sin aplicar) |
-| `cerrar_obra`, `reabrir_obra` | cierre de proyecto (Fase 7, sin aplicar) |
+| `crear_solicitud_traspaso`, `aprobar_traspaso`, `confirmar_recepcion_traspaso`, `rechazar_traspaso`, `cancelar_traspaso` | traspasos entre obras (Fase 6) |
+| `cerrar_obra`, `reabrir_obra` | cierre de proyecto (Fase 7) |
 
 **Y las RPCs no son suficientes por sí solas.** PostgREST expone UPDATE directo sobre las
 tablas a los mismos roles, así que cada máquina de estados necesita además un trigger
@@ -184,12 +185,10 @@ una época en que el remoto iba detrás del repo.
 
 ## Orden de fases — no te saltes ninguna
 
-Aplicadas en remoto: 1 catálogo/obras · 2 solicitudes · 3 cotización/OC · 4 recepción ·
-5 asignación y multi-obra (migraciones `0001`–`0008`).
-
-**6 traspasos entre obras** y **7 cierre + conciliación** ya están escritas
-(`0009`, `0010` + su UI) pero **NO aplicadas en el Supabase remoto**. Hasta que se
-apliquen, `/traspasos` y `/obras/[id]/conciliacion` truenan al cargar.
+Aplicadas en remoto (`uplxxnpurpqlvhjrsufa`): todas las fases 1–7 (catálogo/obras,
+solicitudes, cotización/OC, recepción, asignación y multi-obra, traspasos, cierre y
+conciliación) y los lotes posteriores hasta `0039` (evidencias fotográficas con metadatos en
+`recepcion_fotos`, acceso por proyecto, instalaciones idempotentes, etc.).
 
 En un traspaso **el dinero sigue al material**: el precio se congela al aprobar
 (`traspaso_items.precio_unitario_mxn`, del último precio de compra) y al completarse se
@@ -198,5 +197,5 @@ abona a la obra origen y se carga a la destino. Ese neto **no** vive en
 esa tabla exige `monto_mxn > 0` y no tiene un tipo para devolver dinero gastado. Si
 buscas por qué no cuadra un presupuesto, mira los traspasos completados de la obra.
 
-`README.md` es el documento vivo de estado; los diseños y planes de cada fase viven en
+Si cambias esto, revisa también la nota de estado del README. `README.md` es el documento vivo de estado; los diseños y planes de cada fase viven en
 `docs/superpowers/`.
