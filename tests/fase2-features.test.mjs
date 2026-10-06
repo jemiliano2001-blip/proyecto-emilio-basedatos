@@ -138,10 +138,10 @@ test('Cotejo inteligente de partidas con Orden de Compra', () => {
 })
 
 test('Generador QR Nativo Vectorial: matriz ISO/IEC 18004', () => {
-  // Matriz para texto corto (V2 = 25x25)
+  // Matriz para texto corto (13 bytes, nivel M → versión 1 = 21x21)
   const matrizV2 = generarMatrizQR('emilio:oc:123')
-  assert.equal(matrizV2.length, 25)
-  assert.equal(matrizV2[0].length, 25)
+  assert.equal(matrizV2.length, 21)
+  assert.equal(matrizV2[0].length, 21)
 
   // Finders 7x7 en las esquinas: (0,0), (0,6), (6,0) deben ser true
   assert.equal(matrizV2[0][0], true)
@@ -152,9 +152,9 @@ test('Generador QR Nativo Vectorial: matriz ISO/IEC 18004', () => {
   // Separador interior (1,1) debe ser false
   assert.equal(matrizV2[1][1], false)
 
-  // Matriz para texto largo (V3 = 29x29)
+  // Matriz para texto largo (60 bytes, nivel M → versión 4 = 33x33). La validez real se prueba en qr-oc.test.mjs
   const textoLargo = 'emilio:oc:orden-compra-con-id-sumamente-largo-para-test-2026'
   const matrizV3 = generarMatrizQR(textoLargo)
-  assert.equal(matrizV3.length, 29)
-  assert.equal(matrizV3[0].length, 29)
+  assert.equal(matrizV3.length, 33)
+  assert.equal(matrizV3[0].length, 33)
 })

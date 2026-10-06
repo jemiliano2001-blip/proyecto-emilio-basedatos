@@ -276,7 +276,7 @@ export function OrdenCompraFormatoImpresion({
                 </span>
               </div>
               <div className="p-1 bg-white border border-foreground/30 rounded shadow-xs">
-                <QRCodeSvg value={`emilio:oc:${orden.id}`} size={56} />
+                <QRCodeSvg value={`emilio:oc:${orden.id}`} size={84} />
               </div>
             </div>
           </div>
