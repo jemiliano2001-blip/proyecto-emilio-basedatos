@@ -10,6 +10,7 @@ const uuid = (p) => `${p}0000000-0000-4000-8000-${String(++contador).padStart(12
 async function fixture() {
   const db = await accessFixture()
   await db.exec(readFileSync('supabase/migrations/0045_alertas_saldo.sql', 'utf8'))
+  await db.exec(readFileSync('supabase/migrations/0047_alertas_saldo_agrupadas.sql', 'utf8'))
   db.admin = uuid('1')
   await db.exec(`insert into auth.users values ('${db.admin}');
     insert into usuarios(id,nombre,rol) values ('${db.admin}','Admin alertas','acceso_total');`)
@@ -239,4 +240,56 @@ test('material y dinero son independientes en un mismo proyecto', async (t) => {
   assert.equal((await avisos(db)).length, 3)
   assert.equal((await avisos(db, PRES)).length, 3)
   assert.equal(await revisar(db), 0)
+})
+
+// ---- Agrupación por proyecto (0047) ----
+async function obraConMateriales(db, nombreObra, nombres, { tope = 10, consumo = 10 } = {}) {
+  const obra = await nuevaObra(db, nombreObra)
+  for (const n of nombres) {
+    const m = await nuevoMaterial(db, n)
+    await conTope(db, obra, m, tope)
+    await comprometer(db, obra, m, consumo)
+  }
+  return obra
+}
+
+test('agrupa por proyecto: 4 materiales al 100 % generan un solo aviso por rol', async (t) => {
+  const db = await fixture(); t.after(() => db.close())
+  const nombres = ['Poste', 'Brazo', 'Registro A', 'Registro B']
+  const obra = await obraConMateriales(db, 'Proyecto grande', nombres)
+  assert.equal(await revisar(db), 3)
+  const a = await avisos(db)
+  assert.equal(a.length, 3)
+  assert.ok(a.every((x) => x.titulo === '4 materiales en su tope' && x.referencia_id === obra && nombres.every((n) => x.mensaje.includes(n))))
+  assert.equal(await cuenta(db, 'select count(*)::int n from alertas_saldo where resuelta_en is null'), 8, 'el estado sigue siendo por material')
+  assert.equal(await revisar(db), 0, 'idempotente')
+})
+
+test('la lista de materiales se corta en 5 con "y N más"', async (t) => {
+  const db = await fixture(); t.after(() => db.close())
+  await obraConMateriales(db, 'Proyecto enorme', ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'])
+  assert.equal(await revisar(db), 3)
+  const [a] = await avisos(db)
+  assert.equal(a.titulo, '7 materiales en su tope')
+  assert.ok(a.mensaje.includes('M1') && a.mensaje.includes('M5') && !a.mensaje.includes('M6') && a.mensaje.includes('y 2 más'), a.mensaje)
+})
+
+test('niveles distintos de un mismo proyecto se agrupan por separado', async (t) => {
+  const db = await fixture(); t.after(() => db.close())
+  const obra = await obraConMateriales(db, 'Proyecto mixto de niveles', ['Cable A', 'Cable B'], { tope: 100, consumo: 85 })
+  const m = await nuevoMaterial(db, 'Poste lleno')
+  await conTope(db, obra, m, 10); await comprometer(db, obra, m, 10)
+  assert.equal(await revisar(db), 6)
+  const a = await avisos(db)
+  assert.equal(a.filter((x) => x.titulo === '2 materiales al 80 % del tope').length, 3)
+  assert.equal(a.filter((x) => x.titulo === 'Material en su tope').length, 3, 'un solo material usa el texto individual')
+})
+
+test('borde del 100 %: 99,999 % avisa nivel 80 y muestra 99 %', async (t) => {
+  const db = await fixture(); t.after(() => db.close())
+  await escenario(db, { tope: 100000, consumo: 99999 })
+  assert.equal(await revisar(db), 3)
+  const [a] = await avisos(db)
+  assert.equal(a.titulo, 'Material al 80 % del tope')
+  assert.ok(a.mensaje.includes('lleva el 99 %'), a.mensaje)
 })
