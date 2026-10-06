@@ -33,6 +33,14 @@ export default async function NuevaSolicitudPage({
     .eq('activo', true)
     .order('nombre_base')
 
+  // Alias solo para que el buscador encuentre el material; si la consulta falla se busca sin ellos.
+  const { data: aliasRows } = await supabase.from('catalogo_materiales_alias').select('material_id, alias')
+  const aliasPorMaterial = new Map<string, string[]>()
+  for (const row of aliasRows ?? []) {
+    aliasPorMaterial.set(row.material_id, [...(aliasPorMaterial.get(row.material_id) ?? []), row.alias])
+  }
+  const materialesConAlias = (materiales ?? []).map((m) => ({ ...m, alias: aliasPorMaterial.get(m.id) ?? [] }))
+
   // Saldos de materiales por obra para validación en tiempo real en UI
   const { data: saldosRaw } = await supabase
     .from('v_saldo_material_obra')
@@ -91,7 +99,7 @@ export default async function NuevaSolicitudPage({
         <SolicitudForm
           action={createSolicitudAction}
           obras={obras}
-          materiales={materiales ?? []}
+          materiales={materialesConAlias}
           saldos={saldos}
           defaultObraId={resolvedsearchParams.obra}
           permiteMultiObra={puedeCrearSolicitudMultiObra(session.rol)}

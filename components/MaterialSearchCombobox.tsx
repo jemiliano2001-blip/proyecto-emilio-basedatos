@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { buscarMateriales } from '@/lib/busqueda-material'
 
 export interface MaterialComboboxOption {
   id: string
@@ -9,6 +10,8 @@ export interface MaterialComboboxOption {
   unidad_medida: string
   categoria?: string | null
   subcategoria?: string | null
+  /** Nombres alternativos (catalogo_materiales_alias); solo sirven para encontrar el material. */
+  alias?: string[]
   disponible?: number | null
   comprometido?: number | null
   disabled?: boolean
@@ -76,22 +79,15 @@ export function MaterialSearchCombobox({
   }, [materials])
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q || (selected && query === labelMaterial(selected))) {
-      return soloDisponibles
-    }
-    return soloDisponibles.filter((m) => {
-      const haystack = [
-        m.nombre_base,
-        m.variante ?? '',
-        m.unidad_medida,
-        m.categoria ?? '',
-        m.subcategoria ?? '',
-      ]
-        .join(' ')
-        .toLowerCase()
-      return haystack.includes(q)
-    })
+    if (selected && query === labelMaterial(selected)) return soloDisponibles
+    return buscarMateriales(soloDisponibles, query, (m) => [
+      m.nombre_base,
+      m.variante ?? '',
+      m.unidad_medida,
+      m.categoria ?? '',
+      m.subcategoria ?? '',
+      ...(m.alias ?? []),
+    ])
   }, [soloDisponibles, query, selected])
 
   return (

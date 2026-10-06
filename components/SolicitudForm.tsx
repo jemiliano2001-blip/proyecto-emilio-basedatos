@@ -28,6 +28,7 @@ interface MaterialOption {
   unidad_medida: string
   categoria?: string | null
   subcategoria?: string | null
+  alias?: string[]
   precio_base?: number
 }
 

@@ -35,7 +35,7 @@ hallazgos altos. No se tocó Supabase ni se corrieron los E2E.
 - **Asignar materiales en proyecto cerrado**: sin redirect ni link oculto; error genérico al final (`app/obras/[id]/asignar-materiales/page.tsx`, `app/obras/[id]/page.tsx:204-212`).
 - **Borrador de OC ($0, "A DETERMINAR") con WhatsApp y Excel habilitados** (`app/solicitudes/[id]/formato/page.tsx:71-84`).
 - **Drawer de Abastecimiento**: badges topados en 20 y errores → "No hay pendientes" (`app/api/abastecimiento/pendientes/route.ts:24-71`).
-- **Compras no puede editar/quitar renglones de servicio** al aprobar (`app/solicitudes/[id]/page.tsx:178-195`).
+- **[Resuelto, verificado 2026-10-06: `AprobarRequisicion` muestra importe y proveedor en servicios, "Quitar" aplica a toda partida y `0038` exige proveedor e importe.]** **Compras no puede editar/quitar renglones de servicio** al aprobar (`app/solicitudes/[id]/page.tsx:178-195`).
 - **Factura mayor que el total de la OC** sin aviso (`lib/actions/ordenes.ts:55-179`).
 - **Selector de proveedor de OC incluye inactivos** (`app/ordenes/[id]/page.tsx:123-130`).
 - **"Registrar otra recepción" visible a roles sin captura** — #20 sigue abierto (`app/recepciones/[id]/page.tsx:184-191`).
