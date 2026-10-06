@@ -1,7 +1,7 @@
 # Alertas de saldo bajo — diseño
 
 Fecha: 2026-10-06
-Estado: **0045 aplicada en remoto el 2026-10-06; 0046 (pg_cron) escrita y pendiente de autorización**
+Estado: **implementada y aplicada en remoto el 2026-10-06 (0045 y 0046); job `alertas-saldo` activo cada 15 min**
 Ruta: arquitectónica (subsistema nuevo: regla de negocio en la base + programación periódica)
 
 ## 1. Objetivo y criterio de éxito

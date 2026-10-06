@@ -61,7 +61,7 @@ Usuarios de prueba y sus contraseñas: `README.md` y `supabase/seed_usuarios_pru
 
 ## Migraciones
 
-SQL numerado en `supabase/migrations/` (`0001` … `0046`; todas aplicadas en remoto salvo `0046` (programa con `pg_cron` la revisión de alertas de saldo de `0045`; pendiente de autorización de Emiliano); `0040`–`0045` el 2026-10-06: límite de login en BD, categorías atómicas, piso de cantidad en topes, bloqueo de borrar topes con movimientos, EXECUTE de `anon` revocado en dos funciones y alertas de saldo bajo (`revisar_alertas_saldo()`, solo ejecutable por `postgres`); algunas llevan sufijo `a`/`b`, p. ej. `0034a`). El orden de aplicación en remoto no siempre es el numérico: `0019` se aplicó después de `0033` — confirma con `list_migrations` del MCP de Supabase, no por el nombre del archivo. **No hay Supabase CLI ni
+SQL numerado en `supabase/migrations/` (`0001` … `0046`, todas aplicadas en remoto; `0040`–`0046` el 2026-10-06: límite de login en BD, categorías atómicas, piso de cantidad en topes, bloqueo de borrar topes con movimientos, EXECUTE de `anon` revocado en dos funciones y alertas de saldo bajo (`revisar_alertas_saldo()`, solo ejecutable por `postgres`) y su programación con `pg_cron` cada 15 min (job `alertas-saldo`; reversión: `select cron.unschedule('alertas-saldo')`); algunas llevan sufijo `a`/`b`, p. ej. `0034a`). El orden de aplicación en remoto no siempre es el numérico: `0019` se aplicó después de `0033` — confirma con `list_migrations` del MCP de Supabase, no por el nombre del archivo. **No hay Supabase CLI ni
 `supabase/config.toml` en el repo** — las migraciones las aplica el usuario a mano
 (dashboard / MCP de Supabase). No inventes un `supabase db push`.
 

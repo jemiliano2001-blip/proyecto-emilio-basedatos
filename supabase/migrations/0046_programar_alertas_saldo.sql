@@ -3,5 +3,5 @@
 -- Reversión: select cron.unschedule('alertas-saldo');
 begin;
 create extension if not exists pg_cron;
-select cron.schedule('alertas-saldo', '*/15 * * * *', $$select public.revisar_alertas_saldo()$$);
+select cron.schedule('alertas-saldo', '*/15 * * * *', $job$select public.revisar_alertas_saldo()$job$);
 commit;
