@@ -55,32 +55,16 @@ export async function actualizarCategoriaAction(
   }
 
   const supabase = await createClient()
-
-  // Obtener nombre actual para sincronizar materiales
-  const { data: catActual } = await supabase
-    .from('material_categorias')
-    .select('nombre')
-    .eq('id', categoriaId)
-    .single()
-
-  const { error } = await supabase
-    .from('material_categorias')
-    .update({ nombre: nuevoNombre })
-    .eq('id', categoriaId)
+  const { error } = await supabase.rpc('renombrar_categoria_material', {
+    p_id: categoriaId,
+    p_nombre: nuevoNombre,
+  })
 
   if (error) {
     if (error.code === '23505') {
       return { error: 'Ya existe otra categoría con ese nombre.' }
     }
     return { error: 'No se pudo actualizar la categoría.' }
-  }
-
-  // Si cambió el nombre, cascada a catalogo_materiales
-  if (catActual && catActual.nombre !== nuevoNombre) {
-    await supabase
-      .from('catalogo_materiales')
-      .update({ categoria: nuevoNombre })
-      .eq('categoria', catActual.nombre)
   }
 
   revalidatePath('/materiales')
@@ -96,27 +80,7 @@ export async function eliminarCategoriaAction(
   }
 
   const supabase = await createClient()
-
-  const { data: cat } = await supabase
-    .from('material_categorias')
-    .select('nombre')
-    .eq('id', categoriaId)
-    .single()
-
-  if (!cat) {
-    return { error: 'La categoría no existe.' }
-  }
-
-  // Reasignar materiales a Sin categoría para no perderlos
-  await supabase
-    .from('catalogo_materiales')
-    .update({ categoria: null, subcategoria: null })
-    .eq('categoria', cat.nombre)
-
-  const { error } = await supabase
-    .from('material_categorias')
-    .delete()
-    .eq('id', categoriaId)
+  const { error } = await supabase.rpc('eliminar_categoria_material', { p_id: categoriaId })
 
   if (error) {
     return { error: 'No se pudo eliminar la categoría.' }
@@ -180,34 +144,16 @@ export async function actualizarSubcategoriaAction(
   }
 
   const supabase = await createClient()
-
-  const { data: subActual } = await supabase
-    .from('material_subcategorias')
-    .select('nombre, categoria_id, material_categorias(nombre)')
-    .eq('id', subcategoriaId)
-    .single()
-
-  const { error } = await supabase
-    .from('material_subcategorias')
-    .update({ nombre: nuevoNombre })
-    .eq('id', subcategoriaId)
+  const { error } = await supabase.rpc('renombrar_subcategoria_material', {
+    p_id: subcategoriaId,
+    p_nombre: nuevoNombre,
+  })
 
   if (error) {
     if (error.code === '23505') {
       return { error: 'Ya existe esa subcategoría dentro de esta categoría.' }
     }
     return { error: 'No se pudo actualizar la subcategoría.' }
-  }
-
-  // Cascada a catalogo_materiales
-  const catObj = subActual?.material_categorias as { nombre?: string } | null
-  const catNombre = catObj?.nombre
-  if (subActual && subActual.nombre !== nuevoNombre && catNombre) {
-    await supabase
-      .from('catalogo_materiales')
-      .update({ subcategoria: nuevoNombre })
-      .eq('categoria', catNombre)
-      .eq('subcategoria', subActual.nombre)
   }
 
   revalidatePath('/materiales')
@@ -223,28 +169,7 @@ export async function eliminarSubcategoriaAction(
   }
 
   const supabase = await createClient()
-
-  const { data: subActual } = await supabase
-    .from('material_subcategorias')
-    .select('nombre, material_categorias(nombre)')
-    .eq('id', subcategoriaId)
-    .single()
-
-  const catObj = subActual?.material_categorias as { nombre?: string } | null
-  const catNombre = catObj?.nombre
-  if (subActual && catNombre) {
-    // Reasignar subcategoría a null para no perder los materiales
-    await supabase
-      .from('catalogo_materiales')
-      .update({ subcategoria: null })
-      .eq('categoria', catNombre)
-      .eq('subcategoria', subActual.nombre)
-  }
-
-  const { error } = await supabase
-    .from('material_subcategorias')
-    .delete()
-    .eq('id', subcategoriaId)
+  const { error } = await supabase.rpc('eliminar_subcategoria_material', { p_id: subcategoriaId })
 
   if (error) {
     return { error: 'No se pudo eliminar la subcategoría.' }
