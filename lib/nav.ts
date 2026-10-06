@@ -263,5 +263,6 @@ export function hrefNotificacion(tipo: string, referenciaId: string | null): str
   }
   if (tipo.startsWith('traspaso_')) return `/traspasos/${referenciaId}`
   if (tipo === 'obra_cerrada') return `/obras/${referenciaId}`
+  if (tipo.startsWith('alerta_saldo_')) return `/obras/${referenciaId}`
   return null
 }
