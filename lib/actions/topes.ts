@@ -169,6 +169,8 @@ export async function eliminarMaterialObraAction(
     .select('id')
 
   if (error) {
+    // P0001 = regla de negocio del trigger de bloqueo (0043), con mensaje ya redactado para el usuario.
+    if (error.code === 'P0001') return { error: error.message }
     return { error: 'No se pudo eliminar el material del proyecto. Intenta de nuevo.' }
   }
   if (!data || data.length === 0) {
@@ -202,6 +204,7 @@ export async function eliminarTodosMaterialesObraAction(
     .select('id')
 
   if (error) {
+    if (error.code === 'P0001') return { error: error.message }
     return { error: 'No se pudieron eliminar los materiales del proyecto. Intenta de nuevo.' }
   }
   if (!data || data.length === 0) {
