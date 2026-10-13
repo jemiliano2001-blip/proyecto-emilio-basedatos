@@ -12,6 +12,7 @@ import { LeadTimeBadge } from '@/components/LeadTimeBadge'
 import { OrdenCompraFacturasSection } from '@/components/OrdenCompraFacturasSection'
 import { OrdenCompraProveedorModal } from '@/components/OrdenCompraProveedorModal'
 import { getSessionUsuario } from '@/lib/auth/session'
+import { hrefFacturaOrden } from '@/lib/facturas-oc'
 import { formatMoneyMx } from '@/lib/money'
 import type { DatosOrdenWhatsApp } from '@/lib/whatsapp-notificacion'
 import type { DatosOrdenExcel } from '@/lib/orden-excel-export'
@@ -201,7 +202,7 @@ export default async function OrdenDetallePage({
     folio_factura: f.folio_factura,
     monto_factura: f.monto_factura,
     archivo_path: f.archivo_path,
-    archivo_url: f.archivo_url,
+    archivo_url: hrefFacturaOrden(f.id),
     archivo_nombre: f.archivo_nombre,
     tamano_bytes: f.tamano_bytes,
     tipo_archivo: f.tipo_archivo,

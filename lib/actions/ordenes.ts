@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { getSessionUsuario } from '@/lib/auth/session'
+import { hrefFacturaOrden } from '@/lib/facturas-oc'
 import { puedeAsignarProveedorOC, puedeGestionarFacturasOC } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import { detectTipoArchivo, validateFacturaOrdenInput } from '@/lib/validations/factura_oc'
@@ -110,21 +111,19 @@ export async function subirFacturaOrdenAction(
     }
   }
 
-  const { data: publicUrlData } = supabase.storage
-    .from('obra-documentos')
-    .getPublicUrl(storagePath)
-
-  const archivoUrl = publicUrlData?.publicUrl || storagePath
-
+  // El bucket es privado. archivo_url guarda el enlace de la app, no una URL pública.
+  // Las filas viejas siguen abriéndose por archivo_path en /api/ordenes/facturas/[id].
+  const facturaId = crypto.randomUUID()
   const { data: facturaRow, error: dbError } = await supabase
     .from('orden_compra_facturas')
     .insert({
+      id: facturaId,
       orden_id,
       obra_id,
       folio_factura,
       monto_factura,
       archivo_path: storagePath,
-      archivo_url: archivoUrl,
+      archivo_url: hrefFacturaOrden(facturaId),
       archivo_nombre: file.name,
       tamano_bytes: file.size,
       tipo_archivo: tipoArchivo,
