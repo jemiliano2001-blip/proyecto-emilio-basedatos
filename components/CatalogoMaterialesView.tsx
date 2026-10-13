@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { IconPlus, IconEditar, IconBasura, IconPaquete } from '@/components/icons'
 import { EmptyState } from '@/components/EmptyState'
-import { MaterialPreviewModal } from '@/components/MaterialPreviewModal'
 import { formatMoneyMx } from '@/lib/money'
 import { cn } from '@/lib/utils'
 import { useModalFocus } from '@/lib/hooks/useModalFocus'
@@ -24,7 +23,6 @@ function MaterialCard({
   m,
   puedeEditar,
   verPrecios,
-  onSelect,
   selected,
   onToggleSelected,
   compact,
@@ -33,21 +31,22 @@ function MaterialCard({
   m: CatalogoMaterial
   puedeEditar: boolean
   verPrecios: boolean
-  onSelect: (m: CatalogoMaterial) => void
   selected: boolean
   onToggleSelected: (event: React.MouseEvent<HTMLInputElement>) => void
   compact: boolean
   showImage: boolean
 }) {
+  const router = useRouter()
+  const abrirFicha = () => router.push(`/materiales/${m.id}`)
   return (
     <div
-      role="button"
+      role="link"
       tabIndex={0}
-      onClick={() => onSelect(m)}
+      onClick={abrirFicha}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          onSelect(m)
+          abrirFicha()
         }
       }}
       className={cn(
@@ -164,7 +163,6 @@ export function CatalogoMaterialesView({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const [showImages, setShowImages] = useState(true)
   const [savedViews, setSavedViews] = useState<string[]>([])
-  const [previewMaterial, setPreviewMaterial] = useState<CatalogoMaterial | null>(null)
   const [isPending, startTransition] = useTransition()
   const [modalType, setModalType] = useState<
     | null
@@ -191,7 +189,7 @@ export function CatalogoMaterialesView({
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || previewMaterial) return
+      if (event.key !== 'Escape') return
       if (modalType) {
         setModalType(null)
         setTargetCat(null)
@@ -202,7 +200,7 @@ export function CatalogoMaterialesView({
     }
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [modalType, previewMaterial])
+  }, [modalType])
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString())
@@ -645,7 +643,6 @@ export function CatalogoMaterialesView({
                           m={m}
                           puedeEditar={puedeEditar}
                           verPrecios={verPrecios}
-                          onSelect={setPreviewMaterial}
                           selected={selectedIds.has(m.id)}
                           onToggleSelected={(event) => toggleMaterial(m, event)}
                           compact={density === 'compact'}
@@ -696,7 +693,6 @@ export function CatalogoMaterialesView({
                         m={m}
                         puedeEditar={puedeEditar}
                         verPrecios={verPrecios}
-                        onSelect={setPreviewMaterial}
                         selected={selectedIds.has(m.id)}
                         onToggleSelected={(event) => toggleMaterial(m, event)}
                         compact={density === 'compact'}
@@ -733,7 +729,6 @@ export function CatalogoMaterialesView({
                   m={m}
                   puedeEditar={puedeEditar}
                   verPrecios={verPrecios}
-                  onSelect={setPreviewMaterial}
                   selected={selectedIds.has(m.id)}
                   onToggleSelected={(event) => toggleMaterial(m, event)}
                   compact={density === 'compact'}
@@ -768,7 +763,6 @@ export function CatalogoMaterialesView({
                         m={m}
                         puedeEditar={puedeEditar}
                         verPrecios={verPrecios}
-                        onSelect={setPreviewMaterial}
                         selected={selectedIds.has(m.id)}
                         onToggleSelected={(event) => toggleMaterial(m, event)}
                         compact={density === 'compact'}
@@ -799,7 +793,6 @@ export function CatalogoMaterialesView({
                       m={m}
                       puedeEditar={puedeEditar}
                       verPrecios={verPrecios}
-                      onSelect={setPreviewMaterial}
                       selected={selectedIds.has(m.id)}
                       onToggleSelected={(event) => toggleMaterial(m, event)}
                       compact={density === 'compact'}
@@ -955,15 +948,6 @@ export function CatalogoMaterialesView({
           </div>
         </div>
       )}
-
-      {/* Vista previa de ficha técnica de material */}
-      <MaterialPreviewModal
-        material={previewMaterial}
-        open={Boolean(previewMaterial)}
-        onClose={() => setPreviewMaterial(null)}
-        puedeEditar={puedeEditar}
-        verPrecios={verPrecios}
-      />
     </div>
   )
 }

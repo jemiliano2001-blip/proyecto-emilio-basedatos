@@ -64,3 +64,17 @@ test('login: anon ejecuta las RPC pero no toca la tabla directamente', async t =
   await db.exec('reset role; set role authenticated')
   await assert.rejects(db.query('select * from login_intentos'), /permission denied/i)
 })
+
+test('login: anon no puede limpiar contadores (solo authenticated tras un login exitoso)', async t => {
+  const db = await fixture()
+  t.after(() => db.close())
+  await db.exec(readFileSync('supabase/migrations/0048_login_limpiar_sin_anon.sql', 'utf8'))
+  for (let i = 0; i < 5; i++) await fallo(db, A)
+  await db.exec('set role anon')
+  await assert.rejects(db.query('select public.login_limpiar($1)', [A]), /permission denied/i)
+  assert.ok(await bloqueo(db, A) > 0)
+  await fallo(db, B)
+  await db.exec('reset role; set role authenticated')
+  await db.query('select public.login_limpiar($1)', [A])
+  assert.equal(await bloqueo(db, A), 0)
+})
