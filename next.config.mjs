@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
   experimental: {
     serverActions: {
       // Permite que los Server Actions (p. ej. el login) funcionen cuando la app

@@ -134,7 +134,13 @@ export default async function RecepcionesPage() {
                 </span>
               </div>
               {pendientes.length === 0 ? (
-                <EmptyState icon={IconCheckCircle} title="Nada por revisar" className="py-8" />
+                <EmptyState
+                  icon={IconCheckCircle}
+                  title="Nada por revisar"
+                  description="Cuando el personal registre una recepción en obra, aparecerá aquí para que la revises."
+                  action={{ label: 'Ver historial', href: '#historial' }}
+                  className="py-8"
+                />
               ) : (
                 <div className="list-stack">
                   {pendientes.map((r) => (
@@ -163,7 +169,7 @@ export default async function RecepcionesPage() {
           )}
         </div>
 
-        <section className="space-y-3">
+        <section id="historial" className="space-y-3">
           <div className="flex items-end justify-between gap-3">
             <h2 className="text-base font-semibold text-foreground">Historial</h2>
             <span className="text-sm tabular-nums text-muted-foreground">{historial.length}</span>

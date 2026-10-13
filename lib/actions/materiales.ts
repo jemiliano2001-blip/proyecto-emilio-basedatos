@@ -158,5 +158,6 @@ export async function updateMaterialAction(
 
   revalidatePath('/materiales')
   revalidatePath(`/materiales/${materialId}`)
-  redirect('/materiales')
+  revalidatePath(`/materiales/${materialId}/editar`)
+  redirect(`/materiales/${materialId}`)
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, Poppins } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import { cookies } from 'next/headers'
 import { AppNav } from '@/components/AppNav'
 import { AppSidebar } from '@/components/AppSidebar'
@@ -14,13 +14,6 @@ import { OfflineUserProvider } from '@/components/OfflineUserProvider'
 import { ToastUndoContainer } from '@/components/ToastUndoContainer'
 import { cn } from '@/lib/utils'
 import './globals.css'
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-heading',
-  weight: ['600', '700', '800'],
-})
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -62,7 +55,7 @@ export default async function RootLayout({
   return (
     <html
       lang="es"
-      className={cn(poppins.variable, playfair.variable)}
+      className={poppins.variable}
       data-sidebar={showNav ? (sidebarCollapsed ? 'collapsed' : 'expanded') : undefined}
     >
       <body className="min-h-dvh bg-background text-foreground">

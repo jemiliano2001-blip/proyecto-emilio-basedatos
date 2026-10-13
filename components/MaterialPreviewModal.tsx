@@ -151,7 +151,7 @@ export function MaterialPreviewModal({
           </button>
           {puedeEditar && (
             <Link
-              href={`/materiales/${material.id}`}
+              href={`/materiales/${material.id}/editar`}
               className="btn-primary text-sm px-3.5 py-2"
             >
               <IconEditar className="w-3.5 h-3.5" />

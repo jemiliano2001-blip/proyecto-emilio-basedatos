@@ -23,6 +23,7 @@
     --border: 214.3 31.8% 91.4%;          /* #E2E8F0 */
     --input: 214.3 31.8% 88%;
     --ring: 201.3 96.3% 32.2%;
+    --font-heading: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
     /* Marca / acción primaria exclusiva (#0369A1) */
     --primary: 201.3 96.3% 32.2%;         /* #0369A1 (Sky 700) */
@@ -132,11 +133,6 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: 'cv11', 'ss01', 'ss03';
     text-rendering: optimizeLegibility;
-    /* Fondo ambiental: dos halos de marca muy sutiles sobre el lienzo slate */
-    background-image:
-      radial-gradient(52rem 26rem at 100% -8%, hsl(var(--primary) / 0.07), transparent 65%),
-      radial-gradient(40rem 22rem at -8% 105%, hsl(var(--secondary) / 0.05), transparent 65%);
-    background-repeat: no-repeat;
   }
 
   * {
@@ -222,6 +218,14 @@
 
   .btn-xs {
     @apply min-h-[32px] px-2.5 py-1.5 text-xs rounded-lg font-medium;
+  }
+
+  /* En táctil los botones compactos no bajan de 44px. Con puntero fino se quedan densos. */
+  @media (pointer: coarse) {
+    .btn-sm,
+    .btn-xs {
+      min-height: 44px;
+    }
   }
 
   /* ---------- Superficies (16px radius consistente & sombras elevadas) ---------- */
@@ -451,17 +455,6 @@
   .t-eyebrow::before {
     content: '';
     @apply h-0.5 w-4 rounded-full bg-primary/70;
-  }
-
-  /* Textura "plano de obra": retícula fina que ancla la identidad (paneles de marca, vacíos) */
-  .bg-blueprint {
-    background-image:
-      linear-gradient(hsl(var(--border) / 0.55) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.55) 1px, transparent 1px);
-    background-size: 28px 28px;
-    background-position: -1px -1px;
-    -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
-    mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
   }
 
   .tabular-nums {

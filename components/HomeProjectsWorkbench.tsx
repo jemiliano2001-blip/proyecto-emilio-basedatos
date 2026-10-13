@@ -234,16 +234,22 @@ export function HomeProjectsWorkbench({
           description={
             search
               ? 'Prueba con otro término o cambia la pestaña de estatus.'
-              : puedeCrear && selectedTab === 'activa'
-                ? 'Registra tu primer proyecto para controlar su presupuesto y materiales.'
-                : undefined
+              : selectedTab === 'pausada'
+                ? 'Aquí verás los proyectos que pongas en pausa desde su ficha.'
+                : selectedTab === 'cerrada'
+                  ? 'Aquí aparecen los proyectos que cierres desde su ficha.'
+                  : puedeCrear && selectedTab === 'activa'
+                    ? 'Registra tu primer proyecto para controlar su presupuesto y materiales.'
+                    : undefined
           }
           action={
             search
               ? { label: 'Limpiar búsqueda', onClick: () => setSearch('') }
-              : puedeCrear && selectedTab === 'activa'
-                ? { label: 'Nuevo proyecto', href: '/obras/nueva' }
-                : undefined
+              : selectedTab === 'pausada' || selectedTab === 'cerrada'
+                ? { label: 'Ver activos', onClick: () => setSelectedTab('activa') }
+                : puedeCrear && selectedTab === 'activa'
+                  ? { label: 'Nuevo proyecto', href: '/obras/nueva' }
+                  : undefined
           }
         />
       )}

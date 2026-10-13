@@ -19,17 +19,7 @@ export default async function LoginPage({
   return (
     <main className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
       {/* Panel de marca (solo desktop) */}
-      <aside className="relative isolate hidden overflow-hidden bg-foreground text-background lg:flex lg:flex-col lg:justify-between lg:p-14">
-        <div aria-hidden className="bg-blueprint pointer-events-none absolute inset-0 -z-10 opacity-20" />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-32 -top-32 -z-10 size-[28rem] rounded-full bg-primary/40 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-40 -left-24 -z-10 size-[24rem] rounded-full bg-secondary/30 blur-3xl"
-        />
-
+      <aside className="hidden bg-foreground text-background lg:flex lg:flex-col lg:justify-between lg:p-14">
         <div className="flex items-center gap-3">
           <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-primary">
             <IconLogo className="size-5" />
