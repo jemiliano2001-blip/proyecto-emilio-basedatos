@@ -24,7 +24,7 @@ La migración `supabase/migrations/0016_integridad_proyectos_precios.sql` queda 
 
 ### Fase 0 — Infraestructura (hecha)
 - Proyecto Supabase: `proyecto-emilio-basedatos` (ref `uplxxnpurpqlvhjrsufa`)
-- Migraciones en repo: `0001` … `0039`, aplicadas en remoto (incluida `0019` de evidencias fotográficas, aplicada el 2026-10-01)
+- Migraciones en repo: `0001` … `0048`, aplicadas en remoto hasta `0047` (incluida `0019` de evidencias fotográficas, aplicada el 2026-10-01); `0048` (quita a `anon` el EXECUTE de `login_limpiar`, aviso del Security Advisor) pendiente de aplicar
 - `.env.local` con URL + anon key (no subir a git)
 - Usuarios de prueba sembrados (ver abajo)
 
