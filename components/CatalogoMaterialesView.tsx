@@ -78,9 +78,9 @@ function MaterialCard({
       {/* Botón editar discreto en hover */}
       {puedeEditar && (
         <Link
-          href={`/materiales/${m.id}`}
+          href={`/materiales/${m.id}/editar`}
           onClick={(e) => e.stopPropagation()}
-          className="absolute top-2.5 right-2.5 z-10 flex min-h-[32px] min-w-[32px] items-center justify-center rounded-lg bg-card/90 backdrop-blur-xs shadow-xs border border-border/80 text-muted-foreground hover:text-foreground hover:bg-card transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
+          className="absolute top-2.5 right-2.5 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-card/90 shadow-xs border border-border/80 text-muted-foreground hover:text-foreground hover:bg-card transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
           title="Editar material"
           aria-label={`Editar ${m.nombre_base}`}
         >

@@ -7,7 +7,7 @@ de emitir código. No se regenera por página: se extiende o corrige aquí.
 > Arquetipo de Marca: **El Cuidador (The Caregiver)** — accesibilidad universal (WCAG AAA),
 > ergonomía visual que reduce la ansiedad digital mediante tonos tierra, calidez y
 > alta densidad operativa. Se adoptó la paleta **60-30-10** (#F8FAFC / #FFFFFF / #0369A1 / #0F766E),
-> titulares en **Playfair Display**, cuerpo en **Poppins** y radio consistente de **16px**.
+> titulares en **sans del sistema** (`--font-heading`), cuerpo en **Poppins** y radio consistente de **16px**.
 
 ## Género
 
@@ -40,7 +40,7 @@ border-danger/25`) para badges, alertas y filas.
 
 ## Tipografía
 
-- **Titulares (H1 / H2):** **Playfair Display** (`--font-heading`), pesos 600/700/800.
+- **Titulares (H1 / H2):** sans del sistema (`--font-heading`: ui-sans-serif, system-ui), pesos 600 y 700. Sin serif de display.
 - **Cuerpo y Datos:** **Poppins** (`--font-sans`), pesos 400/500/600/700.
 - Regla de los 3 niveles: H1 (28-32px), H2 (18-22px), Body (16px base, interlineado 1.5 a 1.6).
 - Longitud de línea: Máximo 70 a 80 caracteres (`max-w-[75ch]`) para evitar fatiga visual.
@@ -50,9 +50,9 @@ border-danger/25`) para badges, alertas y filas.
 
 | Clase | Uso | Tamaño |
 |-------|-----|--------|
-| `.t-display` | Login, pantallas de bienvenida | 30 / 36px · Playfair 700 |
-| `.t-h1` | Título de página (`PageHeader`) | 24 / 30px · Playfair 700 |
-| `.t-h2` | Título de sección | 18 / 20px · Playfair 700 |
+| `.t-display` | Login, pantallas de bienvenida | 30 / 36px · sans 700 |
+| `.t-h1` | Título de página (`PageHeader`) | 24 / 30px · sans 700 |
+| `.t-h2` | Título de sección | 18 / 20px · sans 700 |
 | `.t-body` | Texto de lectura | 14 / 16px · Poppins 400 |
 | `.t-caption` | Ayudas, metadatos | 12px · muted |
 | `.t-eyebrow` | Contexto sobre el título (con filete de marca) | 11px · caps · tracking 0.14em |
@@ -62,7 +62,7 @@ Usa estas clases en lugar de recomponer `text-* font-heading` a mano.
 ## Espaciado y radio
 
 - Border Radius: **16px** consistente en botones, tarjetas, inputs y modales (`rounded-2xl` / `--radius: 1rem`).
-- Modificadores de densidad para oficina: `btn-sm` (40px, rounded-xl 12px) y `btn-xs` (32px, rounded-lg 10px).
+- Modificadores de densidad para oficina: `btn-sm` (40px, rounded-xl 12px) y `btn-xs` (32px, rounded-lg 10px). Con `pointer: coarse` ambos quedan en 44px de alto.
 - Sombras: `elevated` suaves y acogedoras, evitando aristas duras o contrastes negros agresivos.
 - Escala de elevación: `xs` (controles) → `card` (superficies en reposo) →
   `card-hover` (interactivas) → `elevated` (diálogos) → `popover` (menús).
@@ -72,10 +72,8 @@ Usa estas clases en lugar de recomponer `text-* font-heading` a mano.
 
 ## Identidad
 
-- **Plano de obra:** retícula fina `.bg-blueprint` (enmascarada en radial) en
-  paneles de marca y estados vacíos. Es la firma visual; no usarla como fondo
-  de contenido.
-- Fondo de página con dos halos de marca muy sutiles (`body` en `globals.css`).
+- Panel de marca del login: fondo sólido `foreground`, sin retícula ni halos.
+- El fondo de página es el token `background`, sin gradiente radial.
 - Eyebrow con filete (`.t-eyebrow`) sobre los títulos de página.
 
 ## Shell

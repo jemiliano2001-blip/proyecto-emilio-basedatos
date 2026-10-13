@@ -51,6 +51,7 @@ export default async function NuevoMaterialPage({
         categorias={categorias}
         initialCategoria={resolvedSearchParams?.categoria}
         initialSubcategoria={resolvedSearchParams?.subcategoria}
+        cancelHref="/materiales"
       />
     </main>
   )

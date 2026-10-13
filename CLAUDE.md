@@ -35,7 +35,7 @@ npx tsc --noEmit   # typecheck — pasa limpio hoy; es LA puerta de verificació
 `components`, `lib` y `middleware.ts`; hoy pasa limpio y sí cuenta como verificación.
 
 **Sistema visual:** `design.md` es la fuente de verdad (tokens semánticos en
-`globals.css`/`tailwind.config.ts`, Playfair Display (titulares) + Poppins (cuerpo) vía `next/font`, sidebar en desktop +
+`globals.css`/`tailwind.config.ts`, titulares en sans del sistema y cuerpo en Poppins vía `next/font`, sidebar en desktop +
 bottom nav en móvil, navegación centralizada en `lib/nav.ts`). No uses colores crudos
 de Tailwind (`text-gray-500`, `bg-red-50`) ni importes constantes desde archivos
 `'use client'` hacia server components.

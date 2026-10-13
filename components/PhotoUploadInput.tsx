@@ -28,6 +28,8 @@ interface PhotoUploadInputProps {
   captureCamera?: boolean
   helpText?: string
   onChangeFile?: (file: File | null) => void
+  /** true cuando se marca la foto ya guardada para quitarla. */
+  onRemoveExisting?: (removed: boolean) => void
   onMetadataChange?: (meta: {
     gps: GpsMetadata | null
     calidad: DiagnosticoCalidadImagen | null
@@ -50,6 +52,7 @@ export function PhotoUploadInput({
   captureCamera = false,
   helpText,
   onChangeFile,
+  onRemoveExisting,
   onMetadataChange,
 }: PhotoUploadInputProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(existingUrl ?? null)
@@ -129,6 +132,7 @@ export function PhotoUploadInput({
         return url
       })
       setRemoveExisting(false)
+      onRemoveExisting?.(false)
       onChangeFile?.(compressedFile)
       vibrarExito()
     })
@@ -186,6 +190,7 @@ export function PhotoUploadInput({
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+    onRemoveExisting?.(true)
     onChangeFile?.(null)
     onMetadataChange?.({ gps: null, calidad: null })
   }

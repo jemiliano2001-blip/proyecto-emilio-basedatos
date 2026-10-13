@@ -18,8 +18,8 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ['var(--font-sans)', 'Poppins', ...defaultTheme.fontFamily.sans],
-        heading: ['var(--font-heading)', 'Playfair Display', ...defaultTheme.fontFamily.serif],
-        serif: ['var(--font-heading)', 'Playfair Display', ...defaultTheme.fontFamily.serif],
+        heading: ['var(--font-heading)', ...defaultTheme.fontFamily.sans],
+        serif: [...defaultTheme.fontFamily.serif],
       },
       colors: {
         background: token('background'),

@@ -7,7 +7,7 @@ En UI se dice **proyecto**; la tabla sigue siendo `obras`.
 
 ### Rediseño SaaS (2026-09-18)
 - Paleta "Slate + Cobalto" como tokens semánticos (CSS variables HSL); dark mode preparado en `[data-theme=dark]`, sin exponer aún.
-- Tipografía Playfair Display + Poppins vía `next/font` (ver `design.md`).
+- Tipografía: titulares en sans del sistema (`--font-heading`) y cuerpo en Poppins vía `next/font` (ver `design.md`).
 - Shell de escritorio con sidebar colapsable (`Ctrl/⌘+B`, cookie `ot-sidebar`) y migas en la barra superior; en móvil sigue la bottom nav + hoja "Más". Navegación por rol centralizada en `lib/nav.ts`.
 - Home como dashboard (KPIs + tabla de proyectos), login a dos paneles, detalle de proyecto a dos columnas con resumen de presupuesto.
 - El Service Worker solo se registra en producción (en desarrollo servía chunks viejos).
