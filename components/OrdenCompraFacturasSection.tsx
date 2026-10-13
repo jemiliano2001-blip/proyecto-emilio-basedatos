@@ -11,6 +11,7 @@ import {
   cotejarPartidasConOC,
 } from '@/lib/extractor-facturas-nativo'
 import { vibrarExito, vibrarTap } from '@/lib/haptics'
+import { hrefFacturaOrden } from '@/lib/facturas-oc'
 import { formatMoneyMx } from '@/lib/money'
 
 interface Props {
@@ -244,7 +245,7 @@ export function OrdenCompraFacturasSection({
                     />
                     <div className="min-w-0 flex-1">
                       <a
-                        href={f.archivo_url}
+                        href={hrefFacturaOrden(f.id)}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
@@ -267,7 +268,7 @@ export function OrdenCompraFacturasSection({
                   <div className="flex items-center gap-1 pr-2 shrink-0">
                     {f.tipo_archivo === 'xml' ? (
                       <a
-                        href={f.archivo_url}
+                        href={hrefFacturaOrden(f.id)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-xs font-semibold text-primary hover:underline"
@@ -479,7 +480,7 @@ export function OrdenCompraFacturasSection({
         initialIndex={quickLookIndex ?? 0}
         onClose={() => setQuickLookIndex(null)}
         items={facturas.map((f) => ({
-          url: f.archivo_url,
+          url: hrefFacturaOrden(f.id),
           nombre: f.folio_factura ? `Factura ${f.folio_factura}` : (f.archivo_nombre || 'Documento'),
           tipo: (f.archivo_nombre || '').toLowerCase().endsWith('.pdf') ? 'pdf' : 'imagen',
           tamano: formatBytes(f.tamano_bytes),
