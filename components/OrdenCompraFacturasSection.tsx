@@ -354,7 +354,7 @@ export function OrdenCompraFacturasSection({
       )}
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50">
           <div className="bg-card rounded-2xl p-6 w-full max-w-md shadow-xl border border-border max-h-[90dvh] overflow-y-auto">
             <h3 className="text-lg font-bold text-foreground mb-1">
               Adjuntar factura del proveedor

@@ -90,7 +90,7 @@ export function HomeProjectsWorkbench({
   return (
     <div className="space-y-3">
       {/* Toolbar: búsqueda + segmentos de estatus */}
-      <div className="sticky top-[calc(var(--topbar-height)+env(safe-area-inset-top,0px))] z-10 -mx-1 flex flex-col gap-2.5 bg-background/95 px-1 py-2 backdrop-blur-md sm:static sm:flex-row sm:items-center sm:justify-between sm:bg-transparent sm:py-0 sm:backdrop-blur-none">
+      <div className="sticky top-[calc(var(--topbar-height)+env(safe-area-inset-top,0px))] z-10 -mx-1 flex flex-col gap-2.5 bg-background/95 px-1 py-2 sm:static sm:flex-row sm:items-center sm:justify-between sm:bg-transparent sm:py-0 sm:backdrop-blur-none">
         <div className="relative flex-1 sm:max-w-md">
           <IconSearch className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -128,7 +128,7 @@ export function HomeProjectsWorkbench({
                 aria-selected={active}
                 onClick={() => setSelectedTab(tab.id)}
                 className={cn(
-                  'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-all sm:min-h-[34px]',
+                  'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] sm:min-h-[34px]',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring select-none',
                   active
                     ? 'bg-card text-foreground shadow-xs font-bold'

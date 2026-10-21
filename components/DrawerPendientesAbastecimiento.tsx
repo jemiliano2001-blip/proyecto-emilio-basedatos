@@ -136,7 +136,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex justify-end bg-black/60 transition-opacity animate-in fade-in duration-200"
       aria-modal="true"
       role="dialog"
       aria-labelledby="drawer-abastecimiento-title"
@@ -183,7 +183,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
             type="button"
             onClick={() => setTabActiva('compras')}
             className={cn(
-              'flex flex-col items-center justify-center rounded-md py-2 px-1 text-xs font-medium transition-all',
+              'flex flex-col items-center justify-center rounded-md py-2 px-1 text-xs font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform]',
               tabActiva === 'compras'
                 ? 'bg-card text-foreground shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
@@ -206,7 +206,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
             type="button"
             onClick={() => setTabActiva('finanzas')}
             className={cn(
-              'flex flex-col items-center justify-center rounded-md py-2 px-1 text-xs font-medium transition-all',
+              'flex flex-col items-center justify-center rounded-md py-2 px-1 text-xs font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform]',
               tabActiva === 'finanzas'
                 ? 'bg-card text-foreground shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
@@ -229,7 +229,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
             type="button"
             onClick={() => setTabActiva('transito')}
             className={cn(
-              'flex flex-col items-center justify-center rounded-md py-2 px-1 text-xs font-medium transition-all',
+              'flex flex-col items-center justify-center rounded-md py-2 px-1 text-xs font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform]',
               tabActiva === 'transito'
                 ? 'bg-card text-foreground shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
@@ -290,7 +290,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
                     key={req.id}
                     href={`/solicitudes/${req.id}`}
                     onClick={() => setAbierto(false)}
-                    className="block rounded-lg border border-border bg-card p-3 shadow-2xs hover:border-primary/50 transition-all"
+                    className="block rounded-lg border border-border bg-card p-3 shadow-2xs hover:border-primary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                   >
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-semibold text-foreground">
@@ -332,7 +332,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
                     key={req.id}
                     href={`/solicitudes/${req.id}`}
                     onClick={() => setAbierto(false)}
-                    className="block rounded-lg border border-border bg-card p-3 shadow-2xs hover:border-primary/50 transition-all"
+                    className="block rounded-lg border border-border bg-card p-3 shadow-2xs hover:border-primary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                   >
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-semibold text-foreground">
@@ -369,7 +369,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
                     key={ord.id}
                     href={`/ordenes/${ord.id}`}
                     onClick={() => setAbierto(false)}
-                    className="block rounded-lg border border-border bg-card p-3 shadow-2xs hover:border-teal-500/50 transition-all"
+                    className="block rounded-lg border border-border bg-card p-3 shadow-2xs hover:border-teal-500/50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                   >
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-foreground">

@@ -98,7 +98,7 @@ export function FileUploader({
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          'relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-200 cursor-pointer select-none',
+          'relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 text-center transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-200 cursor-pointer select-none',
           isDragging
             ? 'border-primary bg-primary-soft/60 scale-[1.01] shadow-elevated'
             : 'border-border/80 bg-muted/20 hover:border-primary/50 hover:bg-primary-soft/40'
@@ -159,7 +159,7 @@ export function FileUploader({
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div
                       className={cn(
-                        'h-full rounded-full transition-all duration-300',
+                        'h-full rounded-full transition-[width] duration-300',
                         status === 'done' ? 'bg-success' : 'bg-primary'
                       )}
                       style={{ width: `${progress}%` }}

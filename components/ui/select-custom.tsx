@@ -122,7 +122,7 @@ export function SelectCustom({
         onClick={() => setIsOpen((prev) => !prev)}
         onKeyDown={handleKeyDown}
         className={cn(
-          'input-base flex items-center justify-between text-left cursor-pointer transition-all duration-180',
+          'input-base flex items-center justify-between text-left cursor-pointer transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-180',
           isOpen && 'border-primary ring-2 ring-primary/20',
           error && 'border-danger focus:ring-danger/20',
           disabled && 'cursor-not-allowed opacity-50'

@@ -413,7 +413,7 @@ export function CommandPalette({ rol, userId, traspasosDisponibles }: { rol: Rol
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 px-4 bg-foreground/50 backdrop-blur-sm print:hidden">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-12 sm:pt-20 px-4 bg-foreground/50 print:hidden">
       {/* Backdrop */}
       <button
         type="button"

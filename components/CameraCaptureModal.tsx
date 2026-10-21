@@ -337,7 +337,7 @@ export function CameraCaptureModal({
 
               {/* Diagnóstico si se detecta advertencia */}
               {liveQuality && !liveQuality.esApta && (
-                <div className="absolute top-3 inset-x-3 bg-warning-soft-foreground/90 text-warning-soft text-xs px-3 py-1.5 rounded-lg border border-warning/50 backdrop-blur-xs">
+                <div className="absolute top-3 inset-x-3 bg-warning-soft-foreground/90 text-warning-soft text-xs px-3 py-1.5 rounded-lg border border-warning/50">
                   {liveQuality.mensajes[0]}
                 </div>
               )}
@@ -352,7 +352,7 @@ export function CameraCaptureModal({
               type="button"
               disabled={isCapturing}
               onClick={handleShutter}
-              className="w-16 h-16 rounded-full border-4 border-primary-foreground bg-primary hover:bg-primary active:scale-95 transition-all shadow-lg flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-ring/50 disabled:opacity-50"
+              className="w-16 h-16 rounded-full border-4 border-primary-foreground bg-primary hover:bg-primary active:scale-95 transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-lg flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-ring/50 disabled:opacity-50"
               aria-label="Tomar fotografía"
             >
               <div className="w-11 h-11 rounded-full bg-card/90" />

@@ -662,7 +662,7 @@ export function AsignarMaterialesObraForm({
                 return (
                   <div
                     key={kit.instanceId}
-                    className="border-2 border-primary/30 bg-primary-soft/15 rounded-xl overflow-hidden shadow-sm transition-all"
+                    className="border-2 border-primary/30 bg-primary-soft/15 rounded-xl overflow-hidden shadow-sm transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                   >
                     {/* Header del Kit Asignado */}
                     <div className="bg-muted/50 border-b border-border p-3 flex items-center justify-between gap-3">

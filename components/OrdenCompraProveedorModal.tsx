@@ -63,7 +63,7 @@ export function OrdenCompraProveedorModal({
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50">
           <div className="card w-full max-w-md shadow-xl border border-rule">
             <h3 className="text-lg font-bold text-foreground mb-1">
               Proveedor y Folio Físico

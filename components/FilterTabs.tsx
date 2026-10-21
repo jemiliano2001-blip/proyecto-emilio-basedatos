@@ -26,7 +26,7 @@ export function FilterTabs({ tabs, ariaLabel = 'Filtros', className }: FilterTab
     >
       {tabs.map((tab) => {
         const itemClasses = cn(
-          'min-h-[38px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-center text-xs sm:text-sm font-semibold transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-[34px]',
+          'min-h-[38px] flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-center text-xs sm:text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-[34px]',
           tab.active
             ? 'bg-card text-foreground shadow-xs font-bold'
             : 'text-muted-foreground hover:text-foreground'

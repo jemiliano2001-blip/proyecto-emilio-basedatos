@@ -36,6 +36,14 @@ interface AdjuntarArchivoProps {
   folio?: string | null
   monto?: string | null
   moneda?: string | null
+  tituloZona?: string
+  ayudaZona?: string
+  nota?: string | null
+  tituloCamara?: string
+  ariaLabel?: string
+  accept?: string
+  botonArchivo?: string
+  grande?: boolean
 }
 
 function esCampoDeTexto(destino: EventTarget | null): boolean {
@@ -58,6 +66,14 @@ export function AdjuntarArchivo({
   folio,
   monto,
   moneda,
+  tituloZona = 'Haz clic o arrastra un screenshot o PDF',
+  ayudaZona = 'O presiona Ctrl + V',
+  nota = 'También puedes elegir un XML del SAT.',
+  tituloCamara = 'Foto de la factura',
+  ariaLabel = 'Seleccionar archivo de factura',
+  accept = ACCEPT_FACTURA,
+  botonArchivo,
+  grande = false,
 }: AdjuntarArchivoProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [camaraAbierta, setCamaraAbierta] = useState(false)
@@ -141,11 +157,22 @@ export function AdjuntarArchivo({
 
   return (
     <div className="space-y-3">
+      {grande && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setCamaraAbierta(true)}
+          className="btn-secondary min-h-14 w-full justify-center text-base"
+        >
+          <IconCamara className="h-5 w-5" />
+          Tomar foto
+        </button>
+      )}
       {!archivo && (
         <div
           role="button"
           tabIndex={disabled ? -1 : 0}
-          aria-label="Seleccionar archivo de factura"
+          aria-label={ariaLabel}
           aria-disabled={disabled}
           onClick={() => {
             if (!disabled) inputRef.current?.click()
@@ -166,20 +193,22 @@ export function AdjuntarArchivo({
             setArrastrando(false)
           }}
           onDrop={soltar}
-          className={`flex min-h-28 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-6 text-center outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-            arrastrando ? 'border-primary bg-primary-soft' : 'border-input bg-muted/40'
-          } ${disabled ? 'pointer-events-none opacity-60' : ''}`}
+          className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 text-center outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            grande ? 'min-h-14 py-4' : 'min-h-28 py-6'
+          } ${arrastrando ? 'border-primary bg-primary-soft' : 'border-input bg-muted/40'} ${
+            disabled ? 'pointer-events-none opacity-60' : ''
+          }`}
         >
-          <span className="text-sm font-medium text-foreground">
-            Haz clic o arrastra un screenshot o PDF
+          <span className={`${grande ? 'text-base' : 'text-sm'} font-medium text-foreground`}>
+            {tituloZona}
           </span>
-          <span className="text-sm text-muted-foreground">O presiona Ctrl + V</span>
+          <span className={`${grande ? 'text-base' : 'text-sm'} text-muted-foreground`}>{ayudaZona}</span>
         </div>
       )}
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPT_FACTURA}
+        accept={accept}
         className="sr-only"
         tabIndex={-1}
         disabled={disabled}
@@ -189,16 +218,32 @@ export function AdjuntarArchivo({
           evento.target.value = ''
         }}
       />
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setCamaraAbierta(true)}
-        className="btn-secondary min-h-14 w-full justify-center text-base"
-      >
-        <IconCamara className="h-5 w-5" />
-        Tomar foto
-      </button>
-      <p className="text-xs text-muted-foreground">También puedes elegir un XML del SAT.</p>
+      {!grande && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setCamaraAbierta(true)}
+          className="btn-secondary min-h-14 w-full justify-center text-base"
+        >
+          <IconCamara className="h-5 w-5" />
+          Tomar foto
+        </button>
+      )}
+      {botonArchivo && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => inputRef.current?.click()}
+          className="btn-secondary min-h-14 w-full justify-center text-base"
+        >
+          {botonArchivo}
+        </button>
+      )}
+      {nota && (
+        <p className={grande ? 'text-base text-muted-foreground' : 'text-xs text-muted-foreground'}>
+          {nota}
+        </p>
+      )}
       {aviso && (
         <p role="status" className="text-sm text-foreground">
           {aviso || AVISO_PEGADO}
@@ -255,7 +300,7 @@ export function AdjuntarArchivo({
       <CameraCaptureModal
         isOpen={camaraAbierta}
         onClose={() => setCamaraAbierta(false)}
-        title="Foto de la factura"
+        title={tituloCamara}
         onCapture={(file) => {
           setCamaraAbierta(false)
           void aplicar(file)

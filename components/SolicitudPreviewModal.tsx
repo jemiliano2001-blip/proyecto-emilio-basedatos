@@ -81,7 +81,7 @@ export function SolicitudPreviewModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="solicitud-preview-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-foreground/80 backdrop-blur-sm transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-foreground/80 transition-opacity print:hidden"
       onClick={onClose}
     >
       <div

@@ -20,7 +20,7 @@ const CardCaregiver = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTML
     <div
       ref={ref}
       className={cn(
-        'rounded-2xl border border-primary/20 bg-primary-soft/30 text-foreground shadow-card transition-all duration-200',
+        'rounded-2xl border border-primary/20 bg-primary-soft/30 text-foreground shadow-card transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-200',
         className
       )}
       {...props}
@@ -34,7 +34,7 @@ const CardInteractive = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
     <div
       ref={ref}
       className={cn(
-        'rounded-2xl border border-border/80 bg-card text-card-foreground shadow-card transition-all duration-200 hover:border-border hover:shadow-card-hover active:scale-[0.99] cursor-pointer',
+        'rounded-2xl border border-border/80 bg-card text-card-foreground shadow-card transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-200 hover:border-border hover:shadow-card-hover active:scale-[0.99] cursor-pointer',
         className
       )}
       {...props}

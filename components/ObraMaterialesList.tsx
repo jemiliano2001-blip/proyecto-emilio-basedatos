@@ -208,7 +208,7 @@ export function ObraMaterialesList({
               type="button"
               onClick={() => setCategoriaSeleccionada('todas')}
               className={cn(
-                'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 categoriaSeleccionada === 'todas'
                   ? 'bg-card text-foreground shadow-xs font-semibold'
@@ -237,7 +237,7 @@ export function ObraMaterialesList({
                   type="button"
                   onClick={() => setCategoriaSeleccionada(cat)}
                   className={cn(
-                    'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     active
                       ? 'bg-card text-foreground shadow-xs font-semibold'
@@ -264,7 +264,7 @@ export function ObraMaterialesList({
                 type="button"
                 onClick={() => setCategoriaSeleccionada('sin_categoria')}
                 className={cn(
-                  'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                  'inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   categoriaSeleccionada === 'sin_categoria'
                     ? 'bg-card text-foreground shadow-xs font-semibold'
@@ -362,7 +362,7 @@ export function ObraMaterialesList({
                         <button
                           type="button"
                           onClick={() => handleAbrirFicha(s)}
-                          className="w-10 h-10 rounded-lg bg-muted border border-border/80 shrink-0 flex items-center justify-center overflow-hidden hover:opacity-90 hover:ring-2 hover:ring-ring/40 transition-all cursor-pointer"
+                          className="w-10 h-10 rounded-lg bg-muted border border-border/80 shrink-0 flex items-center justify-center overflow-hidden hover:opacity-90 hover:ring-2 hover:ring-ring/40 transition-[color,background-color,border-color,box-shadow,opacity,transform] cursor-pointer"
                           title="Ver ficha técnica"
                         >
                           {s.foto_url ? (

@@ -90,7 +90,7 @@ export function RecepcionEvidenciasViewer({
                 <div
                   key={f.id || idx}
                   onClick={() => handleOpen(idx)}
-                  className="card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/40 hover:bg-primary-soft/20 transition-all group"
+                  className="card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/40 hover:bg-primary-soft/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] group"
                 >
                   <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted border border-border shrink-0 relative">
                     <Image
@@ -131,7 +131,7 @@ export function RecepcionEvidenciasViewer({
               <div
                 key={idx}
                 onClick={() => handleOpen(idx)}
-                className="card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/40 hover:bg-primary-soft/20 transition-all group"
+                className="card p-3 flex items-center gap-3 cursor-pointer hover:border-primary/40 hover:bg-primary-soft/20 transition-[color,background-color,border-color,box-shadow,opacity,transform] group"
               >
                 <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted border border-border shrink-0 relative">
                   <Image

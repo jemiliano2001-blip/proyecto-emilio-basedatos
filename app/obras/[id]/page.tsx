@@ -344,8 +344,8 @@ function PresupuestoResumen({
       </div>
       {/* Barra apilada: gastado + comprometido sobre el total */}
       <div className="mb-4 flex h-2.5 w-full overflow-hidden rounded-full bg-muted/80 ring-1 ring-border/50" aria-hidden>
-        <span className="h-full bg-foreground transition-all duration-300" style={{ width: `${pct(gastado)}%` }} />
-        <span className="h-full bg-warning transition-all duration-300" style={{ width: `${pct(comprometido)}%` }} />
+        <span className="h-full bg-foreground transition-[width] duration-300" style={{ width: `${pct(gastado)}%` }} />
+        <span className="h-full bg-warning transition-[width] duration-300" style={{ width: `${pct(comprometido)}%` }} />
       </div>
       <dl className="space-y-2.5 pt-2 border-t border-border/60">
         {filas.map((f) => (

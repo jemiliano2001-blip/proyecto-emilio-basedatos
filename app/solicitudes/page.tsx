@@ -141,7 +141,7 @@ export default async function SolicitudesPage({
                 <Link
                   href="/solicitudes?estatus=recibida"
                   className={cn(
-                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     filters.estatus === 'recibida'
                       ? 'bg-card text-foreground shadow-xs font-semibold'
@@ -155,7 +155,7 @@ export default async function SolicitudesPage({
                 <Link
                   href="/solicitudes?estatus=en_proceso"
                   className={cn(
-                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                    'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     filters.estatus === 'en_proceso'
                       ? 'bg-card text-foreground shadow-xs font-semibold'
@@ -168,7 +168,7 @@ export default async function SolicitudesPage({
               <Link
                 href="/solicitudes?vista=historial"
                 className={cn(
-                  'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-all select-none',
+                  'inline-flex min-h-[36px] items-center gap-1.5 rounded-md px-3 text-xs sm:text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   !filters.estatus
                     ? 'bg-card text-foreground shadow-xs font-semibold'

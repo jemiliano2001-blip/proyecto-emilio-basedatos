@@ -217,7 +217,7 @@ export function MaterialSearchCombobox({
                   </li>
                 )
               })}
-              <li className="px-3 py-1.5 text-[11px] text-muted-foreground text-center bg-muted/40 border-t border-border/60 sticky bottom-0 backdrop-blur-xs select-none">
+              <li className="px-3 py-1.5 text-[11px] text-muted-foreground text-center bg-muted/40 border-t border-border/60 sticky bottom-0 select-none">
                 {filtered.length === 1
                   ? '1 material con saldo disponible'
                   : `${filtered.length} materiales con saldo disponible`}

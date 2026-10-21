@@ -95,19 +95,19 @@ export function TabsTrigger({ value, variant: triggerVariant, className, childre
 
   const triggerStyles: Record<TabsVariant, string> = {
     segmented: cn(
-      'inline-flex min-h-[38px] cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-xl px-4 py-1.5 text-sm font-medium transition-all duration-180 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
+      'inline-flex min-h-[38px] cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-xl px-4 py-1.5 text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-180 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
       isActive
         ? 'bg-card text-foreground font-semibold shadow-xs'
         : 'text-muted-foreground hover:text-foreground hover:bg-muted'
     ),
     pill: cn(
-      'inline-flex min-h-[36px] cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-full px-4 py-1 text-sm font-medium transition-all duration-180 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
+      'inline-flex min-h-[36px] cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-full px-4 py-1 text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-180 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
       isActive
         ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
         : 'text-muted-foreground hover:text-foreground hover:bg-muted/80'
     ),
     underline: cn(
-      'inline-flex min-h-[44px] cursor-pointer select-none items-center justify-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium transition-all duration-180 -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
+      'inline-flex min-h-[44px] cursor-pointer select-none items-center justify-center whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-180 -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
       isActive
         ? 'border-primary text-primary font-bold'
         : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'

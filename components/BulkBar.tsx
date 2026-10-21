@@ -87,7 +87,7 @@ export function BulkBar({
                 disabled={act.disabled || act.loading}
                 onClick={act.onClick}
                 className={cn(
-                  'inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-semibold transition-all active:scale-[0.98]',
+                  'inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-[0.98]',
                   variantClass,
                   'disabled:opacity-50 disabled:pointer-events-none'
                 )}

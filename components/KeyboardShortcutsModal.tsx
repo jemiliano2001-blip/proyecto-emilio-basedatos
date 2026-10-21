@@ -83,7 +83,7 @@ export function KeyboardShortcutsModal() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="shortcuts-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 transition-opacity print:hidden"
       onClick={() => setOpen(false)}
     >
       <div
