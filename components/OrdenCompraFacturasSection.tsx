@@ -1,8 +1,10 @@
 'use client'
 
-import React, { useState, useTransition, useRef } from 'react'
+import React, { useState, useTransition } from 'react'
 import type { OrdenCompraFactura, OrdenItemParaFactura } from '@/lib/types'
-import { eliminarFacturaOrdenAction, subirFacturaOrdenAction } from '@/lib/actions/ordenes'
+import { eliminarFacturaOrdenAction, prepararSubidaFacturaAction, registrarFacturaOrdenAction } from '@/lib/actions/ordenes'
+import { AdjuntarArchivo } from '@/components/AdjuntarArchivo'
+import { VistaPreviaArchivo } from '@/components/VistaPreviaArchivo'
 import { IconClip, IconOjo, IconBasura, IconChevron } from '@/components/icons'
 import { QuickLookModal } from '@/components/QuickLookModal'
 import {
@@ -11,8 +13,11 @@ import {
   cotejarPartidasConOC,
 } from '@/lib/extractor-facturas-nativo'
 import { vibrarExito, vibrarTap } from '@/lib/haptics'
+import { BUCKET_FACTURAS_OC, subirFacturaDirecto } from '@/lib/adjuntos'
+import { formatearFechaLista } from '@/lib/fechas'
 import { hrefFacturaOrden } from '@/lib/facturas-oc'
 import { formatMoneyMx } from '@/lib/money'
+import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   ordenId: string
@@ -54,7 +59,6 @@ export function OrdenCompraFacturasSection({
   const [extraccionMsg, setExtraccionMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function toggleExpand(id: string) {
     setExpandedIds((prev) => {
@@ -74,9 +78,7 @@ export function OrdenCompraFacturasSection({
     })
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0]
-    if (!f) return
+  const leerArchivo = async (f: File) => {
     setArchivo(f)
     setError(null)
     setExtraccionMsg(null)
@@ -138,24 +140,30 @@ export function OrdenCompraFacturasSection({
 
     setError(null)
     startTransition(async () => {
-      const formData = new FormData()
-      formData.append('orden_id', ordenId)
-      formData.append('obra_id', obraId)
-      formData.append('archivo', archivo)
-      if (folioFactura.trim()) {
-        formData.append('folio_factura', folioFactura.trim())
-      }
-      if (montoFactura.trim()) {
-        formData.append('monto_factura', montoFactura.trim())
-      }
-      for (const id of selectedItemIds) {
-        formData.append('item_ids', id)
-      }
-
-      const res = await subirFacturaOrdenAction({ error: null }, formData)
-      if (res.error) {
-        setError(res.error)
-      } else {
+      try {
+        const supabase = createClient()
+        const res = await subirFacturaDirecto({
+          archivo,
+          ordenId,
+          obraId,
+          folio: folioFactura,
+          monto: montoFactura,
+          itemIds: Array.from(selectedItemIds),
+          preparar: prepararSubidaFacturaAction,
+          storage: {
+            upload: async (path, file, opciones) => {
+              const { error: uploadError } = await supabase.storage
+                .from(BUCKET_FACTURAS_OC)
+                .upload(path, file, opciones)
+              return { error: uploadError ? { message: uploadError.message } : null }
+            },
+          },
+          registrar: (fd) => registrarFacturaOrdenAction({ error: null }, fd),
+        })
+        if (!res.ok) {
+          setError(res.error)
+          return
+        }
         setModalOpen(false)
         setArchivo(null)
         setExtraccionMsg(null)
@@ -163,6 +171,8 @@ export function OrdenCompraFacturasSection({
         setMontoFactura(totalOrden > 0 ? String(totalOrden) : '')
         setSelectedItemIds(new Set())
         vibrarExito()
+      } catch {
+        setError('No se pudo guardar la factura. Inténtalo otra vez.')
       }
     })
   }
@@ -318,9 +328,15 @@ export function OrdenCompraFacturasSection({
                         </div>
                       ))
                     )}
+                    {(f.tipo_archivo === 'pdf' || f.tipo_archivo === 'imagen') && (
+                      <VistaPreviaArchivo
+                        tipo={f.tipo_archivo}
+                        nombre={f.archivo_nombre || titulo}
+                        src={hrefFacturaOrden(f.id)}
+                      />
+                    )}
                     <p className="text-[11px] text-muted-foreground pt-1">
-                      {formatBytes(f.tamano_bytes)} ·{' '}
-                      {new Date(f.creado_en).toLocaleDateString('es-MX')}
+                      {formatBytes(f.tamano_bytes)} · {formatearFechaLista(f.creado_en)}
                       {f.subido_por_nombre ? ` · ${f.subido_por_nombre}` : ''}
                     </p>
                   </div>
@@ -352,15 +368,20 @@ export function OrdenCompraFacturasSection({
 
             <form onSubmit={handleSubmitUpload} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-foreground mb-1">
-                  Archivo de la Factura (PDF, Imagen o XML) *
-                </label>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept=".pdf,application/pdf,image/jpeg,image/png,image/webp,text/xml,application/xml"
-                  className="block w-full text-xs text-muted-foreground file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary-hover border border-input rounded-lg p-1 cursor-pointer"
+                <p className="block text-xs font-semibold text-foreground mb-2">
+                  Archivo de la factura (PDF, foto o XML) *
+                </p>
+                <AdjuntarArchivo
+                  archivo={archivo}
+                  disabled={isPending}
+                  onArchivo={(file) => {
+                    void leerArchivo(file)
+                  }}
+                  onError={setError}
+                  onQuitar={() => {
+                    setArchivo(null)
+                    setExtraccionMsg(null)
+                  }}
                 />
                 {archivo && (
                   <p className="text-[11px] text-primary mt-1 font-medium">
@@ -482,10 +503,10 @@ export function OrdenCompraFacturasSection({
         items={facturas.map((f) => ({
           url: hrefFacturaOrden(f.id),
           nombre: f.folio_factura ? `Factura ${f.folio_factura}` : (f.archivo_nombre || 'Documento'),
-          tipo: (f.archivo_nombre || '').toLowerCase().endsWith('.pdf') ? 'pdf' : 'imagen',
+          tipo: f.tipo_archivo === 'pdf' ? 'pdf' : f.tipo_archivo === 'imagen' ? 'imagen' : 'otro',
           tamano: formatBytes(f.tamano_bytes),
           subidoPor: f.subido_por_nombre,
-          fecha: new Date(f.creado_en).toLocaleDateString('es-MX'),
+          fecha: formatearFechaLista(f.creado_en),
         }))}
       />
     </section>

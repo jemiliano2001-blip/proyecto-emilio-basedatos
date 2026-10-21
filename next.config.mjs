@@ -29,7 +29,7 @@ const nextConfig = {
       "img-src 'self' blob: data: https://*.supabase.co https://*.supabase.in https://vercel.live https://vercel.com",
       "font-src 'self' data: https://vercel.live https://assets.vercel.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://vercel.live https://*.pusher.com wss://*.pusher.com",
-      "frame-src 'self' https://vercel.live",
+      "frame-src 'self' blob: https://*.supabase.co https://*.supabase.in https://vercel.live",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

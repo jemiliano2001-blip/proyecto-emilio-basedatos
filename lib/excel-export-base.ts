@@ -1,4 +1,5 @@
 import type ExcelJS from 'exceljs'
+import { fechaHora } from '@/lib/fechas'
 
 export const COLOR_HEADER_BG = 'FF132A45' // Navy corporativo Proyecto Emilio
 export const COLOR_HEADER_FG = 'FFFFFFFF' // Blanco
@@ -113,13 +114,7 @@ export async function construirWorkbookFormal(
   opts: OpcionesTablaExcel
 ): Promise<ExcelJS.Workbook> {
   const generadoEn = opts.generadoEn ?? new Date()
-  const generadoLabel = generadoEn.toLocaleDateString('es-MX', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const generadoLabel = fechaHora(generadoEn)
 
   // Import dinámico para no penalizar el bundle inicial
   const ExcelJSModule = await import('exceljs')

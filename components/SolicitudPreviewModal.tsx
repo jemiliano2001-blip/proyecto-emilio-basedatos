@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react'
 import { IconCerrar, IconAlerta, IconCheck } from '@/components/icons'
+import { fechaDocumento } from '@/lib/fechas'
 import { formatMoneyMx } from '@/lib/money'
 import { labelTipoLinea } from '@/lib/validations/solicitud'
 import type { TipoLineaSolicitud } from '@/lib/types'
@@ -62,11 +63,7 @@ export function SolicitudPreviewModal({
 
   const displayFecha =
     fecha ||
-    new Date().toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
+    fechaDocumento(new Date())
 
   // Verificar si alguna partida tiene saldo insuficiente
   const itemsConAlerta = items.filter(

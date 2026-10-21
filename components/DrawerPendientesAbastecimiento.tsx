@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { LeadTimeBadge } from '@/components/LeadTimeBadge'
 import { IconCerrar } from '@/components/icons'
+import { formatearFechaLista } from '@/lib/fechas'
 import { cn } from '@/lib/utils'
 import { vibrarTap } from '@/lib/haptics'
 import { tabsAbastecimiento } from '@/lib/roles'
@@ -310,12 +311,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
                       </p>
                     )}
                     <p className="mt-1.5 text-[10px] text-muted-foreground/70">
-                      {new Date(req.creado_en).toLocaleDateString('es-MX', {
-                        day: '2-digit',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {formatearFechaLista(req.creado_en)}
                     </p>
                   </Link>
                 ))
@@ -352,12 +348,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
                       </p>
                     )}
                     <p className="mt-1.5 text-[10px] text-muted-foreground/70">
-                      {new Date(req.creado_en).toLocaleDateString('es-MX', {
-                        day: '2-digit',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {formatearFechaLista(req.creado_en)}
                     </p>
                   </Link>
                 ))
@@ -397,10 +388,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
                     <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
                       <span>Total: ${ord.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })} {ord.moneda}</span>
                       <span className="text-[10px]">
-                        {new Date(ord.creado_en).toLocaleDateString('es-MX', {
-                          day: '2-digit',
-                          month: 'short',
-                        })}
+                        {formatearFechaLista(ord.creado_en)}
                       </span>
                     </div>
                   </Link>

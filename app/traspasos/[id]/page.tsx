@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { IconAlerta, IconInfo, IconTraspasos } from '@/components/icons'
 import { TraspasoAcciones } from '@/components/TraspasoAcciones'
 import { getSessionUsuario } from '@/lib/auth/session'
+import { fechaHora } from '@/lib/fechas'
 import { formatMoneyMx } from '@/lib/money'
 import {
   puedeAprobarTraspaso,
@@ -150,22 +151,9 @@ export default async function TraspasoDetallePage({
     (item) => data.estado !== 'solicitado' && !item.precio_unitario_mxn
   )
 
-  const fechaCreacion = new Date(data.creado_en).toLocaleString('es-MX', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
-  const fechaAprobacion = data.aprobado_en
-    ? new Date(data.aprobado_en).toLocaleString('es-MX', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })
-    : null
-  const fechaRecepcion = data.recibido_en
-    ? new Date(data.recibido_en).toLocaleString('es-MX', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })
-    : null
+  const fechaCreacion = fechaHora(data.creado_en)
+  const fechaAprobacion = data.aprobado_en ? fechaHora(data.aprobado_en) : null
+  const fechaRecepcion = data.recibido_en ? fechaHora(data.recibido_en) : null
 
   const hayAcciones =
     (data.estado === 'solicitado' && (puedeAprobar || esSolicitante || puedeCancelar)) ||

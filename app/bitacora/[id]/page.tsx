@@ -6,21 +6,11 @@ import {
   etiquetaAccionAuditoria,
   etiquetaTablaAuditoria,
 } from '@/lib/auditoria-labels'
+import { formatearFechaBitacora } from '@/lib/fechas'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeVerBitacora } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import type { AuditoriaEvento } from '@/lib/types'
-
-function formatearFecha(iso: string): string {
-  try {
-    return new Intl.DateTimeFormat('es-MX', {
-      dateStyle: 'medium',
-      timeStyle: 'medium',
-    }).format(new Date(iso))
-  } catch {
-    return iso
-  }
-}
 
 function JsonBlock({
   title,
@@ -94,7 +84,7 @@ export default async function BitacoraDetallePage({
     <main className="page-shell space-y-4">
       <PageHeader
         title={`${etiquetaAccionAuditoria(ev.accion)} · ${etiquetaTablaAuditoria(ev.tabla)}`}
-        description={`${nombre} · ${formatearFecha(ev.creado_en)}`}
+        description={`${nombre} · ${formatearFechaBitacora(ev.creado_en)}`}
         backHref="/bitacora"
         backLabel="Bitácora"
         badge={

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Badge } from '@/components/Badge'
+import { formatearFechaLista } from '@/lib/fechas'
 import type { EstadoSolicitud } from '@/lib/types'
 
 export interface SolicitudNavRow {
@@ -90,9 +91,7 @@ export function SolicitudesWorkbenchNav({
                         {s.obraNombre}
                       </p>
                       <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">
-                        {new Date(s.creado_en).toLocaleDateString('es-MX', {
-                          dateStyle: 'short',
-                        })}
+                        {formatearFechaLista(s.creado_en)}
                       </p>
                     </div>
                     <Badge variant={badgeVariant(s.estado)}>

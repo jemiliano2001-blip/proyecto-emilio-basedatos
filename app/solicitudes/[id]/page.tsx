@@ -15,6 +15,7 @@ import {
   type SolicitudNavRow,
 } from '@/components/SolicitudesWorkbenchNav'
 import { getSessionUsuario } from '@/lib/auth/session'
+import { fechaHora, soloFecha } from '@/lib/fechas'
 import { formatMoneyMx } from '@/lib/money'
 import {
   puedeAprobarCompras,
@@ -171,10 +172,7 @@ export default async function SolicitudDetallePage({
     puedeAprobarPago(session?.rol ?? null) && detalle.estado === 'en_proceso'
   const puedeRechazar = puedeCompras || puedeFinanzas
   const verPrecios = puedeVerPrecios(session?.rol ?? null)
-  const fechaVisible = new Date(detalle.creado_en).toLocaleString('es-MX', {
-    dateStyle: 'long',
-    timeStyle: 'short',
-  })
+  const fechaVisible = fechaHora(detalle.creado_en)
   const materialesParaAprobar = (detalle.items ?? [])
     .map((i) => {
       const esServicio = (i.tipo_linea ?? 'material') !== 'material'
@@ -261,10 +259,7 @@ export default async function SolicitudDetallePage({
               id: 'paso-req',
               titulo: '1. Requisición',
               subtitulo: 'Captura en campo',
-              fecha: new Date(detalle.creado_en).toLocaleDateString('es-MX', {
-                day: '2-digit',
-                month: 'short',
-              }),
+              fecha: soloFecha(detalle.creado_en),
               responsable: detalle.solicitante?.nombre ?? 'Residente',
               estado:
                 detalle.estado === 'cancelada' || detalle.estado === 'rechazada'

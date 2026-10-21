@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { IconCheckCircle, IconChevron, IconPaquete } from '@/components/icons'
 import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
 import { BotonEscanearQROrden } from '@/components/BotonEscanearQROrden'
+import { formatearFechaLista } from '@/lib/fechas'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
   puedeCapturarRecepcion,
@@ -157,7 +158,7 @@ export default async function RecepcionesPage() {
                           <Badge variant="warning">Por revisar</Badge>
                         </div>
                         <p className="mt-0.5 text-sm text-muted-foreground">
-                          {r.receptor_nombre} · {new Date(r.recibido_en).toLocaleString('es-MX')}
+                          {r.receptor_nombre} · {formatearFechaLista(r.recibido_en)}
                         </p>
                       </div>
                       <span className="btn-secondary btn-xs shrink-0">Revisar</span>
@@ -194,7 +195,7 @@ export default async function RecepcionesPage() {
                       {r.orden_folio}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
-                      {new Date(r.recibido_en).toLocaleString('es-MX')}
+                      {formatearFechaLista(r.recibido_en)}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">

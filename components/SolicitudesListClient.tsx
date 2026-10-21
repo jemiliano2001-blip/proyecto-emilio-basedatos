@@ -15,6 +15,7 @@ import {
   type BatchActionResult,
 } from '@/lib/actions/solicitudes'
 import type { EstadoSolicitud } from '@/lib/types'
+import { formatearFechaLista } from '@/lib/fechas'
 import { cn } from '@/lib/utils'
 import { etapaAprobacionLote } from '@/lib/solicitudes-workflow'
 
@@ -292,10 +293,7 @@ export function SolicitudesListClient({
                       {esMulti ? ' · varios proyectos' : ''}
                       {s.solicitante?.nombre ? ` · Solicitó: ${s.solicitante.nombre}` : ''}
                       {' · '}
-                      {new Date(s.creado_en).toLocaleString('es-MX', {
-                        dateStyle: 'short',
-                        timeStyle: 'short',
-                      })}
+                      {formatearFechaLista(s.creado_en)}
                     </p>
                   </div>
 

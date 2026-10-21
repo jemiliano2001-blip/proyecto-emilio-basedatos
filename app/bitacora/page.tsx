@@ -10,21 +10,11 @@ import {
   etiquetaTablaAuditoria,
 } from '@/lib/auditoria-labels'
 import { getSessionUsuario } from '@/lib/auth/session'
+import { formatearFechaBitacora, finDiaZonaExclusivo, inicioDiaZona } from '@/lib/fechas'
 import { PAGE_SIZE, listFilters, pageHref, type ListParams } from '@/lib/list-filters'
 import { puedeVerBitacora } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
 import type { AuditoriaEvento } from '@/lib/types'
-
-function formatearFecha(iso: string): string {
-  try {
-    return new Intl.DateTimeFormat('es-MX', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    }).format(new Date(iso))
-  } catch {
-    return iso
-  }
-}
 
 export default async function BitacoraPage({
   searchParams,
@@ -64,10 +54,12 @@ export default async function BitacoraPage({
     query = query.eq('tabla', filters.proyecto)
   }
   if (filters.desde) {
-    query = query.gte('creado_en', `${filters.desde}T00:00:00.000Z`)
+    const inicio = inicioDiaZona(filters.desde)
+    if (inicio) query = query.gte('creado_en', inicio)
   }
   if (filters.hasta) {
-    query = query.lte('creado_en', `${filters.hasta}T23:59:59.999Z`)
+    const fin = finDiaZonaExclusivo(filters.hasta)
+    if (fin) query = query.lt('creado_en', fin)
   }
   if (filters.q) {
     query = query.ilike('tabla', `%${filters.q}%`)
@@ -210,7 +202,7 @@ export default async function BitacoraPage({
                   {etiquetaAccionAuditoria(ev.accion)} · {etiquetaTablaAuditoria(ev.tabla)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                  {nombre} · {formatearFecha(ev.creado_en)}
+                  {nombre} · {formatearFechaBitacora(ev.creado_en)}
                 </p>
               </div>
               <Badge

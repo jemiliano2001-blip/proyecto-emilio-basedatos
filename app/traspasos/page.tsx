@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
 import { IconChevron, IconPlus, IconPaquete, IconTraspasos } from '@/components/icons'
+import { formatearFechaLista } from '@/lib/fechas'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeSolicitarTraspaso, puedeVerTraspasos } from '@/lib/roles'
 import { redirect } from 'next/navigation'
@@ -148,12 +149,7 @@ export default async function TraspasosPage() {
             <span />
           </div>
           {lista.map((t) => {
-            const fecha = new Date(t.creado_en).toLocaleDateString('es-MX', {
-              day: '2-digit',
-              month: 'short',
-              hour: '2-digit',
-              minute: '2-digit',
-            })
+            const fecha = formatearFechaLista(t.creado_en)
             const numItems = t.items?.length || 0
 
             return (
