@@ -91,7 +91,7 @@ export default async function InventarioObraPage({
 
       {lista.length > 0 && (
         <section className="card mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+          <p className="text-xs font-semibold text-primary">
             Pendiente de instalar
           </p>
           <p className="mt-1 text-3xl font-semibold tabular-nums text-foreground leading-none">
@@ -144,13 +144,13 @@ export default async function InventarioObraPage({
                       ) : null}
                     </p>
                     {m.categoria && (
-                      <p className="text-[11px] text-muted-foreground uppercase tracking-wide">
+                      <p className="text-xs text-muted-foreground">
                         {m.categoria}
                       </p>
                     )}
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-[10px] font-semibold uppercase text-warning-soft-foreground">
+                    <p className="text-xs font-semibold text-warning-soft-foreground">
                       Pendiente
                     </p>
                     <p className="text-xl font-semibold tabular-nums text-warning-soft-foreground leading-none">

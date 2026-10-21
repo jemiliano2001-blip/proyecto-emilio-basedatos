@@ -241,19 +241,19 @@ export function LectorQRModal({
           {/* Guía visual de encuadre */}
           {escaneando && !errorCamara && !iniciando && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-64 h-64 border-2 border-dashed border-teal-400/80 rounded-2xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]">
-                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-teal-400 -mt-1 -ml-1 rounded-tl-md" />
-                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-teal-400 -mt-1 -mr-1 rounded-tr-md" />
-                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-teal-400 -mb-1 -ml-1 rounded-bl-md" />
-                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-teal-400 -mb-1 -mr-1 rounded-br-md" />
-                <div className="w-full h-0.5 bg-teal-400/60 absolute top-1/2 -translate-y-1/2 animate-pulse" />
+              <div className="w-64 h-64 border-2 border-dashed border-primary-foreground/80 rounded-2xl relative shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]">
+                <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-primary-foreground -mt-1 -ml-1 rounded-tl-md" />
+                <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-primary-foreground -mt-1 -mr-1 rounded-tr-md" />
+                <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-primary-foreground -mb-1 -ml-1 rounded-bl-md" />
+                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-primary-foreground -mb-1 -mr-1 rounded-br-md" />
+                <div className="w-full h-0.5 bg-primary-foreground/60 absolute top-1/2 -translate-y-1/2 animate-pulse" />
               </div>
             </div>
           )}
 
           {iniciando && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/80 bg-black/60">
-              <div className="w-8 h-8 border-3 border-teal-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-3 border-primary-foreground border-t-transparent rounded-full animate-spin" />
               <span className="text-xs font-medium">Iniciando cámara...</span>
             </div>
           )}

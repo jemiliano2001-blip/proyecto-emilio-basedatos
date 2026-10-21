@@ -132,7 +132,7 @@ export default async function SolicitudesPage({
 
       {(esCompras || esFinanzas) && (
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground shrink-0">
+          <span className="text-xs font-semibold text-muted-foreground shrink-0">
             Colas operativas
           </span>
           <div className="overflow-x-auto rounded-lg bg-muted p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

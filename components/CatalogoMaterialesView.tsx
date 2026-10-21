@@ -117,7 +117,7 @@ function MaterialCard({
         <p className="text-[11px] text-muted-foreground/80 mt-0.5">{m.subcategoria}</p>
       )}
       <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-border/60">
-        <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+        <span className="text-xs font-semibold text-muted-foreground">
           {m.unidad_medida}
         </span>
         {verPrecios && m.precio_base !== undefined && m.precio_base > 0 && (
@@ -386,7 +386,7 @@ export function CatalogoMaterialesView({
       <div className="card p-3 sm:p-4 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
           <div>
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <span className="text-xs font-semibold text-muted-foreground">
               Categoría
             </span>
             <p className="text-xs text-muted-foreground">
@@ -594,7 +594,7 @@ export function CatalogoMaterialesView({
                 <div key={sub.id} className="card space-y-3">
                   <div className="flex items-center justify-between border-b border-border pb-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-foreground uppercase tracking-wide">
+                      <h3 className="text-sm font-bold text-foreground">
                         {sub.nombre}
                       </h3>
                       <span className="text-xs text-muted-foreground tabular-nums">({items.length})</span>
@@ -675,7 +675,7 @@ export function CatalogoMaterialesView({
               return (
                 <div className="card space-y-3">
                   <div className="flex items-center justify-between border-b border-border pb-2">
-                    <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wide">
+                    <h3 className="text-sm font-bold text-muted-foreground">
                       Otras / Sin subcategoría
                     </h3>
                     <Link

@@ -141,7 +141,7 @@ export function AppSidebar({
           return (
             <div key={section.id} className="mb-4 last:mb-0">
               {!collapsed ? (
-                <p className="mb-1.5 px-3 text-[11px] font-bold uppercase tracking-wider text-sidebar-muted select-none">
+                <p className="mb-1.5 px-3 text-xs font-bold text-sidebar-muted select-none">
                   {section.label}
                 </p>
               ) : (

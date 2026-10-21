@@ -55,7 +55,7 @@ border-danger/25`) para badges, alertas y filas.
 | `.t-h2` | Título de sección | 18 / 20px · sans 700 |
 | `.t-body` | Texto de lectura | 14 / 16px · Poppins 400 |
 | `.t-caption` | Ayudas, metadatos | 12px · muted |
-| `.t-eyebrow` | Contexto sobre el título (con filete de marca) | 11px · caps · tracking 0.14em |
+| `.t-eyebrow` | Contexto sobre el título (con filete de marca) | 12px · semibold, sentence case (sin VERSALITAS) |
 
 Usa estas clases en lugar de recomponer `text-* font-heading` a mano.
 
@@ -152,6 +152,7 @@ Sentence case en botones y títulos. Verbo claro: "Solicitar material",
 ## Qué NO hacer
 
 - Colores crudos de Tailwind o hex en componentes.
+- Labels y encabezados en VERSALITAS con tracking: usa sentence case (solo se permiten en el formato de impresión de la OC).
 - Más de una `btn-primary` visible por pantalla.
 - Texto con `opacity` para atenuar: usar `text-muted-foreground`.
 - Importar constantes desde archivos `'use client'` hacia server components

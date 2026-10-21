@@ -363,7 +363,7 @@ export function AsignarMaterialesObraForm({
         {/* BANNER DE TOTAL CALCULADO */}
         <div className="rounded-xl bg-foreground text-background p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
           <div>
-            <p className="text-xs uppercase tracking-wider text-background/60 font-medium">
+            <p className="text-xs text-background/60 font-medium">
               Costo Adicional a Sumar al Presupuesto
             </p>
             <p className="text-2xl font-bold tabular-nums text-background">
@@ -503,7 +503,7 @@ export function AsignarMaterialesObraForm({
         {/* 1. SECCIÓN DE MATERIALES INDIVIDUALES (PARTIDAS NORMALES) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between border-b border-border pb-1">
-            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <IconPaquete className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Partidas Individuales ({partidasSueltas.length})</span>
             </h3>
@@ -643,7 +643,7 @@ export function AsignarMaterialesObraForm({
         {kitsAsignados.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-1">
-              <h3 className="text-xs font-bold text-primary-soft-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <h3 className="text-xs font-bold text-primary-soft-foreground flex items-center gap-1.5">
                 <IconRayo className="w-3.5 h-3.5 text-warning" />
                 <span>Kits y Ensambles ({kitsAsignados.length})</span>
               </h3>
@@ -718,7 +718,7 @@ export function AsignarMaterialesObraForm({
                     {/* Lista Expandible de Componentes del Kit */}
                     {kit.isExpanded && (
                       <div className="p-3 space-y-2 bg-card animate-fade-in">
-                        <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 grid grid-cols-12 gap-2">
+                        <div className="text-xs font-semibold text-muted-foreground px-2 grid grid-cols-12 gap-2">
                           <span className="col-span-6 sm:col-span-6">Componente</span>
                           <span className="col-span-3 sm:col-span-2 text-center">Cantidad</span>
                           <span className="hidden sm:block sm:col-span-2 text-right">Precio unit.</span>

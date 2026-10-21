@@ -328,7 +328,7 @@ export function ObraMaterialesList({
         {[...rubrosMap.entries()].map(([rubro, items]) => (
           <div key={rubro} className="space-y-2">
             <div className="flex items-center justify-between px-1">
-              <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-muted-foreground">
                 {rubro}
               </h3>
               <span className="text-xs text-muted-foreground tabular-nums">
@@ -432,31 +432,31 @@ export function ObraMaterialesList({
                         {/* Franja métrica horizontal limpia y tabular */}
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 rounded-lg bg-muted/40 p-3">
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Asignado</p>
+                            <p className="text-xs font-semibold text-muted-foreground">Asignado</p>
                             <p className="tabular-nums font-semibold text-foreground text-sm mt-0.5">
                               {asignado}
                             </p>
                           </div>
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">En proceso</p>
+                            <p className="text-xs font-semibold text-muted-foreground">En proceso</p>
                             <p className="tabular-nums font-semibold text-foreground text-sm mt-0.5">
                               {enProceso}
                             </p>
                           </div>
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Comprado</p>
+                            <p className="text-xs font-semibold text-muted-foreground">Comprado</p>
                             <p className="tabular-nums font-semibold text-foreground text-sm mt-0.5">
                               {comprado}
                             </p>
                           </div>
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Entregado</p>
+                            <p className="text-xs font-semibold text-muted-foreground">Entregado</p>
                             <p className="tabular-nums font-semibold text-foreground text-sm mt-0.5">
                               {entregado}
                             </p>
                           </div>
                           <div className="col-span-2 sm:col-span-1">
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Disponible</p>
+                            <p className="text-xs font-semibold text-muted-foreground">Disponible</p>
                             <p
                               className={cn(
                                 'tabular-nums font-bold text-sm mt-0.5',

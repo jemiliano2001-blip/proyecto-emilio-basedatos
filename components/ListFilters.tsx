@@ -27,7 +27,7 @@ const chipClass = (active: boolean) =>
       : 'text-muted-foreground hover:text-foreground hover:bg-card/40'
   )
 
-const labelClass = 'block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5'
+const labelClass = 'block text-xs font-semibold text-muted-foreground mb-1.5'
 
 export function ListFilters({
   path,

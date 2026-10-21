@@ -119,7 +119,7 @@ export default async function RecepcionDetallePage({
         folioOrden={detalle.orden?.folio ?? ''}
       />
 
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+      <h2 className="text-sm font-semibold text-muted-foreground mb-2">
         Renglones
       </h2>
       <div className="space-y-2 mb-4">

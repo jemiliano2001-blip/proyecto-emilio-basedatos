@@ -206,7 +206,7 @@ export default async function TraspasoDetallePage({
           {/* Origen → destino */}
           <section className="card grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
             <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sale de</p>
+              <p className="text-xs font-medium text-muted-foreground">Sale de</p>
               <p className="mt-1 truncate text-sm font-semibold text-foreground">
                 {data.obra_origen?.nombre ?? 'N/A'}
               </p>
@@ -220,7 +220,7 @@ export default async function TraspasoDetallePage({
               </span>
             </div>
             <div className="min-w-0 sm:text-right">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Entra a</p>
+              <p className="text-xs font-medium text-muted-foreground">Entra a</p>
               <p className="mt-1 truncate text-sm font-semibold text-foreground">
                 {data.obra_destino?.nombre ?? 'N/A'}
               </p>

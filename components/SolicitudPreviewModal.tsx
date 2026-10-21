@@ -159,7 +159,7 @@ export function SolicitudPreviewModal({
         {/* Nota general */}
         {Boolean(notaGeneral?.trim()) && (
           <div className="mx-5 mt-3 p-3 bg-muted/40 rounded-xl border border-border text-xs">
-            <p className="font-bold text-muted-foreground uppercase tracking-wider text-[10px] mb-0.5">
+            <p className="font-bold text-muted-foreground text-xs mb-0.5">
               Nota general:
             </p>
             <p className="text-foreground">{notaGeneral}</p>
@@ -168,7 +168,7 @@ export function SolicitudPreviewModal({
 
         {/* Lista de partidas */}
         <div className="p-5 overflow-y-auto space-y-2.5">
-          <div className="flex items-center justify-between text-xs text-muted-foreground pb-1 border-b border-border/50 font-semibold uppercase tracking-wider">
+          <div className="flex items-center justify-between text-xs text-muted-foreground pb-1 border-b border-border/50 font-semibold">
             <span>Partidas a solicitar ({items.length})</span>
             <span>Cantidad / Monto</span>
           </div>

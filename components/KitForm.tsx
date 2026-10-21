@@ -89,7 +89,7 @@ export function KitForm({
       <FormError message={state.error} />
 
       <div className="card space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+        <h2 className="text-sm font-semibold text-foreground">
           Datos de la Plantilla / Kit
         </h2>
 
@@ -162,7 +162,7 @@ export function KitForm({
       <div className="card space-y-4">
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div>
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-wide">
+            <h2 className="text-sm font-bold text-foreground">
               Componentes Menores Incluidos (&quot;Chiquitiaje&quot;)
             </h2>
             <p className="text-xs text-muted-foreground">

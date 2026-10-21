@@ -78,7 +78,7 @@ export function RecepcionEvidenciasViewer({
 
   return (
     <section className="mb-4">
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+      <h2 className="text-sm font-semibold text-muted-foreground mb-2">
         Evidencias Fotográficas Adjuntas ({items.length})
       </h2>
 

@@ -72,7 +72,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      'h-11 px-4 text-left align-middle text-xs font-semibold uppercase tracking-wider text-muted-foreground',
+      'h-11 px-4 text-left align-middle text-xs font-semibold text-muted-foreground',
       className
     )}
     {...props}
@@ -203,7 +203,7 @@ export function DataTable<T extends object>({
                   checked={paginatedData.length > 0 && selectedKeys.size === paginatedData.length}
                   onChange={handleSelectAll}
                   aria-label="Seleccionar todas las filas"
-                  className="size-4 rounded-md border-border text-primary focus:ring-primary cursor-pointer accent-[#0369A1]"
+                  className="size-4 rounded-md border-border text-primary focus:ring-primary cursor-pointer accent-primary"
                 />
               </TableHead>
             )}
@@ -255,7 +255,7 @@ export function DataTable<T extends object>({
                         checked={isSelected}
                         onChange={() => toggleSelect(key)}
                         aria-label={`Seleccionar fila ${key}`}
-                        className="size-4 rounded-md border-border text-primary focus:ring-primary cursor-pointer accent-[#0369A1]"
+                        className="size-4 rounded-md border-border text-primary focus:ring-primary cursor-pointer accent-primary"
                       />
                     </TableCell>
                   )}

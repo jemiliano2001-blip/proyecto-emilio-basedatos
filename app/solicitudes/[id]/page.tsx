@@ -324,7 +324,7 @@ export default async function SolicitudDetallePage({
 
       {detalle.nota && (
         <div className="card mb-5 border-border/80 bg-card p-4">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+          <p className="text-xs font-semibold text-muted-foreground mb-1.5">
             Nota
           </p>
           <p className="text-sm text-foreground leading-relaxed">{detalle.nota}</p>
@@ -346,7 +346,7 @@ export default async function SolicitudDetallePage({
             return (
               <div key={item.id} className="p-3.5 sm:p-4 space-y-1.5 transition-colors hover:bg-muted/20">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant={tipo === 'material' ? 'neutral' : 'info'} className="text-[10px] uppercase font-semibold">
+                  <Badge variant={tipo === 'material' ? 'neutral' : 'info'} className="text-xs font-semibold">
                     {labelTipoLinea(tipo)}
                   </Badge>
                   {esMultiObra && item.item_obra && (
@@ -417,7 +417,7 @@ export default async function SolicitudDetallePage({
 
       {ordenesRelacionadas.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
+          <h2 className="text-xs font-semibold text-muted-foreground mb-2.5">
             Órdenes de compra generadas
           </h2>
           <div className="space-y-2">
@@ -434,7 +434,7 @@ export default async function SolicitudDetallePage({
         </div>
       )}
 
-      <div className="space-y-3 mt-4 lg:sticky lg:bottom-4 lg:z-10 lg:rounded-xl lg:border lg:border-border/80 lg:bg-card/95 lg:backdrop-blur-md lg:p-4 lg:shadow-elevated">
+      <div className="space-y-3 mt-4 lg:sticky lg:bottom-4 lg:z-10 lg:rounded-xl lg:border lg:border-border/80 lg:bg-card lg:p-4 lg:shadow-elevated">
         {(puedeCompras || puedeFinanzas || verPrecios) && (
           <Link
             href={`/solicitudes/${detalle.id}/formato`}

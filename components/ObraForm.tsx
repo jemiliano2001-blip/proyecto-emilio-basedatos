@@ -325,7 +325,7 @@ export function ObraForm({
 
       {/* SECCIÓN 1: DATOS GENERALES DEL PROYECTO */}
       <div className="card space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+        <h2 className="text-sm font-semibold text-foreground">
           Datos del Proyecto
         </h2>
 
@@ -465,7 +465,7 @@ export function ObraForm({
           {/* BANNER DE TOTAL CALCULADO */}
           <div className="rounded-xl bg-foreground text-background p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wider text-background/60 font-medium">
+              <p className="text-xs text-background/60 font-medium">
                 Presupuesto Estimado del Proyecto
               </p>
               <p className="text-2xl font-bold tabular-nums text-background">

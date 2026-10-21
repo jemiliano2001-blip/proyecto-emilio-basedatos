@@ -31,7 +31,7 @@ export function StepperAbastecimiento({ pasos, className }: StepperAbastecimient
       )}
     >
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        <h3 className="text-xs font-semibold text-muted-foreground">
           Ciclo de Abastecimiento
         </h3>
         <span className="text-xs text-muted-foreground">
@@ -57,7 +57,7 @@ export function StepperAbastecimiento({ pasos, className }: StepperAbastecimient
                     className={cn(
                       'absolute top-4 left-[50%] -z-0 hidden h-0.5 w-full sm:block',
                       paso.estado === 'completado'
-                        ? 'bg-teal-600 dark:bg-teal-500'
+                        ? 'bg-secondary'
                         : 'bg-border'
                     )}
                     aria-hidden="true"
@@ -70,7 +70,7 @@ export function StepperAbastecimiento({ pasos, className }: StepperAbastecimient
                     className={cn(
                       'absolute top-8 left-4 -z-0 h-[calc(100%+8px)] w-0.5 sm:hidden',
                       paso.estado === 'completado'
-                        ? 'bg-teal-600 dark:bg-teal-500'
+                        ? 'bg-secondary'
                         : 'bg-border'
                     )}
                     aria-hidden="true"
@@ -82,7 +82,7 @@ export function StepperAbastecimiento({ pasos, className }: StepperAbastecimient
                   className={cn(
                     'relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm',
                     paso.estado === 'completado' &&
-                      'bg-teal-600 text-white shadow-teal-600/20',
+                      'bg-secondary text-secondary-foreground',
                     paso.estado === 'en_proceso' &&
                       'bg-primary text-primary-foreground ring-4 ring-primary/20 animate-pulse',
                     paso.estado === 'pendiente' &&
@@ -154,7 +154,7 @@ export function StepperAbastecimiento({ pasos, className }: StepperAbastecimient
                     <div className="mt-1">
                       <Link
                         href={paso.enlaceHref}
-                        className="inline-flex items-center gap-0.5 text-[11px] font-medium text-teal-600 hover:underline dark:text-teal-400"
+                        className="inline-flex items-center gap-0.5 text-[11px] font-medium text-secondary hover:underline"
                       >
                         {paso.enlaceTexto}
                         <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -125,7 +125,7 @@ export function MaterialPreviewModal({
 
           {/* Especificaciones técnicas */}
           <div className="p-3.5 bg-muted/40 rounded-xl border border-border">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <h3 className="text-xs font-bold text-muted-foreground mb-1.5">
               Especificaciones y Normas
             </h3>
             {material.especificacion ? (

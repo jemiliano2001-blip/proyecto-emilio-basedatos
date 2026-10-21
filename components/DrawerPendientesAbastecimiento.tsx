@@ -240,7 +240,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
               className={cn(
                 'mt-0.5 rounded-full px-1.5 py-0.2 text-[10px] font-bold',
                 (datos?.resumen.totalTransito ?? 0) > 0
-                  ? 'bg-teal-500/20 text-teal-700 dark:text-teal-300'
+                  ? 'bg-secondary/15 text-secondary'
                   : 'bg-muted text-muted-foreground'
               )}
             >
@@ -369,7 +369,7 @@ export function DrawerPendientesAbastecimiento({ rol }: { rol: RolUsuario | null
                     key={ord.id}
                     href={`/ordenes/${ord.id}`}
                     onClick={() => setAbierto(false)}
-                    className="block rounded-lg border border-border bg-card p-3 shadow-2xs hover:border-teal-500/50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
+                    className="block rounded-lg border border-border bg-card p-3 shadow-2xs hover:border-secondary/50 transition-[color,background-color,border-color,box-shadow,opacity,transform]"
                   >
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-foreground">

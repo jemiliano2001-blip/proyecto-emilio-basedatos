@@ -53,7 +53,7 @@ export function SolicitudesWorkbenchNav({
     <aside className="hidden lg:flex lg:flex-col min-h-0 w-full max-w-[340px] shrink-0">
       <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] max-h-[calc(100dvh-5rem)] flex flex-col rounded-xl border border-border bg-card overflow-hidden">
         <div className="px-3 py-2.5 border-b border-border bg-muted/40 flex items-center justify-between gap-2">
-          <p className="text-xs font-bold uppercase tracking-wide text-foreground">Cola</p>
+          <p className="text-xs font-bold text-foreground">Cola</p>
           <Link
             href="/solicitudes"
             className="text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"

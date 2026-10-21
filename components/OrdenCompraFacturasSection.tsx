@@ -201,7 +201,7 @@ export function OrdenCompraFacturasSection({
     <section className="mb-6">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-muted-foreground">
             Facturas del proveedor
           </h2>
           <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-foreground">
@@ -400,8 +400,8 @@ export function OrdenCompraFacturasSection({
                   </p>
                 )}
                 {extraccionMsg && (
-                  <div className="mt-2 p-2.5 rounded-lg bg-teal-50 border border-teal-200 text-teal-900 text-xs flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-teal-600 shrink-0" />
+                  <div className="mt-2 p-2.5 rounded-lg bg-secondary-soft border border-secondary/25 text-secondary-soft-foreground text-xs flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-secondary shrink-0" />
                     <span className="font-medium leading-snug">{extraccionMsg}</span>
                   </div>
                 )}

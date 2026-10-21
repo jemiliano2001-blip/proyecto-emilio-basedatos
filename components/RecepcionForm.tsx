@@ -215,7 +215,7 @@ export function RecepcionForm({
 
       {/* Evidencia fotográfica de entrega en obra */}
       <div className="card space-y-4 border-primary/30 bg-primary-soft/20">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-primary-soft-foreground">
+        <h3 className="text-xs font-bold text-primary-soft-foreground">
           Evidencia Fotográfica de Entrega
         </h3>
         <PhotoUploadInput

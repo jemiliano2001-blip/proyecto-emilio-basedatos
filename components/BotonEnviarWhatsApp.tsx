@@ -59,7 +59,7 @@ export function BotonEnviarWhatsApp({
     <button
       type="button"
       onClick={handleEnviar}
-      className={`inline-flex items-center gap-1.5 font-semibold rounded-lg transition-colors border shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 ${sizeClasses} ${className}`}
+      className={`inline-flex items-center gap-1.5 font-semibold rounded-lg transition-colors border shadow-xs bg-success hover:bg-success/90 text-success-foreground border-success focus:outline-hidden focus-visible:ring-2 focus-visible:ring-success/30 ${sizeClasses} ${className}`}
       title={
         orden.proveedorTelefono
           ? `Enviar por WhatsApp al proveedor (${orden.proveedorTelefono})`

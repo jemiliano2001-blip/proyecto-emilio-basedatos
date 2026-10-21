@@ -135,7 +135,7 @@ export default async function KitsPage() {
             </div>
 
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-semibold text-muted-foreground">
                 Componentes menores («chiquitiaje»)
               </p>
               <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2 xl:grid-cols-3">
