@@ -252,6 +252,11 @@ export interface Proveedor {
   nombre: string
   contacto: string | null
   telefono: string | null
+  // Migración 0049: solo vienen si la consulta los pide (la ficha sí, la lista no).
+  rfc?: string | null
+  correo?: string | null
+  direccion?: string | null
+  condiciones_pago?: string | null
   activo: boolean
   creado_en: string
 }

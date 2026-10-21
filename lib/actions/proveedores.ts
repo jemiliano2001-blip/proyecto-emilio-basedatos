@@ -22,6 +22,10 @@ export async function createProveedorAction(
     nombre: formData.get('nombre'),
     contacto: formData.get('contacto'),
     telefono: formData.get('telefono'),
+    rfc: formData.get('rfc'),
+    correo: formData.get('correo'),
+    direccion: formData.get('direccion'),
+    condiciones_pago: formData.get('condiciones_pago'),
     activo: true,
   })
 
@@ -55,6 +59,10 @@ export async function updateProveedorAction(
     nombre: formData.get('nombre'),
     contacto: formData.get('contacto'),
     telefono: formData.get('telefono'),
+    rfc: formData.get('rfc'),
+    correo: formData.get('correo'),
+    direccion: formData.get('direccion'),
+    condiciones_pago: formData.get('condiciones_pago'),
     activo: formData.get('activo') !== 'false',
   })
 

@@ -42,7 +42,7 @@ export default async function EditarProveedorPage({
   const supabase = await createClient()
   const { data: proveedor } = await supabase
     .from('proveedores')
-    .select('id, nombre, contacto, telefono, activo, creado_en')
+    .select('id, nombre, contacto, telefono, rfc, correo, direccion, condiciones_pago, activo, creado_en')
     .eq('id', resolvedparams.id)
     .maybeSingle()
 
