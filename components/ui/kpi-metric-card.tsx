@@ -74,7 +74,7 @@ export function KpiMetricCard({
       )}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
-        <span className="text-xs font-semibold text-muted-foreground line-clamp-1">
+        <span className="text-xs font-semibold text-muted-foreground">
           {label}
         </span>
         {icon && (
@@ -85,13 +85,13 @@ export function KpiMetricCard({
       </div>
 
       <div className="flex items-baseline justify-between gap-3 mt-1">
-        <div className="flex flex-col">
-          <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground font-heading tabular-nums">
+        <div className="flex min-w-0 flex-col">
+          <span className="text-2xl font-bold tracking-tight text-foreground font-heading tabular-nums">
             {value}
           </span>
 
           {hint && (
-            <span className="text-xs text-muted-foreground mt-1 line-clamp-1">
+            <span className="text-xs text-muted-foreground mt-1">
               {hint}
             </span>
           )}

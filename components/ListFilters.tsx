@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { FiltrosPlegables } from '@/components/FiltrosPlegables'
 import { IconSearch } from '@/components/icons'
 import { PAGE_SIZE, pageHref, type ListParams } from '@/lib/list-filters'
 import { cn } from '@/lib/utils'
@@ -54,7 +55,8 @@ export function ListFilters({
   const currentEstatus = statuses.includes(params.estatus ?? '')
     ? (params.estatus as string)
     : ''
-  const hayFiltros = Boolean(params.q || params.desde || params.hasta || params.obra || params.proyecto)
+  const filtrosActivos = [params.q, params.desde, params.hasta, params.obra, params.proyecto].filter(Boolean).length
+  const hayFiltros = filtrosActivos > 0
 
   return (
     <div className={compact ? 'mb-4 space-y-2.5' : 'mb-5 space-y-3'}>
@@ -88,123 +90,126 @@ export function ListFilters({
         </div>
       )}
 
-      <form
-        action={path}
-        className={cn(
-          'card',
-          compact
-            ? 'grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end'
-            : 'grid grid-cols-1 gap-4 p-4 sm:grid-cols-2'
-        )}
-      >
-        {params.vista === 'historial' && <input type="hidden" name="vista" value="historial" />}
-        <label
+      <FiltrosPlegables activos={filtrosActivos}>
+        <form
+          action={path}
           className={cn(
-            compact ? 'lg:col-span-4' : '',
-            showChipBar && !compact ? 'sm:col-span-2' : ''
+            'card',
+            compact
+              ? 'grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end'
+              : 'grid grid-cols-1 gap-4 p-4 sm:grid-cols-2'
           )}
         >
-          <span className={labelClass}>{searchLabel}</span>
-          <span className="relative block">
-            <IconSearch className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              className={cn('input-base pl-9', compact && 'min-h-[40px] py-2 text-sm')}
-              name="q"
-              defaultValue={params.q}
-              maxLength={100}
-              type="search"
-              placeholder="Buscar…"
-            />
-          </span>
-        </label>
-        {!hideEstatus && !estatusAsChips && (
-          <label className={compact ? 'lg:col-span-2' : ''}>
-            <span className={labelClass}>Estatus</span>
-            <select
-              className={cn('input-base capitalize', compact && 'min-h-[40px] py-2 text-sm')}
-              name="estatus"
-              defaultValue={params.estatus ?? ''}
-            >
-              <option value="">Todos</option>
-              {statuses.map((s) => (
-                <option key={s} value={s}>
-                  {s.replaceAll('_', ' ')}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        {(hideEstatus || estatusAsChips) && params.estatus ? (
-          <input type="hidden" name="estatus" value={params.estatus} />
-        ) : null}
-        {obras && obras.length > 0 && (
+          {params.vista === 'historial' && <input type="hidden" name="vista" value="historial" />}
           <label
             className={cn(
-              compact ? 'lg:col-span-3' : '',
-              hideEstatus || estatusAsChips || compact ? '' : 'sm:col-span-2'
+              compact ? 'lg:col-span-4' : '',
+              showChipBar && !compact ? 'sm:col-span-2' : ''
             )}
           >
-            <span className={labelClass}>Proyecto</span>
-            <select
-              className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
-              name="obra"
-              defaultValue={params.obra ?? ''}
-            >
-              <option value="">Todos los proyectos</option>
-              {obras.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.nombre}
-                </option>
-              ))}
-            </select>
+            <span className={labelClass}>{searchLabel}</span>
+            <span className="relative block">
+              <IconSearch className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                className={cn('input-base pl-9', compact && 'min-h-[40px] py-2 text-sm')}
+                name="q"
+                defaultValue={params.q}
+                maxLength={100}
+                type="search"
+                placeholder="Buscar…"
+              />
+            </span>
           </label>
-        )}
-        <label className={compact ? 'lg:col-span-2' : ''}>
-          <span className={labelClass}>Desde</span>
-          <input
-            className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
-            type="date"
-            name="desde"
-            defaultValue={params.desde}
-          />
-        </label>
-        <label className={compact ? 'lg:col-span-2' : ''}>
-          <span className={labelClass}>Hasta</span>
-          <input
-            className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
-            type="date"
-            name="hasta"
-            defaultValue={params.hasta}
-          />
-        </label>
-        {path === '/ordenes' && (
-          <label className={compact ? 'lg:col-span-4' : 'sm:col-span-2'}>
-            <span className={labelClass}>Proyecto</span>
+          {!hideEstatus && !estatusAsChips && (
+            <label className={compact ? 'lg:col-span-2' : ''}>
+              <span className={labelClass}>Estatus</span>
+              <select
+                className={cn('input-base capitalize', compact && 'min-h-[40px] py-2 text-sm')}
+                name="estatus"
+                defaultValue={params.estatus ?? ''}
+              >
+                <option value="">Todos</option>
+                {statuses.map((s) => (
+                  <option key={s} value={s}>
+                    {s.replaceAll('_', ' ')}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {(hideEstatus || estatusAsChips) && params.estatus ? (
+            <input type="hidden" name="estatus" value={params.estatus} />
+          ) : null}
+          {obras && obras.length > 0 && (
+            <label
+              className={cn(
+                compact ? 'lg:col-span-3' : '',
+                hideEstatus || estatusAsChips || compact ? '' : 'sm:col-span-2'
+              )}
+            >
+              <span className={labelClass}>Proyecto</span>
+              <select
+                className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
+                name="obra"
+                defaultValue={params.obra ?? ''}
+              >
+                <option value="">Todos los proyectos</option>
+                {obras.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.nombre}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <label className={compact ? 'lg:col-span-2' : ''}>
+            <span className={labelClass}>Desde</span>
             <input
               className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
-              name="proyecto"
-              defaultValue={params.proyecto}
-              type="search"
-              maxLength={100}
+              type="date"
+              name="desde"
+              defaultValue={params.desde}
             />
           </label>
-        )}
-        <div
-          className={cn(
-            'flex flex-wrap items-center gap-2',
-            compact ? 'lg:col-span-12 lg:justify-end' : 'sm:col-span-2'
+          <label className={compact ? 'lg:col-span-2' : ''}>
+            <span className={labelClass}>Hasta</span>
+            <input
+              className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
+              type="date"
+              name="hasta"
+              defaultValue={params.hasta}
+            />
+          </label>
+          {path === '/ordenes' && (
+            <label className={compact ? 'lg:col-span-4' : 'sm:col-span-2'}>
+              <span className={labelClass}>Proyecto</span>
+              <input
+                className={cn('input-base', compact && 'min-h-[40px] py-2 text-sm')}
+                name="proyecto"
+                defaultValue={params.proyecto}
+                type="search"
+                placeholder="Nombre del proyecto"
+                maxLength={100}
+              />
+            </label>
           )}
-        >
-          {hayFiltros && (
-            <Link className={compact ? 'btn-ghost btn-sm' : 'btn-ghost'} href={path}>
-              Limpiar filtros
-            </Link>
-          )}
-          <button className={compact ? 'btn-secondary btn-sm' : 'btn-secondary'} type="submit">
-            Aplicar filtros
-          </button>
-        </div>
-      </form>
+          <div
+            className={cn(
+              'flex flex-wrap items-center gap-2',
+              compact ? 'lg:col-span-12 lg:justify-end' : 'sm:col-span-2'
+            )}
+          >
+            {hayFiltros && (
+              <Link className={compact ? 'btn-ghost btn-sm' : 'btn-ghost'} href={path}>
+                Limpiar filtros
+              </Link>
+            )}
+            <button className={compact ? 'btn-secondary btn-sm' : 'btn-secondary'} type="submit">
+              Aplicar filtros
+            </button>
+          </div>
+        </form>
+      </FiltrosPlegables>
     </div>
   )
 }

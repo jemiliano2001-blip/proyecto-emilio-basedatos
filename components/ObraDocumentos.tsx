@@ -56,7 +56,7 @@ export function ObraDocumentos({
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   function handleDelete(docId: string, docNombre: string) {
-    if (!window.confirm(`¿Estás seguro de eliminar el documento "${docNombre}"?`)) {
+    if (!window.confirm(`¿Eliminar el documento "${docNombre}"? No se puede deshacer.`)) {
       return
     }
     setDeleteError(null)

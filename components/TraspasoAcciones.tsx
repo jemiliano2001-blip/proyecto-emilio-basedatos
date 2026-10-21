@@ -60,7 +60,7 @@ export function TraspasoAcciones({
   }
 
   const handleCancelar = () => {
-    if (!confirm('¿Estás seguro de cancelar este traspaso?')) return
+    if (!confirm('¿Cancelar este traspaso? Ya no se podrá aprobar ni recibir.')) return
     setErrorMsg(null)
     startTransition(async () => {
       const res = await cancelarTraspasoAction(traspasoId)

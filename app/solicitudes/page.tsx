@@ -98,7 +98,7 @@ export default async function SolicitudesPage({
         title={verTodas ? 'Control de solicitudes de compra' : 'Mis solicitudes de compra'}
         subtitle={
           verTodas
-            ? 'Requisiciones por estatus · Compras → Finanzas'
+            ? 'Requisiciones por estatus. Compras las aprueba y Finanzas las paga.'
             : 'Estatus de lo que has solicitado'
         }
         action={

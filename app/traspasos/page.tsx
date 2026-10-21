@@ -175,14 +175,14 @@ export default async function TraspasosPage() {
                     <p className="text-xs font-medium text-muted-foreground lg:hidden">
                       Origen
                     </p>
-                    <p className="truncate text-foreground">{t.obra_origen?.nombre ?? 'Sin especificar'}</p>
+                    <p className="line-clamp-2 text-foreground">{t.obra_origen?.nombre ?? 'Sin especificar'}</p>
                   </div>
                   <IconTraspasos className="size-4 shrink-0 text-muted-foreground lg:hidden" aria-hidden />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-muted-foreground lg:hidden">
                       Destino
                     </p>
-                    <p className="truncate text-foreground">{t.obra_destino?.nombre ?? 'Sin especificar'}</p>
+                    <p className="line-clamp-2 text-foreground">{t.obra_destino?.nombre ?? 'Sin especificar'}</p>
                   </div>
                 </div>
 

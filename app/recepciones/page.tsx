@@ -87,7 +87,6 @@ export default async function RecepcionesPage() {
         <div className="space-y-6">
           {puedeCapturar && (
             <section className="flex flex-col gap-3">
-              <p className="text-3xl font-semibold tabular-nums text-foreground">1 de 4</p>
               <div className="flex items-end justify-between gap-3">
                 <h2 className="text-xl font-semibold text-foreground">¿Qué pedido llegó?</h2>
                 <span className="text-base tabular-nums text-muted-foreground">{ordenesChecklist.length}</span>

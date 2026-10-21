@@ -138,7 +138,7 @@ export function OrdenCompraFacturasSection({
   const handleSubmitUpload = (e: React.FormEvent) => {
     e.preventDefault()
     if (!archivo) {
-      setError('Por favor selecciona un archivo PDF o imagen de la factura.')
+      setError('Selecciona el PDF o la imagen de la factura.')
       return
     }
 
@@ -184,7 +184,7 @@ export function OrdenCompraFacturasSection({
   }
 
   const handleEliminar = (facturaId: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta factura adjunta?')) {
+    if (!confirm('¿Eliminar esta factura adjunta? No se puede deshacer.')) {
       return
     }
     setDeletingId(facturaId)

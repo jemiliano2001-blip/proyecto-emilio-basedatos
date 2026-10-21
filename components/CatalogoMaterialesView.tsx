@@ -536,7 +536,7 @@ export function CatalogoMaterialesView({
         {/* Caso A: Se seleccionó una categoría específica */}
         {categoriaActual && (
           <section className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 bg-muted/50 border border-border rounded-xl">
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 p-4 bg-muted/50 border border-border rounded-xl">
               <div>
                 <h2 className="text-lg font-bold text-foreground">{categoriaActual.nombre}</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">

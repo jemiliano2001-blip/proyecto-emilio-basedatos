@@ -112,7 +112,7 @@ export default async function HomePage({
         aria-label="Indicadores"
         className={cn(
           'grid grid-cols-1 sm:grid-cols-2 gap-4',
-          verDinero ? 'lg:grid-cols-4' : 'lg:grid-cols-3'
+          verDinero ? 'xl:grid-cols-4' : 'lg:grid-cols-3'
         )}
       >
         <KpiMetricCard
