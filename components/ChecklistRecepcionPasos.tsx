@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { IconAlerta, IconCerrar, IconCheckCircle, IconFlechaAtras } from '@/components/icons'
 import {
   CLASE_BOTON_GRANDE,
   cantidadTexto,
@@ -194,7 +195,8 @@ export function ChecklistRecepcionPasos({
             onClick={onAtras}
             className="-ml-2 inline-flex min-h-12 items-center rounded-lg px-3 text-base font-semibold text-primary"
           >
-            ← Atrás
+            <IconFlechaAtras className="mr-1 h-5 w-5" />
+            Atrás
           </button>
           <p
             className="rounded-full bg-muted px-4 py-1 text-lg font-semibold tabular-nums text-foreground"
@@ -219,9 +221,8 @@ export function ChecklistRecepcionPasos({
       </div>
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold text-foreground">Recibir material</h1>
-        <p className="line-clamp-1 text-sm text-muted-foreground">
-          {folio} · {obraNombre}
-        </p>
+        <p className="line-clamp-2 text-sm text-muted-foreground">{obraNombre}</p>
+        <p className="text-sm font-semibold text-muted-foreground">{folio}</p>
       </div>
       <h2 className="text-xl font-semibold text-foreground">{tituloPaso}</h2>
       {paso === 2 && materialActual && (
@@ -247,7 +248,8 @@ export function ChecklistRecepcionPasos({
             onClick={() => onMarca(materialActual.orden_item_id, 'llego')}
             className={claseMarca('llego', materialActual.marca === 'llego')}
           >
-            ✅ Llegó
+            <IconCheckCircle className="mr-2 h-6 w-6" />
+            Llegó
           </button>
           <button
             type="button"
@@ -256,7 +258,8 @@ export function ChecklistRecepcionPasos({
             onClick={() => onMarca(materialActual.orden_item_id, 'incompleto')}
             className={claseMarca('incompleto', materialActual.marca === 'incompleto')}
           >
-            ⚠️ Llegó incompleto o dañado
+            <IconAlerta className="mr-2 h-6 w-6" />
+            Llegó incompleto o dañado
           </button>
           <button
             type="button"
@@ -265,7 +268,8 @@ export function ChecklistRecepcionPasos({
             onClick={() => onMarca(materialActual.orden_item_id, 'no_llego')}
             className={claseMarca('no_llego', materialActual.marca === 'no_llego')}
           >
-            ❌ No llegó
+            <IconCerrar className="mr-2 h-6 w-6" />
+            No llegó
           </button>
         </div>
       )}

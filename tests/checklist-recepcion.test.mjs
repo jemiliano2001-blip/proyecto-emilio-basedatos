@@ -276,9 +276,9 @@ test('a 390px la lista es una columna y Terminar respeta las reglas', () => {
   assert.match(lista, /data-contador="1"/)
   assert.match(lista, /2 de 2/)
   assert.equal(lista.split('data-marca="llego"').length - 1, 1)
-  assert.match(lista, /✅ Llegó/)
-  assert.match(lista, /⚠️ Llegó incompleto o dañado/)
-  assert.match(lista, /❌ No llegó/)
+  assert.match(lista, /Llegó/)
+  assert.match(lista, /Llegó incompleto o dañado/)
+  assert.match(lista, /No llegó/)
   assert.equal(lista.includes('¿Cuántos llegaron bien?'), false)
   assert.equal(lista.includes('grid-cols-2') || lista.includes('grid-cols-3'), false)
 
