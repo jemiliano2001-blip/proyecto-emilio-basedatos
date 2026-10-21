@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useEffect, useState, useCallback, useRef } from 'react'
-import Image from 'next/image'
 import { IconCerrar, IconExterno, IconChevron } from '@/components/icons'
+import { SIN_DATO } from '@/lib/fechas'
 import { useModalFocus } from '@/lib/hooks/useModalFocus'
+import { detectarTipoArchivo } from '@/lib/preview-helpers'
 
 export interface QuickLookItem {
   url: string
@@ -12,6 +13,10 @@ export interface QuickLookItem {
   tamano?: string | null
   subidoPor?: string | null
   fecha?: string | null
+  proveedor?: string | null
+  folio?: string | null
+  monto?: string | null
+  moneda?: string | null
 }
 
 interface QuickLookModalProps {
@@ -29,47 +34,73 @@ export function QuickLookModal({
 }: QuickLookModalProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [zoomNivel, setZoomNivel] = useState(1)
+  const [rotacion, setRotacion] = useState(0)
+  const [posicion, setPosicion] = useState({ x: 0, y: 0 })
+  const [arrastrando, setArrastrando] = useState(false)
+  const [puntoInicio, setPuntoInicio] = useState({ x: 0, y: 0 })
   const panelRef = useRef<HTMLDivElement>(null)
   useModalFocus(open, panelRef)
 
+  const restablecerVista = useCallback(() => {
+    setZoomNivel(1)
+    setRotacion(0)
+    setPosicion({ x: 0, y: 0 })
+    setArrastrando(false)
+  }, [])
+
   useEffect(() => {
     setCurrentIndex(initialIndex)
-    setZoomNivel(1)
-  }, [initialIndex, open])
+    restablecerVista()
+  }, [initialIndex, open, restablecerVista])
 
   const itemActual = items[currentIndex] ?? null
 
   const handleNext = useCallback(() => {
     if (items.length > 1) {
       setCurrentIndex((prev) => (prev + 1) % items.length)
-      setZoomNivel(1)
+      restablecerVista()
     }
-  }, [items.length])
+  }, [items.length, restablecerVista])
 
   const handlePrev = useCallback(() => {
     if (items.length > 1) {
       setCurrentIndex((prev) => (prev - 1 + items.length) % items.length)
-      setZoomNivel(1)
+      restablecerVista()
     }
-  }, [items.length])
+  }, [items.length, restablecerVista])
 
   // Atajos de teclado: Escape (cerrar), Flecha Izq/Der (navegar), Espacio (cerrar)
   useEffect(() => {
     if (!open) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase()
+      const esInput = tag === 'input' || tag === 'textarea' || tag === 'select'
       if (e.key === 'Escape') {
         e.preventDefault()
         onClose()
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === 'ArrowRight' && !esInput) {
         e.preventDefault()
         handleNext()
-      } else if (e.key === 'ArrowLeft') {
+      } else if (e.key === 'ArrowLeft' && !esInput) {
         e.preventDefault()
         handlePrev()
-      } else if (e.key === ' ' && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLAnchorElement)) {
+      } else if (e.key === ' ' && !esInput && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLAnchorElement)) {
         e.preventDefault()
         onClose()
+      } else if (e.key === '+' || e.key === '=') {
+        e.preventDefault()
+        setZoomNivel((z) => Math.min(4, z + 0.25))
+      } else if (e.key === '-') {
+        e.preventDefault()
+        setZoomNivel((z) => Math.max(0.5, z - 0.25))
+      } else if (e.key === '0') {
+        e.preventDefault()
+        setZoomNivel(1)
+        setPosicion({ x: 0, y: 0 })
+      } else if (e.key.toLowerCase() === 'r' && !esInput) {
+        e.preventDefault()
+        setRotacion((r) => (r + 90) % 360)
       }
     }
 
@@ -97,96 +128,118 @@ export function QuickLookModal({
     urlStr.includes('.pdf?') ||
     nombreStr.toLowerCase().endsWith('.pdf')
 
+  const detectado = detectarTipoArchivo(nombreStr || urlStr)
   const esImagen =
     itemActual.tipo === 'imagen' ||
+    detectado === 'image' ||
     Boolean(urlStr.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i)) ||
     Boolean(nombreStr.match(/\.(jpeg|jpg|gif|png|webp)$/i))
+  const muestraFicha =
+    itemActual.proveedor !== undefined ||
+    itemActual.folio !== undefined ||
+    itemActual.monto !== undefined
+  const montoTexto = itemActual.monto?.trim()
+    ? itemActual.moneda && !itemActual.monto.toUpperCase().includes(itemActual.moneda.toUpperCase())
+      ? `${itemActual.monto.trim()} ${itemActual.moneda}`
+      : itemActual.monto.trim()
+    : SIN_DATO
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="quicklook-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-foreground/80 backdrop-blur-md transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex bg-foreground/80 backdrop-blur-md transition-opacity print:hidden"
       onClick={onClose}
     >
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative flex flex-col w-full max-w-5xl h-[92vh] max-h-[900px] bg-card rounded-2xl shadow-2xl border border-border overflow-hidden"
+        className="relative flex flex-col w-full h-full max-w-none bg-card shadow-2xl border border-border overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Barra superior de herramientas */}
-        <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50 shrink-0">
-          <div className="flex items-center gap-2 min-w-0 pr-2">
-            <span
-              className={`px-2 py-0.5 text-xs font-bold rounded ${
-                esPdf
-                  ? 'bg-danger-soft text-danger-soft-foreground'
-                  : esImagen
-                  ? 'bg-primary-soft text-primary-soft-foreground'
-                  : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              {esPdf ? 'PDF' : esImagen ? 'FOTO' : 'ARCHIVO'}
-            </span>
+        <header className="flex flex-col gap-3 px-4 py-3 border-b border-border bg-muted/50 shrink-0">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2
-                id="quicklook-title"
-                className="text-sm font-bold text-foreground truncate max-w-[280px] sm:max-w-md md:max-w-lg"
-                title={itemActual.nombre}
-              >
-                {itemActual.nombre}
-              </h2>
-              {(itemActual.tamano || itemActual.fecha || itemActual.subidoPor) && (
-                <p className="text-[11px] text-muted-foreground truncate">
-                  {[itemActual.tamano, itemActual.fecha, itemActual.subidoPor]
-                    .filter(Boolean)
-                    .join(' · ')}
+              <div className="flex items-center gap-2 min-w-0">
+                <span
+                  className={`px-2 py-0.5 text-xs font-bold rounded ${
+                    esPdf
+                      ? 'bg-danger-soft text-danger-soft-foreground'
+                      : esImagen
+                      ? 'bg-primary-soft text-primary-soft-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {esPdf ? 'PDF' : esImagen ? 'IMG' : 'ARCHIVO'}
+                </span>
+                <h2
+                  id="quicklook-title"
+                  className="text-sm font-bold text-foreground truncate"
+                  title={muestraFicha ? (itemActual.proveedor?.trim() || SIN_DATO) : itemActual.nombre}
+                >
+                  {muestraFicha ? (itemActual.proveedor?.trim() || SIN_DATO) : itemActual.nombre}
+                </h2>
+              </div>
+              {muestraFicha ? (
+                <p className="mt-1 text-xs text-muted-foreground truncate">
+                  Folio {itemActual.folio?.trim() || SIN_DATO}
+                  {' · '}
+                  {montoTexto}
                 </p>
+              ) : (
+                (itemActual.tamano || itemActual.fecha || itemActual.subidoPor) && (
+                  <p className="mt-1 text-[11px] text-muted-foreground truncate">
+                    {[itemActual.tamano, itemActual.fecha, itemActual.subidoPor]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                )
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Controles para imagen: zoom */}
             {esImagen && (
-              <div className="hidden sm:flex items-center gap-1 mr-2 px-1.5 py-0.5 bg-muted/80 border border-border/60 rounded-lg text-xs">
+              <div className="flex flex-wrap items-center gap-1 mr-1 text-xs">
                 <button
                   type="button"
                   onClick={() => setZoomNivel((z) => Math.max(0.5, z - 0.25))}
-                  className="flex h-7 w-7 items-center justify-center rounded-md font-bold text-muted-foreground hover:text-foreground hover:bg-background transition-colors"
-                  aria-label="Reducir zoom"
-                  title="Reducir zoom"
+                  className="btn-secondary min-h-11 px-3"
+                  aria-label="Alejar"
                 >
-                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
+                  Alejar
                 </button>
-                <span className="tabular-nums font-semibold text-foreground px-1.5 text-[11px]">
+                <span className="tabular-nums font-semibold text-foreground px-1.5 text-xs">
                   {Math.round(zoomNivel * 100)}%
                 </span>
                 <button
                   type="button"
-                  onClick={() => setZoomNivel((z) => Math.min(3, z + 0.25))}
-                  className="flex h-7 w-7 items-center justify-center rounded-md font-bold text-muted-foreground hover:text-foreground hover:bg-background transition-colors"
-                  aria-label="Aumentar zoom"
-                  title="Aumentar zoom"
+                  onClick={() => setZoomNivel((z) => Math.min(4, z + 0.25))}
+                  className="btn-secondary min-h-11 px-3"
+                  aria-label="Acercar"
                 >
-                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
+                  Acercar
                 </button>
-                {zoomNivel !== 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setZoomNivel(1)}
-                    className="ml-1 px-1.5 py-0.5 text-[11px] font-medium text-primary hover:text-primary-hover hover:underline"
-                  >
-                    Restablecer
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setZoomNivel(1)
+                    setPosicion({ x: 0, y: 0 })
+                  }}
+                  className="btn-secondary min-h-11 px-3"
+                >
+                  Ajustar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRotacion((r) => (r + 90) % 360)}
+                  className="btn-secondary min-h-11 px-3"
+                >
+                  Girar
+                </button>
               </div>
             )}
 
@@ -196,7 +249,7 @@ export function QuickLookModal({
               download={itemActual.nombre}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary btn-sm font-medium"
+              className="btn-secondary min-h-11 px-3 font-medium"
               title="Descargar o abrir en pestaña externa"
             >
               <span>Descargar</span>
@@ -207,11 +260,12 @@ export function QuickLookModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors ml-1 p-1.5 flex items-center justify-center"
-              aria-label="Cerrar vista previa (Esc)"
+              aria-label="Cerrar vista previa"
               title="Cerrar vista previa (Esc)"
+              className="btn-secondary min-h-11 px-3"
             >
               <IconCerrar className="w-5 h-5" />
+              <span>Cerrar</span>
             </button>
           </div>
         </header>
@@ -227,25 +281,40 @@ export function QuickLookModal({
               />
             </div>
           ) : esImagen ? (
-            <div className="w-full h-full flex items-center justify-center overflow-auto">
-              <div
+            <div
+              className="w-full h-full flex items-center justify-center overflow-hidden"
+              onWheel={(evento) => {
+                evento.preventDefault()
+                const delta = evento.deltaY * -0.0015
+                setZoomNivel((prev) => Math.min(Math.max(prev + delta, 0.5), 4))
+              }}
+              onPointerDown={(evento) => {
+                if (zoomNivel <= 1 || evento.button !== 0) return
+                evento.currentTarget.setPointerCapture(evento.pointerId)
+                setArrastrando(true)
+                setPuntoInicio({ x: evento.clientX - posicion.x, y: evento.clientY - posicion.y })
+              }}
+              onPointerMove={(evento) => {
+                if (!arrastrando) return
+                setPosicion({
+                  x: evento.clientX - puntoInicio.x,
+                  y: evento.clientY - puntoInicio.y,
+                })
+              }}
+              onPointerUp={() => setArrastrando(false)}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- zoom, giro y blob: no pasan por el optimizador */}
+              <img
+                src={itemActual.url}
+                alt={itemActual.nombre}
+                draggable={false}
                 style={{
-                  transform: `scale(${zoomNivel})`,
-                  transformOrigin: 'center center',
-                  transition: 'transform 150ms ease-out',
+                  transform: `translate(${posicion.x}px, ${posicion.y}px) scale(${zoomNivel}) rotate(${rotacion}deg)`,
+                  cursor: zoomNivel > 1 ? (arrastrando ? 'grabbing' : 'grab') : 'default',
+                  transition: arrastrando ? 'none' : 'transform 150ms ease-out',
                 }}
-                className="max-w-full max-h-full flex items-center justify-center"
-              >
-                {/* Visualizador de imagen de alta fidelidad */}
-                <Image
-                  src={itemActual.url}
-                  alt={itemActual.nombre}
-                  width={1400}
-                  height={1000}
-                  unoptimized
-                  className="max-h-[75vh] w-auto h-auto object-contain rounded-lg shadow-md"
-                />
-              </div>
+                className="max-h-[75vh] max-w-full object-contain rounded-lg shadow-md"
+              />
             </div>
           ) : (
             <div className="text-center p-6 bg-card rounded-xl shadow-sm border border-border max-w-md">

@@ -69,7 +69,8 @@ export function detectTipoArchivo(fileName: string, mimeType: string): TipoArchi
     lowerName.endsWith('.jpg') ||
     lowerName.endsWith('.jpeg') ||
     lowerName.endsWith('.png') ||
-    lowerName.endsWith('.webp')
+    lowerName.endsWith('.webp') ||
+    lowerName.endsWith('.gif')
   ) {
     return 'imagen'
   }

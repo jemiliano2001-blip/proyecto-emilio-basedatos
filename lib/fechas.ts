@@ -1,6 +1,9 @@
 /** Zona fija de la obra. El servidor (Vercel) corre en UTC; la pantalla no. */
 export const ZONA_OBRA = 'America/Matamoros'
 
+/** Lo que no tiene fecha. Un solo texto, en toda la app. */
+export const SIN_DATO = 'Sin dato'
+
 type PartesReloj = {
   year: number
   month: number
@@ -11,6 +14,12 @@ type PartesReloj = {
 }
 
 function fechaValida(iso: string | Date): Date | null {
+  // YYYY-MM-DD es un día civil, no medianoche UTC. En el servidor (UTC) esa
+  // medianoche cae el día anterior en Matamoros.
+  if (typeof iso === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    const inicio = inicioDiaZona(iso)
+    return inicio ? new Date(inicio) : null
+  }
   const date = iso instanceof Date ? iso : new Date(iso)
   if (Number.isNaN(date.getTime())) return null
   return date
@@ -71,18 +80,17 @@ function offsetMinutos(date: Date, timeZone: string): number {
   return Math.round((comoUtc - date.getTime()) / 60_000)
 }
 
-function textoOVacio(iso: string | Date, texto: string | null): string {
-  if (texto) return texto
-  return typeof iso === 'string' ? iso : ''
-}
-
 /**
  * Fecha y hora de la obra: `20/10/2026 7:28 p.m.`
- * La usan la Bitácora y las listas.
+ * Es el único formato de un instante. Si falta, `Sin dato`.
  */
-export function fechaHora(iso: string | Date, timeZone: string = ZONA_OBRA): string {
+export function fechaHora(
+  iso: string | Date | null | undefined,
+  timeZone: string = ZONA_OBRA
+): string {
+  if (iso == null || iso === '') return SIN_DATO
   const date = fechaValida(iso)
-  if (!date) return textoOVacio(iso, null)
+  if (!date) return SIN_DATO
   const fmt = new Intl.DateTimeFormat('en-US', {
     timeZone,
     year: 'numeric',
@@ -101,25 +109,70 @@ export function fechaHora(iso: string | Date, timeZone: string = ZONA_OBRA): str
 }
 
 /** Solo el día civil en la zona de la obra: `20/10/2026`. */
-export function soloFecha(iso: string | Date, timeZone: string = ZONA_OBRA): string {
+export function soloFecha(
+  iso: string | Date | null | undefined,
+  timeZone: string = ZONA_OBRA
+): string {
+  if (iso == null || iso === '') return SIN_DATO
   const date = fechaValida(iso)
-  if (!date) return textoOVacio(iso, null)
+  if (!date) return SIN_DATO
   const partes = partesEnZona(date, timeZone)
   const dia = String(partes.day).padStart(2, '0')
   const mes = String(partes.month).padStart(2, '0')
   return `${dia}/${mes}/${partes.year}`
 }
 
-/** Fecha larga para documentos impresos, en la zona de la obra. */
-export function fechaDocumento(iso: string | Date, timeZone: string = ZONA_OBRA): string {
+/** Mismo día civil que `soloFecha`. El impreso no usa otro formato. */
+export function fechaDocumento(
+  iso: string | Date | null | undefined,
+  timeZone: string = ZONA_OBRA
+): string {
+  return soloFecha(iso, timeZone)
+}
+
+/** Encabezado de la Bitácora: `martes, 20 de octubre de 2026`. */
+export function encabezadoDia(
+  iso: string | Date | null | undefined,
+  timeZone: string = ZONA_OBRA
+): string {
+  if (iso == null || iso === '') return SIN_DATO
   const date = fechaValida(iso)
-  if (!date) return textoOVacio(iso, null)
+  if (!date) return SIN_DATO
   return new Intl.DateTimeFormat('es-MX', {
     timeZone,
+    weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  }).format(date)
+  })
+    .format(date)
+    .toLowerCase()
+}
+
+/** Hora de 12 h de un instante: `7:28 p.m.` */
+export function hora12(
+  iso: string | Date | null | undefined,
+  timeZone: string = ZONA_OBRA
+): string {
+  const completa = fechaHora(iso, timeZone)
+  if (completa === SIN_DATO) return SIN_DATO
+  const espacio = completa.indexOf(' ')
+  return espacio === -1 ? completa : completa.slice(espacio + 1)
+}
+
+/** Agrupa en orden, por el día civil de Matamoros. */
+export function agruparPorDia<T>(
+  items: readonly T[],
+  fechaDe: (item: T) => string | null | undefined
+): { dia: string; items: T[] }[] {
+  const grupos: { dia: string; items: T[] }[] = []
+  for (const item of items) {
+    const dia = encabezadoDia(fechaDe(item))
+    const ultimo = grupos[grupos.length - 1]
+    if (ultimo && ultimo.dia === dia) ultimo.items.push(item)
+    else grupos.push({ dia, items: [item] })
+  }
+  return grupos
 }
 
 export const formatearFechaBitacora = fechaHora

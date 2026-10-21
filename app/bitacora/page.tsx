@@ -10,7 +10,8 @@ import {
   etiquetaTablaAuditoria,
 } from '@/lib/auditoria-labels'
 import { getSessionUsuario } from '@/lib/auth/session'
-import { formatearFechaBitacora, finDiaZonaExclusivo, inicioDiaZona } from '@/lib/fechas'
+import { agruparPorDia, finDiaZonaExclusivo, hora12, inicioDiaZona } from '@/lib/fechas'
+import { mensajeSinResultados } from '@/lib/lista-vacia'
 import { PAGE_SIZE, listFilters, pageHref, type ListParams } from '@/lib/list-filters'
 import { puedeVerBitacora } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -174,7 +175,7 @@ export default async function BitacoraPage({
             href="/bitacora"
             className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 text-sm font-semibold text-muted-foreground hover:bg-muted/50"
           >
-            Limpiar
+            Limpiar filtros
           </Link>
         </div>
       </form>
@@ -185,47 +186,66 @@ export default async function BitacoraPage({
         </div>
       )}
 
-      <div className="list-stack">
-        {eventos.map((ev) => {
-          const nombre =
-            ev.usuario && typeof ev.usuario === 'object' && 'nombre' in ev.usuario
-              ? (ev.usuario as { nombre: string }).nombre
-              : 'Sistema'
-          return (
-            <Link
-              key={ev.id}
-              href={`/bitacora/${ev.id}`}
-              className="flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-muted/50 transition-colors"
-            >
-              <div className="min-w-0">
-                <p className="font-semibold text-foreground">
-                  {etiquetaAccionAuditoria(ev.accion)} · {etiquetaTablaAuditoria(ev.tabla)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                  {nombre} · {formatearFechaBitacora(ev.creado_en)}
-                </p>
-              </div>
-              <Badge
-                variant={
-                  ev.accion === 'DELETE'
-                    ? 'red'
-                    : ev.accion === 'INSERT'
-                      ? 'teal'
-                      : 'gray'
-                }
-              >
-                {etiquetaAccionAuditoria(ev.accion)}
-              </Badge>
-            </Link>
-          )
-        })}
+      <div className="space-y-4">
+        {agruparPorDia(eventos, (ev) => ev.creado_en).map((grupo, indice) => (
+          <section key={`${grupo.dia}-${indice}`} className="list-stack">
+            <h2 className="px-3.5 pt-3 text-sm font-semibold lowercase text-foreground">
+              {grupo.dia}
+            </h2>
+            {grupo.items.map((ev) => {
+              const nombre =
+                ev.usuario && typeof ev.usuario === 'object' && 'nombre' in ev.usuario
+                  ? (ev.usuario as { nombre: string }).nombre
+                  : 'Sistema'
+              return (
+                <Link
+                  key={ev.id}
+                  href={`/bitacora/${ev.id}`}
+                  className="flex min-h-[56px] items-start justify-between gap-3 px-3.5 py-3 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground">
+                      {etiquetaAccionAuditoria(ev.accion)} · {etiquetaTablaAuditoria(ev.tabla)}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                      {nombre} · {hora12(ev.creado_en)}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      ev.accion === 'DELETE'
+                        ? 'red'
+                        : ev.accion === 'INSERT'
+                          ? 'teal'
+                          : 'gray'
+                    }
+                  >
+                    {etiquetaAccionAuditoria(ev.accion)}
+                  </Badge>
+                </Link>
+              )
+            })}
+          </section>
+        ))}
         {eventos.length === 0 && !error && (
           <div className="p-4">
-            <EmptyState
-              icon={IconBitacora}
-              title="Sin eventos"
-              description="No hay registros con estos filtros."
-            />
+            {params.q || params.estatus || params.desde || params.hasta || params.proyecto ? (
+              <EmptyState
+                icon={IconBitacora}
+                title="Sin resultados"
+                description={mensajeSinResultados(
+                  'eventos',
+                  params.q || [params.estatus, params.proyecto, params.desde, params.hasta].filter(Boolean).join(' ')
+                )}
+                action={{ label: 'Limpiar filtros', href: '/bitacora' }}
+              />
+            ) : (
+              <EmptyState
+                icon={IconBitacora}
+                title="Sin eventos"
+                description="No hay registros en la bitácora."
+              />
+            )}
           </div>
         )}
       </div>

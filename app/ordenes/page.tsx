@@ -1,4 +1,5 @@
 import { finDiaZonaExclusivo, formatearFechaLista, inicioDiaZona } from '@/lib/fechas'
+import { mensajeSinResultados } from '@/lib/lista-vacia'
 import { ListFilters, ListPagination } from '@/components/ListFilters'
 import { listFilters, type ListParams } from '@/lib/list-filters'
 const STATUSES = ['emitida', 'parcialmente_recibida', 'recibida', 'cancelada'] as const
@@ -151,11 +152,23 @@ export default async function OrdenesPage({
           })}
         </div>
       ) : (
-        <EmptyState
-          icon={IconDocumento}
-          title="Sin órdenes de compra"
-          description="Todavía no hay órdenes de compra emitidas en el sistema."
-        />
+        filters.q || filters.estatus || filters.desde || filters.hasta || filters.proyecto ? (
+          <EmptyState
+            icon={IconDocumento}
+            title="Sin resultados"
+            description={mensajeSinResultados(
+              'órdenes de compra',
+              filters.q || [filters.estatus, filters.proyecto, filters.desde, filters.hasta].filter(Boolean).join(' ')
+            )}
+            action={{ label: 'Limpiar filtros', href: '/ordenes' }}
+          />
+        ) : (
+          <EmptyState
+            icon={IconDocumento}
+            title="Sin órdenes de compra"
+            description="Todavía no hay órdenes de compra emitidas en el sistema."
+          />
+        )
       )}
       {!error && (
         <ListPagination

@@ -64,7 +64,8 @@ test('un PDF de 5 MB se sube a Storage y no entra en la server action', async ()
   assert.deepEqual(resultado, { ok: true })
   assert.equal(subidas.length, 1)
   assert.equal(subidas[0].ruta, path)
-  assert.equal(subidas[0].file, archivo)
+  assert.notEqual(subidas[0].file, archivo)
+  assert.equal(subidas[0].file.name, 'factura-5mb.pdf')
   assert.equal(subidas[0].file.size, tamano)
   assert.equal(subidas[0].opciones.upsert, false)
   assert.equal(registros.length, 1)
@@ -86,40 +87,70 @@ test('un PDF de 5 MB se sube a Storage y no entra en la server action', async ()
   assert.match(accion, /registrarFacturaOrdenAction/)
 })
 
-test('pegar con Ctrl+V adjunta el archivo', () => {
+function itemDe(archivo) {
+  return { kind: 'file', type: archivo.type, getAsFile: () => archivo }
+}
+
+test('pegar con Ctrl+V adjunta imagen o PDF y no roba el texto', () => {
   const archivo = new File([new Uint8Array([1, 2, 3, 4])], 'ticket.jpg', { type: 'image/jpeg' })
   const pegado = adjuntarDesdeCtrlV({
     key: 'v',
     ctrlKey: true,
-    clipboardData: { files: [archivo] },
+    destino: 'pagina',
+    clipboardData: { items: [itemDe(archivo)] },
   })
   assert.equal(pegado.adjuntado, true)
   assert.equal(pegado.archivo, archivo)
-  assert.equal(pegado.error, null)
+  assert.equal(pegado.aviso, 'Captura del portapapeles detectada.')
+
+  const enCampo = adjuntarDesdeCtrlV({
+    destino: 'campo',
+    clipboardData: { items: [itemDe(archivo)] },
+  })
+  assert.equal(enCampo.adjuntado, true)
+
+  const pdf = new File([new Uint8Array([1, 2])], 'factura.pdf', { type: 'application/pdf' })
+  const pdfPegado = adjuntarDesdeCtrlV({
+    destino: 'pagina',
+    clipboardData: { files: [pdf] },
+  })
+  assert.equal(pdfPegado.adjuntado, true)
+  assert.equal(pdfPegado.archivo, pdf)
 
   const texto = adjuntarDesdeCtrlV({
-    key: 'v',
-    ctrlKey: true,
-    clipboardData: { files: [], items: [{ kind: 'string', getAsFile: () => null }] },
+    destino: 'campo',
+    clipboardData: { items: [{ kind: 'string', type: 'text/plain', getAsFile: () => null }] },
   })
   assert.equal(texto.adjuntado, false)
   assert.equal(texto.archivo, null)
+  assert.equal(texto.error, null)
 
   const sinCtrl = adjuntarDesdeCtrlV({
     key: 'v',
     ctrlKey: false,
-    clipboardData: { files: [archivo] },
+    clipboardData: { items: [itemDe(archivo)] },
   })
   assert.equal(sinCtrl.adjuntado, false)
 
-  const pesado = { name: 'grande.pdf', type: 'application/pdf', size: LIMITE_FACTURA_BYTES + 1 }
+  const ya = adjuntarDesdeCtrlV({
+    yaHayArchivo: true,
+    clipboardData: { items: [itemDe(archivo)] },
+  })
+  assert.equal(ya.adjuntado, false)
+
+  const pesado = { name: 'grande.jpg', type: 'image/jpeg', size: LIMITE_FACTURA_BYTES + 1 }
   const rechazo = adjuntarDesdeCtrlV({
-    key: 'v',
-    ctrlKey: true,
-    clipboardData: { files: [pesado] },
+    clipboardData: { items: [itemDe(pesado)] },
   })
   assert.equal(rechazo.adjuntado, false)
-  assert.match(rechazo.error ?? '', /30 MB/)
+  assert.match(rechazo.error ?? '', /no puede exceder 30 MB/)
+
+  const formato = validarArchivoFactura({ name: 'notas.txt', type: 'text/plain', size: 20 })
+  assert.equal(formato.ok, false)
+  assert.match(formato.error, /Formato no válido/)
+
+  const gif = validarArchivoFactura({ name: 'foto.gif', type: 'image/gif', size: 40 })
+  assert.equal(gif.ok, true)
 })
 
 test('se ve la vista previa de imagen y de PDF', () => {
@@ -130,9 +161,9 @@ test('se ve la vista previa de imagen y de PDF', () => {
       src: 'blob:factura-local',
     })
   )
-  assert.match(imagen, /Vista previa de factura\.jpg/)
+  assert.match(imagen, /alt="Factura"/)
   assert.match(imagen, /<img\b/)
-  assert.match(imagen, /Vista previa/)
+  assert.match(imagen, /factura\.jpg/)
   assert.match(imagen, /data-vista-previa="imagen"/)
 
   const pdf = renderToStaticMarkup(
@@ -142,17 +173,65 @@ test('se ve la vista previa de imagen y de PDF', () => {
       src: '/api/ordenes/facturas/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee',
     })
   )
-  assert.match(pdf, /Vista previa del PDF factura\.pdf/)
+  assert.match(pdf, /title="Vista previa PDF"/)
   assert.match(pdf, /<iframe\b/)
-  assert.match(pdf, /Vista previa/)
+  assert.match(pdf, /factura\.pdf/)
   assert.match(pdf, /data-vista-previa="pdf"/)
 
   const seccion = readFileSync('components/OrdenCompraFacturasSection.tsx', 'utf8')
   const adjunto = readFileSync('components/AdjuntarArchivo.tsx', 'utf8')
+  const visor = readFileSync('components/QuickLookModal.tsx', 'utf8')
   assert.match(seccion, /VistaPreviaArchivo/)
   assert.match(seccion, /AdjuntarArchivo/)
+  assert.match(seccion, /disabled=\{isPending \|\| !archivo\}/)
+  assert.match(seccion, /'Guardar'/)
   assert.match(adjunto, /Tomar foto/)
-  assert.match(adjunto, /Elegir archivo/)
-  assert.match(adjunto, /paste/)
+  assert.match(adjunto, /Haz clic o arrastra un screenshot o PDF/)
+  assert.match(adjunto, /O presiona Ctrl \+ V/)
+  assert.match(adjunto, /window\.addEventListener\('paste'/)
   assert.match(adjunto, /VistaPreviaArchivo/)
+  assert.match(adjunto, /Quitar/)
+  assert.match(visor, /Ajustar/)
+  assert.match(visor, /Girar/)
+  assert.match(visor, />Descargar</)
+  assert.match(visor, />Cerrar</)
+  assert.equal(visor.includes('>Eliminar<'), false)
+})
+
+test('si el registro falla, el reintento no vuelve a subir', async () => {
+  const archivo = new File([new Uint8Array([1, 2, 3, 4])], 'ticket.jpg', { type: 'image/jpeg' })
+  const path = `ordenes/${ORDEN_ID}/facturas/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee-ticket.jpg`
+  const pendiente = { path: null }
+  let subidas = 0
+
+  const base = {
+    archivo,
+    ordenId: ORDEN_ID,
+    obraId: OBRA_ID,
+    itemIds: [],
+    pendiente,
+    preparar: async () => ({ error: null, path, tipo: 'imagen' }),
+    storage: {
+      upload: async () => {
+        subidas += 1
+        return { error: null }
+      },
+    },
+  }
+
+  const primero = await subirFacturaDirecto({
+    ...base,
+    registrar: async () => ({ error: 'No se pudo guardar la factura.' }),
+  })
+  assert.equal(primero.ok, false)
+  assert.equal(subidas, 1)
+  assert.equal(pendiente.path, path)
+
+  const segundo = await subirFacturaDirecto({
+    ...base,
+    registrar: async () => ({ error: null }),
+  })
+  assert.deepEqual(segundo, { ok: true })
+  assert.equal(subidas, 1)
+  assert.equal(pendiente.path, null)
 })

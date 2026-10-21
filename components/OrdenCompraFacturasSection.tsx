@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
+import React, { useRef, useState, useTransition } from 'react'
 import type { OrdenCompraFactura, OrdenItemParaFactura } from '@/lib/types'
 import { eliminarFacturaOrdenAction, prepararSubidaFacturaAction, registrarFacturaOrdenAction } from '@/lib/actions/ordenes'
 import { AdjuntarArchivo } from '@/components/AdjuntarArchivo'
@@ -13,8 +13,8 @@ import {
   cotejarPartidasConOC,
 } from '@/lib/extractor-facturas-nativo'
 import { vibrarExito, vibrarTap } from '@/lib/haptics'
-import { BUCKET_FACTURAS_OC, subirFacturaDirecto } from '@/lib/adjuntos'
-import { formatearFechaLista } from '@/lib/fechas'
+import { BUCKET_FACTURAS_OC, subirFacturaDirecto, type SubidaPendiente } from '@/lib/adjuntos'
+import { SIN_DATO, formatearFechaLista } from '@/lib/fechas'
 import { hrefFacturaOrden } from '@/lib/facturas-oc'
 import { formatMoneyMx } from '@/lib/money'
 import { createClient } from '@/lib/supabase/client'
@@ -27,6 +27,7 @@ interface Props {
   facturas: OrdenCompraFactura[]
   items: OrdenItemParaFactura[]
   puedeGestionar: boolean
+  proveedorNombre?: string | null
 }
 
 function formatBytes(bytes: number | null | undefined): string {
@@ -45,6 +46,7 @@ export function OrdenCompraFacturasSection({
   facturas,
   items,
   puedeGestionar,
+  proveedorNombre = null,
 }: Props) {
   const [modalOpen, setModalOpen] = useState(false)
   const [quickLookIndex, setQuickLookIndex] = useState<number | null>(null)
@@ -59,6 +61,7 @@ export function OrdenCompraFacturasSection({
   const [extraccionMsg, setExtraccionMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const pendienteRef = useRef<SubidaPendiente>({ path: null })
 
   function toggleExpand(id: string) {
     setExpandedIds((prev) => {
@@ -79,6 +82,7 @@ export function OrdenCompraFacturasSection({
   }
 
   const leerArchivo = async (f: File) => {
+    pendienteRef.current = { path: null }
     setArchivo(f)
     setError(null)
     setExtraccionMsg(null)
@@ -149,6 +153,7 @@ export function OrdenCompraFacturasSection({
           folio: folioFactura,
           monto: montoFactura,
           itemIds: Array.from(selectedItemIds),
+          pendiente: pendienteRef.current,
           preparar: prepararSubidaFacturaAction,
           storage: {
             upload: async (path, file, opciones) => {
@@ -164,6 +169,7 @@ export function OrdenCompraFacturasSection({
           setError(res.error)
           return
         }
+        pendienteRef.current = { path: null }
         setModalOpen(false)
         setArchivo(null)
         setExtraccionMsg(null)
@@ -374,11 +380,16 @@ export function OrdenCompraFacturasSection({
                 <AdjuntarArchivo
                   archivo={archivo}
                   disabled={isPending}
+                  proveedor={proveedorNombre}
+                  folio={folioFactura}
+                  monto={montoFactura}
+                  moneda={moneda}
                   onArchivo={(file) => {
                     void leerArchivo(file)
                   }}
                   onError={setError}
                   onQuitar={() => {
+                    pendienteRef.current = { path: null }
                     setArchivo(null)
                     setExtraccionMsg(null)
                   }}
@@ -486,9 +497,9 @@ export function OrdenCompraFacturasSection({
                   type="submit"
                   disabled={isPending || !archivo}
                   aria-busy={isPending}
-                  className="btn-primary btn-xs"
+                  className="btn-primary min-h-12 px-4"
                 >
-                  {isPending ? 'Subiendo factura…' : 'Subir factura'}
+                  {isPending ? 'Guardando…' : 'Guardar'}
                 </button>
               </div>
             </form>
@@ -507,6 +518,16 @@ export function OrdenCompraFacturasSection({
           tamano: formatBytes(f.tamano_bytes),
           subidoPor: f.subido_por_nombre,
           fecha: formatearFechaLista(f.creado_en),
+          proveedor: proveedorNombre,
+          folio: f.folio_factura,
+          monto:
+            f.monto_factura == null
+              ? null
+              : Number(f.monto_factura).toLocaleString('es-MX', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }),
+          moneda: moneda || SIN_DATO,
         }))}
       />
     </section>

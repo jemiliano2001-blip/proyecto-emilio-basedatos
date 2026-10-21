@@ -1,16 +1,20 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { IconCamara, IconClip, IconBasura } from '@/components/icons'
+import { IconCamara } from '@/components/icons'
 import { VistaPreviaArchivo } from '@/components/VistaPreviaArchivo'
+import { QuickLookModal } from '@/components/QuickLookModal'
 import {
+  AVISO_PEGADO,
   adjuntarDesdeCtrlV,
+  instantaneaArchivo,
   tipoVistaPrevia,
   validarArchivoFactura,
   type ArchivoMeta,
   type ValidacionArchivo,
 } from '@/lib/adjuntos'
+import { SIN_DATO } from '@/lib/fechas'
 import { vibrarTap } from '@/lib/haptics'
 
 const CameraCaptureModal = dynamic(
@@ -19,7 +23,7 @@ const CameraCaptureModal = dynamic(
 )
 
 const ACCEPT_FACTURA =
-  '.pdf,application/pdf,image/jpeg,image/png,image/webp,text/xml,application/xml'
+  'image/*,.pdf,application/pdf,image/gif,text/xml,application/xml,.xml'
 
 interface AdjuntarArchivoProps {
   archivo: ArchivoMeta | null
@@ -28,10 +32,19 @@ interface AdjuntarArchivoProps {
   onError: (mensaje: string) => void
   onQuitar?: () => void
   validar?: (archivo: ArchivoMeta) => ValidacionArchivo
+  proveedor?: string | null
+  folio?: string | null
+  monto?: string | null
+  moneda?: string | null
 }
 
 function esCampoDeTexto(destino: EventTarget | null): boolean {
-  return destino instanceof HTMLInputElement || destino instanceof HTMLTextAreaElement
+  if (destino instanceof HTMLTextAreaElement) return true
+  if (destino instanceof HTMLInputElement) {
+    const tipo = destino.type
+    return tipo !== 'file' && tipo !== 'button' && tipo !== 'submit'
+  }
+  return false
 }
 
 export function AdjuntarArchivo({
@@ -41,10 +54,17 @@ export function AdjuntarArchivo({
   onError,
   onQuitar,
   validar = validarArchivoFactura,
+  proveedor,
+  folio,
+  monto,
+  moneda,
 }: AdjuntarArchivoProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [camaraAbierta, setCamaraAbierta] = useState(false)
+  const [arrastrando, setArrastrando] = useState(false)
   const [srcLocal, setSrcLocal] = useState<string | null>(null)
+  const [aviso, setAviso] = useState<string | null>(null)
+  const [ampliado, setAmpliado] = useState(false)
   const archivoBlob = archivo instanceof File ? archivo : null
 
   useEffect(() => {
@@ -62,64 +82,100 @@ export function AdjuntarArchivo({
     return () => URL.revokeObjectURL(url)
   }, [archivoBlob])
 
+  const aplicar = useCallback(
+    async (file: File, avisoPegado: string | null = null) => {
+      const validacion = validar(file)
+      if (!validacion.ok) {
+        onError(validacion.error)
+        return
+      }
+      let copia: File
+      try {
+        copia = await instantaneaArchivo(file)
+      } catch {
+        onError('No se pudo leer el archivo. Vuelve a elegirlo.')
+        return
+      }
+      vibrarTap()
+      setAviso(avisoPegado)
+      onArchivo(copia)
+    },
+    [onArchivo, onError, validar]
+  )
+
   useEffect(() => {
-    if (disabled) return
+    if (disabled || archivo) return
 
     function onPaste(evento: ClipboardEvent) {
-      const tieneArchivo = (evento.clipboardData?.files?.length ?? 0) > 0
-      if (esCampoDeTexto(evento.target) && !tieneArchivo) return
       const resultado = adjuntarDesdeCtrlV({
-        key: 'v',
-        ctrlKey: true,
+        destino: esCampoDeTexto(evento.target) ? 'campo' : 'pagina',
+        yaHayArchivo: false,
         clipboardData: evento.clipboardData,
       })
-      if (tieneArchivo || resultado.adjuntado) evento.preventDefault()
+      if (resultado.adjuntado || resultado.error) evento.preventDefault()
       if (!resultado.adjuntado || !(resultado.archivo instanceof File)) {
         if (resultado.error) onError(resultado.error)
         return
       }
-      onArchivo(resultado.archivo)
+      void aplicar(resultado.archivo, resultado.aviso)
     }
 
-    document.addEventListener('paste', onPaste)
-    return () => document.removeEventListener('paste', onPaste)
-  }, [disabled, onArchivo, onError])
+    window.addEventListener('paste', onPaste)
+    return () => window.removeEventListener('paste', onPaste)
+  }, [aplicar, archivo, disabled, onError])
 
-  function tomar(file: File | null | undefined) {
-    if (!file) return
-    const validacion = validar(file)
-    if (!validacion.ok) {
-      onError(validacion.error)
-      return
-    }
-    vibrarTap()
-    onArchivo(file)
+  function soltar(evento: React.DragEvent) {
+    evento.preventDefault()
+    setArrastrando(false)
+    if (disabled || archivo) return
+    const file = evento.dataTransfer.files?.[0]
+    if (file) void aplicar(file)
   }
 
   const tipo = archivo ? tipoVistaPrevia(archivo) : 'ninguna'
+  const montoVisible = monto?.trim()
+    ? moneda?.trim()
+      ? `${monto.trim()} ${moneda.trim()}`
+      : monto.trim()
+    : SIN_DATO
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => setCamaraAbierta(true)}
-          className="btn-secondary min-h-14 justify-center text-sm"
+      {!archivo && (
+        <div
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          aria-label="Seleccionar archivo de factura"
+          aria-disabled={disabled}
+          onClick={() => {
+            if (!disabled) inputRef.current?.click()
+          }}
+          onKeyDown={(evento) => {
+            if (disabled) return
+            if (evento.key === 'Enter' || evento.key === ' ') {
+              evento.preventDefault()
+              inputRef.current?.click()
+            }
+          }}
+          onDragOver={(evento) => {
+            evento.preventDefault()
+            if (!disabled) setArrastrando(true)
+          }}
+          onDragLeave={(evento) => {
+            evento.preventDefault()
+            setArrastrando(false)
+          }}
+          onDrop={soltar}
+          className={`flex min-h-28 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-6 text-center outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            arrastrando ? 'border-primary bg-primary-soft' : 'border-input bg-muted/40'
+          } ${disabled ? 'pointer-events-none opacity-60' : ''}`}
         >
-          <IconCamara className="h-5 w-5" />
-          Tomar foto
-        </button>
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => inputRef.current?.click()}
-          className="btn-secondary min-h-14 justify-center text-sm"
-        >
-          <IconClip className="h-5 w-5" />
-          Elegir archivo
-        </button>
-      </div>
+          <span className="text-sm font-medium text-foreground">
+            Haz clic o arrastra un screenshot o PDF
+          </span>
+          <span className="text-sm text-muted-foreground">O presiona Ctrl + V</span>
+        </div>
+      )}
       <input
         ref={inputRef}
         type="file"
@@ -129,31 +185,72 @@ export function AdjuntarArchivo({
         disabled={disabled}
         onChange={(evento) => {
           const file = evento.target.files?.[0]
-          tomar(file)
+          if (file) void aplicar(file)
           evento.target.value = ''
         }}
       />
-      <p className="text-xs text-muted-foreground">
-        También puedes pegar una imagen o un archivo con Ctrl+V. PDF, foto o XML, hasta 30 MB.
-      </p>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setCamaraAbierta(true)}
+        className="btn-secondary min-h-14 w-full justify-center text-base"
+      >
+        <IconCamara className="h-5 w-5" />
+        Tomar foto
+      </button>
+      <p className="text-xs text-muted-foreground">También puedes elegir un XML del SAT.</p>
+      {aviso && (
+        <p role="status" className="text-sm text-foreground">
+          {aviso || AVISO_PEGADO}
+        </p>
+      )}
       {archivo && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <p className="min-w-0 truncate text-xs font-medium text-foreground">{archivo.name}</p>
+          <VistaPreviaArchivo tipo={tipo} nombre={archivo.name} src={srcLocal} />
+          <div className="flex flex-wrap gap-2">
+            {srcLocal && (
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => setAmpliado(true)}
+                className="btn-secondary min-h-11"
+              >
+                Ampliar
+              </button>
+            )}
             {onQuitar && (
               <button
                 type="button"
                 disabled={disabled}
-                onClick={onQuitar}
-                className="inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-danger"
+                onClick={() => {
+                  setAviso(null)
+                  setAmpliado(false)
+                  onQuitar()
+                }}
+                className="btn-secondary min-h-11 text-danger"
               >
-                <IconBasura className="h-4 w-4" />
                 Quitar
               </button>
             )}
           </div>
-          <VistaPreviaArchivo tipo={tipo} nombre={archivo.name} src={srcLocal} />
         </div>
+      )}
+      {ampliado && srcLocal && archivo && (
+        <QuickLookModal
+          open
+          onClose={() => setAmpliado(false)}
+          items={[
+            {
+              url: srcLocal,
+              nombre: archivo.name,
+              tipo: tipo === 'pdf' ? 'pdf' : 'imagen',
+              proveedor: proveedor ?? null,
+              folio: folio ?? null,
+              monto: montoVisible,
+              moneda: moneda ?? null,
+            },
+          ]}
+        />
       )}
       <CameraCaptureModal
         isOpen={camaraAbierta}
@@ -161,7 +258,7 @@ export function AdjuntarArchivo({
         title="Foto de la factura"
         onCapture={(file) => {
           setCamaraAbierta(false)
-          tomar(file)
+          void aplicar(file)
         }}
       />
     </div>

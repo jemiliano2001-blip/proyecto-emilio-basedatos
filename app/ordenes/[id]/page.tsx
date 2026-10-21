@@ -480,6 +480,7 @@ export default async function OrdenDetallePage({
             facturas={facturas}
             items={itemsParaFactura}
             puedeGestionar={puedeGestionarFacturas}
+            proveedorNombre={detalle.proveedor?.nombre ?? null}
           />
 
           <section className="space-y-3">

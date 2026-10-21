@@ -187,6 +187,9 @@ export default async function SolicitudesPage({
         verTodas={verTodas}
         esCompras={esCompras}
         esFinanzas={esFinanzas}
+        hayFiltros={Boolean(filters.q || filters.desde || filters.hasta || filters.obra || filters.proyecto)}
+        consulta={filters.q}
+        limpiarHref="/solicitudes"
       />
       {!error && (
         <ListPagination path="/solicitudes" params={params} page={filters.page} total={count ?? 0} />
