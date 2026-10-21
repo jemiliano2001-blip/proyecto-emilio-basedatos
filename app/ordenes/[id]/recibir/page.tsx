@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
-import { PageHeader } from '@/components/PageHeader'
-import { RecepcionForm } from '@/components/RecepcionForm'
+import { ChecklistRecepcion } from '@/components/ChecklistRecepcion'
 import { crearRecepcionAction } from '@/lib/actions/recepciones'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeCapturarRecepcion } from '@/lib/roles'
@@ -36,24 +35,13 @@ export default async function RecibirOrdenPage({
 
   return (
     <main className="page-shell-narrow">
-      <PageHeader
-        title={`Checklist · ${cabecera.folio}`}
-        description={
-          <div>
-            <p className="text-sm font-medium text-foreground">{cabecera.obra_nombre}</p>
-            {cabecera.proveedor_nombre && (
-              <p className="text-xs text-muted-foreground">{cabecera.proveedor_nombre}</p>
-            )}
-            <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-              Estado OC: {String(cabecera.orden_estado).replaceAll('_', ' ')}
-            </p>
-          </div>
-        }
-        backHref="/recepciones"
-        backLabel="Recepción"
+      <ChecklistRecepcion
+        action={crearRecepcionAction}
+        ordenId={resolvedparams.id}
+        folio={cabecera.folio}
+        obraNombre={cabecera.obra_nombre}
+        items={items}
       />
-
-      <RecepcionForm action={crearRecepcionAction} ordenId={resolvedparams.id} items={items} />
     </main>
   )
 }

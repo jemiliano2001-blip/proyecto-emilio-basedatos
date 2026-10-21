@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeCapturarRecepcion, puedeRevisarRecepcion } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
+import { exigeFotoItem } from '@/lib/checklist-recepcion'
 import { validateRecepcionInput } from '@/lib/validations/recepcion'
 
 export type ActionResult = { error: string | null; ok?: boolean; id?: string }
@@ -25,10 +26,10 @@ async function uploadRecepcionFoto(
 ): Promise<{ url?: string; storagePath?: string; error?: string }> {
   if (!file || file.size === 0) return {}
   if (!file.type.startsWith('image/')) {
-    return { error: 'El archivo adjunto debe ser una imagen válida (JPG, PNG, WebP).' }
+    return { error: 'La foto tiene que ser una imagen (JPG, PNG o WebP).' }
   }
   if (file.size > 10 * 1024 * 1024) {
-    return { error: 'La fotografía excede el límite de 10 MB.' }
+    return { error: 'La foto es muy grande. Usa una de menos de 10 MB.' }
   }
   const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 40)
   const storagePath = `recepciones/${prefijo}-${crypto.randomUUID()}-${sanitizedName}`
@@ -40,7 +41,7 @@ async function uploadRecepcionFoto(
       upsert: false,
     })
   if (uploadError) {
-    return { error: `Error al subir la fotografía: ${uploadError.message}` }
+    return { error: 'No se pudo subir la foto. Inténtalo otra vez.' }
   }
   const { data: publicData } = supabase.storage
     .from('materiales')
@@ -128,6 +129,17 @@ export async function crearRecepcionAction(
     estado: string
   }[] = []
 
+  const extrasSubidas: { foto_url: string; storage_path: string }[] = []
+  const fotosExtra = formData.getAll('foto_extra')
+  for (const extra of fotosExtra) {
+    if (!(extra instanceof File) || extra.size === 0) continue
+    const upExtra = await uploadRecepcionFoto(supabase, extra, 'extra')
+    if (upExtra.error) return { error: upExtra.error }
+    if (upExtra.url && upExtra.storagePath) {
+      extrasSubidas.push({ foto_url: upExtra.url, storage_path: upExtra.storagePath })
+    }
+  }
+
   for (const item of parsed.data.items) {
     const itemFile = formData.get(`foto_item_${item.orden_item_id}`) as File | null
     if (itemFile && itemFile.size > 0) {
@@ -146,6 +158,15 @@ export async function crearRecepcionAction(
           resolucion_px: (formData.get(`foto_item_${item.orden_item_id}_resolucion`) as string | null) || null,
           estado: item.estado,
         })
+      }
+    }
+  }
+
+  if (formData.get('origen_checklist') === '1') {
+    if (!foto_remision_url) return { error: 'Falta la foto del talón.' }
+    for (const item of parsed.data.items) {
+      if (exigeFotoItem(item.estado, item.cantidad_danada) && !item.foto_url) {
+        return { error: 'Falta la foto de lo que llegó mal.' }
       }
     }
   }
@@ -196,6 +217,16 @@ export async function crearRecepcionAction(
         precision_gps_m: parseNumOrNull(formData.get('foto_evidencia_precision_m')),
         calidad_score: parseNumOrNull(formData.get('foto_evidencia_calidad_score')),
         resolucion_px: (formData.get('foto_evidencia_resolucion') as string | null) || null,
+      })
+    }
+
+    for (const extra of extrasSubidas) {
+      fotosAInsertar.push({
+        recepcion_id: recepcionId,
+        tipo_foto: 'material_completo',
+        storage_path: extra.storage_path,
+        foto_url: extra.foto_url,
+        capturado_por: session.authUserId,
       })
     }
 

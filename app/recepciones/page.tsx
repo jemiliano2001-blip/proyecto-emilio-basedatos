@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { IconCheckCircle, IconChevron, IconPaquete } from '@/components/icons'
 import { OfflineQueueBanner } from '@/components/OfflineQueueBanner'
 import { BotonEscanearQROrden } from '@/components/BotonEscanearQROrden'
+import { ListaPedidosLlegados } from '@/components/ListaPedidosLlegados'
 import { formatearFechaLista } from '@/lib/fechas'
 import { getSessionUsuario } from '@/lib/auth/session'
 import {
@@ -74,7 +75,7 @@ export default async function RecepcionesPage() {
     <main className="page-shell-wide">
       <PageHeader
         title="Recepción"
-        description="Checklist de lo recibido contra lo pedido en cada orden de compra."
+        description={puedeCapturar ? 'Elige el pedido que llegó.' : 'Lo que ya se recibió en la obra.'}
         actions={
           <BotonEscanearQROrden label="Escanear orden" size="sm" />
         }
@@ -85,38 +86,13 @@ export default async function RecepcionesPage() {
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <div className="space-y-6">
           {puedeCapturar && (
-            <section className="space-y-3">
+            <section className="flex flex-col gap-3">
+              <p className="text-base text-muted-foreground">1 de 4</p>
               <div className="flex items-end justify-between gap-3">
-                <h2 className="text-base font-semibold text-foreground">Órdenes por recibir</h2>
-                <span className="text-sm tabular-nums text-muted-foreground">{ordenesChecklist.length}</span>
+                <h2 className="text-xl font-semibold text-foreground">¿Qué pedido llegó?</h2>
+                <span className="text-base tabular-nums text-muted-foreground">{ordenesChecklist.length}</span>
               </div>
-              {ordenesChecklist.length === 0 ? (
-                <EmptyState
-                  icon={IconPaquete}
-                  title="No hay órdenes pendientes de recepción"
-                  className="py-8"
-                />
-              ) : (
-                <div className="list-stack">
-                  {ordenesChecklist.map((orden) => (
-                    <Link key={orden.id} href={`/ordenes/${orden.id}/recibir`} className="list-row group items-center">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-semibold tabular-nums text-foreground group-hover:text-primary">
-                            {orden.folio}
-                          </p>
-                          <Badge variant={orden.estado === 'parcialmente_recibida' ? 'warning' : 'info'}>
-                            {orden.estado.replaceAll('_', ' ')}
-                          </Badge>
-                        </div>
-                        <p className="mt-0.5 truncate text-sm text-muted-foreground">{orden.obra_nombre}</p>
-                        <p className="truncate text-xs text-muted-foreground">{orden.proveedor_nombre}</p>
-                      </div>
-                      <IconChevron className="size-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-                    </Link>
-                  ))}
-                </div>
-              )}
+              <ListaPedidosLlegados pedidos={ordenesChecklist} />
             </section>
           )}
 
