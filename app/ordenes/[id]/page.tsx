@@ -13,6 +13,7 @@ import { OrdenCompraFacturasSection } from '@/components/OrdenCompraFacturasSect
 import { OrdenCompraProveedorModal } from '@/components/OrdenCompraProveedorModal'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { hrefFacturaOrden } from '@/lib/facturas-oc'
+import { fechaHora, soloFecha } from '@/lib/fechas'
 import { formatMoneyMx } from '@/lib/money'
 import type { DatosOrdenWhatsApp } from '@/lib/whatsapp-notificacion'
 import type { DatosOrdenExcel } from '@/lib/orden-excel-export'
@@ -246,11 +247,7 @@ export default async function OrdenDetallePage({
     0
   )
   const pctRecibido = totalPedido > 0 ? Math.min(100, (totalRecibido / totalPedido) * 100) : 0
-  const fechaEmision = new Date(detalle.creado_en).toLocaleDateString('es-MX', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+  const fechaEmision = soloFecha(detalle.creado_en)
 
   const datosWhatsApp: DatosOrdenWhatsApp = {
     folio: detalle.folio,
@@ -379,10 +376,7 @@ export default async function OrdenDetallePage({
                     : 'En tránsito a obra',
               fecha:
                 recepciones.length > 0
-                  ? new Date(recepciones[0].recibido_en).toLocaleDateString('es-MX', {
-                      day: '2-digit',
-                      month: 'short',
-                    })
+                  ? soloFecha(recepciones[0].recibido_en)
                   : null,
               responsable:
                 recepciones.length > 0 && recepciones[0].receptor?.nombre
@@ -486,6 +480,7 @@ export default async function OrdenDetallePage({
             facturas={facturas}
             items={itemsParaFactura}
             puedeGestionar={puedeGestionarFacturas}
+            proveedorNombre={detalle.proveedor?.nombre ?? null}
           />
 
           <section className="space-y-3">
@@ -508,7 +503,7 @@ export default async function OrdenDetallePage({
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground">{r.receptor?.nombre ?? 'Receptor'}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(r.recibido_en).toLocaleString('es-MX')}
+                        {fechaHora(r.recibido_en)}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">

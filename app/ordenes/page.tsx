@@ -1,3 +1,5 @@
+import { finDiaZonaExclusivo, formatearFechaLista, inicioDiaZona } from '@/lib/fechas'
+import { mensajeSinResultados } from '@/lib/lista-vacia'
 import { ListFilters, ListPagination } from '@/components/ListFilters'
 import { listFilters, type ListParams } from '@/lib/list-filters'
 const STATUSES = ['emitida', 'parcialmente_recibida', 'recibida', 'cancelada'] as const
@@ -50,12 +52,14 @@ export default async function OrdenesPage({
     .order('creado_en', { ascending: false })
     .order('id', { ascending: false })
   if (filters.estatus) query = query.eq('estado', filters.estatus)
-  if (filters.desde) query = query.gte('creado_en', filters.desde + 'T00:00:00Z')
-  if (filters.hasta)
-    query = query.lt(
-      'creado_en',
-      new Date(Date.parse(filters.hasta) + 86400000).toISOString()
-    )
+  if (filters.desde) {
+    const inicio = inicioDiaZona(filters.desde)
+    if (inicio) query = query.gte('creado_en', inicio)
+  }
+  if (filters.hasta) {
+    const fin = finDiaZonaExclusivo(filters.hasta)
+    if (fin) query = query.lt('creado_en', fin)
+  }
   if (filters.q) query = query.ilike('folio', '%' + filters.q + '%')
   if (filters.proyecto) query = query.ilike('obra.nombre', '%' + filters.proyecto + '%')
   const { data: ordenes, error, count } = await query.range(filters.from, filters.to)
@@ -140,7 +144,7 @@ export default async function OrdenesPage({
                     <span className="text-xs font-medium text-muted-foreground">{o.moneda}</span>
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">
-                    {new Date(o.creado_en).toLocaleDateString('es-MX')}
+                    {formatearFechaLista(o.creado_en)}
                   </p>
                 </div>
               </Link>
@@ -148,11 +152,23 @@ export default async function OrdenesPage({
           })}
         </div>
       ) : (
-        <EmptyState
-          icon={IconDocumento}
-          title="Sin órdenes de compra"
-          description="Todavía no hay órdenes de compra emitidas en el sistema."
-        />
+        filters.q || filters.estatus || filters.desde || filters.hasta || filters.proyecto ? (
+          <EmptyState
+            icon={IconDocumento}
+            title="Sin resultados"
+            description={mensajeSinResultados(
+              'órdenes de compra',
+              filters.q || [filters.estatus, filters.proyecto, filters.desde, filters.hasta].filter(Boolean).join(' ')
+            )}
+            action={{ label: 'Limpiar filtros', href: '/ordenes' }}
+          />
+        ) : (
+          <EmptyState
+            icon={IconDocumento}
+            title="Sin órdenes de compra"
+            description="Todavía no hay órdenes de compra emitidas en el sistema."
+          />
+        )
       )}
       {!error && (
         <ListPagination

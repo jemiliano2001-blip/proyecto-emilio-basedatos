@@ -1,11 +1,17 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import {
+  rutaFacturaDeOrden,
+  validarArchivoFactura,
+  type PrepararFacturaInput,
+  type PrepararFacturaResult,
+} from '@/lib/adjuntos'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { hrefFacturaOrden } from '@/lib/facturas-oc'
 import { puedeAsignarProveedorOC, puedeGestionarFacturasOC } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
-import { detectTipoArchivo, validateFacturaOrdenInput } from '@/lib/validations/factura_oc'
+import { validateFacturaOrdenInput } from '@/lib/validations/factura_oc'
 
 export type OrdenActionResult = { error: string | null; ok?: boolean }
 
@@ -51,9 +57,45 @@ export async function asignarProveedorOrdenAction(
 }
 
 /**
- * Sube y registra una factura en PDF o imagen para una Orden de Compra.
+ * Paso 1: valida permiso, tipo y tamaño, y devuelve la ruta.
+ * El navegador sube el archivo directo a Storage; aquí no viaja el binario.
  */
-export async function subirFacturaOrdenAction(
+export async function prepararSubidaFacturaAction(
+  input: PrepararFacturaInput
+): Promise<PrepararFacturaResult> {
+  const session = await getSessionUsuario()
+  if (!session?.perfil || !puedeGestionarFacturasOC(session.rol)) {
+    return { error: 'No tienes permiso para adjuntar facturas.' }
+  }
+  if (!input || typeof input.orden_id !== 'string' || typeof input.nombre !== 'string') {
+    return { error: 'Datos de la factura inválidos.' }
+  }
+
+  const validacion = validarArchivoFactura({
+    name: input.nombre,
+    type: typeof input.tipo === 'string' ? input.tipo : '',
+    size: Number(input.tamano),
+  })
+  if (!validacion.ok) return { error: validacion.error }
+
+  const supabase = await createClient()
+  const { data: orden, error: ordenError } = await supabase
+    .from('ordenes_compra')
+    .select('id')
+    .eq('id', input.orden_id)
+    .maybeSingle()
+  if (ordenError) return { error: 'No se pudo verificar la orden de compra.' }
+  if (!orden) return { error: 'No se encontró la orden de compra.' }
+
+  const limpio = input.nombre.trim().replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120) || 'archivo'
+  const path = `ordenes/${input.orden_id}/facturas/${crypto.randomUUID()}-${limpio}`
+  return { error: null, path, tipo: validacion.tipo }
+}
+
+/**
+ * Paso 2: registra la fila con la ruta ya subida. No recibe el archivo.
+ */
+export async function registrarFacturaOrdenAction(
   _prev: OrdenActionResult,
   formData: FormData
 ): Promise<OrdenActionResult> {
@@ -68,47 +110,36 @@ export async function subirFacturaOrdenAction(
     folio_factura: formData.get('folio_factura'),
     monto_factura: formData.get('monto_factura'),
   })
+  if (!parsed.ok) return { error: parsed.error }
 
-  if (!parsed.ok) {
-    return { error: parsed.error }
-  }
-
-  const file = formData.get('archivo') as File | null
-  if (!file || typeof file.size !== 'number' || file.size === 0) {
-    return { error: 'Selecciona un archivo válido (PDF o imagen) para subir.' }
-  }
-
-  // Detectar tipo de archivo
-  const tipoArchivo = detectTipoArchivo(file.name, file.type)
-  if (tipoArchivo !== 'pdf' && tipoArchivo !== 'imagen' && tipoArchivo !== 'xml') {
-    return { error: 'Solo se permiten archivos en formato PDF, imágenes (JPG, PNG) o XML.' }
-  }
-
-  // Limitar a 30MB
-  const maxBytes = 30 * 1024 * 1024
-  if (file.size > maxBytes) {
-    return { error: 'El archivo supera el tamaño máximo permitido de 30 MB.' }
+  const { orden_id, obra_id, folio_factura, monto_factura } = parsed.data
+  const pathRaw = formData.get('archivo_path')
+  const nombreRaw = formData.get('archivo_nombre')
+  const tipoRaw = formData.get('archivo_tipo')
+  const storagePath = typeof pathRaw === 'string' ? pathRaw.trim() : ''
+  const archivoNombre = typeof nombreRaw === 'string' ? nombreRaw.trim() : ''
+  const archivoTipo = typeof tipoRaw === 'string' ? tipoRaw : ''
+  const tamano = Number(formData.get('tamano_bytes'))
+  const validacion = validarArchivoFactura({
+    name: archivoNombre,
+    type: archivoTipo,
+    size: tamano,
+  })
+  if (!validacion.ok) return { error: validacion.error }
+  if (!rutaFacturaDeOrden(orden_id, storagePath)) {
+    return { error: 'La ruta del archivo no corresponde a esta orden.' }
   }
 
   const supabase = await createClient()
-  const { orden_id, obra_id, folio_factura, monto_factura } = parsed.data
-  const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const storagePath = `ordenes/${orden_id}/facturas/${crypto.randomUUID()}-${sanitizedFileName}`
-
-  const arrayBuffer = await file.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
-
-  const { error: uploadError } = await supabase.storage
-    .from('obra-documentos')
-    .upload(storagePath, buffer, {
-      contentType: file.type || 'application/octet-stream',
-      upsert: false,
-    })
-
-  if (uploadError) {
-    return {
-      error: `No se pudo guardar el archivo en Storage: ${uploadError.message}`,
-    }
+  const { data: orden, error: ordenError } = await supabase
+    .from('ordenes_compra')
+    .select('id, obra_id')
+    .eq('id', orden_id)
+    .maybeSingle()
+  if (ordenError) return { error: 'No se pudo verificar la orden de compra.' }
+  if (!orden) return { error: 'No se encontró la orden de compra.' }
+  if (orden.obra_id !== obra_id) {
+    return { error: 'La orden no pertenece a ese proyecto.' }
   }
 
   // El bucket es privado. archivo_url guarda el enlace de la app, no una URL pública.
@@ -124,9 +155,9 @@ export async function subirFacturaOrdenAction(
       monto_factura,
       archivo_path: storagePath,
       archivo_url: hrefFacturaOrden(facturaId),
-      archivo_nombre: file.name,
-      tamano_bytes: file.size,
-      tipo_archivo: tipoArchivo,
+      archivo_nombre: archivoNombre,
+      tamano_bytes: tamano,
+      tipo_archivo: validacion.tipo,
       subido_por: session.perfil.id,
     })
     .select('id')

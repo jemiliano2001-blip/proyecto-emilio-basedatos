@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { PageHeader } from '@/components/PageHeader'
 import { RevisarRecepcionForm } from '@/components/RevisarRecepcionForm'
 import { RecepcionEvidenciasViewer } from '@/components/RecepcionEvidenciasViewer'
+import { fechaHora } from '@/lib/fechas'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeRevisarRecepcion } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -68,9 +69,7 @@ export default async function RevisarRecepcionPage({
         backHref={`/recepciones/${detalle.id}`}
         backLabel="Detalle"
         subtitle={detalle.orden?.folio}
-        description={`${detalle.receptor?.nombre ?? '—'} · ${new Date(
-          detalle.recibido_en
-        ).toLocaleString('es-MX')}`}
+        description={`${detalle.receptor?.nombre ?? '—'} · ${fechaHora(detalle.recibido_en)}`}
       />
 
       {/* Evidencias fotográficas para inspección visual previa a la aprobación */}

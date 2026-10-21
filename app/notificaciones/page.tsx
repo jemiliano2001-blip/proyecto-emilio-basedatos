@@ -3,15 +3,14 @@ import { Badge } from '@/components/Badge'
 import { EmptyState } from '@/components/EmptyState'
 import { IconDocumento } from '@/components/icons'
 import { NotificacionAcciones } from '@/components/NotificacionAcciones'
+import { formatearFechaLista } from '@/lib/fechas'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { hrefNotificacion } from '@/lib/nav'
 import { createClient } from '@/lib/supabase/server'
 import type { Notificacion } from '@/lib/types'
 
 function fechaAviso(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
+  return formatearFechaLista(iso)
 }
 
 export default async function NotificacionesPage() {

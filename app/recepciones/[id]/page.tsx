@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { Badge } from '@/components/Badge'
 import { CopyButton } from '@/components/CopyButton'
 import { RecepcionEvidenciasViewer } from '@/components/RecepcionEvidenciasViewer'
+import { fechaHora } from '@/lib/fechas'
 import { getSessionUsuario } from '@/lib/auth/session'
 import { puedeCapturarRecepcion, puedeRevisarRecepcion, puedeVerRecepciones } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -89,9 +90,7 @@ export default async function RecepcionDetallePage({
             {etiquetaEstado(detalle.estado)}
           </Badge>
         }
-        description={`Capturado por ${detalle.receptor?.nombre ?? '—'} · ${new Date(
-          detalle.recibido_en
-        ).toLocaleString('es-MX')}`}
+        description={`Capturado por ${detalle.receptor?.nombre ?? '—'} · ${fechaHora(detalle.recibido_en)}`}
       />
 
       {(detalle.referencia_entrega || detalle.nota) && (
@@ -163,7 +162,7 @@ export default async function RecepcionDetallePage({
         <div className="card mb-4 text-sm">
           <p>
             Revisado por {detalle.revisor?.nombre ?? '—'} ·{' '}
-            {new Date(detalle.revisado_en).toLocaleString('es-MX')}
+            {fechaHora(detalle.revisado_en)}
           </p>
           {detalle.nota_revision && (
             <p className="text-muted-foreground mt-1">{detalle.nota_revision}</p>

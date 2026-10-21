@@ -6,6 +6,7 @@ import { IconFlechaAtras, IconImprimir } from '@/components/icons'
 import { BotonEnviarWhatsApp } from '@/components/BotonEnviarWhatsApp'
 import { BotonDescargarOrdenExcel } from '@/components/BotonDescargarOrdenExcel'
 import { QRCodeSvg } from '@/lib/qr'
+import { fechaDocumento } from '@/lib/fechas'
 import type { DatosOrdenWhatsApp } from '@/lib/whatsapp-notificacion'
 import type { DatosOrdenExcel } from '@/lib/orden-excel-export'
 
@@ -51,13 +52,7 @@ export function OrdenCompraFormatoImpresion({
   const hrefVolver = volverHref ?? `/ordenes/${orden.id}`
   const labelVolver = volverLabel ?? 'Volver a la orden'
 
-  // Formatear fecha en español legible (ej. "2 de septiembre de 2026")
-  const fechaObj = new Date(orden.creado_en)
-  const fechaFormateada = fechaObj.toLocaleDateString('es-MX', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
+  const fechaFormateada = fechaDocumento(orden.creado_en)
 
   // Preparar partidas numeradas
   const items = orden.items.map((it) => {

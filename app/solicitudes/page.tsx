@@ -1,3 +1,4 @@
+import { finDiaZonaExclusivo, inicioDiaZona } from '@/lib/fechas'
 import { ListFilters, ListPagination } from '@/components/ListFilters'
 import { listFilters, pageHref, type ListParams } from '@/lib/list-filters'
 const STATUSES = [
@@ -77,12 +78,14 @@ export default async function SolicitudesPage({
   if (filters.obra) query = query.eq('obra_id', filters.obra)
   if (filters.estatus === 'recibida') query = query.in('estado', ['recibida', 'pendiente'])
   else if (filters.estatus) query = query.eq('estado', filters.estatus)
-  if (filters.desde) query = query.gte('creado_en', filters.desde + 'T00:00:00Z')
-  if (filters.hasta)
-    query = query.lt(
-      'creado_en',
-      new Date(Date.parse(filters.hasta) + 86400000).toISOString()
-    )
+  if (filters.desde) {
+    const inicio = inicioDiaZona(filters.desde)
+    if (inicio) query = query.gte('creado_en', inicio)
+  }
+  if (filters.hasta) {
+    const fin = finDiaZonaExclusivo(filters.hasta)
+    if (fin) query = query.lt('creado_en', fin)
+  }
   if (filters.q) query = query.ilike('obra.nombre', '%' + filters.q + '%')
 
   const { data: solicitudes, error, count } = await query.range(filters.from, filters.to)
@@ -184,6 +187,9 @@ export default async function SolicitudesPage({
         verTodas={verTodas}
         esCompras={esCompras}
         esFinanzas={esFinanzas}
+        hayFiltros={Boolean(filters.q || filters.desde || filters.hasta || filters.obra || filters.proyecto)}
+        consulta={filters.q}
+        limpiarHref="/solicitudes"
       />
       {!error && (
         <ListPagination path="/solicitudes" params={params} page={filters.page} total={count ?? 0} />

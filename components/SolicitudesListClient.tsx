@@ -15,6 +15,8 @@ import {
   type BatchActionResult,
 } from '@/lib/actions/solicitudes'
 import type { EstadoSolicitud } from '@/lib/types'
+import { formatearFechaLista } from '@/lib/fechas'
+import { mensajeSinResultados } from '@/lib/lista-vacia'
 import { cn } from '@/lib/utils'
 import { etapaAprobacionLote } from '@/lib/solicitudes-workflow'
 
@@ -34,6 +36,9 @@ interface SolicitudesListClientProps {
   verTodas: boolean
   esCompras: boolean
   esFinanzas: boolean
+  hayFiltros?: boolean
+  consulta?: string
+  limpiarHref?: string
 }
 
 function badgeVariant(estado: EstadoSolicitud): 'danger' | 'success' | 'info' | 'warning' {
@@ -83,6 +88,9 @@ export function SolicitudesListClient({
   verTodas,
   esCompras,
   esFinanzas,
+  hayFiltros = false,
+  consulta = '',
+  limpiarHref = '/solicitudes',
 }: SolicitudesListClientProps) {
   const { density } = useDensity()
   const [isPending, startTransition] = useTransition()
@@ -292,10 +300,7 @@ export function SolicitudesListClient({
                       {esMulti ? ' · varios proyectos' : ''}
                       {s.solicitante?.nombre ? ` · Solicitó: ${s.solicitante.nombre}` : ''}
                       {' · '}
-                      {new Date(s.creado_en).toLocaleString('es-MX', {
-                        dateStyle: 'short',
-                        timeStyle: 'short',
-                      })}
+                      {formatearFechaLista(s.creado_en)}
                     </p>
                   </div>
 
@@ -312,19 +317,23 @@ export function SolicitudesListClient({
       ) : (
         <EmptyState
           icon={IconDocumento}
-          title="Sin resultados"
+          title={hayFiltros ? 'Sin resultados' : 'Sin resultados'}
           description={
-            verTodas
-              ? 'Todavía no hay requisiciones registradas en el sistema.'
-              : 'Todavía no has levantado ninguna requisición.'
+            hayFiltros
+              ? mensajeSinResultados('requisiciones', consulta)
+              : verTodas
+                ? 'Todavía no hay requisiciones registradas en el sistema.'
+                : 'Todavía no has levantado ninguna requisición.'
           }
           action={
-            puedeCrear
-              ? {
-                  label: 'Nueva requisición',
-                  href: '/solicitudes/nueva',
-                }
-              : undefined
+            hayFiltros
+              ? { label: 'Limpiar filtros', href: limpiarHref }
+              : puedeCrear
+                ? {
+                    label: 'Nueva requisición',
+                    href: '/solicitudes/nueva',
+                  }
+                : undefined
           }
         />
       )}

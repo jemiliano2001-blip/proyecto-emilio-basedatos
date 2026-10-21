@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useState, useTransition } from 'react'
+import { fechaHora } from '@/lib/fechas'
 import {
   uploadObraDocumentoAction,
   deleteObraDocumentoAction,
@@ -33,17 +34,7 @@ function formatBytes(bytes: number | null): string {
 }
 
 function formatDate(iso: string): string {
-  try {
-    return new Intl.DateTimeFormat('es-MX', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(iso))
-  } catch {
-    return iso
-  }
+  return fechaHora(iso)
 }
 
 export function ObraDocumentos({

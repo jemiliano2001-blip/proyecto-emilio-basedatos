@@ -197,7 +197,7 @@ export function ListFilters({
         >
           {hayFiltros && (
             <Link className={compact ? 'btn-ghost btn-sm' : 'btn-ghost'} href={path}>
-              Limpiar
+              Limpiar filtros
             </Link>
           )}
           <button className={compact ? 'btn-secondary btn-sm' : 'btn-secondary'} type="submit">

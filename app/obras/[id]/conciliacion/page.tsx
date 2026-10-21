@@ -4,6 +4,7 @@ import { Badge } from '@/components/Badge'
 import { IconPaquete } from '@/components/icons'
 import { ExportarConciliacionButton } from '@/components/ExportarConciliacionButton'
 import { getSessionUsuario } from '@/lib/auth/session'
+import { fechaHora, soloFecha } from '@/lib/fechas'
 import { formatMoneyMx } from '@/lib/money'
 import { puedeVerPrecios } from '@/lib/roles'
 import { esRelacionAusente } from '@/lib/schema-disponible'
@@ -62,12 +63,7 @@ export default async function ConciliacionObraPage({
   const pres = presupuestoData as ConciliacionPresupuestoObra
   const mats = (materialesData as ConciliacionMaterialObra[] | null) ?? []
 
-  const fechaCierre = pres.cerrado_en
-    ? new Date(pres.cerrado_en).toLocaleString('es-MX', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })
-    : null
+  const fechaCierre = pres.cerrado_en ? fechaHora(pres.cerrado_en) : null
 
   const esSuperavit = Number(pres.variacion_saldo_mxn) >= 0
 
@@ -102,7 +98,7 @@ export default async function ConciliacionObraPage({
         <h1 className="text-xl font-bold text-foreground">REPORTE DE CONCILIACIÓN Y CIERRE DE PROYECTO</h1>
         <p className="text-sm font-semibold">{pres.obra_nombre}</p>
         {pres.cliente && <p className="text-xs">Cliente: {pres.cliente}</p>}
-        <p className="text-xs text-muted-foreground">Fecha de reporte: {new Date().toLocaleDateString('es-MX')}</p>
+        <p className="text-xs text-muted-foreground">Fecha de reporte: {soloFecha(new Date())}</p>
       </div>
 
       {/* Tarjeta Resumen Financiero ($ MXN) */}
