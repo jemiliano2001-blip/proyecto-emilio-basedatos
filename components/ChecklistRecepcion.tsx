@@ -15,7 +15,6 @@ import {
   archivoAFotoFile,
   borrarBorrador,
   errorDeRenglon,
-  estaRevisado,
   fotoAArchivo,
   fusionarRenglones,
   guardarBorrador,
@@ -23,6 +22,7 @@ import {
   leerBorrador,
   materialesPorRecibir,
   motivoBloqueo,
+  motivoMateriales,
   validarFotoRecepcion,
   type AlmacenBorrador,
   type BorradorChecklist,
@@ -31,6 +31,8 @@ import {
   type RenglonBorrador,
 } from '@/lib/checklist-recepcion'
 import type { OrdenItemChecklist } from '@/lib/types'
+
+type VistaMaterial = 'lista' | 'marca' | 'detalle'
 
 function almacenNavegador(): AlmacenBorrador {
   return {
@@ -58,13 +60,14 @@ export function ChecklistRecepcion({
   const [cargado, setCargado] = useState(false)
   const [paso, setPaso] = useState<PasoChecklist>(2)
   const [indice, setIndice] = useState(0)
-  const [vistaMaterial, setVistaMaterial] = useState<'marca' | 'detalle'>('marca')
+  const [vistaMaterial, setVistaMaterial] = useState<VistaMaterial>('lista')
   const [renglones, setRenglones] = useState<RenglonBorrador[]>([])
   const [quien, setQuien] = useState('')
   const [talon, setTalon] = useState<File | null>(null)
   const [extras, setExtras] = useState<File[]>([])
   const [fotos, setFotos] = useState<Record<string, File>>({})
   const [aviso, setAviso] = useState<string | null>(null)
+  const [antesDeTodo, setAntesDeTodo] = useState<RenglonBorrador[] | null>(null)
   const recepcionId = useRef('')
   const pendienteEnvio = useRef(false)
   const talonFoto = useRef<BorradorChecklist['talon']>(null)
@@ -74,7 +77,7 @@ export function ChecklistRecepcion({
   const respaldo = useRef<BorradorChecklist | null>(null)
   const pasoRef = useRef<PasoChecklist>(2)
   const indiceRef = useRef(0)
-  const vistaRef = useRef<'marca' | 'detalle'>('marca')
+  const vistaRef = useRef<VistaMaterial>('lista')
   const quienRef = useRef('')
   const renglonesRef = useRef<RenglonBorrador[]>([])
   const talonRef = useRef<File | null>(null)
@@ -168,17 +171,10 @@ export function ChecklistRecepcion({
       if (fila.foto) mapa[fila.orden_item_id] = fotoAArchivo(fila.foto)
     }
     setFotos(mapa)
-    const pendiente = materiales.findIndex((material, i) => {
-      const fila = filas[i]
-      return !fila || !estaRevisado(material, aRenglonChecklist(fila))
-    })
-    const donde = pendiente === -1 ? 0 : pendiente
-    const filaPendiente = filas[donde]
-    const sigueEnDetalle = filaPendiente?.marca === 'incompleto' && pendiente !== -1
-    indiceRef.current = donde
-    vistaRef.current = sigueEnDetalle ? 'detalle' : 'marca'
-    setIndice(donde)
-    setVistaMaterial(sigueEnDetalle ? 'detalle' : 'marca')
+    indiceRef.current = 0
+    vistaRef.current = 'lista'
+    setIndice(0)
+    setVistaMaterial('lista')
     if (guardado?.pendienteEnvio) setAviso(MENSAJE_SIN_SENAL)
     setCargado(true)
   }, [materiales, ordenId])
@@ -194,7 +190,14 @@ export function ChecklistRecepcion({
     setAviso(state.error)
   }, [state.error])
 
+  useEffect(() => {
+    if (!antesDeTodo) return
+    const id = window.setTimeout(() => setAntesDeTodo(null), 5000)
+    return () => window.clearTimeout(id)
+  }, [antesDeTodo])
+
   function cambiarFilas(filas: RenglonBorrador[], diferido = false) {
+    setAntesDeTodo(null)
     setRenglones(filas)
     renglonesRef.current = filas
     if (diferido) {
@@ -204,24 +207,15 @@ export function ChecklistRecepcion({
     persistir(armarBorrador(pasoRef.current, filas, quienRef.current))
   }
 
-  function colocar(donde: number, vista: 'marca' | 'detalle') {
+  function colocar(donde: number, vista: VistaMaterial) {
     indiceRef.current = donde
     vistaRef.current = vista
     setIndice(donde)
     setVistaMaterial(vista)
   }
 
-  function avanzarTras(filas: RenglonBorrador[]) {
-    const siguiente = materiales.findIndex((material) => {
-      const fila = filas.find((row) => row.orden_item_id === material.orden_item_id)
-      return !fila || !estaRevisado(material, aRenglonChecklist(fila))
-    })
-    if (siguiente === -1) {
-      colocar(0, 'marca')
-      irA(3)
-      return
-    }
-    colocar(siguiente, 'marca')
+  function volverALista() {
+    colocar(indiceRef.current, 'lista')
   }
 
   function onMarca(ordenItemId: string, marca: MarcaChecklist) {
@@ -237,7 +231,39 @@ export function ChecklistRecepcion({
       colocar(donde < 0 ? indiceRef.current : donde, 'detalle')
       return
     }
-    avanzarTras(filas)
+    volverALista()
+  }
+
+  function onAlternar(ordenItemId: string) {
+    const fila = renglonesRef.current.find((row) => row.orden_item_id === ordenItemId)
+    if (!fila) return
+    if (fila.marca !== null && fila.marca !== 'llego') {
+      colocar(materiales.findIndex((m) => m.orden_item_id === ordenItemId), 'marca')
+      return
+    }
+    const marca = fila.marca === 'llego' ? null : 'llego'
+    cambiarFilas(
+      renglonesRef.current.map((row) => (row === fila ? { ...row, marca } : row))
+    )
+    setAviso(null)
+  }
+
+  function onTodoLlego() {
+    const previas = renglonesRef.current
+    if (!previas.some((fila) => fila.marca === null)) {
+      if (previas.every((fila) => fila.marca === 'llego')) {
+        cambiarFilas(previas.map((fila) => ({ ...fila, marca: null })))
+      }
+      return
+    }
+    cambiarFilas(previas.map((fila) => (fila.marca === null ? { ...fila, marca: 'llego' } : fila)))
+    setAntesDeTodo(previas)
+    setAviso(null)
+  }
+
+  function onDeshacer() {
+    if (antesDeTodo) cambiarFilas(antesDeTodo)
+    setAntesDeTodo(null)
   }
 
   function onBien(ordenItemId: string, valor: number | null) {
@@ -343,8 +369,8 @@ export function ChecklistRecepcion({
       setAviso(null)
       return
     }
-    if (pasoRef.current === 2 && indiceRef.current > 0) {
-      colocar(indiceRef.current - 1, 'marca')
+    if (pasoRef.current === 2 && vistaRef.current === 'marca') {
+      volverALista()
       setAviso(null)
       return
     }
@@ -352,14 +378,22 @@ export function ChecklistRecepcion({
       router.push('/recepciones')
       return
     }
-    if (pasoRef.current === 3) {
-      const ultimo = Math.max(materiales.length - 1, 0)
-      colocar(ultimo, 'marca')
-    }
+    if (pasoRef.current === 3) colocar(0, 'lista')
     irA(pasoRef.current === 4 ? 3 : 2)
   }
 
   function onSiguiente() {
+    if (pasoRef.current === 2 && vistaRef.current === 'lista') {
+      const filas = renglonesRef.current.map(aRenglonChecklist)
+      const bloqueo = motivoMateriales(materiales, filas)
+      if (bloqueo) {
+        setAviso(bloqueo)
+        return
+      }
+      setAviso(null)
+      irA(3)
+      return
+    }
     if (pasoRef.current === 2) {
       const material = materiales[indiceRef.current]
       const fila = renglonesRef.current.find((row) => row.orden_item_id === material?.orden_item_id)
@@ -373,7 +407,7 @@ export function ChecklistRecepcion({
         return
       }
       setAviso(null)
-      avanzarTras(renglonesRef.current)
+      volverALista()
       return
     }
     if (!talonRef.current) {
@@ -491,6 +525,10 @@ export function ChecklistRecepcion({
         colocar(donde, 'marca')
         setAviso(null)
       }}
+      hayDeshacer={antesDeTodo !== null}
+      onAlternar={onAlternar}
+      onTodoLlego={onTodoLlego}
+      onDeshacer={onDeshacer}
       onMarca={onMarca}
       onBien={onBien}
       onRotos={onRotos}

@@ -1,5 +1,12 @@
 import type { ReactNode } from 'react'
-import { IconAlerta, IconCerrar, IconCheckCircle, IconFlechaAtras } from '@/components/icons'
+import {
+  IconAlerta,
+  IconCerrar,
+  IconCheck,
+  IconCheckCircle,
+  IconChevron,
+  IconFlechaAtras,
+} from '@/components/icons'
 import {
   CLASE_BOTON_GRANDE,
   cantidadTexto,
@@ -10,6 +17,7 @@ import {
   noLlegaron,
   pasoDe,
   resumir,
+  textoContador,
   textoProgreso,
   type MarcaChecklist,
   type MaterialChecklist,
@@ -113,9 +121,13 @@ export function ChecklistRecepcionPasos({
   zonaTalon,
   fotosExtra,
   zonaFotoRenglon,
+  hayDeshacer,
   onAtras,
   onSiguiente,
   onIrAMaterial,
+  onAlternar,
+  onTodoLlego,
+  onDeshacer,
   onMarca,
   onBien,
   onRotos,
@@ -126,8 +138,8 @@ export function ChecklistRecepcionPasos({
   paso: PasoChecklist
   /** Material que se está viendo. En la foto y el resumen no cambia la pantalla. */
   indice: number
-  /** "marca" es la decisión. "detalle" pide cantidad y foto, en otra pantalla. */
-  vistaMaterial: 'marca' | 'detalle'
+  /** "lista" es el checklist completo. "marca" decide un material; "detalle" pide cantidad y foto. */
+  vistaMaterial: 'lista' | 'marca' | 'detalle'
   folio: string
   obraNombre: string
   materiales: MaterialVista[]
@@ -137,10 +149,16 @@ export function ChecklistRecepcionPasos({
   zonaTalon: ReactNode
   fotosExtra: ReactNode
   zonaFotoRenglon: (ordenItemId: string) => ReactNode
+  hayDeshacer: boolean
   onAtras: () => void
   onSiguiente: () => void
-  /** Salta a otro material de la lista. */
+  /** Abre la pantalla de un material desde la lista. */
   onIrAMaterial: (indice: number) => void
+  /** Toque en la casilla: pendiente ↔ llegó; en otro estado abre el material. */
+  onAlternar: (ordenItemId: string) => void
+  /** Marca como llegó solo lo que sigue pendiente. */
+  onTodoLlego: () => void
+  onDeshacer: () => void
   onMarca: (ordenItemId: string, marca: MarcaChecklist) => void
   onBien: (ordenItemId: string, valor: number | null) => void
   onRotos: (ordenItemId: string, valor: number | null) => void
@@ -174,20 +192,24 @@ export function ChecklistRecepcionPasos({
     paso === 2
       ? vistaMaterial === 'detalle'
         ? '¿Cuánto llegó mal?'
-        : '¿Qué llegó?'
+        : vistaMaterial === 'lista'
+          ? 'Revisa lo que llegó'
+          : '¿Qué llegó?'
       : paso === 3
         ? 'Foto del talón o remisión'
         : 'Revisa y termina'
   const puesto = paso === 2 ? indice + 1 : Math.max(materiales.length, 1)
-  const progreso = textoProgreso(puesto, materiales.length)
+  const enLista = paso === 2 && vistaMaterial === 'lista'
+  const progreso = enLista
+    ? textoContador(revisados, materiales.length)
+    : textoProgreso(puesto, materiales.length)
 
   return (
     <div
       className="flex min-h-[calc(100dvh-8rem)] w-full flex-col gap-4"
       data-checklist="recepcion"
       data-paso={paso}
-      data-decision={paso === 2 ? vistaMaterial : paso === 3 ? 'talon' : 'terminar'}
-    >
+      data-decision={paso === 2 ? vistaMaterial : paso === 3 ? 'talon' : 'terminar'}    >
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
           <button
@@ -225,7 +247,7 @@ export function ChecklistRecepcionPasos({
         <p className="text-sm font-semibold text-muted-foreground">{folio}</p>
       </div>
       <h2 className="text-xl font-semibold text-foreground">{tituloPaso}</h2>
-      {paso === 2 && materialActual && (
+      {paso === 2 && materialActual && !enLista && (
         <div className="rounded-2xl border-2 border-primary bg-primary-soft px-4 py-4">
           <p className="text-2xl font-semibold text-foreground">{materialActual.nombre}</p>
           <p className="mt-1 text-lg text-primary-soft-foreground">
@@ -274,8 +296,42 @@ export function ChecklistRecepcionPasos({
         </div>
       )}
 
-      {paso === 2 && materialActual && vistaMaterial === 'marca' && (
-        <ListaMateriales materiales={materiales} indice={indice} onElegir={onIrAMaterial} />
+      {enLista && (
+        <>
+          <ListaMateriales
+            materiales={materiales}
+            base={base}
+            onAbrir={onIrAMaterial}
+            onAlternar={onAlternar}
+            onTodoLlego={onTodoLlego}
+          />
+          <div className="sticky bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom,0px))] mt-auto flex flex-col gap-2 border-t border-border bg-background py-3 lg:bottom-0">
+            {hayDeshacer && (
+              <p role="status" className="flex items-center justify-between gap-3 text-base text-foreground">
+                Marcaste lo pendiente como llegó.
+                <button type="button" onClick={onDeshacer} className="min-h-12 px-3 font-semibold text-primary">
+                  Deshacer
+                </button>
+              </p>
+            )}
+            {revisados < materiales.length && (
+              <p className="text-center text-base text-muted-foreground">
+                Faltan {materiales.length - revisados} por revisar
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={onSiguiente}
+              className={`${CLASE_BOTON_GRANDE} ${
+                revisados < materiales.length
+                  ? 'bg-muted text-muted-foreground'
+                  : 'bg-primary text-primary-foreground'
+              }`}
+            >
+              Continuar al talón
+            </button>
+          </div>
+        </>
       )}
 
       {paso === 2 && materialActual && vistaMaterial === 'detalle' && (
@@ -383,56 +439,120 @@ export function ChecklistRecepcionPasos({
   )
 }
 
-const ESTADO_FILA: Record<MarcaChecklist, { icono: string; texto: string; clase: string }> = {
-  llego: { icono: '✓', texto: 'Llegó', clase: 'bg-success text-success-foreground' },
-  incompleto: { icono: '!', texto: 'Incompleto', clase: 'bg-warning text-warning-foreground' },
-  no_llego: { icono: '✕', texto: 'No llegó', clase: 'bg-danger text-danger-foreground' },
+const CAJA = 'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2'
+
+function Casilla({ marca }: { marca: MarcaChecklist | null }) {
+  if (marca === 'llego') {
+    return (
+      <span aria-hidden="true" className={`${CAJA} border-success bg-success text-success-foreground`}>
+        <IconCheck className="h-5 w-5" />
+      </span>
+    )
+  }
+  if (marca === 'incompleto') {
+    return (
+      <span aria-hidden="true" className={`${CAJA} border-warning bg-warning text-warning-foreground`}>
+        <IconAlerta className="h-5 w-5" />
+      </span>
+    )
+  }
+  if (marca === 'no_llego') {
+    return (
+      <span aria-hidden="true" className={`${CAJA} border-danger bg-danger text-danger-foreground`}>
+        <IconCerrar className="h-5 w-5" />
+      </span>
+    )
+  }
+  return <span aria-hidden="true" className={`${CAJA} border-border bg-card`} />
+}
+
+function detalleFila(material: MaterialVista, error: string | null): string {
+  const pedido = cantidadTexto(material.esperado, material.unidad)
+  if (material.marca === 'no_llego') return 'No llegó'
+  if (material.marca === 'incompleto') {
+    if (error) return error
+    return `${cantidadTexto(material.bien ?? 0, '')} bien, ${cantidadTexto(material.rotos ?? 0, '')} rotos de ${pedido}`
+  }
+  return `Esperado: ${pedido}`
 }
 
 function ListaMateriales({
   materiales,
-  indice,
-  onElegir,
+  base,
+  onAbrir,
+  onAlternar,
+  onTodoLlego,
 }: {
   materiales: MaterialVista[]
-  indice: number
-  onElegir: (indice: number) => void
+  base: MaterialChecklist[]
+  onAbrir: (indice: number) => void
+  onAlternar: (ordenItemId: string) => void
+  onTodoLlego: () => void
 }) {
-  if (materiales.length < 2) return null
+  const llegaron = materiales.filter((m) => m.marca === 'llego').length
+  const estadoTodo = llegaron === materiales.length ? 'true' : llegaron === 0 ? 'false' : 'mixed'
   return (
-    <ol className="flex w-full flex-col gap-2" aria-label="Lista de material">
+    <ul className="flex w-full flex-col gap-2" role="group" aria-label="Material del pedido">
+      <li>
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={estadoTodo}
+          onClick={onTodoLlego}
+          className="flex min-h-14 w-full items-center gap-3 rounded-2xl border border-dashed border-border px-3 text-left"
+        >
+          <span
+            aria-hidden="true"
+            className={`${CAJA} ${
+              estadoTodo === 'true'
+                ? 'border-success bg-success text-success-foreground'
+                : estadoTodo === 'mixed'
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-card'
+            }`}
+          >
+            {estadoTodo === 'true' && <IconCheck className="h-5 w-5" />}
+            {estadoTodo === 'mixed' && <span className="h-0.5 w-3 bg-current" />}
+          </span>
+          <span className="text-base font-semibold text-foreground">Todo llegó</span>
+        </button>
+      </li>
       {materiales.map((material, i) => {
-        const estado = material.marca ? ESTADO_FILA[material.marca] : null
-        const actual = i === indice
+        const error = errorDeRenglon(base[i], aRenglon(material))
         return (
-          <li key={material.orden_item_id}>
+          <li
+            key={material.orden_item_id}
+            className="flex min-h-14 items-center gap-1 rounded-2xl border border-border bg-card"
+          >
             <button
               type="button"
-              aria-current={actual ? 'step' : undefined}
-              onClick={() => onElegir(i)}
-              className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 text-left ${
-                actual ? 'border-primary bg-primary-soft' : 'border-border bg-card'
-              }`}
+              role="checkbox"
+              aria-checked={material.marca === 'llego'}
+              aria-label={material.nombre}
+              onClick={() => onAlternar(material.orden_item_id)}
+              className="flex min-h-14 min-w-14 items-center justify-center"
             >
-              <span
-                aria-hidden="true"
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                  estado ? estado.clase : 'border-2 border-border'
-                }`}
-              >
-                {estado?.icono}
+              <Casilla marca={material.marca} />
+            </button>
+            <button
+              type="button"
+              onClick={() => onAbrir(i)}
+              className="flex min-h-14 min-w-0 flex-1 items-center gap-2 pr-3 text-left"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="line-clamp-2 block text-base font-semibold text-foreground">
+                  {material.nombre}
+                </span>
+                <span className="block text-sm tabular-nums text-muted-foreground">
+                  {detalleFila(material, error)}
+                </span>
               </span>
-              <span className="min-w-0 flex-1 truncate text-base text-foreground">
-                {material.nombre}
-              </span>
-              <span className="shrink-0 text-sm text-muted-foreground">
-                {estado ? estado.texto : 'Pendiente'}
-              </span>
+              <IconChevron className="h-4 w-4 shrink-0 text-muted-foreground" />
             </button>
           </li>
         )
       })}
-    </ol>
+    </ul>
   )
 }
 

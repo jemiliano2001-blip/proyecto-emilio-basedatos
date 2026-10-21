@@ -349,6 +349,76 @@ test('a 390px la lista es una columna y Terminar respeta las reglas', () => {
   assert.match(sinTalon, /Falta la foto del talón/)
 })
 
+test('la vista lista muestra todos los materiales como casillas', () => {
+  const noop = () => {}
+  const fila = (id, marca, extra = {}) => ({
+    ...material(id, 10),
+    marca,
+    bien: null,
+    rotos: null,
+    nota: '',
+    tieneFoto: false,
+    ...extra,
+  })
+  const render = (materiales, extra = {}) =>
+    renderToStaticMarkup(
+      React.createElement(ChecklistRecepcionPasos, {
+        paso: 2,
+        indice: 0,
+        vistaMaterial: 'lista',
+        folio: 'OC de ejemplo',
+        obraNombre: 'Proyecto de ejemplo',
+        materiales,
+        tieneTalon: false,
+        quienEntrego: '',
+        aviso: null,
+        zonaTalon: null,
+        fotosExtra: null,
+        zonaFotoRenglon: () => null,
+        hayDeshacer: false,
+        onAtras: noop,
+        onSiguiente: noop,
+        onIrAMaterial: noop,
+        onAlternar: noop,
+        onTodoLlego: noop,
+        onDeshacer: noop,
+        onMarca: noop,
+        onBien: noop,
+        onRotos: noop,
+        onNota: noop,
+        onQuien: noop,
+        onTerminar: noop,
+        ...extra,
+      })
+    )
+
+  const mezcla = render([
+    fila('a', 'llego'),
+    fila('b', 'incompleto', { bien: 7, rotos: 2, tieneFoto: true }),
+    fila('c', 'no_llego'),
+    fila('d', null),
+  ])
+  assert.match(mezcla, /data-decision="lista"/)
+  assert.equal(mezcla.split('role="checkbox"').length - 1, 5)
+  assert.match(mezcla, /aria-checked="mixed"/)
+  assert.match(mezcla, /Todo llegó/)
+  assert.match(mezcla, /3 de 4 revisados/)
+  assert.match(mezcla, /Faltan 1 por revisar/)
+  assert.match(mezcla, /7 bien, 2 rotos/)
+  assert.equal(mezcla.includes('data-marca='), false)
+
+  const completa = render([fila('a', 'llego'), fila('b', 'no_llego')])
+  assert.match(completa, /aria-checked="false"/)
+  assert.match(completa, /Continuar al talón/)
+  assert.equal(completa.includes('Faltan'), false)
+
+  const pendientes = render([fila('a', null), fila('b', null)])
+  assert.match(pendientes, /Faltan 2 por revisar/)
+  assert.match(pendientes, /aria-checked="false"/)
+
+  assert.match(render([fila('a', 'llego')], { hayDeshacer: true }), /Deshacer/)
+})
+
 test('la pantalla de pedidos y la acción usan el checklist sin pedir columnas nuevas', () => {
   const lista = readFileSync('app/recepciones/page.tsx', 'utf8')
   const recibir = readFileSync('app/ordenes/[id]/recibir/page.tsx', 'utf8')
