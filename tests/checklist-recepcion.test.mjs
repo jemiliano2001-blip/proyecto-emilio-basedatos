@@ -249,6 +249,7 @@ test('a 390px la lista es una columna y Terminar respeta las reglas', () => {
     zonaFotoRenglon: () => null,
     onAtras: noop,
     onSiguiente: noop,
+    onIrAMaterial: noop,
     onMarca: noop,
     onBien: noop,
     onRotos: noop,

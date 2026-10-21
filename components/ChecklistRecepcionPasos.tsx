@@ -3,6 +3,7 @@ import {
   CLASE_BOTON_GRANDE,
   cantidadTexto,
   errorDeRenglon,
+  estaRevisado,
   motivoMateriales,
   moverCantidad,
   noLlegaron,
@@ -113,6 +114,7 @@ export function ChecklistRecepcionPasos({
   zonaFotoRenglon,
   onAtras,
   onSiguiente,
+  onIrAMaterial,
   onMarca,
   onBien,
   onRotos,
@@ -136,6 +138,8 @@ export function ChecklistRecepcionPasos({
   zonaFotoRenglon: (ordenItemId: string) => ReactNode
   onAtras: () => void
   onSiguiente: () => void
+  /** Salta a otro material de la lista. */
+  onIrAMaterial: (indice: number) => void
   onMarca: (ordenItemId: string, marca: MarcaChecklist) => void
   onBien: (ordenItemId: string, valor: number | null) => void
   onRotos: (ordenItemId: string, valor: number | null) => void
@@ -151,6 +155,7 @@ export function ChecklistRecepcionPasos({
     esperado,
   }))
   const bloqueoMateriales = motivoMateriales(base, renglones)
+  const revisados = base.filter((row, i) => estaRevisado(row, renglones[i])).length
   const materialActual = materiales[indice] ?? null
   const baseActual = materialActual
     ? (base.find((row) => row.orden_item_id === materialActual.orden_item_id) ?? null)
@@ -182,30 +187,48 @@ export function ChecklistRecepcionPasos({
       data-paso={paso}
       data-decision={paso === 2 ? vistaMaterial : paso === 3 ? 'talon' : 'terminar'}
     >
-      <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onAtras}
-          className="inline-flex min-h-12 items-center px-1 text-base font-semibold text-primary"
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onAtras}
+            className="-ml-2 inline-flex min-h-12 items-center rounded-lg px-3 text-base font-semibold text-primary"
+          >
+            ← Atrás
+          </button>
+          <p
+            className="rounded-full bg-muted px-4 py-1 text-lg font-semibold tabular-nums text-foreground"
+            data-contador="1"
+          >
+            {progreso}
+          </p>
+        </div>
+        <div
+          role="progressbar"
+          aria-label="Material revisado"
+          aria-valuemin={0}
+          aria-valuemax={materiales.length}
+          aria-valuenow={revisados}
+          className="h-2 w-full overflow-hidden rounded-full bg-muted"
         >
-          Atrás
-        </button>
-        <p className="text-3xl font-semibold tabular-nums text-foreground" data-contador="1">
-          {progreso}
-        </p>
+          <div
+            className="h-full rounded-full bg-success"
+            style={{ width: `${materiales.length === 0 ? 0 : (revisados / materiales.length) * 100}%` }}
+          />
+        </div>
       </div>
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">Recibir material</h1>
-        <p className="text-base text-foreground">
+        <h1 className="text-xl font-semibold text-foreground">Recibir material</h1>
+        <p className="line-clamp-1 text-sm text-muted-foreground">
           {folio} · {obraNombre}
         </p>
       </div>
       <h2 className="text-xl font-semibold text-foreground">{tituloPaso}</h2>
       {paso === 2 && materialActual && (
-        <div>
-          <p className="text-xl font-semibold text-foreground">{materialActual.nombre}</p>
-          <p className="text-base text-muted-foreground">
-            Esperado: {cantidadTexto(materialActual.esperado, materialActual.unidad)}
+        <div className="rounded-2xl border-2 border-primary bg-primary-soft px-4 py-4">
+          <p className="text-2xl font-semibold text-foreground">{materialActual.nombre}</p>
+          <p className="mt-1 text-lg text-primary-soft-foreground">
+            Esperado: <span className="font-semibold">{cantidadTexto(materialActual.esperado, materialActual.unidad)}</span>
           </p>
         </div>
       )}
@@ -216,7 +239,7 @@ export function ChecklistRecepcionPasos({
       )}
 
       {paso === 2 && materialActual && vistaMaterial === 'marca' && (
-        <div className="mt-auto flex w-full flex-col gap-3">
+        <div className="flex w-full flex-col gap-3">
           <button
             type="button"
             data-marca="llego"
@@ -245,6 +268,10 @@ export function ChecklistRecepcionPasos({
             ❌ No llegó
           </button>
         </div>
+      )}
+
+      {paso === 2 && materialActual && vistaMaterial === 'marca' && (
+        <ListaMateriales materiales={materiales} indice={indice} onElegir={onIrAMaterial} />
       )}
 
       {paso === 2 && materialActual && vistaMaterial === 'detalle' && (
@@ -349,6 +376,59 @@ export function ChecklistRecepcionPasos({
         </div>
       )}
     </div>
+  )
+}
+
+const ESTADO_FILA: Record<MarcaChecklist, { icono: string; texto: string; clase: string }> = {
+  llego: { icono: '✓', texto: 'Llegó', clase: 'bg-success text-success-foreground' },
+  incompleto: { icono: '!', texto: 'Incompleto', clase: 'bg-warning text-warning-foreground' },
+  no_llego: { icono: '✕', texto: 'No llegó', clase: 'bg-danger text-danger-foreground' },
+}
+
+function ListaMateriales({
+  materiales,
+  indice,
+  onElegir,
+}: {
+  materiales: MaterialVista[]
+  indice: number
+  onElegir: (indice: number) => void
+}) {
+  if (materiales.length < 2) return null
+  return (
+    <ol className="flex w-full flex-col gap-2" aria-label="Lista de material">
+      {materiales.map((material, i) => {
+        const estado = material.marca ? ESTADO_FILA[material.marca] : null
+        const actual = i === indice
+        return (
+          <li key={material.orden_item_id}>
+            <button
+              type="button"
+              aria-current={actual ? 'step' : undefined}
+              onClick={() => onElegir(i)}
+              className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 text-left ${
+                actual ? 'border-primary bg-primary-soft' : 'border-border bg-card'
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                  estado ? estado.clase : 'border-2 border-border'
+                }`}
+              >
+                {estado?.icono}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-base text-foreground">
+                {material.nombre}
+              </span>
+              <span className="shrink-0 text-sm text-muted-foreground">
+                {estado ? estado.texto : 'Pendiente'}
+              </span>
+            </button>
+          </li>
+        )
+      })}
+    </ol>
   )
 }
 

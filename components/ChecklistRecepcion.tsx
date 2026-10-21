@@ -443,6 +443,10 @@ export function ChecklistRecepcion({
       aviso={aviso}
       onAtras={onAtras}
       onSiguiente={onSiguiente}
+      onIrAMaterial={(donde) => {
+        colocar(donde, 'marca')
+        setAviso(null)
+      }}
       onMarca={onMarca}
       onBien={onBien}
       onRotos={onRotos}
