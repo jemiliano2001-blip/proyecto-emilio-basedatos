@@ -143,7 +143,7 @@ export function SheetContent({
     <div className="fixed inset-0 z-50 flex print:hidden" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-foreground/50 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-foreground/50 transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
       />

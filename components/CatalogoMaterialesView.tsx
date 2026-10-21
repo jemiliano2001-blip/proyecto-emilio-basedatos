@@ -58,8 +58,8 @@ function MaterialCard({
       {/* Checkbox discreto y elegante */}
       <label
         className={cn(
-          'absolute left-2.5 top-2.5 z-10 flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-lg transition-all',
-          'bg-card/90 backdrop-blur-xs border border-border/80 shadow-xs hover:border-primary',
+          'absolute left-2.5 top-2.5 z-10 flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-lg transition-[color,background-color,border-color,box-shadow,opacity,transform]',
+          'bg-card/90 border border-border/80 shadow-xs hover:border-primary',
           selected ? 'opacity-100 bg-primary border-primary text-primary-foreground' : 'opacity-80 sm:opacity-0 group-hover:opacity-100 focus-within:opacity-100'
         )}
         onClick={(event) => event.stopPropagation()}
@@ -79,7 +79,7 @@ function MaterialCard({
         <Link
           href={`/materiales/${m.id}/editar`}
           onClick={(e) => e.stopPropagation()}
-          className="absolute top-2.5 right-2.5 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-card/90 shadow-xs border border-border/80 text-muted-foreground hover:text-foreground hover:bg-card transition-all opacity-80 sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
+          className="absolute top-2.5 right-2.5 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg bg-card/90 shadow-xs border border-border/80 text-muted-foreground hover:text-foreground hover:bg-card transition-[color,background-color,border-color,box-shadow,opacity,transform] opacity-80 sm:opacity-0 group-hover:opacity-100 focus:opacity-100"
           title="Editar material"
           aria-label={`Editar ${m.nombre_base}`}
         >
@@ -456,7 +456,7 @@ export function CatalogoMaterialesView({
                   type="button"
                   onClick={() => setSelectedCat(cat.nombre)}
                   className={cn(
-                    'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-all select-none sm:min-h-[34px]',
+                    'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none sm:min-h-[34px]',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     isSelected
                       ? 'bg-card text-foreground shadow-xs font-bold'
@@ -483,7 +483,7 @@ export function CatalogoMaterialesView({
                 type="button"
                 onClick={() => setSelectedCat('sin_categoria')}
                 className={cn(
-                  'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-all select-none sm:min-h-[34px]',
+                  'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none sm:min-h-[34px]',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   selectedCat === 'sin_categoria'
                     ? 'bg-card text-foreground shadow-xs font-bold'
@@ -508,7 +508,7 @@ export function CatalogoMaterialesView({
               type="button"
               onClick={() => setSelectedCat('todas')}
               className={cn(
-                'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-all select-none sm:min-h-[34px]',
+                'inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-xs sm:text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none sm:min-h-[34px]',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 selectedCat === 'todas'
                   ? 'bg-card text-foreground shadow-xs font-bold'
@@ -807,7 +807,7 @@ export function CatalogoMaterialesView({
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="fixed inset-x-3 bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom,0px)+0.75rem)] z-40 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-md lg:bottom-6 lg:left-[calc(var(--sidebar-current)+0.75rem)] print:hidden" role="region" aria-label="Acciones de materiales seleccionados">
+        <div className="fixed inset-x-3 bottom-[calc(var(--nav-height)+env(safe-area-inset-bottom,0px)+0.75rem)] z-40 mx-auto flex max-w-xl items-center justify-between gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-2xl lg:bottom-6 lg:left-[calc(var(--sidebar-current)+0.75rem)] print:hidden" role="region" aria-label="Acciones de materiales seleccionados">
           <p className="text-sm font-semibold text-foreground"><span className="tabular-nums">{selectedIds.size}</span> seleccionados</p>
           <div className="flex items-center gap-2">
             <button type="button" className="btn-primary btn-sm" onClick={() => void exportSelected()}>Exportar CSV</button>

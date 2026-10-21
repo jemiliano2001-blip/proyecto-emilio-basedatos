@@ -80,7 +80,7 @@ export function StepperAbastecimiento({ pasos, className }: StepperAbastecimient
                 {/* Indicador circular del paso */}
                 <div
                   className={cn(
-                    'relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all shadow-sm',
+                    'relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-[color,background-color,border-color,box-shadow,opacity,transform] shadow-sm',
                     paso.estado === 'completado' &&
                       'bg-teal-600 text-white shadow-teal-600/20',
                     paso.estado === 'en_proceso' &&

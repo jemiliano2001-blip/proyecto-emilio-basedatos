@@ -55,7 +55,7 @@ export function PageHeader({
         <div className="mb-2.5">
           <Link
             href={backHref}
-            className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-all hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-[color,background-color,border-color,box-shadow,opacity,transform] hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <IconFlechaAtras className="size-3.5" />
             <span>{backLabel}</span>

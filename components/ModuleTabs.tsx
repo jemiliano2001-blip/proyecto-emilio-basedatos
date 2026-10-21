@@ -85,7 +85,7 @@ export function ModuleTabs({
             id={`tab-${tab.id}`}
             onClick={() => handleTabClick(tab.id)}
             className={cn(
-              'min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 shrink-0 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-[34px]',
+              'min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] flex items-center justify-center gap-1.5 shrink-0 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-[34px]',
               isActive
                 ? 'bg-card text-foreground shadow-xs font-bold'
                 : 'text-muted-foreground hover:text-foreground'

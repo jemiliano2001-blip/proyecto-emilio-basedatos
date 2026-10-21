@@ -62,7 +62,7 @@ export function MoreSheet({
     <div className="fixed inset-0 z-40 lg:hidden">
       <button
         type="button"
-        className="absolute inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 bg-foreground/50 animate-fade-in"
         aria-label="Cerrar menú"
         onClick={onClose}
       />

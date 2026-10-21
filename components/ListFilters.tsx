@@ -20,7 +20,7 @@ function labelEstatusChip(estatus: string): string {
 
 const chipClass = (active: boolean) =>
   cn(
-    'shrink-0 inline-flex min-h-[36px] items-center rounded-md px-3 text-xs sm:text-sm font-medium capitalize transition-all select-none',
+    'shrink-0 inline-flex min-h-[36px] items-center rounded-md px-3 text-xs sm:text-sm font-medium capitalize transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
     active
       ? 'bg-card text-foreground shadow-xs font-semibold'

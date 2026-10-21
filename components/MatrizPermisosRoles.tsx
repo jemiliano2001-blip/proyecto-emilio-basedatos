@@ -182,7 +182,7 @@ export function MatrizPermisosRoles({ rolInicial }: { rolInicial?: RolUsuario })
               key={rol}
               type="button"
               onClick={() => setRolActivo(rol)}
-              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all select-none ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] select-none ${
                 seleccionado
                   ? 'bg-primary text-primary-foreground shadow-xs font-bold'
                   : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'

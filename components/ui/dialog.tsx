@@ -127,7 +127,7 @@ export function DialogContent({ className, children, onClose, ...props }: Dialog
       <div
         ref={contentRef}
         tabIndex={-1}
-        className="fixed inset-0 bg-foreground/50 backdrop-blur-sm animate-fade-in transition-opacity"
+        className="fixed inset-0 bg-foreground/50 animate-fade-in transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
       />

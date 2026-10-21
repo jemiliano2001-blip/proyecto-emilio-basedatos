@@ -78,7 +78,7 @@ export function TopBar({ nombre, rol }: { nombre: string | null; rol: RolUsuario
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
-            className="inline-flex min-h-[38px] items-center gap-2 rounded-xl border border-border/80 bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-xs transition-all duration-150 hover:border-input hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
+            className="inline-flex min-h-[38px] items-center gap-2 rounded-xl border border-border/80 bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-150 hover:border-input hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
             title="Buscador y comandos (Ctrl+K)"
             aria-label="Buscar (⌘K)"
           >
@@ -90,7 +90,7 @@ export function TopBar({ nombre, rol }: { nombre: string | null; rol: RolUsuario
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('open-abastecimiento-drawer'))}
-              className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-xl border border-border/80 bg-muted/40 p-2 text-muted-foreground shadow-xs transition-all duration-150 hover:border-input hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
+              className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-xl border border-border/80 bg-muted/40 p-2 text-muted-foreground shadow-xs transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-150 hover:border-input hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]"
               title="Control de abastecimiento y pendientes"
               aria-label="Abrir control de abastecimiento y pendientes"
             >

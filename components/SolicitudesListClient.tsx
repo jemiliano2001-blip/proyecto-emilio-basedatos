@@ -176,7 +176,7 @@ export function SolicitudesListClient({
         <div
           role="status"
           className={cn(
-            'p-3.5 rounded-xl text-xs sm:text-sm border transition-all animate-enter',
+            'p-3.5 rounded-xl text-xs sm:text-sm border transition-[color,background-color,border-color,box-shadow,opacity,transform] animate-enter',
             feedback.fallidas === 0
               ? 'bg-primary-soft border-primary/30 text-primary-soft-foreground'
               : feedback.exitosas > 0
@@ -250,7 +250,7 @@ export function SolicitudesListClient({
                     >
                       <span
                         className={cn(
-                          'flex size-5 items-center justify-center rounded-md border transition-all duration-150 shadow-xs',
+                          'flex size-5 items-center justify-center rounded-md border transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-150 shadow-xs',
                           selected
                             ? 'bg-primary border-primary text-primary-foreground font-bold'
                             : 'border-border/90 bg-card hover:border-input'
@@ -375,7 +375,7 @@ export function SolicitudesListClient({
           role="dialog"
           aria-modal="true"
           aria-labelledby="rechazo-lote-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50 animate-fade-in"
         >
           <div className="w-full max-w-md bg-card rounded-2xl shadow-elevated border border-border p-6 space-y-4 animate-scale-in">
             <h3 id="rechazo-lote-title" className="text-base sm:text-lg font-bold font-heading text-foreground">

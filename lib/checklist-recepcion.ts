@@ -523,8 +523,8 @@ export function aRenglonChecklist(renglon: RenglonBorrador): RenglonChecklist {
 
 export function archivoAFoto(bytes: Uint8Array, nombre: string, tipo: string): FotoBorrador {
   let binario = ''
-  for (let i = 0; i < bytes.length; i += 1) {
-    binario += String.fromCharCode(bytes[i] ?? 0)
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binario += String.fromCharCode(...bytes.subarray(i, i + 0x8000))
   }
   return { nombre, tipo: tipo || 'image/jpeg', base64: btoa(binario) }
 }

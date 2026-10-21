@@ -116,7 +116,7 @@ export function AppSidebar({
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent('open-command-palette'))}
           className={cn(
-            'flex items-center gap-2.5 rounded-xl border border-border/80 bg-background/60 text-xs font-medium text-muted-foreground shadow-xs transition-all',
+            'flex items-center gap-2.5 rounded-xl border border-border/80 bg-background/60 text-xs font-medium text-muted-foreground shadow-xs transition-[color,background-color,border-color,box-shadow,opacity,transform]',
             'hover:border-input hover:bg-muted/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             collapsed ? 'size-10 justify-center border-transparent bg-transparent shadow-none' : 'h-10 w-full px-3'
           )}
@@ -157,7 +157,7 @@ export function AppSidebar({
                         aria-current={active ? 'page' : undefined}
                         title={collapsed ? item.label : undefined}
                         className={cn(
-                          'group relative flex items-center gap-3 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150',
+                          'group relative flex items-center gap-3 rounded-xl text-xs sm:text-sm font-medium transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-150',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
                           collapsed ? 'size-10 justify-center mx-auto' : 'h-10 px-3',
                           active

@@ -67,7 +67,7 @@ export function KpiMetricCard({
   const content = (
     <div
       className={cn(
-        'group relative flex flex-col justify-between rounded-2xl border p-5 transition-all duration-200',
+        'group relative flex flex-col justify-between rounded-2xl border p-5 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-200',
         variantStyles[variant],
         href && 'cursor-pointer hover:border-input active:scale-[0.99]',
         className
@@ -78,7 +78,7 @@ export function KpiMetricCard({
           {label}
         </span>
         {icon && (
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary ring-1 ring-primary/15 transition-all duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:ring-transparent">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary ring-1 ring-primary/15 transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:ring-transparent">
             {icon}
           </span>
         )}

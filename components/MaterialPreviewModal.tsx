@@ -48,7 +48,7 @@ export function MaterialPreviewModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="material-preview-title"
-      className="fixed inset-0 z-50 flex items-stretch justify-end bg-foreground/75 backdrop-blur-sm transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex items-stretch justify-end bg-foreground/75 transition-opacity print:hidden"
       onClick={onClose}
     >
       <div

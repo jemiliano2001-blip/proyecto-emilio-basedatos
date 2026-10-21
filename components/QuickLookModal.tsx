@@ -149,7 +149,7 @@ export function QuickLookModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="quicklook-title"
-      className="fixed inset-0 z-50 flex bg-foreground/80 backdrop-blur-md transition-opacity print:hidden"
+      className="fixed inset-0 z-50 flex bg-foreground/80 transition-opacity print:hidden"
       onClick={onClose}
     >
       <div
@@ -340,7 +340,7 @@ export function QuickLookModal({
               <button
                 type="button"
                 onClick={handlePrev}
-                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-card hover:shadow-card-hover border border-border/80 transition-all active:scale-95 backdrop-blur-sm"
+                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-card hover:shadow-card-hover border border-border/80 transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-95"
                 title="Elemento anterior (←)"
                 aria-label="Elemento anterior"
               >
@@ -350,7 +350,7 @@ export function QuickLookModal({
               <button
                 type="button"
                 onClick={handleNext}
-                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-card hover:shadow-card-hover border border-border/80 transition-all active:scale-95 backdrop-blur-sm"
+                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-card/90 hover:bg-card text-foreground rounded-full shadow-card hover:shadow-card-hover border border-border/80 transition-[color,background-color,border-color,box-shadow,opacity,transform] active:scale-95"
                 title="Elemento siguiente (→)"
                 aria-label="Elemento siguiente"
               >

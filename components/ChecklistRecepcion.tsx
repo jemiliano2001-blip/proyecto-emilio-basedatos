@@ -70,6 +70,7 @@ export function ChecklistRecepcion({
   const talonFoto = useRef<BorradorChecklist['talon']>(null)
   const extrasFoto = useRef<BorradorChecklist['extras']>([])
   const enviando = useRef(false)
+  const temporizador = useRef<number | null>(null)
   const respaldo = useRef<BorradorChecklist | null>(null)
   const pasoRef = useRef<PasoChecklist>(2)
   const indiceRef = useRef(0)
@@ -108,10 +109,45 @@ export function ChecklistRecepcion({
     }
   }
 
+  function cancelarGuardadoDiferido() {
+    if (temporizador.current !== null) window.clearTimeout(temporizador.current)
+    temporizador.current = null
+  }
+
   function persistir(borrador: BorradorChecklist) {
+    cancelarGuardadoDiferido()
     const resultado = guardarBorrador(almacenNavegador(), borrador)
     if (!resultado.ok) setAviso(resultado.error)
   }
+
+  /** Para cada tecla: espera a que dejes de escribir en vez de reescribir las fotos en cada letra. */
+  function persistirDiferido() {
+    cancelarGuardadoDiferido()
+    temporizador.current = window.setTimeout(() => {
+      temporizador.current = null
+      persistir(armarBorrador(pasoRef.current, renglonesRef.current, quienRef.current))
+    }, 400)
+  }
+
+  const guardarPendienteRef = useRef(() => {})
+  guardarPendienteRef.current = () => {
+    if (temporizador.current === null) return
+    persistir(armarBorrador(pasoRef.current, renglonesRef.current, quienRef.current))
+  }
+
+  useEffect(() => {
+    const salir = () => guardarPendienteRef.current()
+    const alOcultar = () => {
+      if (document.visibilityState === 'hidden') salir()
+    }
+    window.addEventListener('pagehide', salir)
+    document.addEventListener('visibilitychange', alOcultar)
+    return () => {
+      window.removeEventListener('pagehide', salir)
+      document.removeEventListener('visibilitychange', alOcultar)
+      salir()
+    }
+  }, [])
 
   useEffect(() => {
     const guardado = leerBorrador(almacenNavegador(), ordenId)
@@ -158,9 +194,13 @@ export function ChecklistRecepcion({
     setAviso(state.error)
   }, [state.error])
 
-  function cambiarFilas(filas: RenglonBorrador[]) {
+  function cambiarFilas(filas: RenglonBorrador[], diferido = false) {
     setRenglones(filas)
     renglonesRef.current = filas
+    if (diferido) {
+      persistirDiferido()
+      return
+    }
     persistir(armarBorrador(pasoRef.current, filas, quienRef.current))
   }
 
@@ -204,7 +244,8 @@ export function ChecklistRecepcion({
     cambiarFilas(
       renglonesRef.current.map((fila) =>
         fila.orden_item_id === ordenItemId ? { ...fila, bien: valor } : fila
-      )
+      ),
+      true
     )
   }
 
@@ -212,7 +253,8 @@ export function ChecklistRecepcion({
     cambiarFilas(
       renglonesRef.current.map((fila) =>
         fila.orden_item_id === ordenItemId ? { ...fila, rotos: valor } : fila
-      )
+      ),
+      true
     )
   }
 
@@ -220,7 +262,8 @@ export function ChecklistRecepcion({
     cambiarFilas(
       renglonesRef.current.map((fila) =>
         fila.orden_item_id === ordenItemId ? { ...fila, nota } : fila
-      )
+      ),
+      true
     )
   }
 
@@ -285,7 +328,7 @@ export function ChecklistRecepcion({
   function onQuien(valor: string) {
     quienRef.current = valor
     setQuien(valor)
-    persistir(armarBorrador(pasoRef.current, renglonesRef.current, valor))
+    persistirDiferido()
   }
 
   function irA(siguiente: PasoChecklist) {
@@ -389,6 +432,7 @@ export function ChecklistRecepcion({
       pendienteEnvio: true,
     }
     pendienteEnvio.current = false
+    cancelarGuardadoDiferido()
     borrarBorrador(almacenNavegador(), ordenId)
     enviando.current = true
     formAction(fd)

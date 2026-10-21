@@ -208,7 +208,7 @@ export function LectorQRModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
       <div className="relative w-full max-w-md bg-card border border-rule rounded-2xl overflow-hidden shadow-2xl flex flex-col">
         {/* Cabecera */}
         <div className="p-4 border-b border-rule flex items-center justify-between bg-muted/40">
