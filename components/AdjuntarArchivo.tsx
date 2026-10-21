@@ -157,6 +157,17 @@ export function AdjuntarArchivo({
 
   return (
     <div className="space-y-3">
+      {grande && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setCamaraAbierta(true)}
+          className="btn-secondary min-h-14 w-full justify-center text-base"
+        >
+          <IconCamara className="h-5 w-5" />
+          Tomar foto
+        </button>
+      )}
       {!archivo && (
         <div
           role="button"
@@ -207,15 +218,17 @@ export function AdjuntarArchivo({
           evento.target.value = ''
         }}
       />
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setCamaraAbierta(true)}
-        className="btn-secondary min-h-14 w-full justify-center text-base"
-      >
-        <IconCamara className="h-5 w-5" />
-        Tomar foto
-      </button>
+      {!grande && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setCamaraAbierta(true)}
+          className="btn-secondary min-h-14 w-full justify-center text-base"
+        >
+          <IconCamara className="h-5 w-5" />
+          Tomar foto
+        </button>
+      )}
       {botonArchivo && (
         <button
           type="button"

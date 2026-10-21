@@ -14,6 +14,8 @@ import {
   aRenglonChecklist,
   archivoAFotoFile,
   borrarBorrador,
+  errorDeRenglon,
+  estaRevisado,
   fotoAArchivo,
   fusionarRenglones,
   guardarBorrador,
@@ -21,7 +23,6 @@ import {
   leerBorrador,
   materialesPorRecibir,
   motivoBloqueo,
-  motivoMateriales,
   validarFotoRecepcion,
   type AlmacenBorrador,
   type BorradorChecklist,
@@ -56,6 +57,8 @@ export function ChecklistRecepcion({
   const materiales = useMemo(() => materialesPorRecibir(items), [items])
   const [cargado, setCargado] = useState(false)
   const [paso, setPaso] = useState<PasoChecklist>(2)
+  const [indice, setIndice] = useState(0)
+  const [vistaMaterial, setVistaMaterial] = useState<'marca' | 'detalle'>('marca')
   const [renglones, setRenglones] = useState<RenglonBorrador[]>([])
   const [quien, setQuien] = useState('')
   const [talon, setTalon] = useState<File | null>(null)
@@ -69,6 +72,8 @@ export function ChecklistRecepcion({
   const enviando = useRef(false)
   const respaldo = useRef<BorradorChecklist | null>(null)
   const pasoRef = useRef<PasoChecklist>(2)
+  const indiceRef = useRef(0)
+  const vistaRef = useRef<'marca' | 'detalle'>('marca')
   const quienRef = useRef('')
   const renglonesRef = useRef<RenglonBorrador[]>([])
   const talonRef = useRef<File | null>(null)
@@ -77,6 +82,8 @@ export function ChecklistRecepcion({
   const [state, formAction] = useActionState(action, { error: null })
 
   pasoRef.current = paso
+  indiceRef.current = indice
+  vistaRef.current = vistaMaterial
   quienRef.current = quien
   renglonesRef.current = renglones
   talonRef.current = talon
@@ -125,6 +132,17 @@ export function ChecklistRecepcion({
       if (fila.foto) mapa[fila.orden_item_id] = fotoAArchivo(fila.foto)
     }
     setFotos(mapa)
+    const pendiente = materiales.findIndex((material, i) => {
+      const fila = filas[i]
+      return !fila || !estaRevisado(material, aRenglonChecklist(fila))
+    })
+    const donde = pendiente === -1 ? 0 : pendiente
+    const filaPendiente = filas[donde]
+    const sigueEnDetalle = filaPendiente?.marca === 'incompleto' && pendiente !== -1
+    indiceRef.current = donde
+    vistaRef.current = sigueEnDetalle ? 'detalle' : 'marca'
+    setIndice(donde)
+    setVistaMaterial(sigueEnDetalle ? 'detalle' : 'marca')
     if (guardado?.pendienteEnvio) setAviso(MENSAJE_SIN_SENAL)
     setCargado(true)
   }, [materiales, ordenId])
@@ -146,15 +164,40 @@ export function ChecklistRecepcion({
     persistir(armarBorrador(pasoRef.current, filas, quienRef.current))
   }
 
+  function colocar(donde: number, vista: 'marca' | 'detalle') {
+    indiceRef.current = donde
+    vistaRef.current = vista
+    setIndice(donde)
+    setVistaMaterial(vista)
+  }
+
+  function avanzarTras(filas: RenglonBorrador[]) {
+    const siguiente = materiales.findIndex((material) => {
+      const fila = filas.find((row) => row.orden_item_id === material.orden_item_id)
+      return !fila || !estaRevisado(material, aRenglonChecklist(fila))
+    })
+    if (siguiente === -1) {
+      colocar(0, 'marca')
+      irA(3)
+      return
+    }
+    colocar(siguiente, 'marca')
+  }
+
   function onMarca(ordenItemId: string, marca: MarcaChecklist) {
-    cambiarFilas(
-      renglonesRef.current.map((fila) => {
-        if (fila.orden_item_id !== ordenItemId) return fila
-        if (marca === 'incompleto' && fila.rotos === null) return { ...fila, marca, rotos: 0 }
-        return { ...fila, marca }
-      })
-    )
+    const filas = renglonesRef.current.map((fila) => {
+      if (fila.orden_item_id !== ordenItemId) return fila
+      if (marca === 'incompleto' && fila.rotos === null) return { ...fila, marca, rotos: 0 }
+      return { ...fila, marca }
+    })
+    cambiarFilas(filas)
     setAviso(null)
+    if (marca === 'incompleto') {
+      const donde = materiales.findIndex((material) => material.orden_item_id === ordenItemId)
+      colocar(donde < 0 ? indiceRef.current : donde, 'detalle')
+      return
+    }
+    avanzarTras(filas)
   }
 
   function onBien(ordenItemId: string, valor: number | null) {
@@ -252,23 +295,42 @@ export function ChecklistRecepcion({
   }
 
   function onAtras() {
+    if (pasoRef.current === 2 && vistaRef.current === 'detalle') {
+      colocar(indiceRef.current, 'marca')
+      setAviso(null)
+      return
+    }
+    if (pasoRef.current === 2 && indiceRef.current > 0) {
+      colocar(indiceRef.current - 1, 'marca')
+      setAviso(null)
+      return
+    }
     if (pasoRef.current === 2) {
       router.push('/recepciones')
       return
+    }
+    if (pasoRef.current === 3) {
+      const ultimo = Math.max(materiales.length - 1, 0)
+      colocar(ultimo, 'marca')
     }
     irA(pasoRef.current === 4 ? 3 : 2)
   }
 
   function onSiguiente() {
-    const filas = renglonesRef.current.map(aRenglonChecklist)
     if (pasoRef.current === 2) {
-      const error = motivoMateriales(materiales, filas)
+      const material = materiales[indiceRef.current]
+      const fila = renglonesRef.current.find((row) => row.orden_item_id === material?.orden_item_id)
+      if (!material || !fila) {
+        setAviso(MENSAJE_FALTA_REVISAR)
+        return
+      }
+      const error = errorDeRenglon(material, aRenglonChecklist(fila))
       if (error) {
         setAviso(error)
         return
       }
       setAviso(null)
-      irA(3)
+      avanzarTras(renglonesRef.current)
       return
     }
     if (!talonRef.current) {
@@ -371,6 +433,8 @@ export function ChecklistRecepcion({
   return (
     <ChecklistRecepcionPasos
       paso={paso}
+      indice={indice}
+      vistaMaterial={vistaMaterial}
       folio={folio}
       obraNombre={obraNombre}
       materiales={vista}
@@ -405,6 +469,7 @@ export function ChecklistRecepcion({
         />
       }
       fotosExtra={
+        talon === null ? null : (
         <div className="flex w-full flex-col gap-3">
           {extras.map((file, indice) => (
             <div key={`${file.name}-${file.size}-${indice}`} className="flex w-full flex-col gap-2">
@@ -427,6 +492,7 @@ export function ChecklistRecepcion({
             onError={setAviso}
           />
         </div>
+        )
       }
       zonaFotoRenglon={(ordenItemId) => (
         <SelectorFoto

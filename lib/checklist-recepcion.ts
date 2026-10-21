@@ -136,6 +136,13 @@ export function textoContador(revisados: number, total: number): string {
   return `${revisados} de ${total} revisados`
 }
 
+/** Avance grande, una pantalla a la vez: "3 de 10". */
+export function textoProgreso(actual: number, total: number): string {
+  const seguro = Math.max(0, total)
+  const puesto = seguro === 0 ? 0 : Math.min(Math.max(actual, 1), seguro)
+  return `${puesto} de ${seguro}`
+}
+
 export function pasoDe(esperado: number): number {
   return Number.isInteger(roundQuantity(esperado)) ? 1 : 0.5
 }

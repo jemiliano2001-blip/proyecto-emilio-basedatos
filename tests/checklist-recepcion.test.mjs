@@ -28,6 +28,7 @@ import {
   renglonVacio,
   revisarIncompleto,
   resumir,
+  textoProgreso,
 } from '../lib/checklist-recepcion.ts'
 
 function material(id, esperado = 10) {
@@ -148,6 +149,8 @@ test('el contador dice cuántos van revisados', () => {
     i < 7 ? { ...renglonVacio(row.orden_item_id), marca: 'llego' } : renglonVacio(row.orden_item_id)
   )
   assert.equal(contarRevisados(materiales, renglones).texto, '7 de 10 revisados')
+  assert.equal(textoProgreso(3, 10), '3 de 10')
+  assert.equal(textoProgreso(1, 2), '1 de 2')
 })
 
 test('el resumen separa llegó, falta y dañado', () => {
@@ -237,6 +240,8 @@ test('a 390px la lista es una columna y Terminar respeta las reglas', () => {
   const base = {
     folio: 'OC de ejemplo',
     obraNombre: 'Proyecto de ejemplo',
+    indice: 0,
+    vistaMaterial: 'marca',
     quienEntrego: '',
     aviso: null,
     zonaTalon: React.createElement('p', null, 'Tomar foto Elegir archivo Ctrl + V'),
@@ -253,19 +258,55 @@ test('a 390px la lista es una columna y Terminar respeta las reglas', () => {
   }
 
   const lista = renderToStaticMarkup(
-    React.createElement(ChecklistRecepcionPasos, { ...base, paso: 2, materiales, tieneTalon: false })
+    React.createElement(ChecklistRecepcionPasos, {
+      ...base,
+      paso: 2,
+      indice: 1,
+      vistaMaterial: 'marca',
+      materiales,
+      tieneTalon: false,
+    })
   )
   assert.match(lista, /data-checklist="recepcion"/)
-  assert.match(lista, /class="flex w-full flex-col gap-4"/)
+  assert.match(lista, /data-decision="marca"/)
+  assert.match(lista, /flex w-full flex-col/)
   assert.match(lista, /min-h-14 w-full/)
   assert.match(lista, /text-base/)
-  assert.match(lista, /7 de 10 revisados|1 de 2 revisados/)
+  assert.match(lista, /data-contador="1"/)
+  assert.match(lista, /2 de 2/)
+  assert.equal(lista.split('data-marca="llego"').length - 1, 1)
   assert.match(lista, /✅ Llegó/)
   assert.match(lista, /⚠️ Llegó incompleto o dañado/)
   assert.match(lista, /❌ No llegó/)
+  assert.equal(lista.includes('¿Cuántos llegaron bien?'), false)
   assert.equal(lista.includes('grid-cols-2') || lista.includes('grid-cols-3'), false)
-  assert.ok(lista.includes('disabled=""'))
-  assert.match(lista, /Falta revisar unos materiales/)
+
+  const detalle = renderToStaticMarkup(
+    React.createElement(ChecklistRecepcionPasos, {
+      ...base,
+      paso: 2,
+      indice: 0,
+      vistaMaterial: 'detalle',
+      tieneTalon: false,
+      materiales: [
+        {
+          ...material('a', 10),
+          marca: 'incompleto',
+          bien: null,
+          rotos: 0,
+          nota: '',
+          tieneFoto: false,
+        },
+      ],
+      zonaFotoRenglon: () => React.createElement('p', null, 'Tomar foto'),
+    })
+  )
+  assert.match(detalle, /data-decision="detalle"/)
+  assert.match(detalle, /1 de 1/)
+  assert.equal(detalle.includes('data-marca='), false)
+  assert.match(detalle, /Tomar foto/)
+  assert.match(detalle, /Escribe cuántos llegaron/)
+  assert.ok(detalle.includes('disabled=""'))
 
   const foto = renderToStaticMarkup(
     React.createElement(ChecklistRecepcionPasos, {
